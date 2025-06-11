@@ -6,9 +6,7 @@ const CrystalButton = ({ onClick , text , icon, style }: { onClick: () => void, 
   return (
     <View className="figma-customize-button" onClick={onClick}>
       <Text className="figma-button-text">{text}</Text>
-      <View className="figma-button-icon">
-        {icon}
-      </View>
+      {icon}
     </View>
   );
 };

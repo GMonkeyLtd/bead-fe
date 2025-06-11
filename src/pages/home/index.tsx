@@ -154,7 +154,7 @@ const Home = () => {
                   <CrystalButton 
                     onClick={startDesign} 
                     text="开启定制"
-                    icon={<Image src={RightArrow} />}
+                    icon={<Image src={RightArrow} style={{ width: '10px', height: '10px' }}/>}
                   />
                 </View>
               </View>

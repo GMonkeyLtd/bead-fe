@@ -191,8 +191,8 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
         </View>
         <View className="button-container">
           <View className="button-row">
-            <CrystalButton onClick={handleQuickCustomize} text="快速定制" style={{ width: '126px' }} />
-            <CrystalButton onClick={handleQuickCustomize} text="个性化定制" style={{ width: '202px' }} />
+            <CrystalButton onClick={handleQuickCustomize} text="快速定制" />
+            <CrystalButton onClick={handleQuickCustomize} text="个性化定制" />
           </View>
         </View>
       </View>
