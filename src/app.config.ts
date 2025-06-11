@@ -2,7 +2,7 @@ export default defineAppConfig({
   pages: [
     'pages/home/index',
     'pages/predict/index',
-    'pages/design/index'
+    'pages/result/index',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -29,12 +29,6 @@ export default defineAppConfig({
         // iconPath: 'assets/icons/crystal.png',
         // selectedIconPath: 'assets/icons/crystal-active.png'
       },
-      {
-        pagePath: 'pages/design/index',
-        text: '设计',
-        // iconPath: 'assets/icons/crystal.png',
-        // selectedIconPath: 'assets/icons/crystal-active.png'
-      }
     ]
   }
 })

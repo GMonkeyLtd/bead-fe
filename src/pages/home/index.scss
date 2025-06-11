@@ -3,163 +3,238 @@
   display: flex;
   justify-content: center;
   flex-direction: column;
-  background-image: url('../../assets/firstPage.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   position: relative;
-  padding: 40px 20px;
-  
-  // 添加半透明遮罩层确保文字可读性
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    // background: rgba(0, 0, 0, 0.3);
-    z-index: 0;
-  }
 
-  .home-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 40px;
-    position: relative;
-    z-index: 1;
+  .banner-swiper {
+    height: 100vh;
 
-    .hero-section {
-      text-align: center;
-      color: white;
-      
-      .title {
-        font-size: 32px;
-        font-weight: bold;
-        display: block;
-        margin-bottom: 16px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      }
-      
-      .subtitle {
-        font-size: 16px;
-        opacity: 0.9;
-        display: block;
-        line-height: 1.5;
-      }
-    }
-
-    .features-section {
+    .banner-item {
+      height: 100vh;
       display: flex;
-      flex-direction: column;
-      gap: 20px;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+  }
+}
+// 轮播指示器样式自定义
+.banner-swiper ::deep .uni-swiper-dots {
+  bottom: 40px !important;
+
+  .uni-swiper-dot {
+    width: 8px !important;
+    height: 8px !important;
+    margin: 0 6px !important;
+    border-radius: 50% !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .uni-swiper-dot-active {
+    width: 24px !important;
+    border-radius: 12px !important;
+  }
+}
+
+.home-swiper-content {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  left: 0;
+  right: 0;
+  display: flex;  
+  justify-content: center;
+  z-index: 10;
+}
+
+.crystal-title-section {
+  position: absolute;
+  bottom: 210px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+  color: #1f1722;
+
+  .crystal-title-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    .crystal-main-title {
+      color: #1f1722;
+      font-family: "HuXiaoBo-LangManSong", "SimSun", "宋体", serif;
+      font-weight: 400;
+      font-size: 46px;
+      line-height: 1.17;
+      letter-spacing: 2px; // 约等于4.35%的字间距
+      text-align: center;
+      opacity: 0.9;
+      display: inline-block;
+    }
+
+    .crystal-subtitle {
+      color: #1f1722;
+      font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 1.2;
+      letter-spacing: 3px; // 约等于21.4%的字间距
+      text-align: center;
+      opacity: 0.9;
       width: 100%;
-      max-width: 350px;
-
-      .feature-item {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 16px;
-        padding: 20px;
-        text-align: center;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-
-        .feature-title {
-          font-size: 18px;
-          font-weight: bold;
-          color: #333;
-          display: block;
-          margin-bottom: 8px;
-        }
-
-        .feature-desc {
-          font-size: 14px;
-          color: #666;
-          display: block;
-          line-height: 1.4;
-        }
-      }
     }
 
-    .action-container {
-      .btn-start {
-        width: 280px;
-        height: 50px;
-        background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-        color: white;
-        border: none;
-        border-radius: 25px;
-        font-size: 18px;
-        font-weight: bold;
-        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-        
-        &::after {
-          border: none;
-        }
-      }
+    .crystal-subtitle-up {
+      @extend .crystal-subtitle;
+      margin-bottom: 8px;
+    }
+
+    .crystal-subtitle-down {
+      @extend .crystal-subtitle;
+      margin-top: 12px;
     }
   }
 }
 
-// 水晶光泽动画
-@keyframes crystal-shine {
-  0% {
-    left: -100%;
-  }
-  50% {
-    left: 100%;
-  }
-  100% {
-    left: 100%;
-  }
-}
-
-// 入场动画
-.features-section .feature-item {
-  animation: fadeInUp 0.6s ease forwards;
-  opacity: 0;
-  transform: translateY(20px);
-  
-  @for $i from 1 through 3 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{$i * 0.2}s;
-    }
-  }
-}
-
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
+// 当没有自定义字体时的降级方案
+@supports not (font-family: "HuXiaoBo-LangManSong") {
+  .crystal-title-frame .crystal-main-title {
+    font-family: "STKaiti", "楷体", "KaiTi", serif;
   }
 }
 
 // 响应式调整
 @media (max-width: 375px) {
-  .home-container {
-    padding: 20px 16px;
+  
+}
+
+.crystal-action-section {
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+
+.crystal-custom-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  
+  // 边框渐变
+  border: 1px solid;
+  border-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(174, 171, 168, 0.39) 60%,
+    rgba(255, 255, 255, 0.75) 100%
+  ) 1;
+  
+  // 阴影效果
+  box-shadow: 
+    0px 3px 6px 0px rgba(217, 205, 199, 0.07),
+    1px 10px 20px 0px rgba(83, 73, 68, 0.03),
+    4px 40px 16px 0px rgba(0, 0, 0, 0),
+    7px 63px 18px 0px rgba(0, 0, 0, 0),
+    inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.43);
     
-    .home-content {
-      gap: 30px;
-      
-      .hero-section .title {
-        font-size: 28px;
-      }
-      
-      .features-section {
-        max-width: 100%;
-        
-        .feature-item {
-          padding: 16px;
-        }
-      }
-      
-      .action-container .btn-start {
-        width: 100%;
-        max-width: 280px;
-      }
-    }
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0px 5px 8px 0px rgba(217, 205, 199, 0.12),
+      2px 12px 22px 0px rgba(83, 73, 68, 0.06),
+      inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.5);
   }
-} 
+}
+
+.crystal-button-text {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.437;
+  letter-spacing: 6px; // 37.5% 字间距
+  text-align: center;
+  text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.46);
+  
+  // 渐变文字效果
+  background: linear-gradient(
+    45deg,
+    #11022E 0%,
+    #A8ACB1 35%,
+    #1F2A37 100%
+  );
+}
+
+.crystal-button-icon-image {
+  width: 15.15px;
+  height: 10px;
+}
+
+.diamond-gradient-text {
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: 6px;
+  background-image: radial-gradient(
+    circle at center,
+    #B49677, /* Center color */
+    #1F2A37, /* Middle color */
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* Optional: Add text shadow for depth */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+.btn-gradient-border {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  z-index: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: 151px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px; /* 比按钮大1px以显示边框 */
+  background: linear-gradient(135deg, #FFD700 0%, #000000 100%);
+  border-radius: 9px; /* 比按钮圆角大1px */
+  z-index: -1;
+  transform: scale(1.02); /* 确保渐变覆盖整个边框 */
+}
+
+.btn-gradient-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: white;
+  border-radius: 7px; /* 比按钮圆角小1px */
+  z-index: -1;
+}
+.btn-gradient-border:hover::before {
+  background: linear-gradient(135deg, #FFC107 0%, #222222 100%);
+}
+.btn-gradient-border:active::before {
+  background: linear-gradient(135deg, #FFA000 0%, #111111 100%);
+}

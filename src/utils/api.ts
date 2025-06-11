@@ -43,6 +43,7 @@ export const userApi = {
 
 export const generateApi = {
     bazi: (params: any) =>http.post('/user/querybazi', params),
+    quickGenerate: (params: any) =>http.post('/user/oneclick', params),
 }
 
 

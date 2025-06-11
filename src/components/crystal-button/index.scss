@@ -1,0 +1,103 @@
+/* Figma个性化定制按钮样式 */
+
+
+.figma-customize-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 80px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  /* 半透明白色背景 */
+  background: rgba(255, 255, 255, 0.4);
+
+  /* 渐变边框 */
+  border-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(174, 171, 168, 0.39) 60%,
+      rgba(255, 255, 255, 0.75) 100%
+    )
+    1;
+
+  /* 复合阴影效果 */
+  box-shadow: 0px 3px 6px 0px rgba(217, 205, 199, 0.07),
+    1px 10px 20px 0px rgba(83, 73, 68, 0.03), 4px 40px 16px 0px rgba(0, 0, 0, 0),
+    7px 63px 18px 0px rgba(0, 0, 0, 0),
+    inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.43);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 5px 8px 0px rgba(217, 205, 199, 0.12),
+      2px 12px 22px 0px rgba(83, 73, 68, 0.06),
+      inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.5);
+  }
+
+  &:active {
+    transform: translateY(0px);
+    box-shadow: 0px 2px 4px 0px rgba(217, 205, 199, 0.08),
+      inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.35);
+  }
+}
+
+.figma-button-text {
+  font-family: "Source Han Serif CN", serif;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.437;
+  letter-spacing: 6px; /* 40% 字间距 */
+  text-align: center;
+
+  /* 钻石渐变文字效果，匹配Figma设计 */
+  background: radial-gradient(
+    ellipse at 31.28% 83.62%,
+    #b49677 0%,
+    #1f2a37 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* 文字阴影 */
+  text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.46);
+}
+
+.figma-button-icon {
+  position: relative;
+  width: 15.15px;
+  height: 10px;
+}
+
+.figma-icon-line {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 14.97px;
+  height: 0.9px;
+  background-color: #514b46;
+}
+
+.figma-icon-circle-top {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6.39px;
+  height: 5px;
+  border: 0.9px solid #514b46;
+  border-radius: 50% 50% 0 0;
+  box-sizing: border-box;
+}
+
+.figma-icon-circle-bottom {
+  position: absolute;
+  top: 5px;
+  right: 0;
+  width: 6.39px;
+  height: 5px;
+  border: 0.9px solid #514b46;
+  border-radius: 0 0 50% 50%;
+  box-sizing: border-box;
+}

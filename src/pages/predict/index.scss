@@ -1,28 +1,12 @@
-.home-container {
+.predict-container {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
   flex-direction: column;
-  background-image: url('../../assets/firstPage.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  justify-content: center;
   position: relative;
   
-  // 添加半透明遮罩层确保内容可读性
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    z-index: 0;
-  }
-
-  .home-content {
-    height: 50%;
+  .predict-content {
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;

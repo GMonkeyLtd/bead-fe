@@ -23,7 +23,7 @@ export interface ApiResponse<T = any> {
 // 默认配置
 const defaultConfig = {
   baseURL: '', // 在这里设置你的API基础URL
-  timeout: 10000,
+  timeout: 60000,
   showLoading: true,
   loadingText: '加载中...',
   showError: true,
