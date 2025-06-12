@@ -110,7 +110,7 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
       month: months[selectedIndexes[1]],
       day: days[selectedIndexes[2]],
       hour: hours[selectedIndexes[3]],
-      gender: gender
+      gender: gender === '男' ? 1 : 0
     };
     onQuickCustomize?.(selectedDateTime);
     // onClose();
@@ -147,10 +147,10 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
           <View className="gender-switch-container">
             <View className={`gender-switch ${gender === '男' ? 'male-selected' : 'female-selected'}`} onClick={handleGenderToggle}>
               <View className={`gender-option ${gender === '女' ? 'selected' : ''}`}>
-                <Text className={`gender-text ${gender === '女' ? 'selected' : ''}`}>女</Text>
+                <Text className={`gender-text ${gender === '女' ? 'selected' : ''}`}>女生</Text>
               </View>
               <View className={`gender-option ${gender === '男' ? 'selected' : ''}`}>
-                <Text className={`gender-text ${gender === '男' ? 'selected' : ''}`}>男</Text>
+                <Text className={`gender-text ${gender === '男' ? 'selected' : ''}`}>男生</Text>
               </View>
               <View className="gender-slider"></View>
             </View>
@@ -192,7 +192,7 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
         <View className="button-container">
           <View className="button-row">
             <CrystalButton onClick={handleQuickCustomize} text="快速定制" />
-            <CrystalButton onClick={handleQuickCustomize} text="个性化定制" />
+            <CrystalButton onClick={handlePersonalizeCustomize} text="个性化定制" />
           </View>
         </View>
       </View>

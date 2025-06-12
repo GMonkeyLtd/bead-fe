@@ -33,7 +33,6 @@ const CircleRing = ({
   dotDistance = 110, // 大圆的半径（从中心到珠子中心的距离）
   size = 400, // Canvas尺寸
   dotsBgImagePath
-    
 }) => {
   const [dots, setDots] = useState<any[]>([]);
   const [downloadStatus, setDownloadStatus] = useState<'idle' | 'downloading' | 'success' | 'error'>('idle');

@@ -1,0 +1,14 @@
+.icon-button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  
+  
+  &::after {
+    border: none;
+  }
+  &:hover {
+    background: #e8e8e8;
+  }
+
+}

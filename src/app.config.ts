@@ -3,6 +3,7 @@ export default defineAppConfig({
     'pages/home/index',
     'pages/predict/index',
     'pages/result/index',
+    'pages/design/index',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -12,7 +13,7 @@ export default defineAppConfig({
     backgroundColor: '#ffffff'
   },
   tabBar: {
-    color: '#857393',
+    color: '#F4F1EF',
     selectedColor: '#444444',
     backgroundColor: '#ffffff',
     borderStyle: 'black',
@@ -29,6 +30,10 @@ export default defineAppConfig({
         // iconPath: 'assets/icons/crystal.png',
         // selectedIconPath: 'assets/icons/crystal-active.png'
       },
+      // {
+      //   pagePath: 'pages/design/index',
+      //   text: '个性化定制',
+      // },
     ]
   }
 })
