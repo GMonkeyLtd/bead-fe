@@ -1,0 +1,41 @@
+.tag-list {
+  width: 100%;
+  
+  .tags-scroll-view {
+    width: 100%;
+    white-space: nowrap;
+    
+    .tags-container {
+      display: flex;
+      gap: 6px;
+      padding: 0 16px;
+      align-items: center;
+    }
+  }
+
+  .tag-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid #DCD4CD;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:active {
+      opacity: 0.8;
+    }
+
+    .tag-title {
+      font-family: 'Noto Sans SC';
+      font-weight: 300;
+      font-size: 14px;
+      line-height: 1.35;
+      color: #1F1722;
+      opacity: 0.9;
+      white-space: nowrap;
+    }
+  }
+}
