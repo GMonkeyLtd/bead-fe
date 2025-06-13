@@ -78,7 +78,7 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
       // 检查业务状态码
       if (data.code !== undefined) {
         if (data.code === 200 || data.success) {
-          resolve(data.data || data)
+          resolve(data)
         } else if (data.code === 401) {
           // token过期或无效，清除本地认证信息
           AuthManager.clearAuth();

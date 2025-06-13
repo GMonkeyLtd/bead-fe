@@ -1,5 +1,8 @@
 .tag-list {
   width: 100%;
+  border-right: 2px solid;
+  border-image: linear-gradient(to right, brown, white) 1;
+  
   
   .tags-scroll-view {
     width: 100%;

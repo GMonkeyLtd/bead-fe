@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Canvas, View } from '@tarojs/components';
+import { Canvas, View, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import './index.scss';
 import { getDotRingData } from '@/utils/cystal-tools';
 import { ImageCacheManager } from '@/utils/image-cache';
-
+import base from '@/assets/base.png';
+import { calculateBeadArrangement } from '@/utils/cystal-tools';
 /**
  * 水晶手链组件 - 动态计算珠子数量
  * 
@@ -29,13 +30,14 @@ import { ImageCacheManager } from '@/utils/image-cache';
  * ```
  */
 const CircleRing = ({
-  dotRadius = 10, // 小圆珠子的半径
-  size = 160, // Canvas尺寸
+  dotRadius = 10, // 小圆珠子的半径x
+  size = 140, // Canvas尺寸
   dotsBgImagePath
 }) => {
   const [dots, setDots] = useState<any[]>([]);
   const [downloadStatus, setDownloadStatus] = useState<'idle' | 'downloading' | 'success' | 'error'>('idle');
-  const dotDistance = (size - 40) / 2 // 从中心到珠子中心的距离
+  const ringRadius = size  / 2 // 从中心到珠子中心的距离
+  console.log(dotsBgImagePath.length, 'dotsBgImagePath')
 
   // 处理图片路径（下载网络图片）
   useEffect(() => {
@@ -57,11 +59,10 @@ const CircleRing = ({
         });
 
         // 生成珠子位置数据
-        const dotRingData = getDotRingData(finalImagePaths, dotDistance, size / 2, size / 2);
-        setDots(dotRingData);
+        // const dotRingData = getDotRingData(finalImagePaths, ringRadius, size / 2, size / 2);
+        setDots(finalImagePaths);
         
         setDownloadStatus('success');
-        console.log(`🎯 珠子数据生成完成，共 ${dotRingData.length} 个珠子`);
       } catch (error) {
         console.error('❌ 图片处理过程出错:', error);
         setDownloadStatus('error');
@@ -69,7 +70,7 @@ const CircleRing = ({
     };
 
     processImages();
-  }, [dotsBgImagePath, dotDistance]);
+  }, [dotsBgImagePath, ringRadius]);
 
   // 绘制Canvas内容
   const drawCanvas = () => {
@@ -92,24 +93,18 @@ const CircleRing = ({
       // ctx.stroke();
       
       // 绘制环绕的水晶珠子
-      dots.forEach((dot: any) => {
-        try {
-          // 绘制珠子图像
-          ctx.drawImage(
-            dot.bgImage, 
-            dot.x - dotRadius, 
-            dot.y - dotRadius, 
-            dotRadius * 2, 
-            dotRadius * 2
-          );
-        } catch (imageError) {
-          console.error('❌ 绘制图片失败:', dot.bgImage, imageError);
-          // 如果图片绘制失败，绘制一个简单的圆形作为备用
-          ctx.beginPath();
-          ctx.arc(dot.x, dot.y, dotRadius, 0, 2 * Math.PI);
-          ctx.setFillStyle('#cccccc');
-          ctx.fill();
-        }
+     
+      const beads = calculateBeadArrangement(ringRadius, dots.length);
+
+      dots.forEach((dot: any, index) => {
+        const {x, y, radius} = beads.beads[index];
+        ctx.drawImage(
+          dot, 
+          x - radius, 
+          y - radius, 
+          radius * 2, 
+          radius * 2
+        );
       });
 
       ctx.draw();
@@ -142,7 +137,7 @@ const CircleRing = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'white'
+      background: 'transparent'
     }}>
       {/* 下载状态提示 */}
       {downloadStatus === 'downloading' && (
@@ -157,7 +152,7 @@ const CircleRing = ({
           fontSize: '12px',
           zIndex: 1000
         }}>
-          🔄 下载图片中...
+          定制中...
         </View>
       )}
 
@@ -177,13 +172,19 @@ const CircleRing = ({
         </View>
       )}
       
-      <Canvas
-        canvasId="circle-canvas"
-        style={{ width: `${size}px`, height: `${size}px` }}
-        onTouchEnd={handleCanvasClick}
-      />   
+      <Image
+        src={base}
+        style={{ width: `${size + 20}px`, height: `${size + 20}px`, position: 'absolute' }}
+      />
+      {downloadStatus === 'success' && (
+        <Canvas
+          canvasId="circle-canvas"
+          style={{ width: `${size}px`, height: `${size}px`, animation: 'slowRotate 10s linear infinite' }}
+          onTouchEnd={handleCanvasClick}
+        />
+      )}
     </View>
   );
 };
 
-export default CircleRing;    
+export default CircleRing;
