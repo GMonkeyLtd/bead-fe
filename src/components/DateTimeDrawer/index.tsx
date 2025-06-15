@@ -2,7 +2,7 @@ import { View, Text, PickerView, PickerViewColumn } from "@tarojs/components";
 import { useState, useEffect } from "react";
 import { CommonEventFunction } from "@tarojs/components/types/common";
 import "./index.scss";
-import CrystalButton from "../crystal-button";
+import CrystalButton from "../CrystalButton";
 
 interface DateTimeDrawerProps {
   visible: boolean;

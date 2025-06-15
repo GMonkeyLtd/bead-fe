@@ -1,0 +1,13 @@
+.circle-canvas-rotate {
+  animation: beads-rotate 30s linear infinite;
+  will-change: transform;
+}
+
+@keyframes beads-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

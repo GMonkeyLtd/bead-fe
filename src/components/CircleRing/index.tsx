@@ -30,14 +30,14 @@ import { calculateBeadArrangement } from '@/utils/cystal-tools';
  * ```
  */
 const CircleRing = ({
-  dotRadius = 10, // 小圆珠子的半径x
   size = 140, // Canvas尺寸
-  dotsBgImagePath
+  backendSize = 160, // 珠子底座图像尺寸
+  dotsBgImagePath,
+  rotate = false
 }) => {
   const [dots, setDots] = useState<any[]>([]);
   const [downloadStatus, setDownloadStatus] = useState<'idle' | 'downloading' | 'success' | 'error'>('idle');
   const ringRadius = size  / 2 // 从中心到珠子中心的距离
-  console.log(dotsBgImagePath.length, 'dotsBgImagePath')
 
   // 处理图片路径（下载网络图片）
   useEffect(() => {
@@ -174,17 +174,17 @@ const CircleRing = ({
       
       <Image
         src={base}
-        style={{ width: `${size + 20}px`, height: `${size + 20}px`, position: 'absolute' }}
+        style={{ width: `${backendSize}px`, height: `${backendSize}px`, position: 'absolute' }}
       />
       {downloadStatus === 'success' && (
         <Canvas
           canvasId="circle-canvas"
-          style={{ width: `${size}px`, height: `${size}px`, animation: 'slowRotate 10s linear infinite' }}
-          onTouchEnd={handleCanvasClick}
+          className={rotate ? 'circle-canvas-rotate': ''}
+          style={{ width: `${size}px`, height: `${size}px` }}
         />
       )}
     </View>
   );
 };
 
-export default CircleRing;
+export default React.memo(CircleRing);

@@ -6,6 +6,7 @@
   height: calc(
     100vh - constant(safe-area-inset-top) - constant(safe-area-inset-bottom)
   );
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background: linear-gradient(#f5f1edb2, #f5f1edb2),
@@ -75,9 +76,10 @@
     }
 
     .message-container {
+      width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       // 确保最后一条消息有足够的底部间距
       padding-bottom: 20px;
       position: absolute;
@@ -160,27 +162,30 @@
   }
 
   .input-container {
-    flex-shrink: 0;
-    padding: 10px;
-    background: #fff;
-    border-top: 0.5px solid #e5e5e5;
+    width: 100%;
+    box-sizing: border-box;
     // 确保输入框始终在底部
     position: absolute;
-    bottom: 0;
+    // 添加安全区域适配
+
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    bottom: calc(10px + constant(safe-area-inset-bottom));
     // 避免键盘遮挡
     z-index: 100;
-    // 添加安全区域适配
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
-    padding-bottom: calc(10px + constant(safe-area-inset-bottom));
+    padding-left: 8px;
+    padding-right: 8px;
+    flex-shrink: 0;
 
     .input-wrapper {
       display: flex;
       gap: 8px;
+      min-height: 51px;
+      max-height: 58px;
       background: #f8f8f8;
       margin-top: 10px;
       border-radius: 12px;
       align-items: center;
-      padding: 6px 8px;
+      padding: 10px 16px;
       // 确保输入框不会被拉伸过高
       min-height: 36px;
 
@@ -191,31 +196,19 @@
         outline: none;
         font-size: 14px;
         line-height: 1.4;
-        min-height: 24px;
-        max-height: 100px;
         resize: none;
         // 优化输入体验
         word-wrap: break-word;
         word-break: break-all;
-
-        &::placeholder {
-          color: #999;
-        }
       }
 
       .icon-button {
-        width: 32px;
-        height: 32px;
-        background: #007aff;
+       
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-
-        &:hover {
-          background: #0056cc;
-        }
 
         &[disabled] {
           background: #ccc;

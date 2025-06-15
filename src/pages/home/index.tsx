@@ -13,7 +13,7 @@ import { SWIPER_DATA } from "@/config/home-content";
 import RightArrow from "@/assets/icons/right-arrow.svg";
 import DateTimeDrawer from "@/components/DateTimeDrawer";
 import { generateApi } from "@/utils/api";
-import CrystalButton from "@/components/crystal-button";
+import CrystalButton from "@/components/CrystalButton";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);

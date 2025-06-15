@@ -194,10 +194,10 @@
 
 .gender-switch {
   position: relative;
-  width: 160px;
+  width: 162px;
   height: 40px;
   border-radius: 47px;
-  border: 0.223px solid rgba(255, 255, 255, 0.4);
+  border: 0.22px solid #FFFFFF66;
   background: linear-gradient(
       318deg,
       rgba(0, 0, 0, 0.4) 0%,
@@ -205,9 +205,10 @@
     ),
     #efe9e2;
   background-blend-mode: soft-light, normal;
-  box-shadow: -1.116px -1.116px 2.233px 0px #fffaf5 inset,
-    1.116px 1.116px 2.233px 0px rgba(206, 194, 182, 0.56) inset;
-  border-radius: 22px;
+  border-radius: 47px;
+  box-shadow: 1.12px 1.12px 2.23px 0px #CEC2B68F inset,
+   -1.12px -1.12px 2.23px 0px #FFFAF5 inset;
+
   display: flex;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -240,12 +241,14 @@
 
 .gender-slider {
   position: absolute;
-  top: -2px;
-  left: 2px;
-  width: 78px;
-  height: 46px;
-  border-radius: 58px;
-  border: 0.447px solid rgba(230, 205, 180, 0.29);
+  top: 3px;
+  left: 3px;
+  width: 80px;
+  height: 36px;
+  border-radius: 60px;
+  border-image-source: linear-gradient(360deg, #FFFFFF 0%, rgba(210, 201, 190, 0.59) 60.1%, rgba(255, 255, 255, 0.75) 100%);
+
+
   background: #fff8f1;
   box-shadow: -0.893px -0.893px 1.786px 0px #f2e3db inset,
     0.893px 0.893px 1.786px 0px #fff inset,

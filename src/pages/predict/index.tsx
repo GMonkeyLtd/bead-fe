@@ -4,7 +4,7 @@ import Taro from "@tarojs/taro";
 import "./index.scss";
 import CrystalBeads from "@/components/CrystalBeads";
 import api from "@/utils/api";
-import CircleRing from "@/components/circle-ring-canvas";
+import CircleRing from "@/components/CircleRing";
 import { calculateDotCount } from "@/utils/cystal-tools";
 
 const ALL_CRYSTAL_IMAGES = [

@@ -19,12 +19,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, Textarea } from "@tarojs/components";
-import { useLLMChat, type ChatMessage } from "../../hooks/useLLMChat";
-import {
-  formatTime,
-  formatMessageContent,
-  isEmptyMessage,
-} from "../../utils/messageFormatter";
+import { isEmptyMessage } from "../../utils/messageFormatter";
 import "./index.scss";
 import Taro from "@tarojs/taro";
 import { quickGenerate } from "@/utils/generate";
@@ -34,7 +29,7 @@ import sendSvg from "@/assets/icons/send.svg";
 import activeSendSvg from "@/assets/icons/active-send.svg";
 import CrystalCardSlider from "@/components/CrystalCardSlider";
 import api, { PersonalizedGenerateResult } from "@/utils/api";
-import CircleRing from "@/components/circle-ring-canvas";
+import CircleRing from "@/components/CircleRing";
 import TagList from "@/components/TagList";
 import ChatBubble from "@/components/ChatBubble/ChatBubble";
 import assistant from "@/assets/assistant.png";
@@ -43,6 +38,8 @@ import appName from "@/assets/app-name.png";
 import back from "@/assets/icons/back.svg";
 import lastChat from "@/assets/icons/last-chat.svg";
 import forwardChat from "@/assets/icons/forward-chat.svg";
+import ChatCardList from "@/components/ChatCardList";
+import ResultSkeleton from "@/components/ResultSkeleton";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -72,6 +69,7 @@ const ChatPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const safeTop = getSafeArea().top;
   const [messageIndex, setMessageIndex] = useState(0);
+  const messageRef = useRef<typeof ChatCardList>(null);
 
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender } = params || {};
@@ -346,7 +344,6 @@ const ChatPage: React.FC = () => {
       res &&
         setBeadImageData(res.recommendations as PersonalizedGenerateResult[]);
       const messageLength = messages.length;
-      console.log(messageLength, "messageLength");
       setMessages((prev) => [...prev, res.recommendation_text]);
     } catch (error) {
       Taro.showToast({
@@ -358,6 +355,8 @@ const ChatPage: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  console.log("keyboardHeight", keyboardHeight);
 
   useEffect(() => {
     initGenerate(year, month, day, hour, gender);
@@ -393,9 +392,14 @@ const ChatPage: React.FC = () => {
       <View className="history-controller">
         <Image
           src={lastChat}
-          style={{ width: "22px", height: "22px" }}
+          style={{
+            width: "22px",
+            height: "22px",
+            // opacity: messageRef.current?.currentIndex === 0 ? 0.2 : 1,
+          }}
           onClick={() => {
-            setMessageIndex(messageIndex - 1);
+            messageRef.current?.handlePrev();
+            // setMessageIndex(messageIndex - 1);
           }}
         />
         <Image
@@ -403,10 +407,11 @@ const ChatPage: React.FC = () => {
           style={{
             width: "22px",
             height: "22px",
-            opacity: messageIndex === messages.length - 1 ? 0.2 : 1,
+            // opacity: messageRef.current?.currentIndex === messages.length - 1 ? 0.2 : 1,
           }}
           onClick={() => {
-            setMessageIndex(messageIndex + 1);
+            messageRef.current?.handleNext();
+            // setMessageIndex(messageIndex + 1);
           }}
         />
       </View>
@@ -414,6 +419,9 @@ const ChatPage: React.FC = () => {
   };
 
   const renderKeyboardHide = () => {
+    // return (
+    //   <ResultSkeleton />
+    // )
     return (
       <View className="result-container">
         <View className="result-title">当前方案</View>
@@ -427,6 +435,7 @@ const ChatPage: React.FC = () => {
               <View className="result-image">
                 <CircleRing
                   dotsBgImagePath={beadImageData.map((item) => item.image_url)}
+                  rotate
                 />
               </View>
             </View>
@@ -442,6 +451,8 @@ const ChatPage: React.FC = () => {
     return (
       <View className="result-card">
         <CircleRing
+          size={60}
+          backendSize={70}
           dotsBgImagePath={beadImageData.map((item) => item.image_url)}
         />
       </View>
@@ -454,7 +465,6 @@ const ChatPage: React.FC = () => {
     <View
       className="design-container"
       style={{
-        paddingBottom: keyboardVisible ? `${keyboardHeight}px` : "0",
         paddingTop: safeTop,
       }}
     >
@@ -477,13 +487,11 @@ const ChatPage: React.FC = () => {
           </View>
           {/* 助手欢迎消息 - 按照Figma设计样式，包含三角形指示器 */}
           <View className="message-wrapper">
-            {/* Assume ChatMessage has a 'content' property of type string */}
-            {messages.length > 0 && (
-              <ChatBubble
-                message={messages[messageIndex] || ""}
-                style={{ maxHeight: keyboardVisible ? "70px" : "96px", overflow: "auto" }}
-              />
-            )}
+            <ChatCardList
+              chatContents={messages}
+              maxHeight={keyboardVisible ? 70 : 96}
+              ref={messageRef}
+            />
           </View>
         </View>
       </View>
@@ -491,7 +499,12 @@ const ChatPage: React.FC = () => {
       {!keyboardVisible ? renderKeyboardHide() : renderKeyboardShow()}
 
       {/* 输入区域 */}
-      <View className="input-container">
+      <View
+        className="input-container"
+        // style={{
+        //   paddingBottom: keyboardHeight > 0 ? keyboardHeight + "px" : "0",
+        // }}
+      >
         <TagList
           tags={TAGS}
           onTagSelect={(tag) => {
@@ -503,11 +516,12 @@ const ChatPage: React.FC = () => {
             className="message-input"
             value={inputValue}
             placeholder="输入您的定制需求..."
+            placeholderStyle="color: #00000033;"
             onInput={(e) => setInputValue(e.detail.value)}
             onConfirm={handleSend}
             maxlength={2000}
             autoHeight
-            adjustPosition={false}
+            adjustKeyboardTo="bottom"
           />
           <IconButton
             icon={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
