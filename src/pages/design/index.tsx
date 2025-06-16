@@ -38,6 +38,7 @@ import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 import arrowRight from "@/assets/icons/right-arrow.svg";
 import AppHeader from "@/components/AppHeader";
 import { useCircleRing } from "@/hooks/useCircleRing";
+import testData from "./test.json";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -73,8 +74,14 @@ const ChatPage: React.FC = () => {
 
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender } = params || {};
-  const { generateCircleRing, status, imageUrl, isLoading: isCircleRingLoading, error } = useCircleRing({ size: 140, canvasId: "circle-canvas" })
-  console.log(imageUrl,isLoading, status, 'imageUrl')
+  const {
+    generateCircleRing,
+    status,
+    imageUrl,
+    isLoading: isCircleRingLoading,
+    error,
+  } = useCircleRing({ size: 140, canvasId: "circle-canvas" });
+  console.log(imageUrl, isLoading, status, "imageUrl");
 
   // 键盘适配逻辑
   useEffect(() => {
@@ -101,6 +108,25 @@ const ChatPage: React.FC = () => {
     };
   }, []);
 
+  const processResult = (res: any) => {
+    const resData = res.data || {};
+    setBeadImageData(resData.recommendations as PersonalizedGenerateResult[]);
+    setBeadName(resData.bracelet_name);
+    setBeadDescriptions(
+      resData.crystal_ids_deduplication.map((item) => {
+        const recommendation = resData.recommendations.find(
+          (recommendation) => recommendation.id === item.id
+        );
+        return {
+          image_url: recommendation?.image_url || "",
+          description: item.function,
+          name: recommendation?.name || "",
+        };
+      })
+    );
+    setMessages((prev) => [...prev, resData.recommendation_text]);
+  };
+
   const initGenerate = async (year, month, day, hour, gender) => {
     setIsLoading(true);
     try {
@@ -109,79 +135,17 @@ const ChatPage: React.FC = () => {
       //   birth_month: parseInt(month || "0"),
       //   birth_day: parseInt(day || "0"),
       //   birth_hour: parseInt(hour || "0"),
-      //   is_lunar: false
+      //   is_lunar: false,
       //   // gender: parseInt(gender || "0"),
       // });
-      // const resData = res.data || {};
-      // console.log(resData, 'res 111111')
-      const resData = await new Promise((resolve) => {
+      const res = await new Promise((resolve) => {
         setTimeout(() => {
           Taro.hideLoading();
           setIsLoading(false);
-          resolve({
-            code: 200,
-            message: "success",
-            bracelet_name: "水木生辉",
-            crystal_ids_deduplication: [
-              {
-                id: "19",
-                function: "补水旺运",
-              },
-              {
-                id: "77",
-                function: "平衡五行",
-              },
-            ],
-            recommendations: [
-              
-            {
-                "id": "9",
-                "name": "玻璃球6",
-                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%8E%BB%E7%92%83%E7%90%836.png",
-                "color": "蓝色",
-                "wuxing": "金、木、水、火、土",
-                "english": "Glass Ball 6"
-            },
-            {
-                "id": "11",
-                "name": "草莓晶1",
-                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%8D%89%E8%8E%93%E6%99%B61.png",
-                "color": "红色",
-                "wuxing": "火、金、土",
-                "english": "Strawberry Quartz 1"
-            },
-            {
-                "id": "12",
-                "name": "草莓水晶",
-                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%8D%89%E8%8E%93%E6%B0%B4%E6%99%B6.png",
-                "color": "红色",
-                "wuxing": "火、木",
-                "english": "Strawberry Quartz"
-            },
-          ],
-        
-        recommendation_text:
-              "根据您的生辰八字和五行信息，您的五行中水元素较强，喜用神为金和水。因此，我为您选择了多种白色和蓝色的珠子，如白水晶、白松石和海蓝宝，以增强金和水的能量。同时，为了平衡五行，我也加入了一些火元素的珠子，如冰飘南红和红碧石，以增强火的力量。此外，还选择了和田玉等土元素的珠子，以稳定整体能量。这些珠子的颜色搭配和谐，既美观又能有效平衡您的五行能量。",
-          });
+          resolve(testData);
         }, 1000);
       });
-
-
-      setBeadImageData(resData.recommendations as PersonalizedGenerateResult[]);
-      setBeadName(resData.bracelet_name);
-      setBeadDescriptions(
-        resData.crystal_ids_deduplication.map((item) => {
-          const recommendation = resData.recommendations.find(
-            (recommendation) => recommendation.id === item.id
-          );
-          return {
-            image_url: recommendation?.image_url || "",
-            description: item.function,
-            name: recommendation?.name || "",
-          };
-        })
-      );
-      setMessages((prev) => [...prev, resData.recommendation_text]);
+      processResult(res);
     } catch (error) {
       Taro.showToast({
         title: "生成失败:" + error.message,
@@ -193,7 +157,6 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  
   useEffect(() => {
     initGenerate(year, month, day, hour, gender);
 
@@ -216,6 +179,15 @@ const ChatPage: React.FC = () => {
     }
   }, [beadImageData]);
 
+  const handlePersonalizedGenerate2 = async () => {
+    const res: any = await api.generate.personalizedGenerate2({
+      ids: beadImageData.map((item) => item.id),
+      context: inputValue,
+    });
+    console.log(res, "res 1000000");
+    processResult(res);
+  };
+
   // 发送消息
   const handleSend = async () => {
     if (isEmptyMessage(inputValue) || isLoading) return;
@@ -224,9 +196,23 @@ const ChatPage: React.FC = () => {
       title: "设计中...",
       mask: true,
     });
+    setIsLoading(true);
     initGenerate(year, month, day, hour, gender);
-
     setInputValue("");
+    try {
+    const res: any = await api.generate.personalizedGenerate2({
+      ids: beadImageData.map((item) => item.id),
+        context: inputValue,
+      });
+      processResult(res);
+    } catch (error) {
+      Taro.showToast({
+        title: "生成失败:" + error.message,
+        icon: "none",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderHistoryController = () => {
@@ -302,7 +288,12 @@ const ChatPage: React.FC = () => {
                 </View>
               </View>
               <View className="result-image">
-                <CircleRing imageUrl={imageUrl} size={140} backendSize={160} />
+                <CircleRing
+                  dotsBgImagePath={beadImageData.map((item) => item.image_url)}
+                  size={140}
+                  backendSize={160}
+                  canvasId="circle-canvas-big"
+                />
               </View>
             </View>
           ) : (
@@ -325,7 +316,12 @@ const ChatPage: React.FC = () => {
                 style={{ width: "16px", height: "16px" }}
               />
             </View>
-            <CircleRing imageUrl={imageUrl} size={60} backendSize={70} />
+            <CircleRing
+              dotsBgImagePath={beadImageData.map((item) => item.image_url)}
+              size={60}
+              backendSize={70}
+              canvasId="circle-canvas-small"
+            />
           </View>
         </View>
       </View>
@@ -388,9 +384,9 @@ const ChatPage: React.FC = () => {
             onFocus={() => {
               setKeyboardVisible(true);
             }}
-            onBlur={() => {
-              setKeyboardVisible(false);
-            }}
+            // onBlur={() => {
+            //   setKeyboardVisible(false);
+            // }}
             showConfirmBar={false}
           />
           <IconButton

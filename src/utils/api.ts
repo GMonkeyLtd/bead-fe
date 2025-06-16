@@ -47,6 +47,11 @@ export interface PersonalizedGenerateResult {
   english: string;
 }
 
+export interface PersonalizedGenerate2Params {
+  ids: string[];
+  context: string;
+}
+
 export interface BaziResult {
   // 根据实际返回的数据结构定义
   [key: string]: any;
@@ -88,6 +93,12 @@ export const generateApi = {
   personalizedGenerate: (params: PersonalizedGenerateParams) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep1",
+      params,
+      // { skipAuth: true }
+    ),
+  personalizedGenerate2: (params: PersonalizedGenerate2Params) =>
+    http.post<PersonalizedGenerateResult[]>(
+      "/user/personalizationstep2",
       params,
       // { skipAuth: true }
     ),
