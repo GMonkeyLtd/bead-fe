@@ -55,21 +55,19 @@ const Home = () => {
     hour: number;
     gender: number;
   }) => {
-    generateApi
-      .quickGenerate({
-        birth_year: year,
-        birth_month: month,
-        birth_day: day,
-        birth_hour: hour,
-        is_lunar: false,
-        sex: gender,
-      })
-      .then((res) => {
-        const imageUrl = res.image_url;
-        setImageUrl(imageUrl);
-        Taro.navigateTo({
-          url: "/pages/result/index?imageUrl=" + encodeURIComponent(imageUrl),
-        });
+
+      Taro.navigateTo({
+        url:
+          "/pages/quick-design/index?year=" +
+          year +
+          "&month=" +
+          month +
+          "&day=" +
+          day +
+          "&hour=" +
+          hour +
+          "&gender=" +
+          gender,
       });
   };
 

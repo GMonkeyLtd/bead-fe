@@ -30,6 +30,7 @@ import { calculateBeadArrangement } from '@/utils/cystal-tools';
  * ```
  */
 const CircleRing = ({
+  circleCanvasId,
   size = 140, // Canvas尺寸
   backendSize = 160, // 珠子底座图像尺寸
   dotsBgImagePath,
@@ -38,6 +39,8 @@ const CircleRing = ({
   const [dots, setDots] = useState<any[]>([]);
   const [downloadStatus, setDownloadStatus] = useState<'idle' | 'downloading' | 'success' | 'error'>('idle');
   const ringRadius = size  / 2 // 从中心到珠子中心的距离
+  const rotationAngleRef = useRef(0);
+  const animationFrameRef = useRef<number>();
 
   // 处理图片路径（下载网络图片）
   useEffect(() => {
@@ -73,27 +76,23 @@ const CircleRing = ({
   }, [dotsBgImagePath, ringRadius]);
 
   // 绘制Canvas内容
-  const drawCanvas = () => {
+  const drawCanvas = (rotationAngle = 0) => {
     if (downloadStatus !== 'success') {
       console.log('⏳ 等待图片下载完成...');
       return;
     }
 
     try {
-      const ctx = Taro.createCanvasContext('circle-canvas');
+      const ctx = Taro.createCanvasContext(circleCanvasId);
       
       // 清除画布
       ctx.clearRect(0, 0, size, size);
       
-      // 绘制背景圆环轨道（可选）
-      // ctx.beginPath();
-      // ctx.arc(size / 2, size / 2, dotDistance, 0, 2 * Math.PI);
-      // ctx.setStrokeStyle('rgba(255, 255, 255, 0.2)');
-      // ctx.setLineWidth(2);
-      // ctx.stroke();
+      // 设置旋转中心点
+      ctx.translate(size / 2, size / 2);
+      ctx.rotate(rotationAngle * Math.PI / 180);
+      ctx.translate(-size / 2, -size / 2);
       
-      // 绘制环绕的水晶珠子
-     
       const beads = calculateBeadArrangement(ringRadius, dots.length);
 
       dots.forEach((dot: any, index) => {
@@ -108,19 +107,36 @@ const CircleRing = ({
       });
 
       ctx.draw();
-      console.log(`🎨 Canvas绘制完成，绘制了 ${dots.length} 个珠子`);
     } catch (error) {
-      // 兼容处理：如果Canvas API不可用，使用备用方案
       console.log('❌ Canvas API 不可用，使用备用方案', error);
     }
+  };
+
+  // 动画循环
+  const animate = () => {
+    if (!rotate) return;
+    
+    rotationAngleRef.current = (rotationAngleRef.current + 0.2) % 360;
+    drawCanvas(rotationAngleRef.current);
+    animationFrameRef.current = requestAnimationFrame(animate);
   };
 
   // 当数据更新时重新绘制
   useEffect(() => {
     if (dots.length > 0 && downloadStatus === 'success') {
-      setTimeout(drawCanvas, 100); // 延迟绘制确保Canvas已准备好
+      if (rotate) {
+        animate();
+      } else {
+        drawCanvas(0);
+      }
     }
-  }, [dots, downloadStatus]);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [dots, downloadStatus, rotate]);
 
   // 处理画布点击事件
   const handleCanvasClick = (e: any) => {
@@ -130,9 +146,8 @@ const CircleRing = ({
 
   return (
     <View style={{ 
-      width: `${size}px`, 
-      height: `${size}px`, 
-      margin: '20px auto',
+      width: `${backendSize}px`, 
+      height: `${backendSize}px`, 
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
@@ -178,9 +193,9 @@ const CircleRing = ({
       />
       {downloadStatus === 'success' && (
         <Canvas
-          canvasId="circle-canvas"
-          className={rotate ? 'circle-canvas-rotate': ''}
+          canvasId={circleCanvasId}
           style={{ width: `${size}px`, height: `${size}px` }}
+          onTouchStart={handleCanvasClick}
         />
       )}
     </View>

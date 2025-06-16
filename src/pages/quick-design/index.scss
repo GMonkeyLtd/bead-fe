@@ -1,0 +1,27 @@
+.quick-design-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  
+  .quick-design-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+
+    .action-container{
+
+      .btn-start {
+        width: 400px;
+        color: #857393;
+      }
+    }
+  }
+  
+}
+

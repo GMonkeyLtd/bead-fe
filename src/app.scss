@@ -1,4 +1,3 @@
-
 // 全局重置样式
 * {
   margin: 0;
@@ -6,34 +5,93 @@
   box-sizing: border-box;
 }
 
-body, .taro_page {
-  font-family: 'Shantell Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background-color: #F4F1EF;
+body,
+.taro_page {
+  font-family: "Shantell Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background-color: #f4f1ef;
   color: #1f1722;
+}
+
+.crystal-gradient-text {
+  background: radial-gradient(
+    ellipse at 31.28% 83.62%,
+    #b49677 0%,
+    #1f2a37 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* 文字阴影 */
+  text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.46);
+}
+
+.crystal-common-container {
+  position: inherit;
+  height: 100vh;
+  box-sizing: border-box;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
+  padding-top: constant(safe-area-inset-top);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(#f5f1edb2, #f5f1edb2),
+    url(./assets/bc-image.png) repeat;
+
+  // 确保容器不会溢出
+  max-height: 100vh;
+  min-height: 100vh;
+  transition: height 0.3s ease;
+
+  &.keyboard-visible {
+    height: calc(100vh - var(--keyboard-height));
+    min-height: auto;
+    padding-bottom: 0;
+  }
+  
+  .app-name {
+    padding: 10px 16px;
+    display: flex;
+    justify-content: center;
+  }
 }
 
 // 水墨渐变背景
 .ink-gradient-bg {
-  background: linear-gradient(135deg, 
-    rgba(240, 240, 240, 0.95) 0%, 
+  background: linear-gradient(
+    135deg,
+    rgba(240, 240, 240, 0.95) 0%,
     rgba(250, 250, 250, 0.9) 25%,
     rgba(245, 245, 245, 0.95) 50%,
     rgba(235, 235, 235, 0.9) 75%,
     rgba(240, 240, 240, 0.95) 100%
   );
   position: relative;
-  
+
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
-      radial-gradient(circle at 20% 30%, rgba(0, 0, 0, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(68, 68, 68, 0.02) 0%, transparent 40%),
-      radial-gradient(circle at 40% 80%, rgba(0, 0, 0, 0.02) 0%, transparent 30%);
+    background-image: radial-gradient(
+        circle at 20% 30%,
+        rgba(0, 0, 0, 0.03) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 70%,
+        rgba(68, 68, 68, 0.02) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 40% 80%,
+        rgba(0, 0, 0, 0.02) 0%,
+        transparent 30%
+      );
     pointer-events: none;
     z-index: -1;
   }
@@ -46,25 +104,24 @@ body, .taro_page {
   height: 100%;
   overflow: hidden;
   z-index: 0;
-  
+
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 4px;
     height: 4px;
     background: rgba(139, 69, 19, 0.3);
     border-radius: 50%;
     animation: particle-float 6s infinite ease-in-out;
-    box-shadow: 
-      10px 20px rgba(139, 69, 19, 0.2),
-      -20px 30px rgba(139, 69, 19, 0.15),
-      30px -10px rgba(139, 69, 19, 0.1),
+    box-shadow: 10px 20px rgba(139, 69, 19, 0.2),
+      -20px 30px rgba(139, 69, 19, 0.15), 30px -10px rgba(139, 69, 19, 0.1),
       -10px -20px rgba(139, 69, 19, 0.25);
   }
 }
 
 @keyframes particle-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
     opacity: 0.3;
   }
@@ -89,18 +146,18 @@ body, .taro_page {
   border: none;
   border-radius: 4px;
   padding: 14.5px 16px;
-  font-family: 'Shantell Sans', sans-serif;
+  font-family: "Shantell Sans", sans-serif;
   font-weight: 700;
   font-size: 17px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     background-color: #333333;
     transform: translateY(-1px);
   }
-  
+
   &:active {
     transform: translateY(0px);
   }
@@ -112,14 +169,15 @@ body, .taro_page {
   border: 2px solid #444444;
   border-radius: 4px;
   padding: 13.5px 13px;
-  font-family: 'Shantell Sans', sans-serif;
+  font-family: "Shantell Sans", sans-serif;
   font-weight: 400;
   font-size: 17px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  
-  &:hover, &.active {
+
+  &:hover,
+  &.active {
     background-color: #444444;
     color: #ffffff;
   }
@@ -128,9 +186,9 @@ body, .taro_page {
 // 表单样式
 .form-group {
   margin-bottom: 24px;
-  
+
   .form-label {
-    font-family: 'Shantell Sans', sans-serif;
+    font-family: "Shantell Sans", sans-serif;
     font-weight: 700;
     font-size: 20px;
     color: rgba(0, 0, 0, 0.8);
@@ -164,7 +222,7 @@ body, .taro_page {
 
 // 标题样式
 .title-large {
-  font-family: 'Shantell Sans', sans-serif;
+  font-family: "Shantell Sans", sans-serif;
   font-weight: 700;
   font-size: 34px;
   color: rgba(0, 0, 0, 0.8);
@@ -185,11 +243,11 @@ body, .taro_page {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 16px;
-  
+
   &.single-column {
     grid-template-columns: 1fr;
   }
-  
+
   &.three-column {
     grid-template-columns: 1fr 1fr 1fr;
   }
@@ -200,7 +258,7 @@ body, .taro_page {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
-  
+
   .date-picker-item {
     flex: 1;
     background-color: rgba(0, 0, 0, 0.05);

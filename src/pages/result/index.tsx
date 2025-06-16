@@ -2,6 +2,7 @@ import { View, Button, Text, Image } from "@tarojs/components";
 import { useEffect, useState } from "react";
 import Taro from "@tarojs/taro";
 import "./index.scss";
+import AppHeader from "@/components/AppHeader";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -79,6 +80,9 @@ const Result = () => {
   console.log(imageUrl, "当前显示的imageUrl");
 
   return (
+    <View className="crystal-common-container">
+      <AppHeader isWhite={false} />
+
     <View className="result-container">
       {/* 顶部装饰 */}
       <View className="result-header">
@@ -116,6 +120,7 @@ const Result = () => {
           )}
         </View>
       </View>
+    </View>
     </View>
   );
 };

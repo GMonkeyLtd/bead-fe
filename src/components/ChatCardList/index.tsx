@@ -3,42 +3,13 @@ import { View, Swiper, SwiperItem } from "@tarojs/components";
 import "./index.scss";
 import ChatBubble from "../ChatBubble/ChatBubble";
 
-interface ChatCardDisplayMethods {
-  handlePrev: () => void;
-  handleNext: () => void;
-}
-
 interface ChatCardDisplayProps {
   chatContents: string[];
-  initialIndex: number;
+  messageIndex: number;
   maxHeight: number;
 }
 
-const ChatCardList: React.ForwardRefRenderFunction<
-  ChatCardDisplayMethods,
-  ChatCardDisplayProps
-> = (props, ref) => {
-  const { chatContents, initialIndex, maxHeight } = props;
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    setCurrentIndex(chatContents.length - 1);
-  }, [chatContents.length]);
-
-  const handlePrev = () => {
-    console.log('handlePrev')
-    setCurrentIndex((prevIndex) =>
-      prevIndex > 0 ? prevIndex - 1 : 0
-    );
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex < chatContents.length - 1 ? prevIndex + 1 : chatContents.length - 1
-    );
-  };
-
-  React.useImperativeHandle(ref, () => ({ handlePrev, handleNext, currentIndex }));
+const ChatCardList = ({ messageIndex, maxHeight, chatContents }: ChatCardDisplayProps) => {
 
   return (
     <Swiper
@@ -46,15 +17,15 @@ const ChatCardList: React.ForwardRefRenderFunction<
       indicatorDots={false}
       autoplay={false}
       // currentItemId={"message" + currentIndex}
-      current={currentIndex}
-      style={{ width: '100%' }}
+      current={messageIndex}
+      style={{ width: '100%', height: maxHeight }}
     >
       {chatContents.map((content, index) => (
         <SwiperItem key={"message" + index}>
           <ChatBubble
             message={content}
             style={{
-              maxHeight: maxHeight,
+              maxHeight: maxHeight - 24,
               overflow: "auto",
             }}
           />
@@ -64,4 +35,4 @@ const ChatCardList: React.ForwardRefRenderFunction<
   );
 };
 
-export default forwardRef(ChatCardList);
+export default ChatCardList;

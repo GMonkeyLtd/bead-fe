@@ -1,0 +1,37 @@
+import { View, Image } from "@tarojs/components";
+import { getSafeArea } from "@/utils/style-tools";
+import appName from "@/assets/app-name.png";
+import Taro from "@tarojs/taro";
+import back from "@/assets/icons/back.svg";
+import appNameWhite from "@/assets/app-name-white.png";
+
+const AppHeader = ({ isWhite = false }: { isWhite?: boolean }) => {
+  const safeTop = getSafeArea().top;
+  return (
+    <View
+      style={{
+        height: safeTop,
+        padding: `${safeTop}px 16px 10px`,
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <Image
+        src={back}
+        style={{ height: "24px", width: "24px" }}
+        onClick={() => {
+          Taro.switchTab({
+            url: "/pages/home/index",
+          });
+        }}
+      />
+      <Image
+        src={isWhite ? appNameWhite : appName}
+        style={{ height: "24px", flex: 1 }}
+        mode="aspectFit"
+      />
+    </View>
+  );
+};
+
+export default AppHeader;

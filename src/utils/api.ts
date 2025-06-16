@@ -26,11 +26,12 @@ export interface LoginResult {
 
 // 定义八字相关的数据类型
 export interface BaziParams {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  // gender: number;
+  birth_year: number;
+  birth_month: number;
+  birth_day: number;
+  birth_hour: number;
+  is_lunar: boolean;
+  sex: number;
 }
 
 export interface PersonalizedGenerateParams extends BaziParams {}

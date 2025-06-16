@@ -1,219 +1,253 @@
-.design-container {
-  height: calc(100vh - env(safe-area-inset-top));
-  padding-top: env(safe-area-inset-top);
-  // 使用安全区域的高度，避免刘海屏等问题
-  height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  height: calc(
-    100vh - constant(safe-area-inset-top) - constant(safe-area-inset-bottom)
-  );
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(#f5f1edb2, #f5f1edb2),
-    url(../../assets/bc-image.png) repeat;
 
-  // 支持键盘安全(keyboard-inset-height, 0);
-  // 兼容性写法
-  padding-bottom: constant(safe-area-inset-bottom);
-  padding-bottom: env(safe-area-inset-bottom);
-  // 确保容器不会溢出
-  max-height: 100vh;
-  overflow: hidden;
-  .app-name {
+.assistant-container {
+  position: relative;
+  flex-shrink: 1;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  padding: 20px;
+  height: 260px;
+  border-radius: 8px 8px 0px 0px;
+  transition: height 0.3s ease;
+
+  .message-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 24px;
   }
 
-  .assistant-container {
-    position: relative;
-    flex-shrink: 1;
-    overflow-y: hidden;
-    overflow-x: hidden;
-    padding: 20px;
-    height: 260px;
-    border-radius: 8px 8px 0px 0px;
+  .history-controller {
+    display: flex;
+    gap: 10px;
+  }
 
-    .message-header {
+  .assistant-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 140px;
+    font-family: "ZCOOL XiaoWei", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+
+    .assistant-role {
+      font-size: 12px;
+      color: #1f1722;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 100%; /* 12px */
+    }
+    .assistant-name {
+      color: #1f1722;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 100%; /* 24px */
+      letter-spacing: 2px;
+    }
+  }
+
+  .assistant-image {
+    width: 158px;
+    height: 242px;
+  }
+
+  .message-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    // 确保最后一条消息有足够的底部间距
+    padding-bottom: 20px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    .message-wrapper {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+      // width: 100%;
+      position: relative;
       padding: 0 24px;
     }
+  }
 
-    .history-controller {
-      display: flex;
-      gap: 10px;
-    }
+  &.small {
+    height: 184px;
+    transition: height 0.3s ease;
 
-    .assistant-info {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-left: 140px;
-      font-family: "ZCOOL XiaoWei", sans-serif;
-      font-weight: 400;
-      font-style: normal;
-
-      .assistant-role {
-        font-size: 12px;
-        color: #1f1722;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 100%; /* 12px */
-      }
-      .assistant-name {
-        color: #1f1722;
-        font-size: 32px;
-        font-weight: 400;
-        line-height: 100%; /* 24px */
-        letter-spacing: 2px;
-      }
+    .assistant-name {
+      font-size: 24px;
     }
 
     .assistant-image {
-      width: 158px;
-      height: 242px;
+      width: 120px;
+      height: 184px;
     }
 
     .message-container {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      // 确保最后一条消息有足够的底部间距
-      padding-bottom: 20px;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-
-      .message-wrapper {
-        display: flex;
-        // width: 100%;
-        position: relative;
-        padding: 0 24px;
-      }
+      padding-bottom: 10px;
     }
   }
-  .result-container {
-    flex: 1;
-    padding: 24px;
-    background: rgba(255, 255, 255, 0.27);
+}
 
-    .result-title {
-      color: #1f1722;
-      font-family: "Noto Sans SC";
-      font-size: 14px;
-      font-style: normal;
-      font-weight: 300;
-      line-height: normal;
-      letter-spacing: 2px;
-    }
-    .result-card {
-      border-radius: 10px;
-      background: #f2efeb;
-      margin-top: 10px;
+.result-container {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.27);
+  flex: 1;
+  transition: all 0.3s ease;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 
-      .result-content {
-        display: flex;  
-        justify-content: space-between;
-        padding: 20px;
-
-        .result-text {
-          display: flex;
-          padding: 4px 0px;
-          flex-direction: column;
-          justify-content: space-between;
-          align-items: flex-start;
-          align-self: stretch;
-
-          .result-text-title {
-            color: #1f1722;
-            font-family: "Source Han Serif CN";
-            font-size: 18px;
-            font-style: normal;
-            font-weight: 600;
-            line-height: normal;
-            letter-spacing: 4px;
-          }
-        }
-
-        .result-image {
-          // max-width: 203px;
-          border-radius: 10px;
-          background: #f2efeb;
-        }
-      }
-    }
+  .result-title {
+    color: #1f1722;
+    font-family: "Noto Sans SC";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 2px;
   }
 
-  .image-placeholder {
-    width: 100%;
-    max-width: 203px;
-    height: 200px;
-    background: #f0f0f0;
-    border-radius: 8px;
+  .result-link {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: #999;
+    gap: 4px;
+    font-weight: 500;
     font-size: 14px;
-    margin-top: 10px;
-    margin-left: auto;
+    line-height: 1.437;
+    letter-spacing: 2px;
   }
 
-  .input-container {
-    width: 100%;
-    box-sizing: border-box;
-    // 确保输入框始终在底部
-    position: absolute;
-    // 添加安全区域适配
+  .result-card {
+    border-radius: 10px;
+    background: #f2efeb;
+    margin-top: 10px;
 
-    bottom: calc(10px + env(safe-area-inset-bottom));
-    bottom: calc(10px + constant(safe-area-inset-bottom));
-    // 避免键盘遮挡
-    z-index: 100;
-    padding-left: 8px;
-    padding-right: 8px;
-    flex-shrink: 0;
-
-    .input-wrapper {
+    .result-content {
       display: flex;
-      gap: 8px;
-      min-height: 51px;
-      max-height: 58px;
-      background: #f8f8f8;
-      margin-top: 10px;
-      border-radius: 12px;
-      align-items: center;
-      padding: 10px 16px;
-      // 确保输入框不会被拉伸过高
-      min-height: 36px;
+      justify-content: space-between;
+      padding: 20px;
 
-      .message-input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        outline: none;
-        font-size: 14px;
-        line-height: 1.4;
-        resize: none;
-        // 优化输入体验
-        word-wrap: break-word;
-        word-break: break-all;
+      .result-text {
+        display: flex;
+        padding: 4px 0px;
+        flex-direction: column;
+        justify-content: space-between;
+
+        .result-text-title {
+          color: #1f1722;
+          font-family: "Source Han Serif CN";
+          font-size: 18px;
+          font-style: normal;
+          font-weight: 600;
+          line-height: normal;
+          letter-spacing: 4px;
+        }
+        .result-text-content-container {
+          margin-top: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          .result-text-content {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            .result-text-content-name {
+              font-size: 12px;
+              font-weight: 300;
+              line-height: 100%; /* 14px */
+              letter-spacing: 2px;
+              opacity: 1;
+              margin-right: 4px;
+            }
+            .result-text-content-description {
+              font-size: 12px;
+              font-weight: 300;
+              line-height: 100%; /* 14px */
+              letter-spacing: 2px;
+              opacity: 0.6;
+            }
+          }
+        }
       }
 
-      .icon-button {
-       
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
+      .result-image {
+        // max-width: 203px;
+        border-radius: 10px;
+        background: #f2efeb;
+      }
+    }
+  }
 
-        &[disabled] {
-          background: #ccc;
-          opacity: 0.6;
-        }
+  &.small {
+    min-height: 92px;
+    height: 92px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.27);
+    flex: 0 0 auto;
+  }
+}
+
+.image-placeholder {
+  width: 100%;
+  max-width: 203px;
+  height: 200px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 14px;
+  margin-top: 10px;
+  margin-left: auto;
+}
+
+.input-container {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 8px 8px;
+  // background: #fff;
+  background: rgba(255, 255, 255, 0.27);
+  position: relative;
+  z-index: 10;
+
+  .input-wrapper {
+    display: flex;
+    gap: 8px;
+    min-height: 51px;
+    max-height: 58px;
+    background: #f8f8f8;
+    margin-top: 10px;
+    border-radius: 12px;
+    align-items: center;
+    padding: 10px 16px;
+
+    .message-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      line-height: 1.4;
+      resize: none;
+      word-wrap: break-word;
+      word-break: break-all;
+      // height: auto !important;
+      min-height: 24px;
+      max-height: 58px;
+    }
+
+    .icon-button {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      &[disabled] {
+        background: #ccc;
+        opacity: 0.6;
       }
     }
   }
