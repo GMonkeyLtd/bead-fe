@@ -35,6 +35,7 @@ const CircleRing = ({
   dotsBgImagePath,
   rotate = false,
   canvasId = "circle-canvas",
+  onChange = (status: 'idle' | 'downloading' | 'success' | 'error', canvasImage: any[]) => {},
 }) => {
   const [dots, setDots] = useState<any[]>([]);
   const [downloadStatus, setDownloadStatus] = useState<
@@ -140,7 +141,6 @@ const CircleRing = ({
       style={{
         width: `${backendSize}px`,
         height: `${backendSize}px`,
-        margin: "20px auto",
         position: "relative",
         display: "flex",
         alignItems: "center",

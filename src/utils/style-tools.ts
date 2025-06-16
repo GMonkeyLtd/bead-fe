@@ -10,3 +10,12 @@ export const getSafeArea = () => {
     return { top: 0 };
   }
 };
+
+export const getNavBarHeightAndTop = () => {
+  const menuButtonInfo = Taro.getMenuButtonBoundingClientRect();
+  // 导航栏高度 = 胶囊按钮下边界 + 胶囊按钮上边距（通常 8px）
+  return {
+    height: menuButtonInfo.bottom - menuButtonInfo.top,
+    top: menuButtonInfo.top,
+  };
+};

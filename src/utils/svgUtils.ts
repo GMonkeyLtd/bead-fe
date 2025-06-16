@@ -37,7 +37,6 @@ export const createSvgIcon = (
 ) => {
   // 如果需要修改颜色，可以替换SVG中的颜色属性
   let processedSvg = svgContent;
-  console.log(color, 'color')
   if (color) {
     processedSvg = svgContent
       .replace(/fill="[^"]*"/g, `fill="${color}"`)

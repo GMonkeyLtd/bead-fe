@@ -39,6 +39,7 @@ import arrowRight from "@/assets/icons/right-arrow.svg";
 import AppHeader from "@/components/AppHeader";
 import { useCircleRing } from "@/hooks/useCircleRing";
 import testData from "./test.json";
+import assistantSmall from '@/assets/assistant-small.png'
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -79,6 +80,7 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     // 监听键盘弹起
     const onKeyboardHeightChange = (res) => {
+      console.log(res.height, 'height')
       setKeyboardHeight(res.height);
       setKeyboardVisible(res.height > 0);
       // 设置CSS变量
@@ -105,7 +107,7 @@ const ChatPage: React.FC = () => {
     setBeadImageData(resData.recommendations as PersonalizedGenerateResult[]);
     setBeadName(resData.bracelet_name);
     setBeadDescriptions(
-      resData.crystal_ids_deduplication.map((item) => {
+      resData.crystal_ids_deduplication.slice(0, 2).map((item) => {
         const recommendation = resData.recommendations.find(
           (recommendation) => recommendation.id === item.id
         );
@@ -176,8 +178,8 @@ const ChatPage: React.FC = () => {
     setIsLoading(true);
     setInputValue("");
     try {
-    const res: any = await api.generate.personalizedGenerate2({
-      ids: beadImageData.map((item) => item.id),
+      const res: any = await api.generate.personalizedGenerate2({
+        ids: beadImageData.map((item) => item.id),
         context: inputValue,
       });
       processResult(res);
@@ -236,24 +238,26 @@ const ChatPage: React.FC = () => {
         <View className="result-card">
           {beadImageData.length > 0 ? (
             <View className="result-content">
-              <View className="result-text">
-                <View className="result-text-title">{beadName}</View>
-                <View className="result-text-content-container">
-                  {beadDescriptions.length > 0 &&
-                    beadDescriptions.map((item, index) => (
-                      <View className="result-text-content" key={index}>
-                        <Image
-                          src={item.image_url}
-                          style={{ width: "16px", height: "16px" }}
-                        />
-                        <View className="result-text-content-name">
-                          {item.name + ":"}
+              <View className="result-left">
+                <View className="result-text">
+                  <View className="result-text-title">{beadName}</View>
+                  <View className="result-text-content-container">
+                    {beadDescriptions.length > 0 &&
+                      beadDescriptions.map((item, index) => (
+                        <View className="result-text-content" key={index}>
+                          <Image
+                            src={item.image_url}
+                            style={{ width: "15px", height: "15px", marginRight: '4px' }}
+                          />
+                          <View className="result-text-content-name">
+                            {item.name + ":"}
+                          </View>
+                          <View className="result-text-content-description">
+                            {item.description}
+                          </View>
                         </View>
-                        <View className="result-text-content-description">
-                          {item.description}
-                        </View>
-                      </View>
-                    ))}
+                      ))}
+                  </View>
                 </View>
                 <View className="result-link ">
                   <View className="crystal-gradient-text">发起定制派单</View>
@@ -317,7 +321,7 @@ const ChatPage: React.FC = () => {
       {/* 主要聊天区域 */}
       <View className={`assistant-container ${keyboardVisible ? "small" : ""}`}>
         {/* 消息列表 */}
-        <Image src={assistant} className="assistant-image" />
+        <Image src={keyboardVisible ? assistantSmall: assistant} className="assistant-image" />
 
         <View className="message-container">
           <View className="message-header">

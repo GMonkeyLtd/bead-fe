@@ -1,19 +1,20 @@
 import { View, Image } from "@tarojs/components";
-import { getSafeArea } from "@/utils/style-tools";
+import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import appName from "@/assets/app-name.png";
 import Taro from "@tarojs/taro";
 import back from "@/assets/icons/back.svg";
 import appNameWhite from "@/assets/app-name-white.png";
 
 const AppHeader = ({ isWhite = false }: { isWhite?: boolean }) => {
-  const safeTop = getSafeArea().top;
+  const { height: navBarHeight, top: navBarTop } = getNavBarHeightAndTop();
   return (
     <View
       style={{
-        height: safeTop,
-        padding: `${safeTop}px 16px 10px`,
+        height: navBarHeight,
+        padding: `${navBarTop}px 16px 10px`,
         display: "flex",
         justifyContent: "center",
+        alignItems: 'center'
       }}
     >
       <Image

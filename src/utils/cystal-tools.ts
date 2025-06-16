@@ -63,7 +63,6 @@ export const calculateBeadArrangement = (ringRadius: number, beadCount: number) 
     // 当n个小圆围成大圆时，小圆半径计算公式：
     // r = R / (1 + 1/sin(π/n))
     // 其中R是大圆半径，n是小圆个数，r是小圆半径
-    console.log(ringRadius, beadCount, 'ringRadius, beadCount')
     const beadRadius = ringRadius / (1 + 1/Math.sin(Math.PI/beadCount));
     
     // 计算每个小圆的位置
