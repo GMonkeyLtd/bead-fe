@@ -45,7 +45,7 @@ export class ImageCacheManager {
    */
   private static async performDownload(url: string): Promise<string> {
     try {
-      console.log(`📸 开始下载图片: ${url}`);
+      // console.log(`📸 开始下载图片: ${url}`);
       
       const res = await Taro.downloadFile({
         url: url,
@@ -54,7 +54,7 @@ export class ImageCacheManager {
       if (res.statusCode === 200) {
         // 缓存本地路径
         this.cache.set(url, res.tempFilePath);
-        console.log(`✅ 图片下载成功: ${url} -> ${res.tempFilePath}`);
+        // console.log(`✅ 图片下载成功: ${url} -> ${res.tempFilePath}`);
         return res.tempFilePath;
       } else {
         throw new Error(`下载失败，状态码: ${res.statusCode}`);

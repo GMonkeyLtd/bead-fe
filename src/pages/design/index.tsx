@@ -74,14 +74,6 @@ const ChatPage: React.FC = () => {
 
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender } = params || {};
-  const {
-    generateCircleRing,
-    status,
-    imageUrl,
-    isLoading: isCircleRingLoading,
-    error,
-  } = useCircleRing({ size: 140, canvasId: "circle-canvas" });
-  console.log(imageUrl, isLoading, status, "imageUrl");
 
   // 键盘适配逻辑
   useEffect(() => {
@@ -173,21 +165,6 @@ const ChatPage: React.FC = () => {
     setMessageIndex(messages.length - 1);
   }, [messages]);
 
-  useEffect(() => {
-    if (beadImageData.length > 0) {
-      generateCircleRing(beadImageData.map((item) => item.image_url));
-    }
-  }, [beadImageData]);
-
-  const handlePersonalizedGenerate2 = async () => {
-    const res: any = await api.generate.personalizedGenerate2({
-      ids: beadImageData.map((item) => item.id),
-      context: inputValue,
-    });
-    console.log(res, "res 1000000");
-    processResult(res);
-  };
-
   // 发送消息
   const handleSend = async () => {
     if (isEmptyMessage(inputValue) || isLoading) return;
@@ -197,7 +174,6 @@ const ChatPage: React.FC = () => {
       mask: true,
     });
     setIsLoading(true);
-    initGenerate(year, month, day, hour, gender);
     setInputValue("");
     try {
     const res: any = await api.generate.personalizedGenerate2({
@@ -247,7 +223,7 @@ const ChatPage: React.FC = () => {
   };
 
   const renderKeyboardHide = () => {
-    if (isLoading || isCircleRingLoading || status !== "success") {
+    if (isLoading) {
       return (
         <View className="result-container">
           <SkeletonCard />
@@ -293,6 +269,7 @@ const ChatPage: React.FC = () => {
                   size={140}
                   backendSize={160}
                   canvasId="circle-canvas-big"
+                  rotate={true}
                 />
               </View>
             </View>

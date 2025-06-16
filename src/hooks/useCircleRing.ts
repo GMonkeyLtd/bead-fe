@@ -27,7 +27,7 @@ export const useCircleRing = ({
   const [error, setError] = useState<Error | null>(null);
   const [dots, setDots] = useState<string[]>([]);
 
-  console.log(imageUrl, 'imageUrl 222222')
+  console.log(imageUrl, canvasId, 'imageUrl 222222')
 
   const ringRadius = size / 2;
 
@@ -54,7 +54,6 @@ export const useCircleRing = ({
 
         setDots(finalImagePaths);
         setStatus("success");
-        console.log(finalImagePaths, 'finalImagePaths 777777')
       } catch (err) {
         console.error("❌ 图片处理过程出错:", err);
         setError(err instanceof Error ? err : new Error("图片处理失败"));
@@ -67,14 +66,13 @@ export const useCircleRing = ({
 
   // 绘制Canvas内容并转换为图片
   useEffect(() => {
-    console.log(dots,status, 'dots 888888')
     if (status !== "success" || dots.length === 0) {
       return;
     }
 
     const drawCanvasAndExport = async () => {
       try {
-        console.log(canvasId, 'canvasId 999999')
+        console.log(canvasId, dots, 'canvasId 999999 1')
         const ctx = Taro.createCanvasContext(canvasId);
 
         // 清除画布
@@ -89,8 +87,8 @@ export const useCircleRing = ({
         });
 
         // 绘制完成后导出图片
-        ctx.draw(false, () => {
-            console.log('draw')
+        ctx.draw(true, () => {
+            console.log('draw ', '7777777777')
           setTimeout(() => {
             Taro.canvasToTempFilePath({
               canvasId,
