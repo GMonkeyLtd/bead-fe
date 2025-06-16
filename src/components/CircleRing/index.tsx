@@ -35,7 +35,7 @@ const CircleRing = ({
   dotsBgImagePath,
   rotate = false,
   canvasId = "circle-canvas",
-  onChange = (status: 'idle' | 'downloading' | 'success' | 'error', canvasImage: any[]) => {},
+  onChange = (status: 'idle' | 'downloading' | 'success' | 'error', canvasImage: string) => {}
 }) => {
   const [dots, setDots] = useState<any[]>([]);
   const [downloadStatus, setDownloadStatus] = useState<
@@ -43,6 +43,14 @@ const CircleRing = ({
   >("idle");
   const [canvasImage, setCanvasImage] = useState<string>("");
   const ringRadius = size / 2; // 从中心到珠子中心的距离
+
+   // 绘制环绕的水晶珠子
+
+   const beads = calculateBeadArrangement(ringRadius, dotsBgImagePath.length);
+
+  useEffect(() => {
+    onChange(downloadStatus, canvasImage);
+  }, [canvasImage, downloadStatus]);
 
   // 处理图片路径（下载网络图片）
   useEffect(() => {
@@ -53,7 +61,6 @@ const CircleRing = ({
 
     const processImages = async () => {
       setDownloadStatus("downloading");
-
       try {
         // 使用ImageCacheManager处理图片路径
         const processedPaths = await ImageCacheManager.processImagePaths(
@@ -81,11 +88,6 @@ const CircleRing = ({
 
   // 绘制Canvas内容
   const drawCanvas = () => {
-    if (downloadStatus !== "success") {
-      console.log("⏳ 等待图片下载完成...");
-      return;
-    }
-
     try {
       const ctx = Taro.createCanvasContext(canvasId);
 
@@ -99,9 +101,7 @@ const CircleRing = ({
       // ctx.setLineWidth(2);
       // ctx.stroke();
 
-      // 绘制环绕的水晶珠子
-
-      const beads = calculateBeadArrangement(ringRadius, dots.length);
+     
 
       dots.forEach((dot: any, index) => {
         const { x, y, radius } = beads.beads[index];
@@ -128,12 +128,31 @@ const CircleRing = ({
     }
   };
 
+  const drawPlaceHolder = () => {
+    try {
+        const ctx = Taro.createCanvasContext(canvasId + 'placeholder');
+        ctx.clearRect(0, 0, size, size);
+        ctx.setFillStyle('rgba(232, 217, 187, 0.8)')
+        beads.beads.forEach(({ x, y, radius }: any) => {
+          ctx.beginPath() // 开始新路径
+          ctx.arc(x, y, radius, 0, 2 * Math.PI)
+          ctx.fill()
+        })
+        ctx.draw();
+    } catch (error) {
+      console.log("❌ Canvas API 不可用，使用备用方案", error);
+    }
+  }
+
   // 当数据更新时重新绘制
   useEffect(() => {
     if (dots.length > 0 && downloadStatus === "success") {
       setTimeout(drawCanvas, 100); // 延迟绘制确保Canvas已准备好
+    } else {
+      drawPlaceHolder()
     }
   }, [dots, downloadStatus]);
+  
 
   // 处理画布点击事件
   return (
@@ -148,42 +167,6 @@ const CircleRing = ({
         background: "transparent",
       }}
     >
-      {/* 下载状态提示 */}
-      {downloadStatus === "downloading" && (
-        <View
-          style={{
-            position: "absolute",
-            top: "10px",
-            left: "10px",
-            background: "rgba(0,0,0,0.7)",
-            color: "white",
-            padding: "5px 10px",
-            borderRadius: "5px",
-            fontSize: "12px",
-            zIndex: 1000,
-          }}
-        >
-          定制中...
-        </View>
-      )}
-
-      {downloadStatus === "error" && (
-        <View
-          style={{
-            position: "absolute",
-            top: "10px",
-            left: "10px",
-            background: "rgba(255,0,0,0.7)",
-            color: "white",
-            padding: "5px 10px",
-            borderRadius: "5px",
-            fontSize: "12px",
-            zIndex: 1000,
-          }}
-        >
-          ❌ 图片下载失败
-        </View>
-      )}
       <Image
         src={base}
         style={{
@@ -193,11 +176,19 @@ const CircleRing = ({
           zIndex: 100,
         }}
       />
+      {/* 下载状态提示 */}
+      {downloadStatus !== "success" && (
+        <Canvas
+          canvasId={canvasId + 'placeholder'}
+          style={{ width: `${size}px`, height: `${size}px`, zIndex: 101 }}
+        />
+      )}
+      
       {downloadStatus === "success" && !canvasImage && (
         <Canvas
           canvasId={canvasId}
           className={rotate ? "circle-canvas-rotate" : ""}
-          style={{ width: `${size}px`, height: `${size}px` }}
+          style={{ width: `${size}px`, height: `${size}px`, zIndex: 102 }}
         />
       )}
       {canvasImage && (

@@ -27,7 +27,7 @@ import { Image } from "@tarojs/components";
 import sendSvg from "@/assets/icons/send.svg";
 import activeSendSvg from "@/assets/icons/active-send.svg";
 import api, { PersonalizedGenerateResult } from "@/utils/api";
-import CircleRing from "@/components/CircleRing";
+import CircleRing, { CircleRingWithBacked } from "@/components/CircleRing";
 import TagList from "@/components/TagList";
 import assistant from "@/assets/assistant.png";
 import { getSafeArea } from "@/utils/style-tools";
@@ -39,7 +39,7 @@ import arrowRight from "@/assets/icons/right-arrow.svg";
 import AppHeader from "@/components/AppHeader";
 import { useCircleRing } from "@/hooks/useCircleRing";
 import testData from "./test.json";
-import assistantSmall from '@/assets/assistant-small.png'
+import assistantSmall from "@/assets/assistant-small.png";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -61,14 +61,13 @@ const ChatPage: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
   const [beadName, setBeadName] = useState<string>("");
-  const [resultImageUrl, setResultImageUrl] = useState<string>("");
+  const [canvasImageUrl, setCanvasImageUrl] = useState<string>("");
   const [beadDescriptions, setBeadDescriptions] = useState<
     { image_url: string; description: string }[]
   >([]);
   const [beadImageData, setBeadImageData] = useState<
     PersonalizedGenerateResult[]
   >([]);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -80,8 +79,7 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     // 监听键盘弹起
     const onKeyboardHeightChange = (res) => {
-      console.log(res.height, 'height')
-      setKeyboardHeight(res.height);
+      console.log(res.height, "height");
       setKeyboardVisible(res.height > 0);
       // 设置CSS变量
       document.documentElement.style.setProperty(
@@ -137,7 +135,7 @@ const ChatPage: React.FC = () => {
           Taro.hideLoading();
           setIsLoading(false);
           resolve(testData);
-        }, 1000);
+        }, 2000);
       });
       processResult(res);
     } catch (error) {
@@ -247,7 +245,11 @@ const ChatPage: React.FC = () => {
                         <View className="result-text-content" key={index}>
                           <Image
                             src={item.image_url}
-                            style={{ width: "15px", height: "15px", marginRight: '4px' }}
+                            style={{
+                              width: "15px",
+                              height: "15px",
+                              marginRight: "4px",
+                            }}
                           />
                           <View className="result-text-content-name">
                             {item.name + ":"}
@@ -260,7 +262,18 @@ const ChatPage: React.FC = () => {
                   </View>
                 </View>
                 <View className="result-link ">
-                  <View className="crystal-gradient-text">发起定制派单</View>
+                  <View
+                    className="crystal-gradient-text"
+                    onClick={() => {
+                      Taro.navigateTo({
+                        url:
+                          "/pages/result/index?imageUrl=" +
+                          encodeURIComponent(canvasImageUrl as string),
+                      });
+                    }}
+                  >
+                    发起定制派单
+                  </View>
                   <Image
                     src={arrowRight}
                     style={{ width: "16px", height: "16px" }}
@@ -291,7 +304,18 @@ const ChatPage: React.FC = () => {
         <View className="result-card">
           <View className="result-content">
             <View className="result-link ">
-              <View className="crystal-gradient-text">发起定制派单</View>
+              <View
+                className="crystal-gradient-text"
+                onClick={() => {
+                  Taro.navigateTo({
+                    url:
+                      "/pages/result/index?imageUrl=" +
+                      encodeURIComponent(canvasImageUrl as string),
+                  });
+                }}
+              >
+                发起定制派单
+              </View>
               <Image
                 src={arrowRight}
                 style={{ width: "16px", height: "16px" }}
@@ -302,6 +326,9 @@ const ChatPage: React.FC = () => {
               size={60}
               backendSize={70}
               canvasId="circle-canvas-small"
+              onChange={(status, canvasImage) => {
+                setCanvasImageUrl(canvasImage);
+              }}
             />
           </View>
         </View>
@@ -321,7 +348,10 @@ const ChatPage: React.FC = () => {
       {/* 主要聊天区域 */}
       <View className={`assistant-container ${keyboardVisible ? "small" : ""}`}>
         {/* 消息列表 */}
-        <Image src={keyboardVisible ? assistantSmall: assistant} className="assistant-image" />
+        <Image
+          src={keyboardVisible ? assistantSmall : assistant}
+          className="assistant-image"
+        />
 
         <View className="message-container">
           <View className="message-header">
