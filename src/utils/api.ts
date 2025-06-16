@@ -31,7 +31,7 @@ export interface BaziParams {
   birth_day: number;
   birth_hour: number;
   is_lunar: boolean;
-  sex: number;
+  sex?: number;
 }
 
 export interface PersonalizedGenerateParams extends BaziParams {}
@@ -88,13 +88,8 @@ export const generateApi = {
   personalizedGenerate: (params: PersonalizedGenerateParams) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep1",
-      {
-        birth_year: params.year,
-        birth_month: params.month,
-        birth_day: params.day,
-        birth_hour: params.hour,
-      },
-      { skipAuth: true }
+      params,
+      // { skipAuth: true }
     ),
 };
 

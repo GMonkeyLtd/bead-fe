@@ -37,6 +37,7 @@ import ChatCardList from "@/components/ChatCardList";
 import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 import arrowRight from "@/assets/icons/right-arrow.svg";
 import AppHeader from "@/components/AppHeader";
+import { useCircleRing } from "@/hooks/useCircleRing";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -68,17 +69,17 @@ const ChatPage: React.FC = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const safeTop = getSafeArea().top;
   const [messageIndex, setMessageIndex] = useState(0);
 
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender } = params || {};
+  const { generateCircleRing, status, imageUrl, isLoading: isCircleRingLoading, error } = useCircleRing({ size: 140, canvasId: "circle-canvas" })
+  console.log(imageUrl,isLoading, status, 'imageUrl')
 
   // 键盘适配逻辑
   useEffect(() => {
     // 监听键盘弹起
     const onKeyboardHeightChange = (res) => {
-      console.log("onKeyboardHeightChange", res);
       setKeyboardHeight(res.height);
       setKeyboardVisible(res.height > 0);
       // 设置CSS变量
@@ -104,14 +105,16 @@ const ChatPage: React.FC = () => {
     setIsLoading(true);
     try {
       // const res: any = await api.generate.personalizedGenerate({
-      //   year: parseInt(year || "0"),
-      //   month: parseInt(month || "0"),
-      //   day: parseInt(day || "0"),
-      //   hour: parseInt(hour || "0"),
+      //   birth_year: parseInt(year || "0"),
+      //   birth_month: parseInt(month || "0"),
+      //   birth_day: parseInt(day || "0"),
+      //   birth_hour: parseInt(hour || "0"),
+      //   is_lunar: false
       //   // gender: parseInt(gender || "0"),
       // });
-      // console.log(res, 'res')
-      const res = await new Promise((resolve) => {
+      // const resData = res.data || {};
+      // console.log(resData, 'res 111111')
+      const resData = await new Promise((resolve) => {
         setTimeout(() => {
           Taro.hideLoading();
           setIsLoading(false);
@@ -130,245 +133,45 @@ const ChatPage: React.FC = () => {
               },
             ],
             recommendations: [
-              {
-                id: "19",
-                name: "海蓝宝",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-                color: "蓝色",
-                wuxing: "水",
-                english: "Aquamarine",
-              },
-              {
-                id: "19",
-                name: "海蓝宝",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-                color: "蓝色",
-                wuxing: "水",
-                english: "Aquamarine",
-              },
-              {
-                id: "19",
-                name: "海蓝宝",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-                color: "蓝色",
-                wuxing: "水",
-                english: "Aquamarine",
-              },
-              {
-                id: "19",
-                name: "海蓝宝",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-                color: "蓝色",
-                wuxing: "水",
-                english: "Aquamarine",
-              },
-              {
-                id: "19",
-                name: "海蓝宝",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-                color: "蓝色",
-                wuxing: "水",
-                english: "Aquamarine",
-              },
-              {
-                id: "77",
-                name: "青金石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
-                color: "蓝色、金色、白色",
-                wuxing: "水、金、土",
-                english: "Lapis Lazuli",
-              },
-              {
-                id: "77",
-                name: "青金石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
-                color: "蓝色、金色、白色",
-                wuxing: "水、金、土",
-                english: "Lapis Lazuli",
-              },
-              {
-                id: "77",
-                name: "青金石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
-                color: "蓝色、金色、白色",
-                wuxing: "水、金、土",
-                english: "Lapis Lazuli",
-              },
-              {
-                id: "77",
-                name: "青金石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
-                color: "蓝色、金色、白色",
-                wuxing: "水、金、土",
-                english: "Lapis Lazuli",
-              },
-              {
-                id: "77",
-                name: "青金石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
-                color: "蓝色、金色、白色",
-                wuxing: "水、金、土",
-                english: "Lapis Lazuli",
-              },
-              {
-                id: "59",
-                name: "绿东陵",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
-                color: "绿色",
-                wuxing: "木",
-                english: "Green Aventurine",
-              },
-              {
-                id: "59",
-                name: "绿东陵",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
-                color: "绿色",
-                wuxing: "木",
-                english: "Green Aventurine",
-              },
-              {
-                id: "59",
-                name: "绿东陵",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
-                color: "绿色",
-                wuxing: "木",
-                english: "Green Aventurine",
-              },
-              {
-                id: "59",
-                name: "绿东陵",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
-                color: "绿色",
-                wuxing: "木",
-                english: "Green Aventurine",
-              },
-              {
-                id: "59",
-                name: "绿东陵",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
-                color: "绿色",
-                wuxing: "木",
-                english: "Green Aventurine",
-              },
-              {
-                id: "83",
-                name: "太阳石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E5%A4%AA%E9%98%B3%E7%9F%B3.png",
-                color: "浅橙色",
-                wuxing: "金、火",
-                english: "Sunstone",
-              },
-              {
-                id: "83",
-                name: "太阳石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E5%A4%AA%E9%98%B3%E7%9F%B3.png",
-                color: "浅橙色",
-                wuxing: "金、火",
-                english: "Sunstone",
-              },
-              {
-                id: "83",
-                name: "太阳石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E5%A4%AA%E9%98%B3%E7%9F%B3.png",
-                color: "浅橙色",
-                wuxing: "金、火",
-                english: "Sunstone",
-              },
-              {
-                id: "83",
-                name: "太阳石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E5%A4%AA%E9%98%B3%E7%9F%B3.png",
-                color: "浅橙色",
-                wuxing: "金、火",
-                english: "Sunstone",
-              },
-              {
-                id: "83",
-                name: "太阳石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E5%A4%AA%E9%98%B3%E7%9F%B3.png",
-                color: "浅橙色",
-                wuxing: "金、火",
-                english: "Sunstone",
-              },
-              {
-                id: "19",
-                name: "海蓝宝",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-                color: "蓝色",
-                wuxing: "水",
-                english: "Aquamarine",
-              },
-              {
-                id: "77",
-                name: "青金石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
-                color: "蓝色、金色、白色",
-                wuxing: "水、金、土",
-                english: "Lapis Lazuli",
-              },
-              {
-                id: "59",
-                name: "绿东陵",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
-                color: "绿色",
-                wuxing: "木",
-                english: "Green Aventurine",
-              },
-              {
-                id: "83",
-                name: "太阳石",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E5%A4%AA%E9%98%B3%E7%9F%B3.png",
-                color: "浅橙色",
-                wuxing: "金、火",
-                english: "Sunstone",
-              },
-              {
-                id: "19",
-                name: "海蓝宝",
-                image_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-                color: "蓝色",
-                wuxing: "水",
-                english: "Aquamarine",
-              },
-            ],
-
-            recommendation_text:
+              
+            {
+                "id": "9",
+                "name": "玻璃球6",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%8E%BB%E7%92%83%E7%90%836.png",
+                "color": "蓝色",
+                "wuxing": "金、木、水、火、土",
+                "english": "Glass Ball 6"
+            },
+            {
+                "id": "11",
+                "name": "草莓晶1",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%8D%89%E8%8E%93%E6%99%B61.png",
+                "color": "红色",
+                "wuxing": "火、金、土",
+                "english": "Strawberry Quartz 1"
+            },
+            {
+                "id": "12",
+                "name": "草莓水晶",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%8D%89%E8%8E%93%E6%B0%B4%E6%99%B6.png",
+                "color": "红色",
+                "wuxing": "火、木",
+                "english": "Strawberry Quartz"
+            },
+          ],
+        
+        recommendation_text:
               "根据您的生辰八字和五行信息，您的五行中水元素较强，喜用神为金和水。因此，我为您选择了多种白色和蓝色的珠子，如白水晶、白松石和海蓝宝，以增强金和水的能量。同时，为了平衡五行，我也加入了一些火元素的珠子，如冰飘南红和红碧石，以增强火的力量。此外，还选择了和田玉等土元素的珠子，以稳定整体能量。这些珠子的颜色搭配和谐，既美观又能有效平衡您的五行能量。",
           });
         }, 1000);
       });
 
-      res &&
-        setBeadImageData(res.recommendations as PersonalizedGenerateResult[]);
-      setBeadName(res.bracelet_name);
+
+      setBeadImageData(resData.recommendations as PersonalizedGenerateResult[]);
+      setBeadName(resData.bracelet_name);
       setBeadDescriptions(
-        res.crystal_ids_deduplication.map((item) => {
-          const recommendation = res.recommendations.find(
+        resData.crystal_ids_deduplication.map((item) => {
+          const recommendation = resData.recommendations.find(
             (recommendation) => recommendation.id === item.id
           );
           return {
@@ -378,7 +181,7 @@ const ChatPage: React.FC = () => {
           };
         })
       );
-      setMessages((prev) => [...prev, res.recommendation_text]);
+      setMessages((prev) => [...prev, resData.recommendation_text]);
     } catch (error) {
       Taro.showToast({
         title: "生成失败:" + error.message,
@@ -390,8 +193,7 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  console.log("keyboardHeight", keyboardHeight);
-
+  
   useEffect(() => {
     initGenerate(year, month, day, hour, gender);
 
@@ -408,16 +210,15 @@ const ChatPage: React.FC = () => {
     setMessageIndex(messages.length - 1);
   }, [messages]);
 
+  useEffect(() => {
+    if (beadImageData.length > 0) {
+      generateCircleRing(beadImageData.map((item) => item.image_url));
+    }
+  }, [beadImageData]);
+
   // 发送消息
   const handleSend = async () => {
-    console.log(
-      "handleSend",
-      inputValue,
-      isEmptyMessage(inputValue),
-      isLoading
-    );
     if (isEmptyMessage(inputValue) || isLoading) return;
-    console.log("handleSend");
 
     Taro.showLoading({
       title: "设计中...",
@@ -460,7 +261,7 @@ const ChatPage: React.FC = () => {
   };
 
   const renderKeyboardHide = () => {
-    if (isLoading) {
+    if (isLoading || isCircleRingLoading || status !== "success") {
       return (
         <View className="result-container">
           <SkeletonCard />
@@ -501,11 +302,7 @@ const ChatPage: React.FC = () => {
                 </View>
               </View>
               <View className="result-image">
-                <CircleRing
-                  circleCanvasId={`circle-ring-${beadImageData.length}`}
-                  dotsBgImagePath={beadImageData.map((item) => item.image_url)}
-                  rotate
-                />
+                <CircleRing imageUrl={imageUrl} size={140} backendSize={160} />
               </View>
             </View>
           ) : (
@@ -528,19 +325,14 @@ const ChatPage: React.FC = () => {
                 style={{ width: "16px", height: "16px" }}
               />
             </View>
-            <CircleRing
-              circleCanvasId={`circle-ring-small-${beadImageData.length}`}
-              size={60}
-              backendSize={70}
-              dotsBgImagePath={beadImageData.map((item) => item.image_url)}
-            />
+            <CircleRing imageUrl={imageUrl} size={60} backendSize={70} />
           </View>
         </View>
       </View>
     );
   };
 
-  console.log(messages, messageIndex, "messages");
+  // console.log(messages, messageIndex, "messages");
 
   return (
     <View
@@ -599,6 +391,7 @@ const ChatPage: React.FC = () => {
             onBlur={() => {
               setKeyboardVisible(false);
             }}
+            showConfirmBar={false}
           />
           <IconButton
             icon={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}

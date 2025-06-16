@@ -8,7 +8,6 @@ interface ChatBubbleProps {
 }
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ message, style }) => {
-  console.log(message, 'message');
   return (
     <View className="chat-bubble" >
       <View className="chat-bubble-content" style={{...style}}>

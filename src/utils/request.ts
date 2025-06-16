@@ -44,7 +44,7 @@ const requestInterceptor = async (config: RequestConfig) => {
     try {
       // 获取token，如果没有则自动登录
       const token = await AuthManager.getToken();
-      
+      console.log(token, 'token')
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
         console.log('已添加认证token到请求头');
@@ -59,7 +59,6 @@ const requestInterceptor = async (config: RequestConfig) => {
       throw new Error('认证失败，请重试');
     }
   }
-
   return {
     ...config,
     header: headers,
@@ -71,7 +70,6 @@ const requestInterceptor = async (config: RequestConfig) => {
 const responseInterceptor = <T>(response: any): Promise<T> => {
   return new Promise((resolve, reject) => {
     const { statusCode, data } = response
-    console.log(response, 'response')
 
     // HTTP状态码检查
     if (statusCode === 200) {
@@ -123,7 +121,6 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
 const request = async <T = any>(config: RequestConfig): Promise<T> => {
   let retryCount = 0;
   const maxRetries = 1; // 最多重试1次（用于token过期后重新登录）
-
   const executeRequest = async (): Promise<T> => {
     // 请求前拦截处理
     const finalConfig = await requestInterceptor(config)

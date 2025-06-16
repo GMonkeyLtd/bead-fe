@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro'
+import api from './api';
 
 // 登录状态管理
 let isLoggingIn = false;
@@ -47,10 +48,11 @@ export const AuthManager = {
     async getToken(): Promise<string | null> {
       // 先检查是否已有token
       const currentToken = Taro.getStorageSync('token');
+      console.log(currentToken, 'currentToken')
       if (currentToken) {
         return currentToken;
       }
-
+      console.log(isLoggingIn, loginPromise, 'isLoggingIn, loginPromise')
       // 如果正在登录中，等待登录完成
       if (isLoggingIn && loginPromise) {
         return await loginPromise;
@@ -63,29 +65,11 @@ export const AuthManager = {
     // 直接调用登录接口，避免循环依赖
     async callLoginApi(code: string): Promise<{token: string, user?: any}> {
       return new Promise((resolve, reject) => {
-        Taro.request({
-          url: 'http://gmonkey.ai:8088/api/v1/user/login',
-          method: 'POST',
-          data: { code },
-          header: {
-            'Content-Type': 'application/json'
-          },
-          success: (res) => {
-            if (res.statusCode === 200) {
-              const data = res.data as any;
-              if (data.data || data.token) {
-                resolve(data.data || data);
-              } else {
-                reject(new Error(data.message || '登录失败'));
-              }
-            } else {
-              reject(new Error('网络请求失败'));
-            }
-          },
-          fail: (error) => {
-            reject(error);
-          }
-        });
+        api.user.login({ code }).then((res) => {
+          resolve(res)
+        }).catch((err) => {
+          reject(err)
+        })
       });
     },
 
@@ -126,10 +110,11 @@ export const AuthManager = {
 
         const res = await this.callLoginApi(loginRes.code);
         console.log("登录响应:", res);
+        console.log(res, 'res')
   
-        if (res.token) {
+        if (res.data.token) {
           // 保存登录信息到本地缓存
-          AuthManager.saveAuth(res.token, res.user);
+          AuthManager.saveAuth(res.data.token, res.data.user);
   
           Taro.showToast({
             title: "登录成功",
@@ -138,7 +123,7 @@ export const AuthManager = {
           });
   
           console.log("认证信息已保存:", AuthManager.getAuthInfo());
-          return res.token;
+          return res.data.token;
         } else {
           throw new Error('登录响应中没有token');
         }
