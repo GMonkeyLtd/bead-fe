@@ -57,7 +57,7 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
     setDays(dayList);
 
     // 计算当前时间对应的索引
-    const yearIndex = 0; // 当前年份在数组第一位
+    const yearIndex = yearList.findIndex(year => year === 2000); // 当前年份在数组第一位
     const monthIndex = currentMonth - 1; // 月份数组从1开始，索引需要-1
     const dayIndex = currentDay - 1; // 日期数组从1开始，索引需要-1
     const hourIndex = currentHour; // 小时数组从0开始，索引就是小时值
@@ -191,8 +191,8 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
         </View>
         <View className="button-container">
           <View className="button-row">
-            <CrystalButton onClick={handleQuickCustomize} text="快速定制" />
-            <CrystalButton onClick={handlePersonalizeCustomize} text="个性化定制" />
+            <CrystalButton onClick={handleQuickCustomize} text="一键定制" />
+            <CrystalButton onClick={handlePersonalizeCustomize} text="下一步" />
           </View>
         </View>
       </View>

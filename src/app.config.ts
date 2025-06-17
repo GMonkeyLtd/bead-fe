@@ -1,10 +1,10 @@
 export default defineAppConfig({
   pages: [
     'pages/home/index',
-    'pages/quick-design/index',
     'pages/result/index',
+    'pages/quick-design/index',
+    'pages/tabPage/index',
     'pages/design/index',
-    'pages/tabPage/index'
   ],
   window: {
     backgroundTextStyle: 'light',

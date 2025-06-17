@@ -18,7 +18,7 @@ export default defineConfig<"vite">(async (merge) => {
       828: 1.81 / 2,
     },
     sourceRoot: "src",
-    outputRoot: "dist",
+    outputRoot: process.env.OUTPUT_DIR || 'dist',
     plugins: [],
     defineConstants: {},
     alias: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Canvas, View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./index.scss";
@@ -32,7 +32,8 @@ import { calculateBeadArrangement } from "@/utils/cystal-tools";
 const CircleRing = ({
   size = 140, // Canvas尺寸
   backendSize = 160, // 珠子底座图像尺寸
-  dotsBgImagePath,
+  canvasImage,
+  dotsBgImageData,
   rotate = false,
   canvasId = "circle-canvas",
   onChange = (status: 'idle' | 'downloading' | 'success' | 'error', canvasImage: string) => {}
@@ -41,16 +42,13 @@ const CircleRing = ({
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
-  const [canvasImage, setCanvasImage] = useState<string>("");
-  const ringRadius = size / 2; // 从中心到珠子中心的距离
+  const ringRadius = size / 2;
+  const dotsBgImagePath = useMemo(() => dotsBgImageData.map((item: any) => item.image_url), [dotsBgImageData]);
+  console.log('canvasImage', canvasImage);
+  
 
-   // 绘制环绕的水晶珠子
+  const beads = calculateBeadArrangement(ringRadius, dotsBgImagePath.length);
 
-   const beads = calculateBeadArrangement(ringRadius, dotsBgImagePath.length);
-
-  useEffect(() => {
-    onChange(downloadStatus, canvasImage);
-  }, [canvasImage, downloadStatus]);
 
   // 处理图片路径（下载网络图片）
   useEffect(() => {
@@ -58,24 +56,19 @@ const CircleRing = ({
       setDownloadStatus("success");
       return;
     }
-
+    console.log('rerender dots');
     const processImages = async () => {
       setDownloadStatus("downloading");
       try {
-        // 使用ImageCacheManager处理图片路径
         const processedPaths = await ImageCacheManager.processImagePaths(
           dotsBgImagePath
         );
 
-        // 将处理后的路径映射回原始数组结构
         const finalImagePaths = dotsBgImagePath.map((originalPath: string) => {
           return processedPaths.get(originalPath) || originalPath;
         });
 
-        // 生成珠子位置数据
-        // const dotRingData = getDotRingData(finalImagePaths, ringRadius, size / 2, size / 2);
         setDots(finalImagePaths);
-
         setDownloadStatus("success");
       } catch (error) {
         console.error("❌ 图片处理过程出错:", error);
@@ -88,20 +81,12 @@ const CircleRing = ({
 
   // 绘制Canvas内容
   const drawCanvas = () => {
+
+    console.log('drawCanvas11111');
     try {
+      const dpr = Taro.getSystemInfoSync().pixelRatio
       const ctx = Taro.createCanvasContext(canvasId);
-
-      // 清除画布
       ctx.clearRect(0, 0, size, size);
-
-      // 绘制背景圆环轨道（可选）
-      // ctx.beginPath();
-      // ctx.arc(size / 2, size / 2, dotDistance, 0, 2 * Math.PI);
-      // ctx.setStrokeStyle('rgba(255, 255, 255, 0.2)');
-      // ctx.setLineWidth(2);
-      // ctx.stroke();
-
-     
 
       dots.forEach((dot: any, index) => {
         const { x, y, radius } = beads.beads[index];
@@ -109,11 +94,15 @@ const CircleRing = ({
       });
 
       ctx.draw(true, () => {
+        console.log('canvasToTempFilePath22222');
         Taro.canvasToTempFilePath({
           canvasId: canvasId,
+          destHeight: 1024 * dpr,
+          destWidth: 1024 * dpr,
+          quality: 1,
           success: (res) => {
-            setCanvasImage(res.tempFilePath);
-            console.log(res, "res 111111");
+            onChange('success', res.tempFilePath);
+            console.log('生成临时文件成功', res.tempFilePath);
           },
           fail: (err) => {
             console.error("生成临时文件失败:", err);
@@ -121,40 +110,36 @@ const CircleRing = ({
           },
         });
       });
-      console.log(`🎨 Canvas绘制完成，绘制了 ${dots.length} 个珠子`);
     } catch (error) {
-      // 兼容处理：如果Canvas API不可用，使用备用方案
       console.log("❌ Canvas API 不可用，使用备用方案", error);
     }
   };
 
   const drawPlaceHolder = () => {
     try {
-        const ctx = Taro.createCanvasContext(canvasId + 'placeholder');
-        ctx.clearRect(0, 0, size, size);
-        ctx.setFillStyle('rgba(232, 217, 187, 0.8)')
-        beads.beads.forEach(({ x, y, radius }: any) => {
-          ctx.beginPath() // 开始新路径
-          ctx.arc(x, y, radius, 0, 2 * Math.PI)
-          ctx.fill()
-        })
-        ctx.draw();
+      const ctx = Taro.createCanvasContext(canvasId + 'placeholder');
+      ctx.clearRect(0, 0, size, size);
+      ctx.setFillStyle('rgba(232, 217, 187, 0.8)');
+      beads.beads.forEach(({ x, y, radius }: any) => {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+      ctx.draw();
     } catch (error) {
       console.log("❌ Canvas API 不可用，使用备用方案", error);
     }
-  }
+  };
 
-  // 当数据更新时重新绘制
   useEffect(() => {
     if (dots.length > 0 && downloadStatus === "success") {
-      setTimeout(drawCanvas, 100); // 延迟绘制确保Canvas已准备好
+      console.log('drawCanvas33333');
+      setTimeout(drawCanvas, 100);
     } else {
-      drawPlaceHolder()
+      drawPlaceHolder();
     }
   }, [dots, downloadStatus]);
-  
 
-  // 处理画布点击事件
   return (
     <View
       style={{
@@ -176,28 +161,42 @@ const CircleRing = ({
           zIndex: 100,
         }}
       />
-      {/* 下载状态提示 */}
       {downloadStatus !== "success" && (
         <Canvas
           canvasId={canvasId + 'placeholder'}
-          style={{ width: `${size}px`, height: `${size}px`, zIndex: 101 }}
+          style={{ 
+            width: `${size}px`, 
+            height: `${size}px`, 
+            zIndex: 101,
+            transition: 'opacity 0.3s ease-in-out'
+          }}
         />
       )}
       
-      {downloadStatus === "success" && !canvasImage && (
+      {downloadStatus === "success" && (
         <Canvas
           canvasId={canvasId}
           className={rotate ? "circle-canvas-rotate" : ""}
-          style={{ width: `${size}px`, height: `${size}px`, zIndex: 102 }}
+          style={{ 
+            width: `${size}px`, 
+            height: `${size}px`, 
+            zIndex: 102,
+            transition: 'opacity 0.3s ease-in-out'
+          }}
         />
       )}
-      {canvasImage && (
+      {/* {canvasImage && (
         <Image
           src={canvasImage}
-          style={{ width: `${size}px`, height: `${size}px`, zIndex: 200 }}
+          style={{ 
+            width: `${size}px`, 
+            height: `${size}px`, 
+            zIndex: 200,
+            transition: 'opacity 0.3s ease-in-out'
+          }}
           className={rotate ? "circle-image-rotate" : ""}
         />
-      )}
+      )} */}
     </View>
   );
 };

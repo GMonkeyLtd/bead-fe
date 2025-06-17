@@ -1,360 +1,197 @@
 .result-container {
-  min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    #f8f6f3 0%,
-    #e8e4e0 50%,
-    #f0ece8 100%
-  );
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   position: relative;
-  overflow: hidden;
+  box-sizing: border-box;
+  height: 100vh;
+  width: 100vw;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+  padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
 
-  // 背景装饰
+  // background: linear-gradient(
+  //   180deg,
+  //   rgba(191, 170, 142, 0.5) 0%,
+  //   rgba(252, 245, 240, 0.8) 19.55%,
+  //   #fffcfa 100%
+  // ), var(--bg-image) center/cover;
+  // backdrop-filter: blur(48px);
+
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
-      radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
-      radial-gradient(circle at 80% 80%, rgba(180, 150, 119, 0.2) 1px, transparent 1px);
-    background-size: 40px 40px, 60px 60px;
-    pointer-events: none;
-    z-index: 0;
+
+    /* 背景图设置 */
+    background: var(--bg-image) center/cover;
+
+    /* 模糊效果 */
+    // backdrop-filter: blur(48px);
+
+    /* 确保模糊层在内容之下 */
+    z-index: -1;
   }
-}
 
-.result-header {
-  width: 100%;
-  text-align: center;
-  margin-bottom: 30px;
-  z-index: 1;
-  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-  .crystal-decoration {
-    padding: 20px 0;
-
-    .crystal-title {
-      display: block;
-      font-family: "HuXiaoBo-LangManSong", "SimSun", "宋体", serif;
-      font-size: 28px;
-      font-weight: 400;
-      color: #1f1722;
-      margin-bottom: 8px;
-      letter-spacing: 2px;
-      line-height: 1.2;
-    }
-
-    .crystal-subtitle {
-      display: block;
-      font-family: "Noto Sans SC", sans-serif;
-      font-size: 12px;
-      color: #B49677;
-      letter-spacing: 4px;
-      opacity: 0.8;
-      font-weight: 300;
-    }
-  }
-}
-
-.image-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-  z-index: 1;
-  position: relative;
-
-  .image-frame {
-    position: relative;
-    width: 280px;
-    height: 280px;
-    border-radius: 20px;
-    overflow: hidden;
     background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.9) 0%,
-      rgba(248, 246, 243, 0.8) 100%
+      180deg,
+      rgba(191, 170, 142, 0.3),
+      rgba(252, 245, 240, 0.6) 50%,
+      #FFFCFA 90%
     );
-    box-shadow: 
-      0 8px 32px rgba(31, 23, 34, 0.12),
-      0 2px 8px rgba(180, 150, 119, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-
-    .generated-image {
-      width: 100%;
-      height: 100%;
-      border-radius: 20px;
-    }
-
-    .image-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(
-        45deg,
-        rgba(248, 246, 243, 0.8) 0%,
-        rgba(232, 228, 224, 0.6) 100%
-      );
-
-      .placeholder-text {
-        color: #B49677;
-        font-size: 14px;
-        opacity: 0.7;
-      }
-    }
-
-    .frame-decoration {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-
-      .corner {
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        border: 2px solid rgba(180, 150, 119, 0.6);
-
-        &.corner-top-left {
-          top: 8px;
-          left: 8px;
-          border-right: none;
-          border-bottom: none;
-          border-top-left-radius: 8px;
-        }
-
-        &.corner-top-right {
-          top: 8px;
-          right: 8px;
-          border-left: none;
-          border-bottom: none;
-          border-top-right-radius: 8px;
-        }
-
-        &.corner-bottom-left {
-          bottom: 8px;
-          left: 8px;
-          border-right: none;
-          border-top: none;
-          border-bottom-left-radius: 8px;
-        }
-
-        &.corner-bottom-right {
-          bottom: 8px;
-          right: 8px;
-          border-left: none;
-          border-top: none;
-          border-bottom-right-radius: 8px;
-        }
-      }
-    }
+    backdrop-filter: blur(48px);
+    /* 确保渐变层在模糊背景之上，内容之下 */
+    z-index: -1;
   }
-}
 
-.result-description {
-  width: 100%;
-  max-width: 300px;
-  text-align: center;
-  margin-bottom: 40px;
-  z-index: 1;
-  position: relative;
-
-  .description-text {
-    font-family: "Noto Sans SC", sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #1f1722;
-    opacity: 0.8;
-    letter-spacing: 1px;
-  }
-}
-
-.action-buttons {
-  width: 100%;
-  max-width: 320px;
-  z-index: 1;
-  position: relative;
-
-  .button-row {
+  .result-content-container {
+    padding: 24px;
     display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  .action-btn {
     flex: 1;
-    height: 48px;
-    border-radius: 12px;
-    border: none;
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    flex-direction: column;
+    justify-content: space-between;
+    align-content: space-between;
 
-    &::after {
-      border: none;
+    .result-content-card {
+      width: 100%;
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      background: linear-gradient(white, white) padding-box,
+        linear-gradient(180deg, #aeaba836 0, #ffffffb8 75%, #ffffff52 100%)
+          border-box;
+      border: 4px solid transparent;
+      border-radius: 10px;
+
+      .result-content-card-image {
+        position: relative;
+        width: 100%;
+        height: 256px;
+        flex-shrink: 0;
+        border-radius: 6px 6px 0 0;
+        background: linear-gradient(180deg, #ffffff00 80%, #ffffff 100%),
+          var(--bg-image) center/cover;
+
+        .logo-image-container {
+          position: absolute;
+          top: 0;
+          right: 0;
+          border-radius: 0px 10px 0px 10px;
+          padding: 6px 11px;
+          background: linear-gradient(
+              0deg,
+              rgba(255, 255, 255, 0.6) 0%,
+              rgba(255, 255, 255, 0.6) 100%
+            ),
+            rgba(0, 0, 0, 0.07);
+
+          backdrop-filter: blur(2px);
+        }
+
+        .logo-image {
+          width: 48px;
+        }
+
+        .expend-image {
+          position: absolute;
+          width: 16px;
+          height: 16px;
+          bottom: 20px;
+          right: 20px;
+        }
+      }
+
+      .result-content-card-text-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-top: -36px;
+        padding-bottom: 24px;
+      }
+
+      .result-content-card-text {
+        position: relative;
+        width: 55%;
+        color: #1f1722;
+        padding: 0 24px;
+
+
+        .result-content-card-text-desc {
+          font-weight: 300;
+          font-size: 12px;
+          line-height: 135%;
+          margin-bottom: 4px;
+        }
+
+        .result-content-card-text-title {
+          font-weight: 400;
+          font-size: 40px;
+          letter-spacing: 2px;
+          margin-bottom: 24px;
+        }
+
+        .result-content-card-text-content {
+          font-size: 12px;
+
+        }
+      }
+    }
+    .bead-description-container {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 24px;
     }
 
-    .btn-text {
-      position: relative;
-      z-index: 2;
-    }
+    .bead-description-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
 
-    // 主要按钮样式
-    &.primary-btn {
-      background: linear-gradient(
-        135deg,
-        #B49677 0%,
-        #8B7355 100%
-      );
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(180, 150, 119, 0.3);
+      .bead-title {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 500;
+        gap: 4px;
+        margin-bottom: 4px;
+      }
 
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(180, 150, 119, 0.4);
+      .bead-description {
+        font-size: 11px;
+        font-weight: 300;
+        line-height: 100%;
       }
     }
 
-    // 次要按钮样式
-    &.secondary-btn {
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.9) 0%,
-        rgba(248, 246, 243, 0.8) 100%
-      );
-      color: #1f1722;
-      border: 1px solid rgba(180, 150, 119, 0.3);
-      box-shadow: 0 2px 8px rgba(31, 23, 34, 0.1);
+    .bead-share-rccode {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
 
-      &:hover {
-        transform: translateY(-1px);
-        border-color: rgba(180, 150, 119, 0.5);
-      }
-    }
-
-    // 保存按钮样式
-    &.save-btn {
-      background: linear-gradient(
-        135deg,
-        #6B73FF 0%,
-        #4F56C7 100%
-      );
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(107, 115, 255, 0.3);
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(107, 115, 255, 0.4);
-      }
-    }
-
-    // 分享按钮样式
-    &.share-btn {
-      background: linear-gradient(
-        135deg,
-        #FF6B9D 0%,
-        #C74F7E 100%
-      );
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(255, 107, 157, 0.4);
+      .bead-share-rccode-text {
+        font-size: 12px;
+        font-weight: 400;
       }
     }
   }
-}
-
-.result-footer {
-  margin-top: 40px;
-  display: flex;
-  justify-content: center;
-  z-index: 1;
-  position: relative;
-
-  .crystal-pattern {
+  .result-content-card-action {
+    padding: 24px;
     display: flex;
-    gap: 8px;
-    align-items: center;
-
-    .pattern-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: linear-gradient(
-        45deg,
-        #B49677 0%,
-        #8B7355 100%
-      );
-      opacity: 0.6;
-      animation: pulse 2s ease-in-out infinite;
-
-      &:nth-child(2) {
-        animation-delay: 0.2s;
-        transform: scale(1.2);
-      }
-
-      &:nth-child(3) {
-        animation-delay: 0.4s;
-      }
-    }
+    justify-content: space-between;
+    gap: 10px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
 }
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-}
-
-// 响应式适配
-@media (max-width: 375px) {
-  .result-container {
-    padding: 16px;
-  }
-
-  .image-container .image-frame {
-    width: 240px;
-    height: 240px;
-  }
-
-  .crystal-decoration .crystal-title {
-    font-size: 24px;
-  }
-
-  .action-buttons {
-    max-width: 280px;
-  }
-}
-
-// 字体降级方案
-@supports not (font-family: "HuXiaoBo-LangManSong") {
-  .crystal-title {
-    font-family: "STKaiti", "楷体", "KaiTi", serif !important;
-  }
-} 

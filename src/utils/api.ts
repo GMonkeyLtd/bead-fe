@@ -88,19 +88,19 @@ export const generateApi = {
   // 快速生成
   quickGenerate: (params: QuickGenerateParams) =>
     http.post<QuickGenerateResult>("/user/oneclick", params, {
-      skipAuth: true,
+      showLoading: false
     }),
   personalizedGenerate: (params: PersonalizedGenerateParams) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep1",
       params,
-      // { skipAuth: true }
+      { showLoading: false }
     ),
   personalizedGenerate2: (params: PersonalizedGenerate2Params) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep2",
       params,
-      // { skipAuth: true }
+      { showLoading: false }
     ),
 };
 

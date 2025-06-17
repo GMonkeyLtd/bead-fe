@@ -79,7 +79,6 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     // 监听键盘弹起
     const onKeyboardHeightChange = (res) => {
-      console.log(res.height, "height");
       setKeyboardVisible(res.height > 0);
       // 设置CSS变量
       document.documentElement.style.setProperty(
@@ -122,21 +121,21 @@ const ChatPage: React.FC = () => {
   const initGenerate = async (year, month, day, hour, gender) => {
     setIsLoading(true);
     try {
-      // const res: any = await api.generate.personalizedGenerate({
-      //   birth_year: parseInt(year || "0"),
-      //   birth_month: parseInt(month || "0"),
-      //   birth_day: parseInt(day || "0"),
-      //   birth_hour: parseInt(hour || "0"),
-      //   is_lunar: false,
-      //   // gender: parseInt(gender || "0"),
-      // });
-      const res = await new Promise((resolve) => {
-        setTimeout(() => {
-          Taro.hideLoading();
-          setIsLoading(false);
-          resolve(testData);
-        }, 2000);
+      const res: any = await api.generate.personalizedGenerate({
+        birth_year: parseInt(year || "0"),
+        birth_month: parseInt(month || "0"),
+        birth_day: parseInt(day || "0"),
+        birth_hour: parseInt(hour || "0"),
+        is_lunar: false,
+        // gender: parseInt(gender || "0"),
       });
+      // const res = await new Promise((resolve) => {
+      //   setTimeout(() => {
+      //     Taro.hideLoading();
+      //     setIsLoading(false);
+      //     resolve(testData);
+      //   }, 2000);
+      // });
       processResult(res);
     } catch (error) {
       Taro.showToast({
@@ -168,11 +167,6 @@ const ChatPage: React.FC = () => {
   // 发送消息
   const handleSend = async () => {
     if (isEmptyMessage(inputValue) || isLoading) return;
-
-    Taro.showLoading({
-      title: "设计中...",
-      mask: true,
-    });
     setIsLoading(true);
     setInputValue("");
     try {
@@ -223,7 +217,7 @@ const ChatPage: React.FC = () => {
   };
 
   const renderKeyboardHide = () => {
-    if (isLoading) {
+    if (isLoading || !beadImageData.length) {
       return (
         <View className="result-container">
           <SkeletonCard />
@@ -234,65 +228,69 @@ const ChatPage: React.FC = () => {
       <View className="result-container">
         <View className="result-title">当前方案</View>
         <View className="result-card">
-          {beadImageData.length > 0 ? (
-            <View className="result-content">
-              <View className="result-left">
-                <View className="result-text">
-                  <View className="result-text-title">{beadName}</View>
-                  <View className="result-text-content-container">
-                    {beadDescriptions.length > 0 &&
-                      beadDescriptions.map((item, index) => (
-                        <View className="result-text-content" key={index}>
-                          <Image
-                            src={item.image_url}
-                            style={{
-                              width: "15px",
-                              height: "15px",
-                              marginRight: "4px",
-                            }}
-                          />
-                          <View className="result-text-content-name">
-                            {item.name + ":"}
-                          </View>
-                          <View className="result-text-content-description">
-                            {item.description}
-                          </View>
+          <View className="result-content">
+            <View className="result-left">
+              <View className="result-text">
+                <View className="result-text-title">{beadName}</View>
+                <View className="result-text-content-container">
+                  {beadDescriptions.length > 0 &&
+                    beadDescriptions.map((item, index) => (
+                      <View className="result-text-content" key={index}>
+                        <Image
+                          src={item.image_url}
+                          style={{
+                            width: "15px",
+                            height: "15px",
+                            marginRight: "4px",
+                          }}
+                        />
+                        <View className="result-text-content-name">
+                          {item.name + ":"}
                         </View>
-                      ))}
-                  </View>
-                </View>
-                <View className="result-link ">
-                  <View
-                    className="crystal-gradient-text"
-                    onClick={() => {
-                      Taro.navigateTo({
-                        url:
-                          "/pages/result/index?imageUrl=" +
-                          encodeURIComponent(canvasImageUrl as string),
-                      });
-                    }}
-                  >
-                    发起定制派单
-                  </View>
-                  <Image
-                    src={arrowRight}
-                    style={{ width: "16px", height: "16px" }}
-                  />
+                        <View className="result-text-content-description">
+                          {item.description}
+                        </View>
+                      </View>
+                    ))}
                 </View>
               </View>
-              <View className="result-image">
-                <CircleRing
-                  dotsBgImagePath={beadImageData.map((item) => item.image_url)}
-                  size={140}
-                  backendSize={160}
-                  canvasId="circle-canvas-big"
-                  rotate={true}
+              <View className="result-link ">
+                <View
+                  className="crystal-gradient-text"
+                  onClick={() => {
+                    if (!canvasImageUrl) {
+                      return;
+                    }
+                    Taro.navigateTo({
+                      url:
+                        "/pages/result/index?imageUrl=" +
+                        encodeURIComponent(canvasImageUrl as string),
+                    });
+                  }}
+                  style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
+                >
+                  发起定制派单
+                </View>
+                <Image
+                  src={arrowRight}
+                  style={{ width: "16px", height: "16px" }}
                 />
               </View>
             </View>
-          ) : (
-            <View>定制中</View>
-          )}
+            <View className="result-image">
+              <CircleRing
+                canvasImage={canvasImageUrl}
+                dotsBgImageData={beadImageData}
+                size={140}
+                backendSize={160}
+                canvasId="circle-canvas-big"
+                rotate={true}
+                onChange={(status, canvasImage) => {
+                  setCanvasImageUrl(canvasImage);
+                }}
+              />
+            </View>
+          </View>
         </View>
       </View>
     );
@@ -306,7 +304,11 @@ const ChatPage: React.FC = () => {
             <View className="result-link ">
               <View
                 className="crystal-gradient-text"
+                style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
                 onClick={() => {
+                  if (!canvasImageUrl) {
+                    return;
+                  }
                   Taro.navigateTo({
                     url:
                       "/pages/result/index?imageUrl=" +
@@ -322,7 +324,7 @@ const ChatPage: React.FC = () => {
               />
             </View>
             <CircleRing
-              dotsBgImagePath={beadImageData.map((item) => item.image_url)}
+              dotsBgImageData={beadImageData}
               size={60}
               backendSize={70}
               canvasId="circle-canvas-small"
@@ -336,7 +338,7 @@ const ChatPage: React.FC = () => {
     );
   };
 
-  // console.log(messages, messageIndex, "messages");
+  console.log(canvasImageUrl, "canvasImageUrl");
 
   return (
     <View
@@ -395,14 +397,14 @@ const ChatPage: React.FC = () => {
             onFocus={() => {
               setKeyboardVisible(true);
             }}
-            // onBlur={() => {
-            //   setKeyboardVisible(false);
-            // }}
+            onBlur={() => {
+              setKeyboardVisible(false);
+            }}
             showConfirmBar={false}
           />
           <IconButton
             icon={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
-            size={20}
+            size={32}
             color=""
             disabled={isEmptyMessage(inputValue) || isLoading}
             loading={isLoading}
