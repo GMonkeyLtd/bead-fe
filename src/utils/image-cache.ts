@@ -84,7 +84,7 @@ export class ImageCacheManager {
     });
 
     await Promise.allSettled(downloadPromises);
-    console.log(`📊 批量下载完成: 成功 ${results.size}/${urls.length} 张图片`);
+    // console.log(`📊 批量下载完成: 成功 ${results.size}/${urls.length} 张图片`);
     return results;
   }
 

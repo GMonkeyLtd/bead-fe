@@ -23,7 +23,6 @@
 
 .drawer-header {
   display: flex;
-  justify-content: center;
   align-items: center;
   padding: 20px 24px;
 }
@@ -58,7 +57,7 @@
 }
 
 .picker-container {
-  padding: 20px 24px;
+  padding: 10px 24px;
 }
 .picker-title {
   font-size: 14px;
@@ -146,7 +145,7 @@
 }
 
 .button-container {
-  padding: 0 24px 20px 24px;
+  padding: 16px 24px 20px 24px;
 }
 
 .button-row {
@@ -173,15 +172,17 @@
   font-weight: 400;
   color: #514b46;
 }
-
 .gender-container {
   padding: 0 24px 10px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .gender-title {
   font-size: 14px;
   color: #1f1722;
-  font-weight: 350;
+  font-weight: 300;
   margin-bottom: 10px;
 }
 
@@ -265,3 +266,4 @@
 .gender-switch.male-selected .gender-slider {
   transform: translateX(78px);
 }
+

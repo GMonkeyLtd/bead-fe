@@ -38,7 +38,7 @@ body,
   display: flex;
   flex-direction: column;
   background: linear-gradient(#f5f1edb2, #f5f1edb2),
-    url(./assets/bc-image.png) repeat;
+    url(https://zhuluoji.cn-sh2.ufileos.com/images-frontend/background-texture.png) repeat;
 
   // 确保容器不会溢出
   max-height: 100vh;
@@ -47,7 +47,6 @@ body,
 
   &.keyboard-visible {
     height: calc(100vh - var(--keyboard-height));
-    min-height: auto;
     padding-bottom: 0;
   }
   

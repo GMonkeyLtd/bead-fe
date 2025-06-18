@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Canvas, View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./index.scss";
-import { getDotRingData } from "@/utils/cystal-tools";
 import { ImageCacheManager } from "@/utils/image-cache";
-import base from "@/assets/base.png";
 import { calculateBeadArrangement } from "@/utils/cystal-tools";
+import { BASE_IMAGE_URL } from "@/config";
 /**
  * 水晶手链组件 - 动态计算珠子数量
  *
@@ -29,26 +28,30 @@ import { calculateBeadArrangement } from "@/utils/cystal-tools";
  * <CircleComponent />
  * ```
  */
+
 const CircleRing = ({
-  size = 140, // Canvas尺寸
-  backendSize = 160, // 珠子底座图像尺寸
-  canvasImage,
+  targetSize = 1024, // 保存图片的尺寸
   dotsBgImageData,
-  rotate = false,
   canvasId = "circle-canvas",
-  onChange = (status: 'idle' | 'downloading' | 'success' | 'error', canvasImage: string) => {}
+  showCanvas = false,
+  onChange = (
+    status: "idle" | "downloading" | "success" | "error",
+    canvasImage: string
+  ) => {},
 }) => {
   const [dots, setDots] = useState<any[]>([]);
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
-  const ringRadius = size / 2;
-  const dotsBgImagePath = useMemo(() => dotsBgImageData.map((item: any) => item.image_url), [dotsBgImageData]);
-  console.log('canvasImage', canvasImage);
-  
+  const ringRadius = targetSize / 2;
+  const dpr = Taro.getSystemInfoSync().pixelRatio;
+
+  const dotsBgImagePath = useMemo(
+    () => dotsBgImageData.map((item: any) => item.image_url),
+    [dotsBgImageData]
+  );
 
   const beads = calculateBeadArrangement(ringRadius, dotsBgImagePath.length);
-
 
   // 处理图片路径（下载网络图片）
   useEffect(() => {
@@ -56,7 +59,8 @@ const CircleRing = ({
       setDownloadStatus("success");
       return;
     }
-    console.log('rerender dots');
+    console.log("rerender dots");
+
     const processImages = async () => {
       setDownloadStatus("downloading");
       try {
@@ -80,13 +84,11 @@ const CircleRing = ({
   }, [dotsBgImagePath, ringRadius]);
 
   // 绘制Canvas内容
-  const drawCanvas = () => {
-
-    console.log('drawCanvas11111');
+  const drawCanvas = async() => {
     try {
-      const dpr = Taro.getSystemInfoSync().pixelRatio
+     
       const ctx = Taro.createCanvasContext(canvasId);
-      ctx.clearRect(0, 0, size, size);
+      ctx.clearRect(0, 0, targetSize, targetSize);
 
       dots.forEach((dot: any, index) => {
         const { x, y, radius } = beads.beads[index];
@@ -94,15 +96,16 @@ const CircleRing = ({
       });
 
       ctx.draw(true, () => {
-        console.log('canvasToTempFilePath22222');
         Taro.canvasToTempFilePath({
+          x: 0,
+          y: 0,
           canvasId: canvasId,
-          destHeight: 1024 * dpr,
-          destWidth: 1024 * dpr,
+          destHeight: targetSize * dpr,
+          destWidth: targetSize * dpr,
           quality: 1,
           success: (res) => {
-            onChange('success', res.tempFilePath);
-            console.log('生成临时文件成功', res.tempFilePath);
+            onChange("success", res.tempFilePath);
+            console.log("生成临时文件成功", res.tempFilePath);
           },
           fail: (err) => {
             console.error("生成临时文件失败:", err);
@@ -117,9 +120,9 @@ const CircleRing = ({
 
   const drawPlaceHolder = () => {
     try {
-      const ctx = Taro.createCanvasContext(canvasId + 'placeholder');
-      ctx.clearRect(0, 0, size, size);
-      ctx.setFillStyle('rgba(232, 217, 187, 0.8)');
+      const ctx = Taro.createCanvasContext(canvasId + "placeholder");
+      ctx.clearRect(0, 0, targetSize, targetSize);
+      ctx.setFillStyle("rgba(232, 217, 187, 0.8)");
       beads.beads.forEach(({ x, y, radius }: any) => {
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
@@ -133,13 +136,45 @@ const CircleRing = ({
 
   useEffect(() => {
     if (dots.length > 0 && downloadStatus === "success") {
-      console.log('drawCanvas33333');
       setTimeout(drawCanvas, 100);
     } else {
       drawPlaceHolder();
     }
   }, [dots, downloadStatus]);
 
+  if (downloadStatus === "success") {
+    return (
+      <Canvas
+          canvasId={canvasId}
+          id={canvasId}
+          height={`${targetSize * dpr}px`}
+          width={`${targetSize * dpr}px`}
+          // className={rotate ? "circle-canvas-rotate" : ""}
+          style={{
+            width: `${targetSize}px`,
+            height: `${targetSize}px`,
+            visibility: showCanvas ? "visible" : "hidden",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            zIndex: -100,
+            transition: "display 0.3s ease-in-out",
+          }}
+        />
+    )
+  }
+  return null;
+};
+
+export default React.memo(CircleRing);
+
+export const CircleRingImage = ({
+  size = 140, // Canvas尺寸
+  backendSize = 160, // 珠子底座图像尺寸
+  imageUrl,
+  backgroundImage = BASE_IMAGE_URL,
+  rotate = false,
+}) => {
   return (
     <View
       style={{
@@ -153,52 +188,23 @@ const CircleRing = ({
       }}
     >
       <Image
-        src={base}
+        src={backgroundImage}
         style={{
           width: `${backendSize}px`,
           height: `${backendSize}px`,
           position: "absolute",
-          zIndex: 100,
         }}
       />
-      {downloadStatus !== "success" && (
-        <Canvas
-          canvasId={canvasId + 'placeholder'}
-          style={{ 
-            width: `${size}px`, 
-            height: `${size}px`, 
-            zIndex: 101,
-            transition: 'opacity 0.3s ease-in-out'
-          }}
-        />
-      )}
-      
-      {downloadStatus === "success" && (
-        <Canvas
-          canvasId={canvasId}
-          className={rotate ? "circle-canvas-rotate" : ""}
-          style={{ 
-            width: `${size}px`, 
-            height: `${size}px`, 
-            zIndex: 102,
-            transition: 'opacity 0.3s ease-in-out'
-          }}
-        />
-      )}
-      {/* {canvasImage && (
-        <Image
-          src={canvasImage}
-          style={{ 
-            width: `${size}px`, 
-            height: `${size}px`, 
-            zIndex: 200,
-            transition: 'opacity 0.3s ease-in-out'
-          }}
-          className={rotate ? "circle-image-rotate" : ""}
-        />
-      )} */}
+      <Image
+        src={imageUrl}
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          position: "absolute",
+          transition: "opacity 0.3s ease-in-out",
+        }}
+        className={rotate ? "circle-image-rotate" : ""}
+      />
     </View>
-  );
-};
-
-export default React.memo(CircleRing);
+  )
+}

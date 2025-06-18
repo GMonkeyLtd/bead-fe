@@ -4,56 +4,43 @@ import Taro from "@tarojs/taro";
 import "./index.scss";
 import AppHeader from "@/components/AppHeader";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
-import logoImage from "@/assets/icons/logo.svg";
+import logoSvg from "@/assets/icons/logo.svg";
 import expendImage from "@/assets/icons/expend.svg";
 import CrystalButton from "@/components/CrystalButton";
-import rcodeImage from "@/assets/rcode.png"
+import { QR_CODE_IMAGE_URL } from "@/config";
+import { useDesign } from "@/store/DesignContext";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const { top: navBarTop } = getNavBarHeightAndTop();
-
-  const [beadDescriptions, setBeadDescriptions] = useState([
-    {
-      image_url:
-        "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
-      name: "绿松石",
-      description: "一段话描",
-    },
-    {
-      image_url:
-        "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-      name: "蓝水晶",
-      description: "量和祝福。",
-    },
-  ]);
+  const [braceletName, setBraceletName] = useState("");
+  const [braceletDescription, setBraceletDescription] = useState("");
+  const { designData } = useDesign();
+  console.log(designData, "designData");
+  const [beadDescriptions, setBeadDescriptions] = useState([]);
 
   useEffect(() => {
     // 获取传入的图片URL参数
     const instance = Taro.getCurrentInstance();
     const params = instance.router?.params;
-    console.log(params, "params");
-    if (params?.imageUrl) {
-      const decodedUrl = decodeURIComponent(params.imageUrl);
-      setImageUrl(decodedUrl);
-      document.documentElement.style.setProperty(
-        "--bg-image",
-        `url(${decodedUrl})`
-      );
-      console.log(decodedUrl, "decodedUrl");
-    } else {
-      document.documentElement.style.setProperty(
-        "--background-image",
-        `url(https://crystal-ring.cn-sh2.ufileos.com/ring.png)`
-      );
-      setImageUrl("https://crystal-ring.cn-sh2.ufileos.com/ring.png");
-    }
-
-    // 设置导航栏标题
-    Taro.setNavigationBarTitle({
-      title: "生成结果",
-    });
+    if (params?.designId) {
+      const result = designData.find((item: any) => item.design_id === params.designId);
+      const { images_url, bracelet_name, recommendation_text, bead_ids_deduplication } = result;
+      console.log(images_url[0],decodeURIComponent(images_url[0]), "images_url");
+      setImageUrl(images_url[0]);
+      setBraceletName(bracelet_name);
+      setBraceletDescription(recommendation_text);
+      setBeadDescriptions(bead_ids_deduplication);
+    } 
+    // if (params?.imageUrl) {
+    //   console.log(params.imageUrl, decodeURIComponent(params.imageUrl), "params.imageUrl");
+    //   document.documentElement.style.setProperty(
+    //     "--background-image",
+    //     `url(${decodeURIComponent(params.imageUrl)})`
+    //   );
+    //   setImageUrl(decodeURIComponent(params.imageUrl));
+    // }
   }, []);
 
   // 保存图片到相册
@@ -135,19 +122,17 @@ const Result = () => {
       <View className="result-content-container">
         <View className="result-content-card">
           <View className="result-content-card-image" onClick={viewImage}>
+            {/* <Image mode="widthFix" src={imageUrl} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} /> */}
             <View className="logo-image-container" onClick={viewImage}>
-              <Image className="logo-image" src={logoImage} mode="widthFix" />
+              <Image className="logo-image" src={logoSvg} mode="widthFix" />
             </View>
             <Image className="expend-image" src={expendImage} mode="widthFix" />
           </View>
           <View className="result-content-card-text-container">
             <View className="result-content-card-text">
-              <View className="result-content-card-text-desc">
-                财如泉涌 生生不息
-              </View>
-              <View className="result-content-card-text-title">夏日睡莲</View>
+              <View className="result-content-card-text-title">{braceletName}</View>
               <View className="result-content-card-text-content">
-                一段话描述这款手串的，一段话描述这款手串的整体能量和祝福。
+                {braceletDescription}
               </View>
             </View>
             <View className="bead-description-container">
@@ -171,7 +156,7 @@ const Result = () => {
                   ))}
               </View>
               <View className="bead-share-rccode">
-                <Image src={rcodeImage} mode="widthFix" style={{ width: '62px', height: '62px'}} />
+                <Image src={QR_CODE_IMAGE_URL} mode="widthFix" style={{ width: '62px', height: '62px'}} />
                 <View className="bead-share-rccode-text">开启专属定制</View>
               </View>
             </View>
@@ -180,7 +165,7 @@ const Result = () => {
       </View>
       <View className="result-content-card-action">
         <CrystalButton onClick={saveImage} text="保存图片" />
-        <CrystalButton onClick={shareImage} text="分享好友" />
+        <CrystalButton onClick={shareImage} text="分享好友" style={{ flex: 1 }} />
       </View>
     </View>
   );

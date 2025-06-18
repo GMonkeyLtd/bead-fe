@@ -1,6 +1,5 @@
 import {
   View,
-  Button,
   Text,
   Swiper,
   SwiperItem,
@@ -12,12 +11,10 @@ import "./index.scss";
 import { SWIPER_DATA } from "@/config/home-content";
 import RightArrow from "@/assets/icons/right-arrow.svg";
 import DateTimeDrawer from "@/components/DateTimeDrawer";
-import { generateApi } from "@/utils/api";
 import CrystalButton from "@/components/CrystalButton";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     // 隐藏底部导航栏
@@ -48,12 +45,14 @@ const Home = () => {
     day,
     hour,
     gender,
+    isLunar
   }: {
     year: number;
     month: number;
     day: number;
     hour: number;
     gender: number;
+    isLunar: boolean;
   }) => {
 
       Taro.navigateTo({
@@ -67,7 +66,9 @@ const Home = () => {
           "&hour=" +
           hour +
           "&gender=" +
-          gender,
+          gender +
+          "&isLunar=" +
+          isLunar,
       });
   };
 
@@ -77,12 +78,14 @@ const Home = () => {
     day,
     hour,
     gender,
+    isLunar
   }: {
     year: number;
     month: number;
     day: number;
     hour: number;
     gender: string;
+    isLunar: boolean;
   }) => {
     Taro.navigateTo({
       url:
@@ -96,6 +99,7 @@ const Home = () => {
         hour +
         "&gender=" +
         gender,
+        isLunar: isLunar
     });
   };
 

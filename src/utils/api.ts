@@ -38,6 +38,10 @@ export interface PersonalizedGenerateParams extends BaziParams {}
 
 export interface QuickGenerateParams extends BaziParams {}
 
+export interface QuickGenerateByImageParams {
+  image_base64: string[];
+}
+
 export interface PersonalizedGenerateResult {
   id: string;
   name: string;
@@ -102,6 +106,10 @@ export const generateApi = {
       params,
       { showLoading: false }
     ),
+  personalizedGenerateByImage: (params: QuickGenerateByImageParams) =>
+    http.post<QuickGenerateResult>("/user/personalizationstep3", params, {
+      showLoading: false
+    }),
 };
 
 // 文件相关API

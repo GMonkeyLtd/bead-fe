@@ -17,8 +17,8 @@
  *    - 图片大小不超过10MB
  */
 
-import React, { useState, useRef, useEffect } from "react";
-import { View, Text, Textarea } from "@tarojs/components";
+import React, { useState, useEffect } from "react";
+import { View, Textarea } from "@tarojs/components";
 import { isEmptyMessage } from "../../utils/messageFormatter";
 import "./index.scss";
 import Taro from "@tarojs/taro";
@@ -27,19 +27,15 @@ import { Image } from "@tarojs/components";
 import sendSvg from "@/assets/icons/send.svg";
 import activeSendSvg from "@/assets/icons/active-send.svg";
 import api, { PersonalizedGenerateResult } from "@/utils/api";
-import CircleRing, { CircleRingWithBacked } from "@/components/CircleRing";
+import CircleRing, { CircleRingImage } from "@/components/CircleRing";
 import TagList from "@/components/TagList";
-import assistant from "@/assets/assistant.png";
-import { getSafeArea } from "@/utils/style-tools";
 import lastChat from "@/assets/icons/last-chat.svg";
 import forwardChat from "@/assets/icons/forward-chat.svg";
 import ChatCardList from "@/components/ChatCardList";
 import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 import arrowRight from "@/assets/icons/right-arrow.svg";
 import AppHeader from "@/components/AppHeader";
-import { useCircleRing } from "@/hooks/useCircleRing";
-import testData from "./test.json";
-import assistantSmall from "@/assets/assistant-small.png";
+import { ASSISTANT_SM_IMAGE_URL, ASSISTANT_LG_IMAGE_URL } from "@/config";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -62,6 +58,7 @@ const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<string[]>([]);
   const [beadName, setBeadName] = useState<string>("");
   const [canvasImageUrl, setCanvasImageUrl] = useState<string>("");
+  const [canvasImageStatus, setCanvasImageStatus] = useState<"idle" | "downloading" | "success" | "error">("idle");
   const [beadDescriptions, setBeadDescriptions] = useState<
     { image_url: string; description: string }[]
   >([]);
@@ -73,18 +70,18 @@ const ChatPage: React.FC = () => {
   const [messageIndex, setMessageIndex] = useState(0);
 
   const params = Taro.getCurrentInstance()?.router?.params;
-  const { year, month, day, hour, gender } = params || {};
+  const { year, month, day, hour, gender, isLunar } = params || {};
 
   // 键盘适配逻辑
   useEffect(() => {
     // 监听键盘弹起
     const onKeyboardHeightChange = (res) => {
-      setKeyboardVisible(res.height > 0);
       // 设置CSS变量
       document.documentElement.style.setProperty(
         "--keyboard-height",
         `${res.height}px`
       );
+      setKeyboardVisible(res.height > 0);
     };
 
     // 小程序键盘事件监听
@@ -118,7 +115,7 @@ const ChatPage: React.FC = () => {
     setMessages((prev) => [...prev, resData.recommendation_text]);
   };
 
-  const initGenerate = async (year, month, day, hour, gender) => {
+  const initGenerate = async (year, month, day, hour, gender, isLunar: boolean) => {
     setIsLoading(true);
     try {
       const res: any = await api.generate.personalizedGenerate({
@@ -126,10 +123,10 @@ const ChatPage: React.FC = () => {
         birth_month: parseInt(month || "0"),
         birth_day: parseInt(day || "0"),
         birth_hour: parseInt(hour || "0"),
-        is_lunar: false,
+        is_lunar: isLunar,
         // gender: parseInt(gender || "0"),
       });
-      // const res = await new Promise((resolve) => {
+      //  const res = await new Promise((resolve) => {
       //   setTimeout(() => {
       //     Taro.hideLoading();
       //     setIsLoading(false);
@@ -149,7 +146,7 @@ const ChatPage: React.FC = () => {
   };
 
   useEffect(() => {
-    initGenerate(year, month, day, hour, gender);
+    initGenerate(year, month, day, hour, gender, isLunar === "true" ? true : false);
 
     // 检查图片URL
 
@@ -217,7 +214,7 @@ const ChatPage: React.FC = () => {
   };
 
   const renderKeyboardHide = () => {
-    if (isLoading || !beadImageData.length) {
+    if (isLoading || !beadImageData.length || !canvasImageUrl) {
       return (
         <View className="result-container">
           <SkeletonCard />
@@ -261,9 +258,14 @@ const ChatPage: React.FC = () => {
                     if (!canvasImageUrl) {
                       return;
                     }
+                    // Taro.navigateTo({
+                    //   url:
+                    //     "/pages/result/index?imageUrl=" +
+                    //     encodeURIComponent(canvasImageUrl as string),
+                    // });
                     Taro.navigateTo({
                       url:
-                        "/pages/result/index?imageUrl=" +
+                        "/pages/quick-design/index?imageUrl=" +
                         encodeURIComponent(canvasImageUrl as string),
                     });
                   }}
@@ -278,16 +280,11 @@ const ChatPage: React.FC = () => {
               </View>
             </View>
             <View className="result-image">
-              <CircleRing
-                canvasImage={canvasImageUrl}
-                dotsBgImageData={beadImageData}
+              <CircleRingImage
                 size={140}
                 backendSize={160}
-                canvasId="circle-canvas-big"
+                imageUrl={canvasImageUrl}
                 rotate={true}
-                onChange={(status, canvasImage) => {
-                  setCanvasImageUrl(canvasImage);
-                }}
               />
             </View>
           </View>
@@ -295,6 +292,7 @@ const ChatPage: React.FC = () => {
       </View>
     );
   };
+  console.log(canvasImageUrl, 'canvasImageUrl')
 
   const renderKeyboardShow = () => {
     return (
@@ -323,22 +321,16 @@ const ChatPage: React.FC = () => {
                 style={{ width: "16px", height: "16px" }}
               />
             </View>
-            <CircleRing
-              dotsBgImageData={beadImageData}
-              size={60}
-              backendSize={70}
-              canvasId="circle-canvas-small"
-              onChange={(status, canvasImage) => {
-                setCanvasImageUrl(canvasImage);
-              }}
-            />
+            <CircleRingImage
+                size={60}
+                backendSize={70}
+                imageUrl={canvasImageUrl}
+              />
           </View>
         </View>
       </View>
     );
   };
-
-  console.log(canvasImageUrl, "canvasImageUrl");
 
   return (
     <View
@@ -351,7 +343,7 @@ const ChatPage: React.FC = () => {
       <View className={`assistant-container ${keyboardVisible ? "small" : ""}`}>
         {/* 消息列表 */}
         <Image
-          src={keyboardVisible ? assistantSmall : assistant}
+          src={keyboardVisible ? ASSISTANT_SM_IMAGE_URL : ASSISTANT_LG_IMAGE_URL}
           className="assistant-image"
         />
 
@@ -393,7 +385,8 @@ const ChatPage: React.FC = () => {
             onInput={(e) => setInputValue(e.detail.value)}
             onConfirm={handleSend}
             autoHeight
-            // adjustKeyboardTo="bottom"
+            adjustPosition={false}
+            adjustKeyboardTo="bottom"
             onFocus={() => {
               setKeyboardVisible(true);
             }}
@@ -411,6 +404,16 @@ const ChatPage: React.FC = () => {
             onClick={handleSend}
           />
         </View>
+        {/* 用于拼接珠串图片的隐藏Canvas */}
+        <CircleRing
+          dotsBgImageData={beadImageData}
+          targetSize={1024}
+          canvasId="circle-ring-canvas"
+          onChange={(status, canvasImage) => {
+            setCanvasImageUrl(canvasImage);
+            setCanvasImageStatus(status);
+          }}
+        />
       </View>
     </View>
   );

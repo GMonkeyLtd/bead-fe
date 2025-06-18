@@ -56,6 +56,9 @@ importers:
       '@tarojs/taro':
         specifier: 4.1.2
         version: 4.1.2(@tarojs/components@4.1.2(@tarojs/helper@4.1.2)(@types/react@18.3.23)(postcss@8.5.4)(react@18.3.1)(rollup@3.29.5))(@tarojs/helper@4.1.2)(@tarojs/shared@4.1.2)(@types/react@18.3.23)(postcss@8.5.4)(rollup@3.29.5)
+      lunar-typescript:
+        specifier: ^1.8.0
+        version: 1.8.0
       react:
         specifier: ^18.0.0
         version: 18.3.1
@@ -3382,6 +3385,9 @@ packages:
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
+
+  lunar-typescript@1.8.0:
+    resolution: {integrity: sha512-hz6JtkC30sd1MrdQ9QEPLrJ+ILlRVLZNWDyZUcU3p8VaYOKRqPoICwsrplM6BVAPRwwf360EFe+PukA+i8LmAw==}
 
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
@@ -8320,6 +8326,8 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  lunar-typescript@1.8.0: {}
 
   magic-string@0.30.17:
     dependencies:

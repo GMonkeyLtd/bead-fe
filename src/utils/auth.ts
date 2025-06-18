@@ -116,12 +116,6 @@ export const AuthManager = {
           // 保存登录信息到本地缓存
           AuthManager.saveAuth(res.data.token, res.data.user);
   
-          Taro.showToast({
-            title: "登录成功",
-            icon: "success",
-            duration: 1500
-          });
-  
           console.log("认证信息已保存:", AuthManager.getAuthInfo());
           return res.data.token;
         } else {

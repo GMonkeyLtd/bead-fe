@@ -1,7 +1,25 @@
 import type { UserConfigExport } from "@tarojs/cli"
 
 export default {
-  mini: {},
+  mini: {
+    webpackChain(chain) {
+      chain.optimization.minimize(true);
+      chain.plugin('terser').use(require('terser-webpack-plugin'), [{
+        terserOptions: {
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+            pure_funcs: ['console.log', 'console.debug']
+          }
+        }
+      }]);
+    },
+    commonChunks: ['runtime', 'vendors', 'taro', 'common'],
+    // optimizeMainPackage: {
+    //   enable: true,
+    //   exclude: ['pages/result/index', 'pages/design/index']
+    // }
+  },
   h5: {
     /**
      * WebpackChain 插件配置

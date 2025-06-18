@@ -1,6 +1,7 @@
 import { View, Text, PickerView, PickerViewColumn } from "@tarojs/components";
 import { useState, useEffect } from "react";
 import { CommonEventFunction } from "@tarojs/components/types/common";
+import { Lunar, Solar } from "lunar-typescript";
 import "./index.scss";
 import CrystalButton from "../CrystalButton";
 
@@ -17,13 +18,22 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
   const [days, setDays] = useState<number[]>([]);
   const [hours, setHours] = useState<number[]>([]);
   const [gender, setGender] = useState<string>('女');
-  
+  const [dateType, setDateType] = useState<string>('公历');
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([0, 0, 0, 0]);
+
+  // 农历月份名称
+  const lunarMonths = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月'];
+  // 农历日期名称
+  const lunarDays = [
+    '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+    '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+    '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'
+  ];
 
   useEffect(() => {
     const now = new Date();
     const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1; // getMonth() 返回 0-11，需要 +1
+    const currentMonth = now.getMonth() + 1;
     const currentDay = now.getDate();
     const currentHour = now.getHours();
 
@@ -57,81 +67,135 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
     setDays(dayList);
 
     // 计算当前时间对应的索引
-    const yearIndex = yearList.findIndex(year => year === 2000); // 当前年份在数组第一位
-    const monthIndex = currentMonth - 1; // 月份数组从1开始，索引需要-1
-    const dayIndex = currentDay - 1; // 日期数组从1开始，索引需要-1
-    const hourIndex = currentHour; // 小时数组从0开始，索引就是小时值
+    const yearIndex = yearList.findIndex(year => year === 2000);
+    const monthIndex = currentMonth - 1;
+    const dayIndex = currentDay - 1;
+    const hourIndex = currentHour;
 
-    // 设置初始选中的索引为当前时间
     setSelectedIndexes([yearIndex, monthIndex, dayIndex, hourIndex]);
   }, []);
 
   const updateDays = (year: number, month: number) => {
-    const daysInMonth = new Date(year, month, 0).getDate();
+    if (dateType === '公历') {
+      const daysInMonth = new Date(year, month, 0).getDate();
       const dayList: number[] = [];
-    for (let i = 1; i <= daysInMonth; i++) {
-      dayList.push(i);
+      for (let i = 1; i <= daysInMonth; i++) {
+        dayList.push(i);
+      }
+      setDays(dayList);
+    } else {
+      // 农历月份的天数
+      const lunar = Lunar.fromYmd(year, month, 1);
+      const daysInLunarMonth = lunar.getDayCount();
+      const dayList: number[] = [];
+      for (let i = 1; i <= daysInLunarMonth; i++) {
+        dayList.push(i);
+      }
+      setDays(dayList);
     }
-    setDays(dayList);
   };
 
   const handlePickerChange: CommonEventFunction = (e) => {
     const { value } = e.detail;
     const newIndexes = [...value];
     
-    // 检查年份或月份是否改变
-    if (newIndexes[0] !== selectedIndexes[0] || newIndexes[1] !== selectedIndexes[1]) {
-      const year = years[newIndexes[0]];
-      const month = months[newIndexes[1]];
+    const year = years[newIndexes[0]];
+    const month = months[newIndexes[1]];
 
-      // 先计算新月份的天数
-      const daysInMonth = new Date(year, month, 0).getDate();
-      const newDayList: number[] = [];
-      for (let i = 1; i <= daysInMonth; i++) {
-        newDayList.push(i);
-      }
+    if (newIndexes[0] !== selectedIndexes[0] || newIndexes[1] !== selectedIndexes[1]) {
+      updateDays(year, month);
       
-      // 如果当前选择的日期超出了新月份的天数，重置为最后一天
-      if (newIndexes[2] >= daysInMonth) {
-        newIndexes[2] = daysInMonth - 1;
+      if (newIndexes[2] >= days.length) {
+        newIndexes[2] = days.length - 1;
       }
-      
-      // 更新日期列表
-      setDays(newDayList);
     }
     
     setSelectedIndexes(newIndexes);
   };
 
-  
-  const handleQuickCustomize = () => {
-    const selectedDateTime = {
-      year: years[selectedIndexes[0]],
-      month: months[selectedIndexes[1]],
-      day: days[selectedIndexes[2]],
-      hour: hours[selectedIndexes[3]],
-      gender: gender === '男' ? 1 : 0
-    };
-    onQuickCustomize?.(selectedDateTime);
-    // onClose();
+  const handleDateTypeToggle = () => {
+    const newDateType = dateType === '公历' ? '农历' : '公历';
+    setDateType(newDateType);
 
-  };
+    // 在切换日期类型时转换日期
+    const year = years[selectedIndexes[0]];
+    const month = months[selectedIndexes[1]];
+    const day = days[selectedIndexes[2]];
 
-  const handlePersonalizeCustomize = () => {
-    const selectedDateTime = {
-      year: years[selectedIndexes[0]],
-      month: months[selectedIndexes[1]],
-      day: days[selectedIndexes[2]],
-      hour: hours[selectedIndexes[3]],
-      gender: gender
-    };
-    onPersonalizeCustomize?.(selectedDateTime);
-    // onClose();
-
+    if (newDateType === '农历') {
+      // 从公历转农历
+      const solar = Solar.fromYmd(year, month, day);
+      const lunar = solar.getLunar();
+      
+      const yearIndex = years.findIndex(y => y === lunar.getYear());
+      const monthIndex = lunar.getMonth();
+      const dayIndex = lunar.getDay();
+      
+      setSelectedIndexes([yearIndex, monthIndex, dayIndex, selectedIndexes[3]]);
+      updateDays(lunar.getYear(), lunar.getMonth());
+    } else {
+      // 从农历转公历
+      const lunar = Lunar.fromYmd(year, month, day);
+      const solar = lunar.getSolar();
+      
+      const yearIndex = years.findIndex(y => y === solar.getYear());
+      const monthIndex = solar.getMonth() - 1;
+      const dayIndex = solar.getDay() - 1;
+      
+      setSelectedIndexes([yearIndex, monthIndex, dayIndex, selectedIndexes[3]]);
+      updateDays(solar.getYear(), solar.getMonth());
+    }
   };
 
   const handleGenderToggle = () => {
     setGender(gender === '男' ? '女' : '男');
+  };
+
+  const handleQuickCustomize = () => {
+    const year = years[selectedIndexes[0]];
+    const month = months[selectedIndexes[1]];
+    const day = days[selectedIndexes[2]];
+    
+    let solarDate;
+    if (dateType === '农历') {
+      const lunar = Lunar.fromYmd(year, month, day);
+      solarDate = lunar.getSolar();
+    } else {
+      solarDate = Solar.fromYmd(year, month, day);
+    }
+
+    const selectedDateTime = {
+      year: solarDate.getYear(),
+      month: solarDate.getMonth(),
+      day: solarDate.getDay(),
+      hour: hours[selectedIndexes[3]],
+      gender,
+    };
+    onQuickCustomize?.(selectedDateTime);
+  };
+
+  const handlePersonalizeCustomize = () => {
+    const year = years[selectedIndexes[0]];
+    const month = months[selectedIndexes[1]];
+    const day = days[selectedIndexes[2]];
+    
+    let solarDate;
+    if (dateType === '农历') {
+      const lunar = Lunar.fromYmd(year, month, day);
+      solarDate = lunar.getSolar();
+    } else {
+      solarDate = Solar.fromYmd(year, month, day);
+    }
+
+    const selectedDateTime = {
+      year: solarDate.getYear(),
+      month: solarDate.getMonth(),
+      day: solarDate.getDay(),
+      hour: hours[selectedIndexes[3]],
+      gender,
+      isLunar: dateType === '农历'
+    };
+    onPersonalizeCustomize?.(selectedDateTime);
   };
 
   if (!visible) return null;
@@ -156,35 +220,50 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
             </View>
           </View>
         </View>
+        <View className="gender-container">
+        <View className="gender-title">选择出生日期</View>
+          <View className="gender-switch-container">
+            <View className={`gender-switch ${dateType === '公历' ? 'female-selected' : 'male-selected'}`} onClick={handleDateTypeToggle}>
+              <View className={`gender-option ${dateType === '公历' ? 'selected' : ''}`}>
+                <Text className={`gender-text ${dateType === '公历' ? 'selected' : ''}`}>公历</Text>
+              </View>
+              <View className={`gender-option ${dateType === '农历' ? 'selected' : ''}`}>
+                <Text className={`gender-text ${dateType === '农历' ? 'selected' : ''}`}>农历</Text>
+              </View>
+              <View className="gender-slider"></View>
+            </View>
+          </View>
+        </View>
         <View className="picker-container">
-          <View className="picker-title">选择出生日期 「公历」</View>
           <PickerView 
             className="datetime-picker"
             indicatorStyle="height: 40px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;"
             indicatorClass="picker-indicator"
-            // maskStyle="height: 10px;"
-            // maskClass="picker-mask"
             value={selectedIndexes}
             onChange={handlePickerChange}
           >
             <PickerViewColumn>
               {years.map((year) => (
-                <View key={year} className="picker-item">{year}</View>
+                <View key={year} className="picker-item">{year}年</View>
               ))}
             </PickerViewColumn>
             <PickerViewColumn>
-              {months.map((month) => (
-                <View key={month} className="picker-item">{month}</View>
+              {months.map((month, index) => (
+                <View key={month} className="picker-item">
+                  {dateType === '农历' ? lunarMonths[index] : `${month}月`}
+                </View>
               ))}
             </PickerViewColumn>
             <PickerViewColumn>
-              {days.map((day) => (
-                <View key={day} className="picker-item">{day}</View>
+              {days.map((day, index) => (
+                <View key={day} className="picker-item">
+                  {dateType === '农历' ? lunarDays[index] : `${day}日`}
+                </View>
               ))}
             </PickerViewColumn>
             <PickerViewColumn>
               {hours.map((hour) => (
-                <View key={hour} className="picker-item">{hour}</View>
+                <View key={hour} className="picker-item">{hour}时</View>
               ))}
             </PickerViewColumn>
           </PickerView>
