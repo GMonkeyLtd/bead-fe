@@ -36,6 +36,8 @@ import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 import arrowRight from "@/assets/icons/right-arrow.svg";
 import AppHeader from "@/components/AppHeader";
 import { ASSISTANT_SM_IMAGE_URL, ASSISTANT_LG_IMAGE_URL } from "@/config";
+import { useDesign } from "@/store/DesignContext";
+import { generateUUID } from "@/utils/uuid";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -68,6 +70,7 @@ const ChatPage: React.FC = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
+  const [error, setError] = useState<any>(null);
 
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender, isLunar } = params || {};
@@ -136,10 +139,11 @@ const ChatPage: React.FC = () => {
       processResult(res);
     } catch (error) {
       Taro.showToast({
-        title: "生成失败:" + error.message,
+        title: "生成失败:" + JSON.stringify(error),
         icon: "none",
       });
-      console.error(error);
+      setError(JSON.stringify(error));
+      // console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -182,6 +186,28 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  const handleNextStep = () => {
+      if (!canvasImageUrl) {
+        return;
+      }
+      const beadDataId = 'bead-'+generateUUID();
+      addBeadData({
+        image_url: canvasImageUrl,
+        bead_list: beadImageData.map((item) => ({
+          id: item.id,
+          image_url: item.image_url,
+          name: item.name,
+          description: item.description,
+        })),
+        bead_data_id: beadDataId,
+      });
+
+      Taro.navigateTo({
+        url:
+          "/design-package/quick-design/index?beadDataId=" + beadDataId
+      });
+  }
+
   const renderHistoryController = () => {
     return (
       <View className="history-controller">
@@ -223,7 +249,7 @@ const ChatPage: React.FC = () => {
     }
     return (
       <View className="result-container">
-        <View className="result-title">当前方案</View>
+        <View className="result-title">当前方案 + {beadImageData?.[0]?.image_url}</View>
         <View className="result-card">
           <View className="result-content">
             <View className="result-left">
@@ -254,21 +280,7 @@ const ChatPage: React.FC = () => {
               <View className="result-link ">
                 <View
                   className="crystal-gradient-text"
-                  onClick={() => {
-                    if (!canvasImageUrl) {
-                      return;
-                    }
-                    // Taro.navigateTo({
-                    //   url:
-                    //     "/pages/result/index?imageUrl=" +
-                    //     encodeURIComponent(canvasImageUrl as string),
-                    // });
-                    Taro.navigateTo({
-                      url:
-                        "/pages/quick-design/index?imageUrl=" +
-                        encodeURIComponent(canvasImageUrl as string),
-                    });
-                  }}
+                  onClick={handleNextStep}
                   style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
                 >
                   发起定制派单
@@ -292,7 +304,6 @@ const ChatPage: React.FC = () => {
       </View>
     );
   };
-  console.log(canvasImageUrl, 'canvasImageUrl')
 
   const renderKeyboardShow = () => {
     return (
@@ -309,7 +320,7 @@ const ChatPage: React.FC = () => {
                   }
                   Taro.navigateTo({
                     url:
-                      "/pages/result/index?imageUrl=" +
+                      "/design-package/result/index?imageUrl=" +
                       encodeURIComponent(canvasImageUrl as string),
                   });
                 }}
@@ -352,6 +363,7 @@ const ChatPage: React.FC = () => {
             <View className="assistant-info">
               <View className="assistant-role">疗愈师</View>
               <View className="assistant-name">黎莉莉</View>
+              {error}
             </View>
             {!keyboardVisible && renderHistoryController()}
           </View>

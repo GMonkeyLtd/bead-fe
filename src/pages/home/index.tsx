@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  Swiper,
-  SwiperItem,
-  Image,
-} from "@tarojs/components";
+import { View, Text, Swiper, SwiperItem, Image } from "@tarojs/components";
 import { useEffect, useState } from "react";
 import Taro from "@tarojs/taro";
 import "./index.scss";
@@ -12,6 +6,7 @@ import { SWIPER_DATA } from "@/config/home-content";
 import RightArrow from "@/assets/icons/right-arrow.svg";
 import DateTimeDrawer from "@/components/DateTimeDrawer";
 import CrystalButton from "@/components/CrystalButton";
+import AppHeader from "@/components/AppHeader";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
@@ -45,7 +40,7 @@ const Home = () => {
     day,
     hour,
     gender,
-    isLunar
+    isLunar,
   }: {
     year: number;
     month: number;
@@ -54,22 +49,21 @@ const Home = () => {
     gender: number;
     isLunar: boolean;
   }) => {
-
-      Taro.navigateTo({
-        url:
-          "/pages/quick-design/index?year=" +
-          year +
-          "&month=" +
-          month +
-          "&day=" +
-          day +
-          "&hour=" +
-          hour +
-          "&gender=" +
-          gender +
-          "&isLunar=" +
-          isLunar,
-      });
+    Taro.navigateTo({
+      url:
+        "/design-package/quick-design/index?year=" +
+        year +
+        "&month=" +
+        month +
+        "&day=" +
+        day +
+        "&hour=" +
+        hour +
+        "&gender=" +
+        gender +
+        "&isLunar=" +
+        isLunar,
+    });
   };
 
   const handlePersonalizeCustomize = ({
@@ -78,7 +72,7 @@ const Home = () => {
     day,
     hour,
     gender,
-    isLunar
+    isLunar,
   }: {
     year: number;
     month: number;
@@ -89,7 +83,7 @@ const Home = () => {
   }) => {
     Taro.navigateTo({
       url:
-        "/pages/design/index?year=" +
+        "/design-package/design/index?year=" +
         year +
         "&month=" +
         month +
@@ -99,12 +93,23 @@ const Home = () => {
         hour +
         "&gender=" +
         gender,
-        isLunar: isLunar
+      isLunar: isLunar,
     });
   };
 
   return (
     <View className="home-container">
+      <AppHeader
+        isWhite
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+        }}
+        showBack={false}
+      />
       <Swiper
         className="banner-swiper"
         indicatorColor="rgba(255,255,255,0.3)"
@@ -153,7 +158,6 @@ const Home = () => {
           </SwiperItem>
         ))}
       </Swiper>
-
       <DateTimeDrawer
         onQuickCustomize={handleQuickCustomize}
         onPersonalizeCustomize={handlePersonalizeCustomize}

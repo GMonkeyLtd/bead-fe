@@ -2,7 +2,8 @@ import http, { setBaseURL } from "./request";
 import Taro from "@tarojs/taro";
 
 // 在应用启动时设置API基础URL
-setBaseURL("http://gmonkey.ai:8088/api/v1");
+// setBaseURL("http://gmonkey.ai:8088/api/v1");
+setBaseURL("https://test.qianjunye.com:443/api/v1");
 // setBaseURL("http://192.168.189.246:8088/api/v1");
 
 // 定义用户相关的数据类型
@@ -40,6 +41,7 @@ export interface QuickGenerateParams extends BaziParams {}
 
 export interface QuickGenerateByImageParams {
   image_base64: string[];
+  bead_ids: string[];
 }
 
 export interface PersonalizedGenerateResult {
@@ -112,6 +114,13 @@ export const generateApi = {
     }),
 };
 
+export const beadsApi = {
+  getBeadList: () =>
+    http.get<PersonalizedGenerateResult[]>("/user/beadlist", {}, {
+      showLoading: false
+    }),
+};
+
 // 文件相关API
 export const fileApi = {
   // 上传文件
@@ -123,5 +132,6 @@ export const fileApi = {
 export default {
   user: userApi,
   generate: generateApi,
+  bead: beadsApi,
   file: fileApi,
 };

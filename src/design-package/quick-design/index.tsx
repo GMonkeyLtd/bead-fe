@@ -13,14 +13,14 @@ const QuickDesign = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [designing, setDesigning] = useState(true);
   const params = Taro.getCurrentInstance()?.router?.params;
-  const { year, month, day, hour, gender, imageUrl: imageUrlParam, isLunar } = params || {};
+  const { year, month, day, hour, gender, isLunar, beadDataId } = params || {};
 
-  const { addDesignData } = useDesign();
+  const { addDesignData, beadData } = useDesign();
 
   useEffect(() => {
-    if (imageUrlParam) {
-      const decodedUrl = decodeURIComponent(imageUrlParam);
-      quickDesignByImage(decodedUrl);
+    if (beadDataId) {
+      const _beadData = beadData.find((item) => item.bead_data_id === beadDataId);
+      quickDesignByImage(_beadData?.image_url, _beadData?.bead_list?.map(item => item.id));
       // processDesignData({
       //   images_url: [decodedUrl],
       //   bracelet_name: "夏日睡莲",
@@ -47,17 +47,18 @@ const QuickDesign = () => {
   }, []);
 
   const processDesignData = (data) => {
+    console.log(data, "processDesignData");
     const uniqueId = generateUUID();
-    const { images_url, bracelet_name, recommendation_text, bead_ids_deduplication } = data;
+    const { image_urls, bracelet_name, recommendation_text, bead_ids_deduplication } = data;
     addDesignData({
-      images_url,
+      image_urls,
       bracelet_name,
       recommendation_text,
       bead_ids_deduplication,
       design_id: uniqueId,
     })
     Taro.navigateTo({
-      url: "/pages/result/index?imageUrl=" + encodeURIComponent(images_url[0]) + "&designId=" + uniqueId,
+      url: "/design-package/result/index?imageUrl=" + encodeURIComponent(image_urls[0]) + "&designId=" + uniqueId,
     })
   }
 
@@ -104,11 +105,12 @@ const QuickDesign = () => {
     });
   };
 
-  const quickDesignByImage = async(imageUrl) => {
+  const quickDesignByImage = async(imageUrl, beadIds) => {
     setDesigning(true);
     try {
     const base64 = await imageToBase64(imageUrl, false);
      const res = await generateApi.personalizedGenerateByImage({
+        bead_ids: beadIds,
         image_base64: [base64 as string],
       })
       console.log(res, "res");
@@ -116,30 +118,31 @@ const QuickDesign = () => {
       if (!_imageUrl) {
         throw new Error('生成失败');
       }
-      // processDesignData(res.data)
+      processDesignData(res.data)
       console.log(res, "res");
       // processDesignData(res);
-      processDesignData({
-        images_url: [_imageUrl],
-        bracelet_name: "夏日睡莲",
-        recommendation_text: "一段话描述这款手串的，一段话描述这款手串的整体能量和祝福。",
-        bead_ids_deduplication: [
-          {
-            image_url:
-              "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
-            name: "绿松石",
-            description: "一段话描",
-          },
-          {
-            image_url:
-              "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
-            name: "蓝水晶",
-            description: "量和祝福。",
-          },
-        ],
-        design_id: generateUUID(),
-      });
+      // processDesignData({
+      //   images_url: [_imageUrl],
+      //   bracelet_name: "夏日睡莲",
+      //   recommendation_text: "一段话描述这款手串的，一段话描述这款手串的整体能量和祝福。",
+      //   bead_ids_deduplication: [
+      //     {
+      //       image_url:
+      //         "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
+      //       name: "绿松石",
+      //       description: "一段话描",
+      //     },
+      //     {
+      //       image_url:
+      //         "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
+      //       name: "蓝水晶",
+      //       description: "量和祝福。",
+      //     },
+      //   ],
+      //   design_id: generateUUID(),
+      // });
     } catch (err) {
+      console.error(err, "err");
       Taro.showToast({
         title: '生成失败',
         icon: 'none',

@@ -20,6 +20,12 @@ export default {
     //   exclude: ['pages/result/index', 'pages/design/index']
     // }
   },
+  preloadRule: {
+    "pages/home/index": {
+      "network": "all",
+      "packages": ["design-package"]
+    }
+  },
   h5: {
     /**
      * WebpackChain 插件配置

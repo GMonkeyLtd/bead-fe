@@ -5,9 +5,20 @@
   box-sizing: border-box;
 }
 
-body,
+@font-face {
+  font-family: "GlobalFont"; // 自定义字体名称
+  src: url("https://zhuluoji.cn-sh2.ufileos.com/resources/%E8%83%A1%E6%99%93%E6%B3%A2%E6%B5%AA%E6%BC%AB%E5%AE%8B.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: "Source Han Serif CN", "PingFang SC", "Microsoft YaHei",
+    sans-serif;
+}
 .taro_page {
-  font-family: "Shantell Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
   background-color: #f4f1ef;
   color: #1f1722;
 }
@@ -38,7 +49,8 @@ body,
   display: flex;
   flex-direction: column;
   background: linear-gradient(#f5f1edb2, #f5f1edb2),
-    url(https://zhuluoji.cn-sh2.ufileos.com/images-frontend/background-texture.png) repeat;
+    url(https://zhuluoji.cn-sh2.ufileos.com/images-frontend/background-texture.png)
+      repeat;
 
   // 确保容器不会溢出
   max-height: 100vh;
@@ -49,7 +61,7 @@ body,
     height: calc(100vh - var(--keyboard-height));
     padding-bottom: 0;
   }
-  
+
   .app-name {
     padding: 10px 16px;
     display: flex;
@@ -145,7 +157,7 @@ body,
   border: none;
   border-radius: 4px;
   padding: 14.5px 16px;
-  font-family: "Shantell Sans", sans-serif;
+  font-family: "GlobalFont", sans-serif;
   font-weight: 700;
   font-size: 17px;
   text-align: center;
@@ -168,7 +180,7 @@ body,
   border: 2px solid #444444;
   border-radius: 4px;
   padding: 13.5px 13px;
-  font-family: "Shantell Sans", sans-serif;
+  font-family: "GlobalFont", sans-serif;
   font-weight: 400;
   font-size: 17px;
   text-align: center;
@@ -187,7 +199,7 @@ body,
   margin-bottom: 24px;
 
   .form-label {
-    font-family: "Shantell Sans", sans-serif;
+    font-family: "GlobalFont", sans-serif;
     font-weight: 700;
     font-size: 20px;
     color: rgba(0, 0, 0, 0.8);
@@ -221,7 +233,7 @@ body,
 
 // 标题样式
 .title-large {
-  font-family: "Shantell Sans", sans-serif;
+  font-family: "GlobalFont", sans-serif;
   font-weight: 700;
   font-size: 34px;
   color: rgba(0, 0, 0, 0.8);

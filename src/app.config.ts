@@ -1,15 +1,23 @@
 export default defineAppConfig({
   pages: [
     'pages/home/index',
-    'pages/design/index',
-    'pages/result/index',
-    'pages/quick-design/index',
+    'pages/custom-design/index',
     'pages/tabPage/index',
+  ],
+  subPackages: [
+    {
+      root: 'design-package',
+      pages: [
+        
+        'result/index',
+        'quick-design/index',
+      ]
+    },
   ],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#ffffff',
-    navigationBarTitleText: '五行水晶命理测算',
+    navigationBarTitleText: '琉光纪',
     navigationBarTextStyle: 'black',
     backgroundColor: '#ffffff'
   },

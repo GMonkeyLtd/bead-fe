@@ -237,7 +237,8 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
         <View className="picker-container">
           <PickerView 
             className="datetime-picker"
-            indicatorStyle="height: 40px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;"
+            // style={{ backgroundColor: 'red' }}
+            indicatorStyle="height: 40px; border-top: 1px solidrgb(245, 230, 220); border-bottom: 1px solidrgb(246, 230, 220);"
             indicatorClass="picker-indicator"
             value={selectedIndexes}
             onChange={handlePickerChange}

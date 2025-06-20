@@ -7,7 +7,15 @@ import backWhite from "@/assets/icons/back-white.svg";
 import appNameWhite from "@/assets/app-name-white.png";
 import { useEffect } from "react";
 
-const AppHeader = ({ isWhite = false }: { isWhite?: boolean }) => {
+const AppHeader = ({
+  isWhite = false,
+  showBack = true,
+  style = {},
+}: {
+  isWhite?: boolean;
+  showBack?: boolean;
+  style?: React.CSSProperties;
+}) => {
   const { height: navBarHeight, top: navBarTop } = getNavBarHeightAndTop();
   useEffect(() => {
     if (isWhite) {
@@ -30,18 +38,21 @@ const AppHeader = ({ isWhite = false }: { isWhite?: boolean }) => {
         padding: `${navBarTop}px 16px 10px`,
         display: "flex",
         justifyContent: "center",
-        alignItems: 'center'
+        alignItems: "center",
+        ...style,
       }}
     >
-      <Image
-        src={isWhite ? backWhite : back}
-        style={{ height: "24px", width: "24px" }}
-        onClick={() => {
-          Taro.switchTab({
-            url: "/pages/home/index",
-          });
-        }}
-      />
+      {showBack && (
+        <Image
+          src={isWhite ? backWhite : back}
+          style={{ height: "24px", width: "24px" }}
+          onClick={() => {
+            Taro.switchTab({
+              url: "/pages/home/index",
+            });
+          }}
+        />
+      )}
       <Image
         src={isWhite ? appNameWhite : appName}
         style={{ height: "24px", flex: 1 }}

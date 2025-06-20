@@ -17,6 +17,12 @@
       overflow: hidden;
     }
   }
+
+  .home-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
 }
 // 轮播指示器样式自定义
 .banner-swiper ::deep .uni-swiper-dots {
@@ -42,7 +48,7 @@
   height: 100vh;
   left: 0;
   right: 0;
-  display: flex;  
+  display: flex;
   justify-content: center;
   z-index: 10;
 }
@@ -65,7 +71,6 @@
 
     .crystal-main-title {
       color: #1f1722;
-      font-family: "HuXiaoBo-LangManSong", "SimSun", "宋体", serif;
       font-weight: 400;
       font-size: 46px;
       line-height: 1.17;
@@ -73,12 +78,11 @@
       text-align: center;
       opacity: 0.9;
       display: inline-block;
+      font-family: "GlobalFont", "SimSun", "宋体", serif;
     }
 
     .crystal-subtitle {
       color: #1f1722;
-      font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       font-weight: 400;
       font-size: 14px;
       line-height: 1.2;
@@ -98,18 +102,6 @@
       margin-top: 12px;
     }
   }
-}
-
-// 当没有自定义字体时的降级方案
-@supports not (font-family: "HuXiaoBo-LangManSong") {
-  .crystal-title-frame .crystal-main-title {
-    font-family: "STKaiti", "楷体", "KaiTi", serif;
-  }
-}
-
-// 响应式调整
-@media (max-width: 375px) {
-  
 }
 
 .crystal-action-section {
@@ -132,28 +124,25 @@
   cursor: pointer;
   transition: all 0.3s ease;
 
-  
   // 边框渐变
   border: 1px solid;
   border-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(174, 171, 168, 0.39) 60%,
-    rgba(255, 255, 255, 0.75) 100%
-  ) 1;
-  
+      180deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(174, 171, 168, 0.39) 60%,
+      rgba(255, 255, 255, 0.75) 100%
+    )
+    1;
+
   // 阴影效果
-  box-shadow: 
-    0px 3px 6px 0px rgba(217, 205, 199, 0.07),
-    1px 10px 20px 0px rgba(83, 73, 68, 0.03),
-    4px 40px 16px 0px rgba(0, 0, 0, 0),
+  box-shadow: 0px 3px 6px 0px rgba(217, 205, 199, 0.07),
+    1px 10px 20px 0px rgba(83, 73, 68, 0.03), 4px 40px 16px 0px rgba(0, 0, 0, 0),
     7px 63px 18px 0px rgba(0, 0, 0, 0),
     inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.43);
-    
+
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 
-      0px 5px 8px 0px rgba(217, 205, 199, 0.12),
+    box-shadow: 0px 5px 8px 0px rgba(217, 205, 199, 0.12),
       2px 12px 22px 0px rgba(83, 73, 68, 0.06),
       inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.5);
   }
@@ -166,14 +155,9 @@
   letter-spacing: 6px; // 37.5% 字间距
   text-align: center;
   text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.46);
-  
+
   // 渐变文字效果
-  background: linear-gradient(
-    45deg,
-    #11022E 0%,
-    #A8ACB1 35%,
-    #1F2A37 100%
-  );
+  background: linear-gradient(45deg, #11022e 0%, #a8acb1 35%, #1f2a37 100%);
 }
 
 .crystal-button-icon-image {
@@ -189,8 +173,9 @@
   letter-spacing: 6px;
   background-image: radial-gradient(
     circle at center,
-    #B49677, /* Center color */
-    #0f151c, /* Middle color */
+    #b49677,
+    /* Center color */ #0f151c,
+    /* Middle color */
   );
   background-clip: text;
   -webkit-background-clip: text;
@@ -198,7 +183,6 @@
   /* Optional: Add text shadow for depth */
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 
 .btn-gradient-border {
   position: relative;
@@ -218,7 +202,7 @@
   content: "";
   position: absolute;
   inset: -1px; /* 比按钮大1px以显示边框 */
-  background: linear-gradient(135deg, #FFD700 0%, #000000 100%);
+  background: linear-gradient(135deg, #ffd700 0%, #000000 100%);
   border-radius: 9px; /* 比按钮圆角大1px */
   z-index: -1;
   transform: scale(1.02); /* 确保渐变覆盖整个边框 */
@@ -233,8 +217,8 @@
   z-index: -1;
 }
 .btn-gradient-border:hover::before {
-  background: linear-gradient(135deg, #FFC107 0%, #222222 100%);
+  background: linear-gradient(135deg, #ffc107 0%, #222222 100%);
 }
 .btn-gradient-border:active::before {
-  background: linear-gradient(135deg, #FFA000 0%, #111111 100%);
+  background: linear-gradient(135deg, #ffa000 0%, #111111 100%);
 }

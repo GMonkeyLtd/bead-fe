@@ -148,7 +148,7 @@ const CircleRing = ({
           canvasId={canvasId}
           id={canvasId}
           height={`${targetSize * dpr}px`}
-          width={`${targetSize * dpr}px`}
+          width={`${targetSize * dpr}px`} 
           // className={rotate ? "circle-canvas-rotate" : ""}
           style={{
             width: `${targetSize}px`,

@@ -56,6 +56,9 @@ export default defineConfig<"vite">(async (merge) => {
             generateScopedName: "[name]__[local]___[hash:base64:5]",
           },
         },
+        webpackChain(chain) {
+          chain.optimization.minimize(true)
+        }
       },
     },
     h5: {

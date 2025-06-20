@@ -82,7 +82,7 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
           AuthManager.clearAuth();
           reject(new Error('登录已过期，请重新登录'));
         } else {
-          reject(new Error(data.message || '请求失败'));
+          reject(new Error(data.message || '请求失败1'));
         }
       } else {
         // 没有业务状态码，直接返回data
@@ -124,6 +124,11 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
   const executeRequest = async (): Promise<T> => {
     // 请求前拦截处理
     const finalConfig = await requestInterceptor(config)
+    Taro.showToast({
+      title: finalConfig.url,
+      icon: 'none',
+      duration: 2000,
+    })
 
     // 显示加载提示
     if (config.showLoading !== false) {
@@ -175,13 +180,13 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
       // 显示错误提示
       if (config.showError !== false) {
         Taro.showToast({
-          title: error.message || '请求失败',
+          title: 'base' + JSON.stringify(error),
           icon: 'none',
-          duration: 2000,
+          duration: 5000,
         })
       }
 
-      throw error
+      throw JSON.stringify(error)+ finalConfig.url
     }
   }
 

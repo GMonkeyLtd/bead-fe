@@ -44,7 +44,7 @@
       180deg,
       rgba(191, 170, 142, 0.3),
       rgba(252, 245, 240, 0.6) 50%,
-      #FFFCFA 90%
+      #fffcfa 90%
     );
     backdrop-filter: blur(48px);
     /* 确保渐变层在模糊背景之上，内容之下 */
@@ -58,7 +58,16 @@
     flex-direction: column;
     justify-content: space-between;
     align-content: space-between;
+    box-sizing: border-box;
 
+    .result-content-bg-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+
+      opacity: 0.2;
+    }
     .result-content-card {
       width: 100%;
       height: 520px;
@@ -87,7 +96,7 @@
           left: 0;
           right: 0;
           bottom: 0;
-      
+
           background: linear-gradient(180deg, #ffffff00 80%, #ffffff 100%);
         }
 
@@ -95,7 +104,7 @@
           position: absolute;
           top: 0;
           right: 0;
-          border-radius: 0px 10px 0px 10px;
+          border-radius: 0px 6px 0px 10px;
           padding: 6px 11px;
           background: linear-gradient(
               0deg,
@@ -139,11 +148,21 @@
           font-size: 40px;
           letter-spacing: 2px;
           margin-bottom: 24px;
+          font-family: "GlobalFont", "SimSun", "宋体", serif;
         }
 
         .result-content-card-text-content {
           font-size: 12px;
+          height: 36px;
+          position: relative;
+          overflow: hidden;
 
+          &::after {
+            content: "...";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+          }
         }
       }
     }
@@ -165,12 +184,14 @@
         font-weight: 500;
         gap: 4px;
         margin-bottom: 4px;
+        font-family: "Source Han Serif CN", "SimSun", "宋体", serif;
       }
 
       .bead-description {
         font-size: 11px;
         font-weight: 300;
         line-height: 100%;
+        padding-left: 24px;
       }
     }
 
