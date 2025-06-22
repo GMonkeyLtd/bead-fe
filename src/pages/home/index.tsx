@@ -7,22 +7,16 @@ import RightArrow from "@/assets/icons/right-arrow.svg";
 import DateTimeDrawer from "@/components/DateTimeDrawer";
 import CrystalButton from "@/components/CrystalButton";
 import AppHeader from "@/components/AppHeader";
+import { AuthManager } from "@/utils/auth";
+import { pageUrls } from "@/config/page-urls";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
 
   useEffect(() => {
-    // 隐藏底部导航栏
-    Taro.hideTabBar({
-      animation: false,
-    });
-
-    // 当组件卸载时恢复显示底部导航栏
-    return () => {
-      Taro.showTabBar({
-        animation: false,
-      });
-    };
+    
+    // AuthManager.clearAuth();
+    // AuthManager.login();
   }, []);
 
   const startDesign = () => {
@@ -51,7 +45,7 @@ const Home = () => {
   }) => {
     Taro.navigateTo({
       url:
-        "/design-package/quick-design/index?year=" +
+        pageUrls.quickDesign + "?year=" +
         year +
         "&month=" +
         month +
@@ -83,7 +77,7 @@ const Home = () => {
   }) => {
     Taro.navigateTo({
       url:
-        "/design-package/design/index?year=" +
+        pageUrls.design + '?year=' +
         year +
         "&month=" +
         month +

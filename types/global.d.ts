@@ -10,6 +10,10 @@ declare module '*.less';
 declare module '*.scss';
 declare module '*.sass';
 declare module '*.styl';
+declare module '*.json' {
+  const value: any;
+  export default value;
+}
 
 declare namespace NodeJS {
   interface ProcessEnv {

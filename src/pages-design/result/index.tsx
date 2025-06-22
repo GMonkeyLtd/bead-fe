@@ -7,8 +7,10 @@ import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import logoSvg from "@/assets/icons/logo.svg";
 import expendImage from "@/assets/icons/expend.svg";
 import CrystalButton from "@/components/CrystalButton";
-import { QR_CODE_IMAGE_URL } from "@/config";
+import { CRYSTALS_BG_IMAGE_URL, QR_CODE_IMAGE_URL } from "@/config";
 import { useDesign } from "@/store/DesignContext";
+import createBeadImage from "@/assets/icons/create-bead.svg";
+import shareDesignImage from "@/assets/icons/share-design.svg";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -20,26 +22,8 @@ const Result = () => {
   const [shareImageUrl, setShareImageUrl] = useState("");
   console.log(designData, "designData");
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
-  const [posterData, setPosterData] = useState(
-    {
-      title: "四季福缘",
-      description: "四季福缘",
-      mainImage: 
-      "https://p26-aiop-sign.byteimg.com/tos-cn-i-vuqhorh59i/20250619173439F930AD7D1A982EA90EC2-0~tplv-vuqhorh59i-image.image?rk3s=7f9e702d&x-expires=1750412091&x-signature=9QP8pePdU9yBsemF%2ByLIaUoY73g%3D",
-      crystals: [
-        {
-          name: "绿东陵",
-          element: "木",
-          effect: "招财旺运",
-          color: "#000000",
-          image: "https://p26-aiop-sign.byteimg.com/tos-cn-i-vuqhorh59i/20250619173439F930AD7D1A982EA90EC2-0~tplv-vuqhorh59i-image.image?rk3s=7f9e702d&x-expires=1750412091&x-signature=9QP8pePdU9yBsemF%2ByLIaUoY73g%3D",
-        },
-
-      ],
-      qrCode: QR_CODE_IMAGE_URL,
-    }
-  );
-
+  const [designNo, setDesignNo] = useState("");
+  
   useEffect(() => {
     // 获取传入的图片URL参数
     const instance = Taro.getCurrentInstance();
@@ -47,7 +31,7 @@ const Result = () => {
     const params = {
       bracelet_name: "四季福缘",
       image_urls: [
-        "https://p26-aiop-sign.byteimg.com/tos-cn-i-vuqhorh59i/20250619173439F930AD7D1A982EA90EC2-0~tplv-vuqhorh59i-image.image?rk3s=7f9e702d&x-expires=1750412091&x-signature=9QP8pePdU9yBsemF%2ByLIaUoY73g%3D",
+        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
       ],
       designId: "design-1234567890",
       bead_ids_deduplication: [
@@ -79,6 +63,7 @@ const Result = () => {
     setBraceletName(params.bracelet_name);
     setBraceletDescription(params.recommendation_text);
     setBeadDescriptions(params.bead_ids_deduplication);
+    setDesignNo("00001");
     // if (params?.designId) {
     //   const result = designData.find((item: any) => item.design_id === params.designId);
     //   const { image_urls, bracelet_name, recommendation_text, bead_ids_deduplication } = result;
@@ -169,7 +154,7 @@ const Result = () => {
       <View className="result-content-container">
         <View className="result-content-bg-image">
           <Image
-            src="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/crystal-image.png"
+            src={CRYSTALS_BG_IMAGE_URL}
             mode="widthFix"
             style={{ width: "100%" }}
           />
@@ -184,6 +169,9 @@ const Result = () => {
           </View>
           <View className="result-content-card-text-container">
             <View className="result-content-card-text">
+              {designNo && (
+                <View className="result-content-card-subtitle">{`设计编号：${designNo}`}</View>
+              )}
               <View className="result-content-card-text-title">
                 {braceletName}
               </View>
@@ -211,25 +199,31 @@ const Result = () => {
                     </View>
                   ))}
               </View>
-              <View className="bead-share-rccode">
+              <View className="bead-share-qrcode">
                 <Image
                   src={QR_CODE_IMAGE_URL}
                   mode="widthFix"
                   style={{ width: "62px", height: "62px" }}
                 />
-                <View className="bead-share-rccode-text">开启专属定制</View>
+                <View className="bead-share-qrcode-text">开启专属定制</View>
               </View>
             </View>
           </View>
         </View>
       </View>
-      {shareImageUrl && <Image src={shareImageUrl} mode="widthFix" style={{ width: "100%" }} />}
+      {shareImageUrl && (
+        <Image src={shareImageUrl} mode="widthFix" style={{ width: "100%" }} />
+      )}
       <View className="result-content-card-action">
-        <CrystalButton onClick={saveImage} text="保存图片" />
+        <CrystalButton onClick={saveImage} text="分享"
+          prefixIcon={<Image src={shareDesignImage} mode="widthFix" style={{ width: "24px", height: "24px" }} />}
+        />
         <CrystalButton
           onClick={shareImage}
-          text="分享好友"
+          isPrimary
+          text="制作成品"
           style={{ flex: 1 }}
+          prefixIcon={<Image src={createBeadImage} mode="widthFix" style={{ width: "24px", height: "24px" }} />}
         />
       </View>
     </View>

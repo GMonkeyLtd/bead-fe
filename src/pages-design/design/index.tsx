@@ -22,7 +22,6 @@ import { View, Textarea } from "@tarojs/components";
 import { isEmptyMessage } from "../../utils/messageFormatter";
 import "./index.scss";
 import Taro from "@tarojs/taro";
-import IconButton from "@/components/IconButton";
 import { Image } from "@tarojs/components";
 import sendSvg from "@/assets/icons/send.svg";
 import activeSendSvg from "@/assets/icons/active-send.svg";
@@ -36,8 +35,9 @@ import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 import arrowRight from "@/assets/icons/right-arrow.svg";
 import AppHeader from "@/components/AppHeader";
 import { ASSISTANT_SM_IMAGE_URL, ASSISTANT_LG_IMAGE_URL } from "@/config";
-import { useDesign } from "@/store/DesignContext";
+import { DesignProvider, useDesign } from "@/store/DesignContext";
 import { generateUUID } from "@/utils/uuid";
+import { pageUrls } from "@/config/page-urls";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -60,7 +60,9 @@ const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<string[]>([]);
   const [beadName, setBeadName] = useState<string>("");
   const [canvasImageUrl, setCanvasImageUrl] = useState<string>("");
-  const [canvasImageStatus, setCanvasImageStatus] = useState<"idle" | "downloading" | "success" | "error">("idle");
+  const [canvasImageStatus, setCanvasImageStatus] = useState<
+    "idle" | "downloading" | "success" | "error"
+  >("idle");
   const [beadDescriptions, setBeadDescriptions] = useState<
     { image_url: string; description: string }[]
   >([]);
@@ -70,10 +72,10 @@ const ChatPage: React.FC = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
-  const [error, setError] = useState<any>(null);
 
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender, isLunar } = params || {};
+  const { addBeadData } = useDesign();
 
   // 键盘适配逻辑
   useEffect(() => {
@@ -118,7 +120,14 @@ const ChatPage: React.FC = () => {
     setMessages((prev) => [...prev, resData.recommendation_text]);
   };
 
-  const initGenerate = async (year, month, day, hour, gender, isLunar: boolean) => {
+  const initGenerate = async (
+    year,
+    month,
+    day,
+    hour,
+    gender,
+    isLunar: boolean
+  ) => {
     setIsLoading(true);
     try {
       const res: any = await api.generate.personalizedGenerate({
@@ -129,28 +138,27 @@ const ChatPage: React.FC = () => {
         is_lunar: isLunar,
         // gender: parseInt(gender || "0"),
       });
-      //  const res = await new Promise((resolve) => {
-      //   setTimeout(() => {
-      //     Taro.hideLoading();
-      //     setIsLoading(false);
-      //     resolve(testData);
-      //   }, 2000);
-      // });
       processResult(res);
-    } catch (error) {
+    } catch (err) {
       Taro.showToast({
-        title: "生成失败:" + JSON.stringify(error),
+        title: "生成失败:" + JSON.stringify(err),
         icon: "none",
       });
-      setError(JSON.stringify(error));
-      // console.error(error);
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    initGenerate(year, month, day, hour, gender, isLunar === "true" ? true : false);
+    initGenerate(
+      year,
+      month,
+      day,
+      hour,
+      gender,
+      isLunar === "true" ? true : false
+    );
 
     // 检查图片URL
 
@@ -187,26 +195,25 @@ const ChatPage: React.FC = () => {
   };
 
   const handleNextStep = () => {
-      if (!canvasImageUrl) {
-        return;
-      }
-      const beadDataId = 'bead-'+generateUUID();
-      addBeadData({
-        image_url: canvasImageUrl,
-        bead_list: beadImageData.map((item) => ({
-          id: item.id,
-          image_url: item.image_url,
-          name: item.name,
-          description: item.description,
-        })),
-        bead_data_id: beadDataId,
-      });
+    if (!canvasImageUrl) {
+      return;
+    }
+    const beadDataId = "bead-" + generateUUID();
+    addBeadData({
+      image_url: canvasImageUrl,
+      bead_list: beadImageData.map((item) => ({
+        id: item.id,
+        image_url: item.image_url,
+        name: item.name,
+        description: item.description,
+      })),
+      bead_data_id: beadDataId,
+    });
 
-      Taro.navigateTo({
-        url:
-          "/design-package/quick-design/index?beadDataId=" + beadDataId
-      });
-  }
+    Taro.navigateTo({
+      url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
+    });
+  };
 
   const renderHistoryController = () => {
     return (
@@ -249,7 +256,7 @@ const ChatPage: React.FC = () => {
     }
     return (
       <View className="result-container">
-        <View className="result-title">当前方案 + {beadImageData?.[0]?.image_url}</View>
+        <View className="result-title">当前方案</View>
         <View className="result-card">
           <View className="result-content">
             <View className="result-left">
@@ -320,7 +327,8 @@ const ChatPage: React.FC = () => {
                   }
                   Taro.navigateTo({
                     url:
-                      "/design-package/result/index?imageUrl=" +
+                      pageUrls.result +
+                      "?imageUrl=" +
                       encodeURIComponent(canvasImageUrl as string),
                   });
                 }}
@@ -333,10 +341,10 @@ const ChatPage: React.FC = () => {
               />
             </View>
             <CircleRingImage
-                size={60}
-                backendSize={70}
-                imageUrl={canvasImageUrl}
-              />
+              size={60}
+              backendSize={70}
+              imageUrl={canvasImageUrl}
+            />
           </View>
         </View>
       </View>
@@ -354,7 +362,9 @@ const ChatPage: React.FC = () => {
       <View className={`assistant-container ${keyboardVisible ? "small" : ""}`}>
         {/* 消息列表 */}
         <Image
-          src={keyboardVisible ? ASSISTANT_SM_IMAGE_URL : ASSISTANT_LG_IMAGE_URL}
+          src={
+            keyboardVisible ? ASSISTANT_SM_IMAGE_URL : ASSISTANT_LG_IMAGE_URL
+          }
           className="assistant-image"
         />
 
@@ -363,7 +373,6 @@ const ChatPage: React.FC = () => {
             <View className="assistant-info">
               <View className="assistant-role">疗愈师</View>
               <View className="assistant-name">黎莉莉</View>
-              {error}
             </View>
             {!keyboardVisible && renderHistoryController()}
           </View>
@@ -385,7 +394,7 @@ const ChatPage: React.FC = () => {
         <TagList
           tags={TAGS}
           onTagSelect={(tag) => {
-            setInputValue(tag.title);
+            setInputValue(prev => !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title);
           }}
         />
         <View className="input-wrapper">
@@ -407,26 +416,24 @@ const ChatPage: React.FC = () => {
             }}
             showConfirmBar={false}
           />
-          <IconButton
-            icon={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
-            size={32}
-            color=""
-            disabled={isEmptyMessage(inputValue) || isLoading}
-            loading={isLoading}
+          <Image
+            src={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
+            style={{ width: "26px", height: "26px" }}
             onClick={handleSend}
           />
         </View>
-        {/* 用于拼接珠串图片的隐藏Canvas */}
-        <CircleRing
-          dotsBgImageData={beadImageData}
-          targetSize={1024}
-          canvasId="circle-ring-canvas"
-          onChange={(status, canvasImage) => {
-            setCanvasImageUrl(canvasImage);
-            setCanvasImageStatus(status);
-          }}
-        />
       </View>
+      {/* 用于拼接珠串图片的隐藏Canvas */}
+      <CircleRing
+        dotsBgImageData={beadImageData}
+        targetSize={1024}
+        canvasId="circle-ring-canvas"
+        onChange={(status, canvasImage) => {
+          setCanvasImageUrl(canvasImage);
+          setCanvasImageStatus(status);
+        }}
+        showCanvas={false}
+      />
     </View>
   );
 };

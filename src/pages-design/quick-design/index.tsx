@@ -1,0 +1,169 @@
+import { View, Image } from "@tarojs/components";
+import { useState, useEffect } from "react";
+import Taro from "@tarojs/taro";
+import "./index.scss";
+import { generateApi } from "@/utils/api";
+import AppHeader from "@/components/AppHeader";
+import { imageToBase64 } from "@/utils/imageUtils";
+import { useDesign } from "@/store/DesignContext";
+import { DESIGNING_IMAGE_URL } from "@/config";
+import { generateUUID } from "@/utils/uuid";
+import { pageUrls } from "@/config/page-urls";
+
+const QuickDesign = () => {
+  const [imageUrl, setImageUrl] = useState("");
+  const [designing, setDesigning] = useState(true);
+  const params = Taro.getCurrentInstance()?.router?.params;
+  const { year, month, day, hour, gender, isLunar, beadDataId } = params || {};
+
+  const { addDesignData, beadData } = useDesign();
+
+  useEffect(() => {
+    if (beadDataId) {
+      const _beadData = beadData.find(
+        (item) => item.bead_data_id === beadDataId
+      );
+      quickDesignByImage(
+        _beadData?.image_url,
+        _beadData?.bead_list?.map((item) => item.id)
+      );
+      return;
+    }
+    quickDesignByInfo(
+      year,
+      month,
+      day,
+      hour,
+      gender,
+      isLunar === "true" ? true : false
+    );
+  }, []);
+
+  const processDesignData = (data) => {
+    console.log(data, "processDesignData");
+    const uniqueId = generateUUID();
+    const {
+      image_urls,
+      bracelet_name,
+      recommendation_text,
+      bead_ids_deduplication,
+    } = data;
+    addDesignData({
+      image_urls,
+      bracelet_name,
+      recommendation_text,
+      bead_ids_deduplication,
+      design_id: uniqueId,
+    });
+    Taro.navigateTo({
+      url:
+        pageUrls.result +
+        "?imageUrl=" +
+        encodeURIComponent(image_urls[0]) +
+        "&designId=" +
+        uniqueId,
+    });
+  };
+
+  const quickDesignByInfo = (
+    year,
+    month,
+    day,
+    hour,
+    gender,
+    isLunar: boolean
+  ) => {
+    if (!year || !month || !day || !hour || !gender) {
+      return;
+    }
+    setDesigning(true);
+    generateApi
+      .quickGenerate({
+        birth_year: parseInt(year || "0"),
+        birth_month: parseInt(month || "0"),
+        birth_day: parseInt(day || "0"),
+        birth_hour: parseInt(hour || "0"),
+        is_lunar: isLunar,
+        sex: parseInt(gender || "0"),
+      })
+      .then((res) => {
+        if (!res.data?.images_url?.[0]) {
+          throw new Error("生成失败");
+        }
+        console.log(res, "res");
+        processDesignData(res);
+      })
+      .catch((err) => {
+        Taro.showToast({
+          title: "生成失败",
+          icon: "none",
+        });
+        setTimeout(() => {
+          Taro.navigateTo({
+            url: pageUrls.home,
+          });
+        }, 3000);
+        console.error(JSON.stringify(err));
+      })
+      .finally(() => {
+        setDesigning(false);
+      });
+  };
+
+  const quickDesignByImage = async (imageUrl, beadIds) => {
+    setDesigning(true);
+    try {
+      const base64 = await imageToBase64(imageUrl, false);
+      const res = await generateApi.personalizedGenerateByImage({
+        bead_ids: beadIds,
+        image_base64: [base64 as string],
+      });
+      console.log(res, "res");
+      if (!res.data?.image_urls?.[0]) {
+        throw new Error("生成失败");
+      }
+      processDesignData(res.data);
+      console.log(res, "res");
+    } catch (err) {
+      console.error(err, "err");
+      Taro.showToast({
+        title: "生成失败",
+        icon: "none",
+      });
+      setTimeout(() => {
+        Taro.navigateTo({
+          url: pageUrls.home,
+        });
+      }, 3000)
+    } finally {
+      setDesigning(false);
+    }
+  };
+
+  return (
+    <View className="crystal-common-container">
+      <AppHeader isWhite={false} />
+      {designing ? (
+        <View className="quick-design-container">
+          <View className="quick-design-loading">
+            <Image
+              src={DESIGNING_IMAGE_URL}
+              className="quick-design-loading-image"
+            />
+            <View className="quick-design-loading-title">
+              制作中
+              <View className="quick-design-loading-title-dot">
+                <View className="quick-design-loading-title-dot-item">...</View>
+              </View>
+            </View>
+            <View className="quick-design-loading-content">
+              TIPS: 金生水、水生木、木生火、火生土、土生金。
+            </View>
+          </View>
+        </View>
+      ) : null}
+    </View>
+  );
+};
+
+export default QuickDesign;

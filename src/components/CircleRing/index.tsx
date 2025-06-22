@@ -155,8 +155,8 @@ const CircleRing = ({
             height: `${targetSize}px`,
             visibility: showCanvas ? "visible" : "hidden",
             position: "absolute",
-            top: 0,
-            left: 0,
+            top: `-999999px`,
+            left: `-999999px`,
             zIndex: -100,
             transition: "display 0.3s ease-in-out",
           }}

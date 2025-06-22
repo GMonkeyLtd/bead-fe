@@ -39,7 +39,6 @@ export async function imageToBase64(
         filePath: finalFilePath,
         encoding: "base64",
         success: (res) => {
-            console.log(`data:image/png;base64,${res.data}`, "res");
           const base64 = needPrefix
             ? `data:image/jpeg;base64,${res.data}`
             : res.data;

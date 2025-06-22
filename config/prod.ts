@@ -23,7 +23,7 @@ export default {
   preloadRule: {
     "pages/home/index": {
       "network": "all",
-      "packages": ["design-package"]
+      "packages": ["pages-design"]
     }
   },
   h5: {

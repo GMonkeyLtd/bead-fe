@@ -32,7 +32,11 @@ const TagList: React.FC<TagListProps> = ({ tags, onTagSelect }) => {
             <View
               key={tag.id}
               className="tag-item"
-              onClick={() => handleTagClick(tag)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleTagClick(tag);
+                e.preventDefault();
+              }}
             >
               <Text className="tag-title">{tag.title}</Text>
             </View>

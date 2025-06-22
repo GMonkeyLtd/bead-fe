@@ -1,7 +1,7 @@
 import { View, Text, PickerView, PickerViewColumn } from "@tarojs/components";
 import { useState, useEffect } from "react";
 import { CommonEventFunction } from "@tarojs/components/types/common";
-import { Lunar, Solar } from "lunar-typescript";
+import { Lunar, LunarMonth, Solar } from "lunar-typescript";
 import "./index.scss";
 import CrystalButton from "../CrystalButton";
 
@@ -85,8 +85,9 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
       setDays(dayList);
     } else {
       // 农历月份的天数
-      const lunar = Lunar.fromYmd(year, month, 1);
-      const daysInLunarMonth = lunar.getDayCount();
+      const lunarMonth = LunarMonth.fromYm(year, month);
+      const daysInLunarMonth = lunarMonth?.getDayCount() || 30;
+
       const dayList: number[] = [];
       for (let i = 1; i <= daysInLunarMonth; i++) {
         dayList.push(i);
@@ -238,7 +239,7 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
           <PickerView 
             className="datetime-picker"
             // style={{ backgroundColor: 'red' }}
-            indicatorStyle="height: 40px; border-top: 1px solidrgb(245, 230, 220); border-bottom: 1px solidrgb(246, 230, 220);"
+            indicatorStyle="height: 40px; border-top: 1px solid rgb(245, 230, 220); border-bottom: 1px solid rgb(246, 230, 220);"
             indicatorClass="picker-indicator"
             value={selectedIndexes}
             onChange={handlePickerChange}

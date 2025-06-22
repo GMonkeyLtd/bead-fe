@@ -1,5 +1,6 @@
 import Taro from '@tarojs/taro'
 import { AuthManager } from './auth'
+import { MockManager } from './mockManager'
 
 // 定义请求配置接口
 export interface RequestConfig {
@@ -29,6 +30,7 @@ const defaultConfig = {
   showLoading: true,
   loadingText: '定制中...',
   showError: true,
+  isMock: true
 }
 
 // 请求拦截器 - 在发送请求前的处理
@@ -124,11 +126,6 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
   const executeRequest = async (): Promise<T> => {
     // 请求前拦截处理
     const finalConfig = await requestInterceptor(config)
-    Taro.showToast({
-      title: finalConfig.url,
-      icon: 'none',
-      duration: 2000,
-    })
 
     // 显示加载提示
     if (config.showLoading !== false) {
@@ -189,7 +186,13 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
       throw JSON.stringify(error)+ finalConfig.url
     }
   }
-
+  if (defaultConfig.isMock) {
+    const mockData = MockManager.getMockDataByUrl(config.url);
+    if (mockData) {
+      console.log('使用Mock数据:', config.url);
+      return mockData;
+    }
+  }
   return await executeRequest();
 }
 
