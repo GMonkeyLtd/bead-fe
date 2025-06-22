@@ -9,23 +9,19 @@ import {
 } from "@/config";
 import "./index.scss";
 
-/**
- * 海报生成器组件
- *
- * 优化内容：
- * 1. 将超过3个参数的函数重构为对象参数结构，提高可读性和维护性
- * 2. 支持加载外部字体资源(GlobalFont)
- * 3. 统一的Canvas文本样式设置方法
- * 4. 优化的绘制函数，支持参数解构和默认值
- * 5. 类型安全的参数接口定义
- */
+// 字体配置
+const FONT_CONFIG = {
+  globalFont: {
+    family: "GlobalFont",
+    url: FONT_URL,
+  },
+};
 
 interface CrystalItem {
   name: string;
-  element: string;
-  effect: string;
-  color: string;
-  image?: string;
+  wuxing: string;
+  function: string;
+  image_url?: string;
 }
 
 interface PosterData {
@@ -83,31 +79,16 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
 }) => {
   const canvasRef = useRef<any>(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [canvasImageUrl, setCanvasImageUrl] = useState("");
 
+  // 画布尺寸
   const systemInfo = Taro.getSystemInfoSync();
   const dpr = systemInfo.pixelRatio;
-  const canvasWidth = 566;
-  const canvasHeight = 754;
+  const canvasWidth = 566 * dpr;
+  const canvasHeight = 754 * dpr;
 
   // 计算缩放比例
   const scaleRatio = (systemInfo.screenWidth - 20) / canvasWidth;
-  // 使用较小的缩放比例保持比例
-  console.log(
-    systemInfo.screenWidth,
-    systemInfo.screenHeight,
-    canvasWidth,
-    canvasHeight,
-    scaleRatio,
-    "scaleWidth, scaleHeight"
-  );
-
-  // 字体配置
-  const FONT_CONFIG = {
-    globalFont: {
-      family: "GlobalFont",
-      url: FONT_URL,
-    },
-  };
 
   // 预加载字体
   const loadFonts = async () => {
@@ -123,25 +104,21 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
             source: `url("${FONT_CONFIG.globalFont.url}")`,
             success: () => {
               console.log("GlobalFont字体加载成功");
-              FONT_CONFIG.globalFont.loaded = true;
               resolve();
             },
             fail: (err: any) => {
               console.warn("GlobalFont字体加载失败:", err);
-              FONT_CONFIG.globalFont.loaded = false;
               resolve(); // 即使失败也继续，使用默认字体
             },
           });
         });
       } else {
         console.warn("当前环境不支持loadFontFace，将使用默认字体");
-        FONT_CONFIG.globalFont.loaded = false;
       }
 
       setFontsLoaded(true);
     } catch (error) {
       console.warn("字体加载过程中出现错误:", error);
-      FONT_CONFIG.globalFont.loaded = false;
       setFontsLoaded(true); // 即使失败也继续，使用默认字体
     }
   };
@@ -161,7 +138,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
   const setCanvasTextStyle = (params: SetCanvasTextStyleParams) => {
     const {
       ctx,
-      fontSize = 36,
+      fontSize = 36 * dpr,
       fontWeight = 300,
       color = "#1F1722",
       textAlign = "left",
@@ -177,7 +154,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
 
   // 绘制圆角矩形
   const drawRoundedRect = (params: DrawRoundedRectParams) => {
-    const { ctx, x, y, width, height, radius } = params;
+    let { ctx, x, y, width, height, radius } = params;
 
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
@@ -202,7 +179,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       maxWidth,
       lineHeight,
       maxLine = 2,
-      fontSize = 36,
+      fontSize = 36 * dpr,
       fontWeight = 300,
       color = "#1F1722",
       textAlign = "left",
@@ -211,7 +188,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
     // 设置字体样式
     setCanvasTextStyle({
       ctx,
-      fontSize,
+      fontSize: fontSize,
       fontWeight,
       color,
       textAlign,
@@ -268,10 +245,10 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
 
     try {
       const ctx = Taro.createCanvasContext("poster-canvas");
-      ctx.antialias = 'smooth';
+      // ctx.antialias = 'smooth';
 
       // 设置画布缩放
-      ctx.scale(scaleRatio, scaleRatio);
+      // ctx.scale(scaleRatio, scaleRatio);
       // ctx.scale(2, 2);
       // ctx.scale(dpr, dpr);
 
@@ -280,14 +257,21 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       ctx.drawImage(bgImgPath, 0, 0, canvasWidth, canvasHeight);
 
       // crystals bg
-      const { path: crystalsBgImgPath, height: crystalsBgImgHeight } =
-        await loadImage(CRYSTALS_BG_IMAGE_URL);
+      const {
+        path: crystalsBgImgPath,
+        height: crystalsBgImgHeight,
+        width: crystalsBgImgWidth,
+      } = await loadImage(CRYSTALS_BG_IMAGE_URL);
       ctx.drawImage(
         crystalsBgImgPath,
         0,
-        canvasHeight - crystalsBgImgHeight / 2,
+        0,
+        crystalsBgImgWidth,
+        crystalsBgImgHeight * 0.5,
+        0,
+        canvasHeight - crystalsBgImgHeight * dpr * 0.7,
         canvasWidth,
-        crystalsBgImgHeight
+        crystalsBgImgHeight * dpr * 0.7
       );
 
       // 绘制卡片白色背景
@@ -295,11 +279,11 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       ctx.setFillStyle("#ffffff");
       drawRoundedRect({
         ctx,
-        x: 98,
-        y: 38,
-        width: 370,
-        height: 612,
-        radius: 20,
+        x: 98 * dpr,
+        y: 38 * dpr,
+        width: 370 * dpr,
+        height: 600 * dpr,
+        radius: 20 * dpr,
       });
       ctx.fill();
 
@@ -309,23 +293,23 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       );
       drawRoundedRect({
         ctx,
-        x: 98,
-        y: 38,
-        width: 370,
-        height: 612,
-        radius: 20,
+        x: 98 * dpr,
+        y: 38 * dpr,
+        width: 370 * dpr,
+        height: 612 * dpr,
+        radius: 20 * dpr,
       });
       ctx.clip();
       ctx.drawImage(
         mainImgPath,
         0,
-        100,
+        100 * dpr,
         mainImgWidth,
         mainImgWidth,
-        98,
-        38,
-        370,
-        370
+        98 * dpr,
+        38 * dpr,
+        370 * dpr,
+        370 * dpr
       );
       ctx.restore();
 
@@ -339,44 +323,40 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       // gradient.addColorStop(1, "rgba(36, 228, 32, 0.8)");
 
       ctx.strokeStyle = gradient as any;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2 * dpr;
       drawRoundedRect({
         ctx,
-        x: 98,
-        y: 38,
-        width: 370,
-        height: 612,
-        radius: 20,
+        x: 98 * dpr,
+        y: 38 * dpr,
+        width: 370 * dpr,
+        height: 600 * dpr,
+        radius: 20 * dpr,
       });
       ctx.stroke();
 
       // 绘制标题 - 使用统一的样式设置方法
-      console.log(
-        getFontFamily(true),
-        FONT_CONFIG.globalFont.loaded,
-        "getFontFamily"
-      );
+
       setCanvasTextStyle({
         ctx,
-        fontSize: 36,
+        fontSize: 40 * dpr,
         fontWeight: 300,
         color: "#1F1722",
         textAlign: "left",
         textBaseline: "top",
         fontFamily: getFontFamily(true),
       });
-      ctx.fillText(data.title, 135, 428);
+      ctx.fillText(data.title, 135 * dpr, 380 * dpr);
 
       // 绘制描述文字（如果需要）
       if (data.description) {
         drawText({
           ctx,
           text: data.description,
-          x: 135,
-          y: 480,
-          maxWidth: 300,
-          lineHeight: 20,
-          fontSize: 14,
+          x: 135 * dpr,
+          y: 446 * dpr,
+          maxWidth: 300 * dpr,
+          lineHeight: 20 * dpr,
+          fontSize: 14 * dpr,
           fontWeight: 300,
         });
       }
@@ -387,17 +367,15 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       // ctx.fill();
 
       // 绘制水晶信息
-      let crystalX = 138,
-        crystalY = 540;
+      let crystalX = 138 * dpr,
+        crystalY = 516 * dpr;
       let crystalImgPath: any[] = [];
-      console.log(data.crystals, "data.crystals");
       if (data.crystals?.[0]) {
         crystalImgPath[0] = await loadImage(data.crystals[0].image_url || "");
       }
       if (data.crystals?.[1]) {
         crystalImgPath[1] = await loadImage(data.crystals[1].image_url || "");
       }
-      console.log(crystalImgPath, "crystalImgPath");
       crystalImgPath.forEach(async (_, index) => {
         // 绘制水晶圆形图标
         crystalImgPath[index]?.path &&
@@ -405,70 +383,74 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
             crystalImgPath[index]?.path,
             crystalX,
             crystalY,
-            16,
-            16
+            16 * dpr,
+            16 * dpr
           );
 
         // 绘制水晶名称
         drawText({
           ctx,
           text: `${data.crystals[index].name}「${data.crystals[index].wuxing}」`,
-          x: crystalX + 24,
+          x: crystalX + 28 * dpr,
           y: crystalY,
-          maxWidth: 300,
-          lineHeight: 16,
-          fontSize: 12,
+          maxWidth: 300 * dpr,
+          lineHeight: 16 * dpr,
+          fontSize: 12 * dpr,
           fontWeight: 300,
           textAlign: "left",
-          textBaseline: "top",
         });
 
         //绘制效果
         drawText({
           ctx,
           text: data.crystals[index].function,
-          x: crystalX + 24,
-          y: crystalY + 18,
-          maxWidth: 300,
-          lineHeight: 12,
-          fontSize: 10,
+          x: crystalX + 28 * dpr,
+          y: crystalY + 18 * dpr,
+          maxWidth: 300 * dpr,
+          lineHeight: 12 * dpr,
+          fontSize: 12 * dpr,
           fontWeight: 300,
           textAlign: "left",
-          textBaseline: "top",
         });
 
-        crystalY += 44;
+        crystalY += 40 * dpr;
       });
 
       // 绘制右下角二维码/开启定制区域
       if (data.qrCode) {
         const { path: qrImgPath } = await loadImage(data.qrCode);
-        ctx.drawImage(qrImgPath, 362, 532, 72, 72);
+        ctx.drawImage(qrImgPath, 362 * dpr, 510 * dpr, 68 * dpr, 68 * dpr);
       }
 
       // 绘制"开启专属定制"文字
       setCanvasTextStyle({
         ctx,
-        fontSize: 12,
+        fontSize: 12 * dpr,
         fontWeight: 300,
         textAlign: "left",
-        textBaseline: "top",
       });
-      ctx.fillText("开启专属定制", 363, 610);
+      ctx.fillText("开启专属定制", 360 * dpr, 580 * dpr);
 
       // 绘制logo和slogan
       const { path: logoSloganImgPath } = await loadImage(
         LOGO_SLOGAN_IMAGE_URL
       );
-      ctx.drawImage(logoSloganImgPath, 236, 674, 94, 54);
+      ctx.drawImage(
+        logoSloganImgPath,
+        236 * dpr,
+        674 * dpr,
+        94 * dpr,
+        54 * dpr
+      );
 
       ctx.draw();
       // 导出图片
       Taro.canvasToTempFilePath({
         canvasId: "poster-canvas",
-        width: canvasWidth * dpr,
-        height: canvasHeight * dpr,
+        width: canvasWidth,
+        height: canvasHeight,
         success: (res) => {
+          setCanvasImageUrl(res.tempFilePath);
           onGenerated?.(res.tempFilePath);
         },
         fail: (err) => {
@@ -498,24 +480,41 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         hasMainImage: !!data.mainImage,
       });
 
-      // 延时确保所有资源都准备就绪
-      setTimeout(() => {
         drawPoster();
-      }, 1000);
     }
   }, [fontsLoaded, data]);
 
   return (
-    <Canvas
-      id="poster-canvas"
-      canvasId="poster-canvas"
-      style={{
-        height: canvasHeight * scaleRatio,
-        width: canvasWidth * scaleRatio,
-      }}
-      height={`${canvasHeight * dpr}px`}
-      width={`${canvasWidth * dpr}px`}
-    />
+    <View style={{ position: "relative" }}>
+      <Canvas
+        id="poster-canvas"
+        canvasId="poster-canvas"
+        style={{
+          height: canvasHeight,
+          width: canvasWidth,
+          position: "absolute",
+          top: `-999999px`,
+          left: `-999999px`,
+          zIndex: -100,
+          transition: "display 0.3s ease-in-out",
+        }}
+        height={`${canvasHeight}px`}
+        width={`${canvasWidth}px`}
+        onTouchStart={() => {
+          Taro.previewImage({
+            urls: [canvasImageUrl],
+          });
+        }}
+      />
+      {/* <Image
+        src={canvasImageUrl}
+        style={{
+          height: canvasHeight * scaleRatio,
+          width: canvasWidth * scaleRatio,
+        }}
+        mode="widthFix"
+      /> */}
+    </View>
   );
 };
 

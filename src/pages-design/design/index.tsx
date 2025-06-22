@@ -33,11 +33,11 @@ import forwardChat from "@/assets/icons/forward-chat.svg";
 import ChatCardList from "@/components/ChatCardList";
 import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 import arrowRight from "@/assets/icons/right-arrow.svg";
-import AppHeader from "@/components/AppHeader";
 import { ASSISTANT_SM_IMAGE_URL, ASSISTANT_LG_IMAGE_URL } from "@/config";
-import { DesignProvider, useDesign } from "@/store/DesignContext";
+import { useDesign } from "@/store/DesignContext";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
+import PageContainer from "@/components/PageContainer";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -352,89 +352,97 @@ const ChatPage: React.FC = () => {
   };
 
   return (
-    <View
-      className={`crystal-common-container ${
-        keyboardVisible ? "keyboard-visible" : ""
-      }`}
-    >
-      <AppHeader isWhite={false} />
-      {/* 主要聊天区域 */}
-      <View className={`assistant-container ${keyboardVisible ? "small" : ""}`}>
-        {/* 消息列表 */}
-        <Image
-          src={
-            keyboardVisible ? ASSISTANT_SM_IMAGE_URL : ASSISTANT_LG_IMAGE_URL
-          }
-          className="assistant-image"
-        />
+    <PageContainer keyboardVisible={keyboardVisible}>
+      <View
+        style={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* 主要聊天区域 */}
+        <View
+          className={`assistant-container ${keyboardVisible ? "small" : ""}`}
+        >
+          {/* 消息列表 */}
+          <Image
+            src={
+              keyboardVisible ? ASSISTANT_SM_IMAGE_URL : ASSISTANT_LG_IMAGE_URL
+            }
+            className="assistant-image"
+          />
 
-        <View className="message-container">
-          <View className="message-header">
-            <View className="assistant-info">
-              <View className="assistant-role">疗愈师</View>
-              <View className="assistant-name">黎莉莉</View>
+          <View className="message-container">
+            <View className="message-header">
+              <View className="assistant-info">
+                <View className="assistant-role">疗愈师</View>
+                <View className="assistant-name">黎莉莉</View>
+              </View>
+              {!keyboardVisible && renderHistoryController()}
             </View>
-            {!keyboardVisible && renderHistoryController()}
+            {/* 助手欢迎消息 - 按照Figma设计样式，包含三角形指示器 */}
+            <View className="message-wrapper">
+              <ChatCardList
+                chatContents={messages}
+                messageIndex={messageIndex}
+                maxHeight={keyboardVisible ? 70 : 96}
+              />
+            </View>
           </View>
-          {/* 助手欢迎消息 - 按照Figma设计样式，包含三角形指示器 */}
-          <View className="message-wrapper">
-            <ChatCardList
-              chatContents={messages}
-              messageIndex={messageIndex}
-              maxHeight={keyboardVisible ? 70 : 96}
+        </View>
+        {/* 生成的图片 */}
+        {keyboardVisible ? renderKeyboardShow() : renderKeyboardHide()}
+
+        {/* 输入区域 */}
+        <View className="input-container">
+          <TagList
+            tags={TAGS}
+            onTagSelect={(tag) => {
+              setInputValue((prev) =>
+                !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
+              );
+            }}
+          />
+          <View className="input-wrapper">
+            <Textarea
+              className="message-input"
+              value={inputValue}
+              placeholder="输入您的定制需求..."
+              placeholderStyle="color: #00000033;"
+              onInput={(e) => setInputValue(e.detail.value)}
+              onConfirm={handleSend}
+              autoHeight
+              adjustPosition={false}
+              adjustKeyboardTo="bottom"
+              onFocus={() => {
+                setKeyboardVisible(true);
+              }}
+              onBlur={() => {
+                setKeyboardVisible(false);
+              }}
+              showConfirmBar={false}
+            />
+            <Image
+              src={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
+              style={{ width: "26px", height: "26px" }}
+              onClick={handleSend}
             />
           </View>
         </View>
-      </View>
-      {/* 生成的图片 */}
-      {keyboardVisible ? renderKeyboardShow() : renderKeyboardHide()}
-
-      {/* 输入区域 */}
-      <View className="input-container">
-        <TagList
-          tags={TAGS}
-          onTagSelect={(tag) => {
-            setInputValue(prev => !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title);
+        {/* 用于拼接珠串图片的隐藏Canvas */}
+        <CircleRing
+          dotsBgImageData={beadImageData}
+          targetSize={1024}
+          canvasId="circle-ring-canvas"
+          onChange={(status, canvasImage) => {
+            setCanvasImageUrl(canvasImage);
+            setCanvasImageStatus(status);
           }}
+          showCanvas={false}
         />
-        <View className="input-wrapper">
-          <Textarea
-            className="message-input"
-            value={inputValue}
-            placeholder="输入您的定制需求..."
-            placeholderStyle="color: #00000033;"
-            onInput={(e) => setInputValue(e.detail.value)}
-            onConfirm={handleSend}
-            autoHeight
-            adjustPosition={false}
-            adjustKeyboardTo="bottom"
-            onFocus={() => {
-              setKeyboardVisible(true);
-            }}
-            onBlur={() => {
-              setKeyboardVisible(false);
-            }}
-            showConfirmBar={false}
-          />
-          <Image
-            src={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
-            style={{ width: "26px", height: "26px" }}
-            onClick={handleSend}
-          />
-        </View>
       </View>
-      {/* 用于拼接珠串图片的隐藏Canvas */}
-      <CircleRing
-        dotsBgImageData={beadImageData}
-        targetSize={1024}
-        canvasId="circle-ring-canvas"
-        onChange={(status, canvasImage) => {
-          setCanvasImageUrl(canvasImage);
-          setCanvasImageStatus(status);
-        }}
-        showCanvas={false}
-      />
-    </View>
+    </PageContainer>
   );
 };
 

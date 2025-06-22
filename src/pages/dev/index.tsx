@@ -1,4 +1,4 @@
-import PosterGenerator from "@/components/poster-generator";
+import PosterGenerator from "@/components/PosterGenerator";
 import { QR_CODE_IMAGE_URL } from "@/config";
 import { View, Text, Image } from "@tarojs/components";
 import { useState } from "react";

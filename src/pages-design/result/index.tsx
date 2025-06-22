@@ -1,5 +1,5 @@
 import { View, Button, Text, Image } from "@tarojs/components";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Taro from "@tarojs/taro";
 import "./index.scss";
 import AppHeader from "@/components/AppHeader";
@@ -11,11 +11,12 @@ import { CRYSTALS_BG_IMAGE_URL, QR_CODE_IMAGE_URL } from "@/config";
 import { useDesign } from "@/store/DesignContext";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import shareDesignImage from "@/assets/icons/share-design.svg";
+import PosterGenerator from "@/components/PosterGenerator";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const { top: navBarTop } = getNavBarHeightAndTop();
+  const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
   const [braceletName, setBraceletName] = useState("");
   const [braceletDescription, setBraceletDescription] = useState("");
   const { designData } = useDesign();
@@ -23,7 +24,17 @@ const Result = () => {
   console.log(designData, "designData");
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
   const [designNo, setDesignNo] = useState("");
-  
+
+  const posterData = useMemo(() => {
+    return {
+      title: braceletName,
+      description: braceletDescription,
+      crystals: beadDescriptions,
+      qrCode: QR_CODE_IMAGE_URL,
+      mainImage: imageUrl,
+    };
+  }, [braceletName, braceletDescription, beadDescriptions, imageUrl]);
+
   useEffect(() => {
     // 获取传入的图片URL参数
     const instance = Taro.getCurrentInstance();
@@ -77,7 +88,7 @@ const Result = () => {
 
   // 保存图片到相册
   const saveImage = async () => {
-    if (!imageUrl) {
+    if (!shareImageUrl) {
       Taro.showToast({
         title: "没有图片可保存",
         icon: "none",
@@ -90,22 +101,14 @@ const Result = () => {
         icon: "loading",
       });
 
-      // 先下载图片到本地
-      const downloadRes = await Taro.downloadFile({
-        url: imageUrl,
+      await Taro.saveImageToPhotosAlbum({
+        filePath: shareImageUrl,
       });
 
-      if (downloadRes.statusCode === 200) {
-        // 保存图片到相册
-        await Taro.saveImageToPhotosAlbum({
-          filePath: downloadRes.tempFilePath,
-        });
-
-        Taro.showToast({
-          title: "保存成功",
-          icon: "success",
-        });
-      }
+      Taro.showToast({
+        title: "保存成功",
+        icon: "success",
+      });
     } catch (error) {
       console.error("保存图片失败:", error);
       Taro.showToast({
@@ -139,8 +142,6 @@ const Result = () => {
     });
   };
 
-  console.log(imageUrl, "当前显示的imageUrl");
-
   return (
     <View
       className="result-container"
@@ -151,8 +152,19 @@ const Result = () => {
       }}
     >
       <AppHeader isWhite />
-      <View className="result-content-container">
-        <View className="result-content-bg-image">
+      <View
+        className="result-content-container"
+        style={{
+          position: "relative",
+          top: `${navBarTop + navBarHeight}px`,
+        }}
+      >
+        <View
+          className="result-content-bg-image"
+          style={{
+            top: `-${navBarTop + navBarHeight}px`,
+          }}
+        >
           <Image
             src={CRYSTALS_BG_IMAGE_URL}
             mode="widthFix"
@@ -211,21 +223,33 @@ const Result = () => {
           </View>
         </View>
       </View>
-      {shareImageUrl && (
-        <Image src={shareImageUrl} mode="widthFix" style={{ width: "100%" }} />
-      )}
       <View className="result-content-card-action">
-        <CrystalButton onClick={saveImage} text="分享"
-          prefixIcon={<Image src={shareDesignImage} mode="widthFix" style={{ width: "24px", height: "24px" }} />}
+        <CrystalButton
+          onClick={saveImage}
+          text="分享"
+          prefixIcon={
+            <Image
+              src={shareDesignImage}
+              mode="widthFix"
+              style={{ width: "24px", height: "24px" }}
+            />
+          }
         />
         <CrystalButton
           onClick={shareImage}
           isPrimary
           text="制作成品"
           style={{ flex: 1 }}
-          prefixIcon={<Image src={createBeadImage} mode="widthFix" style={{ width: "24px", height: "24px" }} />}
+          prefixIcon={
+            <Image
+              src={createBeadImage}
+              mode="widthFix"
+              style={{ width: "24px", height: "24px" }}
+            />
+          }
         />
       </View>
+      <PosterGenerator data={posterData} onGenerated={setShareImageUrl} />
     </View>
   );
 };

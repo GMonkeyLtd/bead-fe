@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import Taro from "@tarojs/taro";
 import "./index.scss";
 import { generateApi } from "@/utils/api";
-import AppHeader from "@/components/AppHeader";
 import { imageToBase64 } from "@/utils/imageUtils";
 import { useDesign } from "@/store/DesignContext";
 import { DESIGNING_IMAGE_URL } from "@/config";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
+import PageContainer from "@/components/PageContainer";
 
 const QuickDesign = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -141,8 +141,7 @@ const QuickDesign = () => {
   };
 
   return (
-    <View className="crystal-common-container">
-      <AppHeader isWhite={false} />
+    <PageContainer keyboardVisible={false}>
       {designing ? (
         <View className="quick-design-container">
           <View className="quick-design-loading">
@@ -162,7 +161,7 @@ const QuickDesign = () => {
           </View>
         </View>
       ) : null}
-    </View>
+    </PageContainer>
   );
 };
 

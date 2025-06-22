@@ -3,7 +3,7 @@ import testData from "./test.json";
 import CustomDesignRing from "@/components/CustomDesignRing";
 import { useEffect, useState } from "react";
 import { beadsApi } from "@/utils/api";
-import AppHeader from "@/components/AppHeader";
+import PageContainer from "@/components/PageContainer";
 
 const CustomDesign = () => {
   const [beadList, setBeadList] = useState<any[]>([]);
@@ -32,8 +32,7 @@ const CustomDesign = () => {
   }, []);
 
   return (
-    <View className="crystal-common-container">
-      <AppHeader isWhite={false} />
+    <PageContainer keyboardVisible={false}>
       <CustomDesignRing
         beads={testData.data.recommendations?.map((item, index) => ({
           image: item.image_url,
@@ -43,7 +42,7 @@ const CustomDesign = () => {
         size={300}
         beadTypeMap={beadTypeMap}
       />
-    </View>
+    </PageContainer>
   );
 };
 

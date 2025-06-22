@@ -35,6 +35,11 @@ const AppHeader = ({
   return (
     <View
       style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
         height: navBarHeight,
         padding: `${navBarTop}px ${showBack ? navBarWidth : 16}px 10px 16px`,
         display: "flex",
