@@ -529,13 +529,6 @@ const CustomDesignRing = ({
       </View>
       {/* 左侧纵向Tab选择器 */}
       <View className="custom-design-ring-bottom-container">
-        <View 
-          style={{
-            display: "flex",
-            height: "100%",
-            flex: 1,
-          }}
-        >
           <View
             style={{
               width: "60px",
@@ -591,8 +584,6 @@ const CustomDesignRing = ({
             ))}
           </View>
           {renderBeads()}
-        </View>
-        <CrystalButton onClick={() => onCreate()} text="去制作" isPrimary />
       </View>
     </View>
   );
