@@ -36,6 +36,7 @@ interface PosterData {
 interface PosterGeneratorProps {
   data: PosterData;
   onGenerated?: (tempFilePath: string) => void;
+  showPoster?: boolean;
 }
 
 /** 绘制圆角矩形的参数接口 */
@@ -77,6 +78,7 @@ interface SetCanvasTextStyleParams {
 const PosterGenerator: React.FC<PosterGeneratorProps> = ({
   data,
   onGenerated,
+  showPoster = false,
 }) => {
   const canvasRef = useRef<any>(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -268,11 +270,11 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         0,
         0,
         crystalsBgImgWidth,
-        crystalsBgImgHeight * 0.5,
+        crystalsBgImgHeight,
         0,
-        canvasHeight - crystalsBgImgHeight * dpr * 0.7,
+        canvasHeight - crystalsBgImgHeight * dpr * 0.6,
         canvasWidth,
-        crystalsBgImgHeight * dpr * 0.7
+        crystalsBgImgHeight * dpr * 0.6
       );
 
       // 绘制卡片白色背景
@@ -481,7 +483,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         hasMainImage: !!data.mainImage,
       });
 
-        drawPoster();
+      drawPoster();
     }
   }, [fontsLoaded, data]);
 
@@ -507,14 +509,16 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
           });
         }}
       />
-      {/* <Image
-        src={canvasImageUrl}
-        style={{
-          height: canvasHeight * scaleRatio,
-          width: canvasWidth * scaleRatio,
-        }}
-        mode="widthFix"
-      /> */}
+      {showPoster && (
+        <Image
+          src={canvasImageUrl}
+          style={{
+            height: canvasHeight * scaleRatio,
+            width: canvasWidth * scaleRatio,
+          }}
+          mode="widthFix"
+        />
+      )}
     </View>
   );
 };

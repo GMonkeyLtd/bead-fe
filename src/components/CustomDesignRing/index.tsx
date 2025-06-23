@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Canvas, Button, View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { ImageCacheManager } from "@/utils/image-cache";
+import CrystalButton from "../CrystalButton";
+import "./CustomDesignRing.scss";
+import { getNavBarHeightAndTop } from "@/utils/style-tools";
 
 interface Bead {
-  image: string;
+  image_url: string;
   radius: number;
   id?: string | number;
 }
@@ -19,6 +22,12 @@ interface Position {
 }
 
 const WUXING_MAP = ["金", "火", "土", "木", "水"];
+
+const SIZE_MAP = {
+  8: 34,
+  10: 48,
+  12: 56,
+};
 /**
  * CustomCircleRing 组件
  * @param beads 珠子数组，每个珠子包含 image（图片地址）和 radius（半径，px）
@@ -30,7 +39,7 @@ const WUXING_MAP = ["金", "火", "土", "木", "水"];
 const CustomDesignRing = ({
   beads = [],
   canvasId = "custom-circle-canvas",
-  size = 300,
+  size = 0,
   spacing = 0,
   beadTypeMap = {},
 }: {
@@ -46,21 +55,49 @@ const CustomDesignRing = ({
   const [beadStatus, setBeadStatus] = useState<
     "idle" | "processing" | "success" | "error"
   >("idle");
-  const [selectedBeadType, setSelectedBeadType] = useState<string>("");
+  const [curWuxing, setCurWuxing] = useState<string>("");
+  const [predictedLength, setPredictedLength] = useState<number>(0);
+  const [canvasSize, setCanvasSize] = useState<number>(0);
 
   useEffect(() => {
-    setSelectedBeadType(Object.keys(beadTypeMap)[0]);
-  }, [beadTypeMap]);
+    const systemInfo = Taro.getSystemInfoSync();
+    const { height: safeHeight } = systemInfo.safeArea || { height: 0 };
+    const predictSize = safeHeight / 2 - 16 - 45;
+    setCanvasSize(!size && predictSize ? predictSize : size);
+  }, []);
 
-  const processImages = async () => {
+  const allWuxing = useMemo(
+    () => Object.keys(beadTypeMap),
+    [JSON.stringify(beadTypeMap)]
+  );
+
+  useEffect(() => {
+    setCurWuxing(Object.keys(beadTypeMap)[0]);
+  }, [allWuxing]);
+
+  useEffect(() => {
+    if (!dots.length) return;
+    const dotsLength = dots.map((dot) => dot.radius);
+    // 所有珠子能围成的周长
+    const allLength = dotsLength.reduce((sum, radius) => sum + radius, 0);
+    // 围成圆的半径
+    const ringRadius = allLength / (2 * Math.PI);
+    // 珠子的平均半径
+    const averageRadius = allLength / (2 * dotsLength.length);
+    // 手围 = （围成圆的半径 - 珠子的平均半径）* 2 * PI
+    const predictLength = (ringRadius - averageRadius) * 2 * Math.PI;
+    setPredictedLength(Math.floor(predictLength / 10));
+  }, [dots]);
+
+  const processImages = async (_beads: Bead[]) => {
     const processedPaths = await ImageCacheManager.processImagePaths(
-      beads.map((item: Bead) => item.image)
+      _beads.map((item: Bead) => item.image_url)
     );
 
-    const beadsWithImageData = beads.map((bead: Bead) => {
+    const beadsWithImageData = _beads.map((bead: Bead) => {
       return {
         ...bead,
-        imageData: processedPaths.get(bead.image) || bead.image,
+        imageData: processedPaths.get(bead.image_url) || bead.image_url,
       };
     });
 
@@ -73,27 +110,27 @@ const CustomDesignRing = ({
     return calculatedPositions;
   };
 
-  const processBeads = async () => {
+  const processBeads = async (_beads: Bead[]) => {
     setBeadStatus("processing");
-    const beadsWithImageData = await processImages();
+    const beadsWithImageData = await processImages(_beads);
     const positions = computeBeadPositions(beadsWithImageData, spacing);
     setDots(positions);
     setBeadStatus("success");
   };
 
   useEffect(() => {
-    if (!beads || beads.length === 0) {
+    if (!beads || beads.length === 0 || !canvasSize) {
       setBeadStatus("success");
       return;
     }
 
     try {
-      processBeads();
+      processBeads(beads);
     } catch (error) {
       console.error("❌ 珠子处理过程出错:", error);
       setBeadStatus("error");
     }
-  }, [JSON.stringify(beads)]);
+  }, [JSON.stringify(beads), canvasSize]);
 
   // 动态计算圆环半径
   function calcRingRadius(beads: any[], spacing: number) {
@@ -114,7 +151,7 @@ const CustomDesignRing = ({
     let currentAngle = 0;
     const positions: Position[] = [];
     // 圆心坐标
-    const center = size / 2;
+    const center = canvasSize / 2;
 
     for (let i = 0; i < dots.length; i++) {
       const j = (i + 1) % dots.length;
@@ -141,26 +178,35 @@ const CustomDesignRing = ({
   const drawCanvas = async (dotList: any[], selectedBeadIndex: number) => {
     if (!dotList.length) return;
     const ctx = Taro.createCanvasContext(canvasId);
-    ctx.clearRect(0, 0, size, size);
+    ctx.clearRect(0, 0, canvasSize, canvasSize);
     dotList.forEach((item, index) => {
       if (index === selectedBeadIndex) {
         return;
       }
       const { x, y, radius, imageData } = item;
       ctx.drawImage(imageData, x - radius, y - radius, radius * 2, radius * 2);
-      // 如果是选中的珠子，绘制红色边框
+      if (selectedBeadIndex !== -1 && index !== selectedBeadIndex) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
+        ctx.setFillStyle('rgba(245, 241, 237, 0.6)');
+        ctx.fill();
+      }
     });
-    if (selectedBeadIndex !== -1) {
-      const { x, y, radius, imageData } = dotList[selectedBeadIndex];
-      ctx.drawImage(imageData, x - radius, y - radius, radius * 2, radius * 2);
-      ctx.beginPath();
-      ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
-      ctx.setStrokeStyle("#ff0000");
-      ctx.setLineWidth(4);
-      ctx.stroke();
-    }
+
+    if (selectedBeadIndex !== -1 ) {
+      // 如果是选中的珠子，绘制白色边框
+        const { x, y, radius, imageData } = dotList[selectedBeadIndex];
+        ctx.drawImage(imageData, x - radius, y - radius, radius * 2, radius * 2);
+        ctx.beginPath();
+        ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
+        ctx.setStrokeStyle("#ffffff");
+        ctx.setLineWidth(4);
+        ctx.stroke();
+      }
+    
     ctx.draw();
   };
+  console.log(selectedBeadIndex, "selectedBeadIndex");
 
   // 处理Canvas点击事件
   const handleCanvasClick = (e: any) => {
@@ -208,8 +254,8 @@ const CustomDesignRing = ({
     query.exec();
   };
 
-  const onChangeBeadType = (beadType: string) => {
-    setSelectedBeadType(beadType);
+  const onWuxingChange = (wuxing: string) => {
+    setCurWuxing(wuxing);
   };
 
   useEffect(() => {
@@ -219,74 +265,251 @@ const CustomDesignRing = ({
     // eslint-disable-next-line
   }, [beadStatus, dots, selectedBeadIndex]);
 
+  const updateBeads = (newDots: any[]) => {
+    processBeads(newDots);
+    // const dotsWithNewPositions = computeBeadPositions(newDots, spacing);
+    // setDots(dotsWithNewPositions);
+  };
+
   const onClockwiseMove = () => {
-    if (selectedBeadIndex === -1) return;
+    if (selectedBeadIndex === -1) {
+      Taro.showToast({
+        title: "请先选择要移动的珠子",
+        icon: "none",
+      });
+      return;
+    }
     const newDots = [...dots];
     const selectedBead = newDots[selectedBeadIndex || 0];
     if (!selectedBead) return;
     const nextIndex = (selectedBeadIndex + 1) % newDots.length;
     newDots[selectedBeadIndex || 0] = newDots[nextIndex];
     newDots[nextIndex] = selectedBead;
-    const dotsWithNewPositions = computeBeadPositions(newDots, spacing);
-    setDots(dotsWithNewPositions);
+    updateBeads(newDots);
     setSelectedBeadIndex(nextIndex);
   };
 
   const onCounterclockwiseMove = () => {
-    if (selectedBeadIndex === -1) return;
+    if (selectedBeadIndex === -1) {
+      Taro.showToast({
+        title: "请先选择要移动的珠子",
+        icon: "none",
+      });
+      return;
+    }
     const newDots = [...dots];
     const selectedBead = newDots[selectedBeadIndex || 0];
     if (!selectedBead) return;
     const nextIndex = (selectedBeadIndex - 1 + newDots.length) % newDots.length;
     newDots[selectedBeadIndex || 0] = newDots[nextIndex];
     newDots[nextIndex] = selectedBead;
-    const dotsWithNewPositions = computeBeadPositions(newDots, spacing);
-    setDots(dotsWithNewPositions);
+    updateBeads(newDots);
     setSelectedBeadIndex(nextIndex);
   };
 
   const onDelete = () => {
-    if (selectedBeadIndex === -1) return;
+    if (selectedBeadIndex === -1) {
+      Taro.showToast({
+        title: "请先选择要删除的珠子",
+        icon: "none",
+      });
+      return;
+    }
     const newDots = [...dots];
     newDots.splice(selectedBeadIndex, 1);
-    const dotsWithNewPositions = computeBeadPositions(newDots, spacing);
-    setDots(dotsWithNewPositions);
-    setSelectedBeadIndex(-1);
+    updateBeads(newDots);
+    setSelectedBeadIndex(selectedBeadIndex + 1);
   };
 
-  console.log(Object.keys(beadTypeMap), "Object.keys(beadTypeMap)");
-
-  const handleBeadClick = (bead: any) => {
+  const handleBeadClick = (bead: any, size: number) => {
     const newDots = [...dots];
     if (selectedBeadIndex === -1) {
-      newDots.push(bead);
+      newDots.push({
+        ...bead,
+        radius: size,
+      });
     } else {
-      newDots[selectedBeadIndex] = bead;
+      newDots[selectedBeadIndex] = {
+        ...bead,
+        radius: size,
+      };
     }
-    const dotsWithNewPositions = computeBeadPositions(newDots, spacing);
-    setDots(dotsWithNewPositions);
+    updateBeads(newDots);
   };
 
-  return (
-    <View style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-      {/* 右侧内容区域 */}
+  const onCreate = () => {
+    console.log("onCreate");
+  };
+
+  const renderBeads = () => {
+    const typeBeads = beadTypeMap[curWuxing];
+    if (!typeBeads || typeBeads.length === 0) return null;
+    return (
       <View
+        key={curWuxing}
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
+          overflowY: "auto",
+          padding: "0px 0px 24px 12px",
+          gap: "16px",
+          borderRadius: "0 8px 8px 0",
+          // backgroundColor: "#f7eed4e8",
+          // boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Canvas
-          canvasId={canvasId}
-          id={canvasId}
-          height={`${size * dpr}px`}
-          width={`${size * dpr}px`}
-          style={{ width: `${size}px`, height: `${size}px` }}
-          onTouchEnd={handleCanvasClick}
-          onClick={handleCanvasClick}
-        />
+        {typeBeads?.map((item: any) => {
+          return (
+            <View
+              key={item.id}
+              style={{
+                width: "100%",
+                height: "120px",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignContent: "center",
+                gap: "8px",
+                // boxSizing: "border-box",
+              }}
+            >
+              {[8, 10, 12].map((size) => {
+                return (
+                  <View
+                    key={`${item.id}-${size}`}
+                    style={{
+                      width: `${SIZE_MAP[size]}px`,
+                      height: `${SIZE_MAP[size]}px`,
+                    }}
+                    onClick={() => handleBeadClick(item, size)}
+                    style={{
+                      flex: 1,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "72px",
+                        width: "72px",
+                        backgroundColor: "#ffffff8a",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      <Image
+                        src={item.image_url}
+                        style={{
+                          width: `${SIZE_MAP[size] * 0.7}px`,
+                          height: `${SIZE_MAP[size] * 0.7}px`,
+                        }}
+                      />
+                    </View>
+                    <View
+                      style={{
+                        fontSize: "12px",
+                        color: "#333",
+                        textAlign: "center",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {item.name}
+                    </View>
+                    <View
+                      style={{
+                        fontSize: "10px",
+                        color: "#8e7767",
+                        textAlign: "center",
+                      }}
+                    >
+                      {size}mm
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
+  return (
+    <View className="custom-design-ring-container">
+      {/* 顶部内容区域 */}
+      <View
+        className="custom-design-ring-top-container"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          height: `${canvasSize + 16 + 45}px`,
+          // height: '50%',
+          flexShrink: 0,
+          flexGrow: 0,
+        }}
+        onClick={() => setSelectedBeadIndex(-1)}
+      >
+        <View
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "relative",
+            height: `${canvasSize}px`,
+          }}
+        >
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <View style={{ fontSize: "12px", color: "#333" }}>适合手围:</View>
+            <View style={{ fontSize: "12px", color: "#333" }}>
+              {`${predictedLength}cm ~ ${predictedLength + 0.5}cm`}
+            </View>
+          </View>
+          <View
+            style={{
+              width: "100%",
+              height: "100%",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexShrink: 0,
+              flexGrow: 0,
+            }}
+          >
+            <Canvas
+              canvasId={canvasId}
+              id={canvasId}
+              height={`${canvasSize * dpr}px`}
+              width={`${canvasSize * dpr}px`}
+              style={{
+                width: `${canvasSize}px`,
+                height: `${canvasSize}px`,
+              }}
+              onTouchEnd={handleCanvasClick}
+              onClick={handleCanvasClick}
+            />
+          </View>
+        </View>
 
         <View
           style={{
@@ -294,112 +517,82 @@ const CustomDesignRing = ({
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            width: "100%",
+            width: "80%",
+            gap: "16px",
           }}
         >
-          <Button
-            onClick={onClockwiseMove}
-            style={{ opacity: selectedBeadIndex === -1 ? 0.7 : 1 }}
-          >
-            顺时针移动
-          </Button>
-          <Button
-            onClick={onCounterclockwiseMove}
-            style={{ opacity: selectedBeadIndex === -1 ? 0.7 : 1 }}
-          >
-            逆时针移动
-          </Button>
-          <Button
-            onClick={onDelete}
-            style={{ opacity: selectedBeadIndex === -1 ? 0.7 : 1 }}
-          >
-            删除
-          </Button>
+          <CrystalButton onClick={onCounterclockwiseMove} text="右移" />
+          <CrystalButton onClick={onClockwiseMove} text="左移" />
+
+          <CrystalButton onClick={onDelete} text="删除" />
         </View>
       </View>
       {/* 左侧纵向Tab选择器 */}
-      <View
-        style={{
-          display: "flex",
-          backgroundColor: "#f7eed4e8",
-          borderRadius: "8px",
-          height: "100%",
-          margin: "20px",
-        }}
-      >
-        <View
-          style={{
-            width: "60px",
-            backgroundColor: "#f5f5f5",
-            borderRadius: "8px 0 0 8px",
-            padding: "8px",
-            maxHeight: "500px",
-            overflowY: "auto",
-            flexShrink: 0,
-          }}
-        >
-          {Object.keys(beadTypeMap).map((beadType, index) => (
-            <View
-              key={beadType}
-              onClick={() => onChangeBeadType(beadType)}
-              style={{
-                padding: "8px 12px",
-                marginBottom: "8px",
-                borderRadius: "6px",
-                backgroundColor:
-                  selectedBeadType === beadType
-                    ? "rgb(245 221 136 / 0.3)"
-                    : "#f5f5f5",
-                color: selectedBeadType === beadType ? "#fffff" : "#333",
-                fontSize: "12px",
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                // border:
-                //   selectedBeadType === beadType
-                //     ? "1px solid #ecbd2d"
-                //     : "1px solid #e0e0e0",
-                boxShadow:
-                  selectedBeadType === beadType
-                    ? "0 2px 4px rgb(194 216 226)"
-                    : "none",
-              }}
-            >
-              {beadType}
-              {beadTypeMap[beadType] && beadTypeMap[beadType].length > 0 && (
-                <View
-                  style={{
-                    fontSize: "10px",
-                    marginTop: "4px",
-                    opacity: 0.8,
-                  }}
-                >
-                  ({beadTypeMap[beadType].length}个)
-                </View>
-              )}
-            </View>
-          ))}
-        </View>
-        <View
+      <View className="custom-design-ring-bottom-container">
+        <View 
           style={{
             display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 8,
-            maxHeight: "300px",
-            overflowY: "auto",
-            padding: "24px",
+            height: "100%",
+            flex: 1,
           }}
         >
-          {beadTypeMap[selectedBeadType]?.map((item: any) => (
-            <View key={item.id} style={{ width: "70px", height: "70px" }} onClick={() => handleBeadClick(item)}>
-              <Image
-                src={item.image_url}
-                style={{ width: "70%", height: "70%" }}
-              />
-            </View>
-          ))}
+          <View
+            style={{
+              width: "60px",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "8px 0 0 8px",
+              padding: "8px",
+              maxHeight: "500px",
+              overflowY: "auto",
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              // boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
+              // borderRight: "1px solid #efd8c4b8"
+            }}
+          >
+            {allWuxing.map((wuxing, index) => (
+              <View
+                key={wuxing}
+                onClick={() => onWuxingChange(wuxing)}
+                style={{
+                  padding: "8px 12px",
+                  marginBottom: "8px",
+                  borderRadius: "6px",
+                  backgroundColor:
+                    curWuxing === wuxing ? "#fdf6eae8" : "#f5f5f5",
+                  color: curWuxing === wuxing ? "#fffff" : "#333",
+                  fontSize: "12px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  // border:
+                  //   selectedBeadType === beadType
+                  //     ? "1px solid #ecbd2d"
+                  //     : "1px solid #e0e0e0",
+                  boxShadow:
+                    curWuxing === wuxing ? "0 2px 4px rgb(194 216 226)" : "none",
+                }}
+              >
+                {wuxing}
+                {beadTypeMap[wuxing] && beadTypeMap[wuxing].length > 0 && (
+                  <View
+                    style={{
+                      fontSize: "10px",
+                      marginTop: "4px",
+                      opacity: 0.8,
+                    }}
+                  >
+                    ({beadTypeMap[wuxing].length}个)
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+          {renderBeads()}
         </View>
+        <CrystalButton onClick={() => onCreate()} text="去制作" isPrimary />
       </View>
     </View>
   );

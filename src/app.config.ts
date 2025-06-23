@@ -9,7 +9,8 @@ export default defineAppConfig({
       pages: [
         'result/index',
         'quick-design/index',
-        'design/index'
+        'design/index',
+        'custom-design/index',
       ]
     },
   ],

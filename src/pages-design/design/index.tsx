@@ -38,6 +38,7 @@ import { useDesign } from "@/store/DesignContext";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
 import PageContainer from "@/components/PageContainer";
+import editBead from "@/assets/icons/edit-bead.svg";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -75,7 +76,7 @@ const ChatPage: React.FC = () => {
 
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender, isLunar } = params || {};
-  const { addBeadData } = useDesign();
+  const { addBeadData, addDesignData } = useDesign();
 
   // 键盘适配逻辑
   useEffect(() => {
@@ -246,6 +247,23 @@ const ChatPage: React.FC = () => {
     );
   };
 
+  const handleEditBead = () => {
+    const beadDataId = "bead-" + generateUUID();
+    addBeadData({
+      image_url: canvasImageUrl,
+      bead_list: beadImageData.map((item) => ({
+        id: item.id,
+        image_url: item.image_url,
+        name: item.name,
+        description: item.description,
+      })),
+      bead_data_id: beadDataId,
+    });
+    Taro.redirectTo({
+      url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
+    });
+  };
+
   const renderKeyboardHide = () => {
     if (isLoading || !beadImageData.length || !canvasImageUrl) {
       return (
@@ -256,7 +274,14 @@ const ChatPage: React.FC = () => {
     }
     return (
       <View className="result-container">
-        <View className="result-title">当前方案</View>
+        <View className="result-title">
+          <View className="result-title-text">当前方案</View>
+          <Image src={editBead} style={{ width: "20px", height: "20px" }}
+            onClick={() => {
+              handleEditBead();
+            }}
+          />
+        </View>
         <View className="result-card">
           <View className="result-content">
             <View className="result-left">

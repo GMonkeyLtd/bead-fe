@@ -30,7 +30,7 @@ const defaultConfig = {
   showLoading: false,
   loadingText: '定制中...',
   showError: true,
-  isMock: false
+  isMock: true
 }
 
 // 请求拦截器 - 在发送请求前的处理
@@ -186,8 +186,10 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
       throw JSON.stringify(error)+ finalConfig.url
     }
   }
+  console.log(defaultConfig, defaultConfig.isMock, 'defaultConfig.isMock')
   if (defaultConfig.isMock) {
     const mockData = MockManager.getMockDataByUrl(config.url);
+    console.log(mockData, 'mockData')
     if (mockData) {
       console.log('使用Mock数据:', config.url);
       return mockData;

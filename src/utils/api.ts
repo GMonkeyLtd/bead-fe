@@ -73,7 +73,10 @@ export interface QuickGenerateResult {
 export const userApi = {
   // 用户登录 - 跳过认证检查，避免循环依赖
   login: (params: LoginParams) =>
-    http.post<LoginResult>("/user/login", params, { skipAuth: true, showLoading: false }),
+    http.post<LoginResult>("/user/login", params, {
+      skipAuth: true,
+      showLoading: false,
+    }),
 
   // 获取用户信息
   getUserInfo: (userId: number) => http.get<User>(`/user/${userId}`),
@@ -94,7 +97,7 @@ export const generateApi = {
   // 快速生成
   quickGenerate: (params: QuickGenerateParams) =>
     http.post<QuickGenerateResult>("/user/oneclick", params, {
-      showLoading: false
+      showLoading: false,
     }),
   personalizedGenerate: (params: PersonalizedGenerateParams) =>
     http.post<PersonalizedGenerateResult[]>(
@@ -110,15 +113,30 @@ export const generateApi = {
     ),
   personalizedGenerateByImage: (params: QuickGenerateByImageParams) =>
     http.post<QuickGenerateResult>("/user/personalizationstep3", params, {
-      showLoading: false
+      showLoading: false,
     }),
 };
 
 export const beadsApi = {
   getBeadList: () =>
-    http.get<PersonalizedGenerateResult[]>("/user/beadlist", {}, {
-      showLoading: false
-    }),
+    http.get<PersonalizedGenerateResult[]>(
+      "/user/beadlist",
+      {},
+      {
+        showLoading: false,
+      }
+    ),
+};
+
+export const userHistoryApi = {
+  getImageHistory: () =>
+    http.get<PersonalizedGenerateResult[]>(
+      "/user/getimagehistory",
+      {},
+      {
+        showLoading: false,
+      }
+    ),
 };
 
 // 文件相关API
@@ -134,4 +152,5 @@ export default {
   generate: generateApi,
   bead: beadsApi,
   file: fileApi,
+  userHistory: userHistoryApi,
 };

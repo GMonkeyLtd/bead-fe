@@ -35,8 +35,8 @@ const CustomDesign = () => {
     <PageContainer keyboardVisible={false}>
       <CustomDesignRing
         beads={testData.data.recommendations?.map((item, index) => ({
-          image: item.image_url,
-          radius: item.radius,
+          image_url: item.image_url,
+          radius: 10,
           name: `bead-${index}`,
         }))}
         size={300}

@@ -51,8 +51,7 @@ const Dev = () => {
 
   return (
     <View style={{ width: '100vw', height: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', paddingTop: '50px', paddingBottom: '50px' }}>
-      <PosterGenerator data={posterData} onGenerated={handleGenerated} />
-      {/* {posterImageUrl && <Image src={posterImageUrl} />} */}
+      <PosterGenerator data={posterData} onGenerated={handleGenerated} showPoster={true} />
       <View onClick={handleSave}>
         保存
       </View>

@@ -67,11 +67,11 @@ export class MockManager {
   static getMockDataByUrl(url: string): any {
     const urlArr = url?.split('/')
     const key = urlArr?.length > 0 ? urlArr[urlArr.length - 1] : ''
-    const mockData = this.getMockData(key)
+    const mockData = this.getMockData(key.replace('?', ''))
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(mockData)
-      }, 4000)
+      }, 500)
     })
   }
 }
