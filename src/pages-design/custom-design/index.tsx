@@ -1,15 +1,23 @@
 import { View, Image } from "@tarojs/components";
+import Taro from "@tarojs/taro";
 import testData from "./test.json";
 import CustomDesignRing from "@/components/CustomDesignRing";
 import { useEffect, useState } from "react";
 import { beadsApi } from "@/utils/api";
 import PageContainer from "@/components/PageContainer";
+import { useDesign } from "@/store/DesignContext";
+
 
 const CustomDesign = () => {
   const [beadList, setBeadList] = useState<any[]>([]);
   const [beadTypeMap, setBeadTypeMap] = useState<any>({});
+  const { beadData } = useDesign();
+
+  const {beadDataId} = Taro.getCurrentInstance()?.router?.params || {};
+  console.log(Taro.getCurrentInstance()?.router?.params, 'custom-design')
 
   useEffect(() => {
+
     beadsApi.getBeadList().then((res) => {
       console.log(res, "res");
       const resData = res.data;
@@ -29,6 +37,13 @@ const CustomDesign = () => {
         }, {})
       );
     });
+
+    if (beadDataId) {
+      const _beadData = beadData.find(
+        (item) => item.bead_data_id === beadDataId
+      );
+      console.log(_beadData)
+    }
   }, []);
 
   return (

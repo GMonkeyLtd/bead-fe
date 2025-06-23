@@ -59,7 +59,6 @@ const CircleRing = ({
       setDownloadStatus("success");
       return;
     }
-    console.log("rerender dots");
 
     const processImages = async () => {
       setDownloadStatus("downloading");

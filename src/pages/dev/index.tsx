@@ -1,8 +1,9 @@
 import PosterGenerator from "@/components/PosterGenerator";
 import { QR_CODE_IMAGE_URL } from "@/config";
-import { View, Text, Image } from "@tarojs/components";
+import { View, Text, Image, Button } from "@tarojs/components";
 import { useState } from "react";
 import Taro from "@tarojs/taro";
+import BudgetDialog from '../../components/BudgetDialog'
 
 const Dev = () => {
   const [posterData, setPosterData] = useState({
@@ -34,6 +35,7 @@ const Dev = () => {
   });
 
   const [posterImageUrl, setPosterImageUrl] = useState('');
+  const [showBudgetDialog, setShowBudgetDialog] = useState(false)
 
   const handleGenerated = (tempFilePath: string) => {
     console.log(tempFilePath, 'tempFilePath')
@@ -49,12 +51,37 @@ const Dev = () => {
     });
   }
 
+  const handleOpenDialog = () => {
+    setShowBudgetDialog(true)
+  }
+
+  const handleCloseDialog = () => {
+    setShowBudgetDialog(false)
+  }
+
+  const handleConfirm = (budget: number) => {
+    console.log('确认预算:', budget)
+    setShowBudgetDialog(false)
+  }
+
   return (
     <View style={{ width: '100vw', height: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', paddingTop: '50px', paddingBottom: '50px' }}>
-      <PosterGenerator data={posterData} onGenerated={handleGenerated} showPoster={true} />
+      {/* <PosterGenerator data={posterData} onGenerated={handleGenerated} showPoster={true} />
       <View onClick={handleSave}>
         保存
       </View>
+      <Button onClick={handleOpenDialog}>
+        打开订单预算弹窗
+      </Button> */}
+      
+      <BudgetDialog
+        visible={true}
+        title="夏日睡莲"
+        designNumber="0001"
+        productImage="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"
+        onConfirm={handleConfirm}
+        onClose={handleCloseDialog}
+      />
     </View>
   );
 };

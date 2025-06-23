@@ -12,6 +12,7 @@ import { useDesign } from "@/store/DesignContext";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import shareDesignImage from "@/assets/icons/share-design.svg";
 import PosterGenerator from "@/components/PosterGenerator";
+import BudgetDialog from "@/components/BudgetDialog";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -23,7 +24,8 @@ const Result = () => {
   const [shareImageUrl, setShareImageUrl] = useState("");
   console.log(designData, "designData");
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
-  const [designNo, setDesignNo] = useState("");
+  const [designNo, setDesignNo] = useState("000001");
+  const [budgetDialogShow, setBudgetDialogShow] = useState(false);
 
   const posterData = useMemo(() => {
     return {
@@ -121,10 +123,8 @@ const Result = () => {
   };
 
   // 分享图片
-  const shareImage = () => {
-    Taro.showShareMenu({
-      withShareTicket: true,
-    });
+  const doCreate = () => {
+    setBudgetDialogShow(true);
   };
 
   const viewImage = () => {
@@ -236,7 +236,7 @@ const Result = () => {
           }
         />
         <CrystalButton
-          onClick={shareImage}
+          onClick={doCreate}
           isPrimary
           text="制作成品"
           style={{ flex: 1 }}
@@ -249,6 +249,14 @@ const Result = () => {
           }
         />
       </View>
+      <BudgetDialog
+        visible={budgetDialogShow}
+        title={braceletName}
+        designNumber={designNo}
+        productImage={imageUrl}
+        onConfirm={console.log}
+        onClose={() => setBudgetDialogShow(false)}
+      />
       <PosterGenerator data={posterData} onGenerated={setShareImageUrl} />
     </View>
   );
