@@ -73,7 +73,7 @@ export interface QuickGenerateResult {
 export const userApi = {
   // 用户登录 - 跳过认证检查，避免循环依赖
   login: (params: LoginParams) =>
-    http.post<LoginResult>("/user/login", params, { skipAuth: true }),
+    http.post<LoginResult>("/user/login", params, { skipAuth: true, showLoading: false }),
 
   // 获取用户信息
   getUserInfo: (userId: number) => http.get<User>(`/user/${userId}`),

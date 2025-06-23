@@ -27,10 +27,10 @@ export interface ApiResponse<T = any> {
 const defaultConfig = {
   baseURL: '', // 在这里设置你的API基础URL
   timeout: 60000,
-  showLoading: true,
+  showLoading: false,
   loadingText: '定制中...',
   showError: true,
-  isMock: true
+  isMock: false
 }
 
 // 请求拦截器 - 在发送请求前的处理

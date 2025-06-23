@@ -14,9 +14,8 @@ const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
 
   useEffect(() => {
-    
-    // AuthManager.clearAuth();
-    // AuthManager.login();
+    AuthManager.clearAuth();
+    AuthManager.login();
   }, []);
 
   const startDesign = () => {
@@ -43,7 +42,7 @@ const Home = () => {
     gender: number;
     isLunar: boolean;
   }) => {
-    Taro.navigateTo({
+    Taro.redirectTo({
       url:
         pageUrls.quickDesign + "?year=" +
         year +
@@ -75,7 +74,7 @@ const Home = () => {
     gender: string;
     isLunar: boolean;
   }) => {
-    Taro.navigateTo({
+    Taro.redirectTo({
       url:
         pageUrls.design + '?year=' +
         year +

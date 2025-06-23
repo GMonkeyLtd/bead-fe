@@ -4,7 +4,7 @@ export const SWIPER_DATA = [
     {
       id: 1,
       title: "水晶手串新灵感",
-      subtitle: "CRYSTAL4",
+      subtitle: "CRYSTAL",
       description: "探索未来，掌握命运",
       backgroundImage:
         "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/home-page.png",

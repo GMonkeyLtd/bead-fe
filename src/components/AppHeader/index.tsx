@@ -57,7 +57,7 @@ const AppHeader = ({
             style={{ height: "24px", width: "24px" }}
             onClick={() => {
               console.log('handleback')
-              Taro.navigateTo({
+              Taro.redirectTo({
                 url: pageUrls.home,
               });
             }}

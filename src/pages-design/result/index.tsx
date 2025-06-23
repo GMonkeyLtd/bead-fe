@@ -38,52 +38,52 @@ const Result = () => {
   useEffect(() => {
     // 获取传入的图片URL参数
     const instance = Taro.getCurrentInstance();
-    // const params = instance.router?.params;
-    const params = {
-      bracelet_name: "四季福缘",
-      image_urls: [
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-      ],
-      designId: "design-1234567890",
-      bead_ids_deduplication: [
-        {
-          color: "绿色",
-          english: "Green Aventurine",
-          function: "招财旺运",
-          id: "59",
-          image_url:
-            "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
-          name: "绿东陵",
-          wuxing: "木",
-        },
-        {
-          color: "浅黄色",
-          english: "Citrine",
-          function: "聚财纳福",
-          id: "38",
-          image_url:
-            "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%BB%84%E6%B0%B4%E6%99%B6.png",
-          name: "黄水晶",
-          wuxing: "土",
-        },
-      ],
-      recommendation_text:
-        "这款四季福缘手串精选绿东陵与黄水晶为主珠，配以白水晶与海蓝宝，象征春夏秋冬四季轮回。绿东陵带来生机与财运，黄水晶招财聚福，白水晶净化心灵，海蓝宝守护平安。佩戴此串，四季平安，福缘深厚。",
-    };
-    setImageUrl(params.image_urls[0]);
-    setBraceletName(params.bracelet_name);
-    setBraceletDescription(params.recommendation_text);
-    setBeadDescriptions(params.bead_ids_deduplication);
-    setDesignNo("00001");
-    // if (params?.designId) {
-    //   const result = designData.find((item: any) => item.design_id === params.designId);
-    //   const { image_urls, bracelet_name, recommendation_text, bead_ids_deduplication } = result;
-    //   console.log(image_urls[0],decodeURIComponent(image_urls[0]), "images_url");
-    //   setImageUrl(image_urls[0]);
-    //   setBraceletName(bracelet_name);
-    //   setBraceletDescription(recommendation_text);
-    //   setBeadDescriptions(bead_ids_deduplication);
-    // }
+    const params = instance.router?.params;
+    // const params = {
+    //   bracelet_name: "四季福缘",
+    //   image_urls: [
+    //     "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
+    //   ],
+    //   designId: "design-1234567890",
+    //   bead_ids_deduplication: [
+    //     {
+    //       color: "绿色",
+    //       english: "Green Aventurine",
+    //       function: "招财旺运",
+    //       id: "59",
+    //       image_url:
+    //         "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
+    //       name: "绿东陵",
+    //       wuxing: "木",
+    //     },
+    //     {
+    //       color: "浅黄色",
+    //       english: "Citrine",
+    //       function: "聚财纳福",
+    //       id: "38",
+    //       image_url:
+    //         "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%BB%84%E6%B0%B4%E6%99%B6.png",
+    //       name: "黄水晶",
+    //       wuxing: "土",
+    //     },
+    //   ],
+    //   recommendation_text:
+    //     "这款四季福缘手串精选绿东陵与黄水晶为主珠，配以白水晶与海蓝宝，象征春夏秋冬四季轮回。绿东陵带来生机与财运，黄水晶招财聚福，白水晶净化心灵，海蓝宝守护平安。佩戴此串，四季平安，福缘深厚。",
+    // };
+    // setImageUrl(params.image_urls[0]);
+    // setBraceletName(params.bracelet_name);
+    // setBraceletDescription(params.recommendation_text);
+    // setBeadDescriptions(params.bead_ids_deduplication);
+    // setDesignNo("00001");
+    if (params?.designId) {
+      const result = designData.find((item: any) => item.design_id === params.designId);
+      const { image_urls, bracelet_name, recommendation_text, bead_ids_deduplication } = result;
+      console.log(image_urls[0],decodeURIComponent(image_urls[0]), "images_url");
+      setImageUrl(image_urls[0]);
+      setBraceletName(bracelet_name);
+      setBraceletDescription(recommendation_text);
+      setBeadDescriptions(bead_ids_deduplication);
+    }
   }, []);
 
   // 保存图片到相册

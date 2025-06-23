@@ -55,7 +55,7 @@ const QuickDesign = () => {
       bead_ids_deduplication,
       design_id: uniqueId,
     });
-    Taro.navigateTo({
+    Taro.redirectTo({
       url:
         pageUrls.result +
         "?imageUrl=" +
@@ -99,7 +99,7 @@ const QuickDesign = () => {
           icon: "none",
         });
         setTimeout(() => {
-          Taro.navigateTo({
+          Taro.redirectTo({
             url: pageUrls.home,
           });
         }, 3000);
@@ -131,7 +131,7 @@ const QuickDesign = () => {
         icon: "none",
       });
       setTimeout(() => {
-        Taro.navigateTo({
+        Taro.redirectTo({
           url: pageUrls.home,
         });
       }, 3000)

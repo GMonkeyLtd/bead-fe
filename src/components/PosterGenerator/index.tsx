@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { View, Canvas, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import {
+  CRYSTAL_BROWN_BG_IMAGE_URL,
   CRYSTALS_BG_IMAGE_URL,
   FONT_URL,
   LOGO_SLOGAN_IMAGE_URL,
@@ -261,7 +262,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         path: crystalsBgImgPath,
         height: crystalsBgImgHeight,
         width: crystalsBgImgWidth,
-      } = await loadImage(CRYSTALS_BG_IMAGE_URL);
+      } = await loadImage(CRYSTAL_BROWN_BG_IMAGE_URL);
       ctx.drawImage(
         crystalsBgImgPath,
         0,

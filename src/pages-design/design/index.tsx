@@ -210,7 +210,7 @@ const ChatPage: React.FC = () => {
       bead_data_id: beadDataId,
     });
 
-    Taro.navigateTo({
+    Taro.redirectTo({
       url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
     });
   };
@@ -325,7 +325,7 @@ const ChatPage: React.FC = () => {
                   if (!canvasImageUrl) {
                     return;
                   }
-                  Taro.navigateTo({
+                  Taro.redirectTo({
                     url:
                       pageUrls.result +
                       "?imageUrl=" +
