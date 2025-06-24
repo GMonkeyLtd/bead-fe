@@ -12,6 +12,10 @@ interface BraceletCardProps {
   productImage: string;
   onMoreClick?: () => void;
   className?: string;
+  orderAction?: {
+    text: string;
+    onClick: () => void;
+  };
 }
 
 const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
@@ -21,21 +25,28 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
   quantity,
   price,
   productImage,
-  className = ''
+  className = '',
+  orderAction
 }) => {
   return (
     <View className={`bracelet-info ${className}`}>
       {/* 订单编号和复制 */}
-      <View className="order-info">
-        <Text className="order-number">订单编号：{orderNumber}</Text>
-        {/* <View className="copy-button" onClick={console.log}> */}
-          <Image 
-            src={copyIcon}
-            style={{ width: "16px", height: "16px" }}
-            // mode="aspectFit"
-          />
-        {/* </View> */}
+      <View className='order-info-container'>
+        <View className="order-info">
+          <Text className="order-number">订单编号：{orderNumber}</Text>
+            <Image 
+              src={copyIcon}
+              style={{ width: "16px", height: "16px" }}
+              // mode="aspectFit"
+            />
+        </View>
+        {orderAction?.text && (
+          <View className="order-action" onClick={orderAction.onClick}>
+            {orderAction.text}
+          </View>
+        )}
       </View>
+      
       
       {/* 分割线 */}
       <View className="divider" />
@@ -120,7 +131,8 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
   price,
   productImage,
   style = {},
-  beads = []
+  beads = [],
+  orderAction
 }) => {
   return (
     <View style={{ display: "flex", flexDirection: "column", gap: "20px", ...style }}>
@@ -131,6 +143,7 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
           quantity={quantity}
           price={price}
           productImage={productImage}
+          orderAction={orderAction}
         />
 
         <BeadDetailList beads={beads} />

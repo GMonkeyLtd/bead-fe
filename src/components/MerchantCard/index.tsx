@@ -5,6 +5,7 @@ import wechatIcon from "@/assets/icons/wechat.svg";
 import notificationIcon from "@/assets/icons/notification.svg";
 import greenUpArrowIcon from "@/assets/icons/green-up-arrow.svg";
 import redDownArrowIcon from "@/assets/icons/red-down-arrow.svg";
+import remarkIcon from "@/assets/icons/remark.svg";
 import "./index.scss";
 import ImageSlider from "../ImageSlider";
 
@@ -20,6 +21,11 @@ interface MerchantCardProps {
   onCall?: () => void;
   onWechat?: () => void;
   onRemind?: () => void;
+  onRemark?: () => void;
+  showRemind?: boolean;
+  showRemark?: boolean;
+  showHistory?: boolean;
+  isCanceled?: boolean;
 }
 
 const MerchantCard: React.FC<MerchantCardProps> = ({
@@ -32,25 +38,21 @@ const MerchantCard: React.FC<MerchantCardProps> = ({
   historyCount,
   historyImages,
   showRemind = true,
+  showRemark = true,
+  showHistory = true,
+  isCanceled = false,
   onCall,
   onWechat,
   onRemind,
+  onRemark,
 }) => {
-  // 根据数值变化方向决定箭头颜色
-  const getArrowColor = (rate: number) => {
-    return rate >= 70 ? "#60BD09" : "#E12C2C";
-  };
-
   return (
     <View className="merchant-card">
       {/* 商家信息区域 */}
-      <View className="merchant-info">
+      <View className="merchant-info" style={{ opacity: isCanceled ? 0.5 : 1 }}>
         <View className="merchant-header">
           <View className="merchant-title">
             <Text className="merchant-name">{name}</Text>
-            <View className="status-badge">
-              <Text className="status-text">{status}</Text>
-            </View>
           </View>
           <Text className="merchant-address">{address}</Text>
         </View>
@@ -94,27 +96,29 @@ const MerchantCard: React.FC<MerchantCardProps> = ({
       </View>
 
       {/* 历史成交区域 */}
-      <View className="history-section">
-        <Text className="history-title">历史成交（{historyCount}）</Text>
-        <View className="history-images">
-          <View className="image-list">
-            {historyImages.slice(0, 4).map((image, index) => (
-              <View key={index} className="history-image">
-                <img src={image} alt={`成交记录${index + 1}`} />
-              </View>
-            ))}
+      {showHistory && (
+        <View className="history-section">
+          <Text className="history-title">历史成交（{historyCount}）</Text>
+          <View className="history-images">
+            <View className="image-list">
+              {historyImages.slice(0, 4).map((image, index) => (
+                <View key={index} className="history-image">
+                  <img src={image} alt={`成交记录${index + 1}`} />
+                </View>
+              ))}
+            </View>
+            <ImageSlider
+              images={historyImages}
+              width={80}
+              height={80}
+              gap={8}
+              borderRadius={10}
+              showGradientMask={true}
+            />
+            <View className="image-fade"></View>
           </View>
-          <ImageSlider
-            images={historyImages}
-            width={80}
-            height={80}
-            gap={8}
-            borderRadius={10}
-            showGradientMask={true}
-          />
-          <View className="image-fade"></View>
         </View>
-      </View>
+      )}
 
       {/* 操作按钮区域 */}
       <View className="action-buttons">
@@ -130,6 +134,12 @@ const MerchantCard: React.FC<MerchantCardProps> = ({
           <View className="action-btn remind-btn" onClick={onRemind}>
             <Image src={notificationIcon} />
             <Text>催一下</Text>
+          </View>
+        )}
+        {showRemark && (
+          <View className="action-btn remark-btn" onClick={onRemark}>
+            <Image src={remarkIcon} />
+            <Text>评价</Text>
           </View>
         )}
       </View>

@@ -8,11 +8,13 @@ const CrystalContainer = ({
   style = {},
   isWhite = false,
   keyboardVisible = false,
+  disablePaddingBottom = false,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
   isWhite?: boolean;
   keyboardVisible?: boolean;
+  disablePaddingBottom?: boolean;
 }) => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
 
@@ -24,6 +26,9 @@ const CrystalContainer = ({
       style={{
         background: "linear-gradient(180deg, rgba(213, 195, 157, 0.50) 0%, rgba(252, 245, 240, 0.80) 19.55%, #FFFCFA 100%)",
         backdropFilter: "blur(24.100000381469727px)",
+        ...(disablePaddingBottom && {
+          paddingBottom: 0,
+        }),
       }}
     >
       <AppHeader isWhite={isWhite} />
@@ -52,7 +57,7 @@ const CrystalContainer = ({
             style={{ width: "100%" }}
           />
         </View>
-        <View style={{...style, position: "relative"}}>
+        <View style={{...style, position: "relative", height: "100%"}}>
           {children}
         </View>
       </View>
