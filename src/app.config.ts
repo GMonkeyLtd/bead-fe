@@ -7,9 +7,13 @@ export default defineAppConfig({
     {
       root: 'pages-design',
       pages: [
-        'result/index',
         'quick-design/index',
-        'design/index',
+        'design/index'
+      ]
+    },
+    {
+      root: 'pages-utils',
+      pages: [
         'custom-design/index',
       ]
     },
@@ -17,16 +21,18 @@ export default defineAppConfig({
       root: 'pages-user',
       pages: [
         'order-detail/index',
+        'order-list/index',
         'design-list/index',
+        'result/index',
       ]
     },
   ],
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#ffffff',
+    navigationBarBackgroundColor: '#F4F1EE',
     navigationBarTitleText: '琉光纪',
     navigationBarTextStyle: 'black',
-    backgroundColor: '#ffffff'
+    backgroundColor: '#F4F1EE'
   },
 
 })

@@ -5,27 +5,29 @@ import AppHeader from "../AppHeader";
 const PageContainer = ({
   children,
   isWhite = false,
-  keyboardVisible = false,
+  keyboardHeight = 0,
 }: {
   children: React.ReactNode;
   isWhite?: boolean;
-  keyboardVisible?: boolean;
+  keyboardHeight?: number;
 }) => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
 
+  console.log("keyboardHeight", keyboardHeight);
   return (
     <View
-      className={`crystal-common-container ${
-        keyboardVisible ? "keyboard-visible" : ""
-      }`}
+      className={`crystal-common-container `}
+      style={{
+        height: `calc(100vh - ${keyboardHeight}px)`,
+      }}
     >
       <AppHeader isWhite={isWhite} />
       <View
-        className='page-children-container'
+        className="page-children-container"
         style={{
           position: "relative",
           width: "100vw",
-          height: `calc(100vh - ${navBarTop + navBarHeight}px)`,
+          height: `calc(100% - ${navBarTop + navBarHeight + keyboardHeight}px)`,
           top: `${navBarTop + navBarHeight}px`,
         }}
       >

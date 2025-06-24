@@ -70,7 +70,7 @@ const ChatPage: React.FC = () => {
   const [beadImageData, setBeadImageData] = useState<
     PersonalizedGenerateResult[]
   >([]);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
 
@@ -83,11 +83,11 @@ const ChatPage: React.FC = () => {
     // 监听键盘弹起
     const onKeyboardHeightChange = (res) => {
       // 设置CSS变量
-      document.documentElement.style.setProperty(
-        "--keyboard-height",
-        `${res.height}px`
-      );
-      setKeyboardVisible(res.height > 0);
+      // document.documentElement.style.setProperty(
+      //   "--keyboard-height",
+      //   `${res.height}px`
+      // );
+      setKeyboardHeight(res.height);
     };
 
     // 小程序键盘事件监听
@@ -276,7 +276,9 @@ const ChatPage: React.FC = () => {
       <View className="result-container">
         <View className="result-title">
           <View className="result-title-text">当前方案</View>
-          <Image src={editBead} style={{ width: "20px", height: "20px" }}
+          <Image
+            src={editBead}
+            style={{ width: "20px", height: "20px" }}
             onClick={() => {
               handleEditBead();
             }}
@@ -377,7 +379,7 @@ const ChatPage: React.FC = () => {
   };
 
   return (
-    <PageContainer keyboardVisible={keyboardVisible}>
+    <PageContainer keyboardHeight={keyboardHeight}>
       <View
         style={{
           height: "100%",
@@ -388,14 +390,17 @@ const ChatPage: React.FC = () => {
       >
         {/* 主要聊天区域 */}
         <View
-          className={`assistant-container ${keyboardVisible ? "small" : ""}`}
+          className={`assistant-container ${keyboardHeight > 0 ? "small" : ""}`}
         >
           {/* 消息列表 */}
           <Image
             src={
-              keyboardVisible ? ASSISTANT_SM_IMAGE_URL : ASSISTANT_LG_IMAGE_URL
+              keyboardHeight > 0
+                ? ASSISTANT_SM_IMAGE_URL
+                : ASSISTANT_LG_IMAGE_URL
             }
             className="assistant-image"
+            mode="aspectFill"
           />
 
           <View className="message-container">
@@ -404,20 +409,20 @@ const ChatPage: React.FC = () => {
                 <View className="assistant-role">疗愈师</View>
                 <View className="assistant-name">黎莉莉</View>
               </View>
-              {!keyboardVisible && renderHistoryController()}
+              {keyboardHeight === 0 && renderHistoryController()}
             </View>
             {/* 助手欢迎消息 - 按照Figma设计样式，包含三角形指示器 */}
             <View className="message-wrapper">
               <ChatCardList
                 chatContents={messages}
                 messageIndex={messageIndex}
-                maxHeight={keyboardVisible ? 70 : 96}
+                maxHeight={keyboardHeight > 0 ? 70 : 96}
               />
             </View>
           </View>
         </View>
         {/* 生成的图片 */}
-        {keyboardVisible ? renderKeyboardShow() : renderKeyboardHide()}
+        {keyboardHeight > 0 ? renderKeyboardShow() : renderKeyboardHide()}
 
         {/* 输入区域 */}
         <View className="input-container">
@@ -439,13 +444,13 @@ const ChatPage: React.FC = () => {
               onConfirm={handleSend}
               autoHeight
               adjustPosition={false}
-              adjustKeyboardTo="bottom"
-              onFocus={() => {
-                setKeyboardVisible(true);
-              }}
-              onBlur={() => {
-                setKeyboardVisible(false);
-              }}
+              // adjustKeyboardTo="bottom"
+              // onFocus={() => {
+              //   setKeyboardHeight(90);
+              // }}
+              // onBlur={() => {
+              //   setKeyboardHeight(0);
+              // }}
               showConfirmBar={false}
             />
             <Image

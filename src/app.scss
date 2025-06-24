@@ -57,11 +57,6 @@ body {
   min-height: 100vh;
   transition: height 0.3s ease;
 
-  &.keyboard-visible {
-    height: calc(100vh - var(--keyboard-height));
-    padding-bottom: 0;
-  }
-
   .app-name {
     padding: 10px 16px;
     display: flex;

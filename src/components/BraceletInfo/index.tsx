@@ -33,7 +33,7 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
       {/* 订单编号和复制 */}
       <View className='order-info-container'>
         <View className="order-info">
-          <Text className="order-number">订单编号：{orderNumber}</Text>
+          <Text className="order-number">订单号：{orderNumber}</Text>
             <Image 
               src={copyIcon}
               style={{ width: "16px", height: "16px" }}

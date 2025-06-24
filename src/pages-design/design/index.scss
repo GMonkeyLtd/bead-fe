@@ -9,6 +9,7 @@
   transition: height 0.3s ease;
   display: flex;
   align-items: flex-end;
+  background: linear-gradient(180deg, rgba(245, 243, 239, 0.00) 0%, #E4DDD6 100%);
 
   .message-header {
     display: flex;
@@ -79,8 +80,8 @@
     }
 
     .assistant-image {
-      width: 120px;
-      height: 181px;
+      width: 160px;
+      height: 182px;
     }
 
     .message-container {
@@ -193,7 +194,7 @@
   &.small {
     padding: 16px;
     background: rgba(255, 255, 255, 0.27);
-    flex: 0 0 auto;
+    flex: 1 1 auto;
   }
 }
 

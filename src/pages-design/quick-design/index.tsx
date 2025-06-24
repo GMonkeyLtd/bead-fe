@@ -141,7 +141,7 @@ const QuickDesign = () => {
   };
 
   return (
-    <PageContainer keyboardVisible={false}>
+    <PageContainer>
       {designing ? (
         <View className="quick-design-container">
           <View className="quick-design-loading">

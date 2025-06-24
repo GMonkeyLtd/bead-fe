@@ -13,6 +13,8 @@ import createBeadImage from "@/assets/icons/create-bead.svg";
 import shareDesignImage from "@/assets/icons/share-design.svg";
 import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
+import { OrderStatus } from "@/utils/orderUtils";
+import OrderListComp from "@/components/OrderListComp";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -26,6 +28,38 @@ const Result = () => {
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
   const [designNo, setDesignNo] = useState("000001");
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
+  const [orderList, setOrderList] = useState<any[]>([
+    {
+      id: "1",
+      orderNumber: "ADX2333",
+      status: OrderStatus.PendingDispatch,
+      merchantName: "东海县亿特珠宝有限公司",
+      merchantImage:
+        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
+      price: 199.0,
+      createTime: "2025-04-08 14:27:39",
+    },
+    {
+      id: "2",
+      orderNumber: "ADX2333",
+      status: OrderStatus.PendingAcceptance,
+      merchantName: "东海县亿特珠宝有限公司",
+      merchantImage:
+        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
+      price: 299.0,
+      createTime: "2025-04-08 14:27:39",
+    },
+    {
+      id: "3",
+      orderNumber: "ADX2333",
+      status: OrderStatus.Completed,
+      merchantName: "上上珠宝有限公司",
+      merchantImage:
+        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
+      price: 299.0,
+      createTime: "2025-04-08 14:27:39",
+    },
+  ]);
 
   const posterData = useMemo(() => {
     return {
@@ -235,13 +269,25 @@ const Result = () => {
             </View>
           </View>
         </View>
+
+        {orderList.length > 0 && (
+          <View className="result-order-list-container">
+            <View className="result-order-list-title">
+              {`相关订单（${orderList.length}）`}
+            </View>
+            <OrderListComp
+              orders={orderList}
+              showActions={false}
+              showImage={false}
+            />
+          </View>
+        )}
       </View>
-      <View
-        className="result-content-card-action"
-      >
+      <View className="result-content-card-action">
         <CrystalButton
           onClick={saveImage}
           text="分享"
+          style={{ marginTop: "20px", marginLeft: "24px" }}
           prefixIcon={
             <Image
               src={shareDesignImage}
@@ -254,7 +300,7 @@ const Result = () => {
           onClick={doCreate}
           isPrimary
           text="制作成品"
-          style={{ flex: 1 }}
+          style={{ flex: 1, marginTop: "20px", marginRight: "24px" }}
           prefixIcon={
             <Image
               src={createBeadImage}

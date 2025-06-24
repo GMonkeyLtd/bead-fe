@@ -77,7 +77,6 @@
         linear-gradient(180deg, #aeaba836 0, #ffffffb8 75%, #ffffff52 100%)
           border-box;
       border: 4px solid transparent;
-      border-radius: 10px;
       box-sizing: border-box;
 
       .result-content-card-image {
@@ -156,7 +155,6 @@
           font-weight: 400;
           font-size: 40px;
           letter-spacing: 2px;
-          margin-bottom: 24px;
           font-family: "GlobalFont", "SimSun", "宋体", serif;
         }
 
@@ -164,6 +162,7 @@
           font-size: 12px;
           height: 36px;
           font-weight: 300;
+          margin-bottom: 24px;
           position: relative;
           overflow: hidden;
 
@@ -209,7 +208,7 @@
       flex-direction: column;
       align-items: center;
       gap: 8px;
-            
+
       .bead-share-qrcode-text {
         font-weight: 300;
         font-size: 11px;
@@ -229,5 +228,20 @@
     flex-direction: row;
     gap: 16px;
     box-shadow: 0px -5px 14px 0px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.result-order-list-container {
+  margin-top: 20px;
+
+  .result-order-list-title {
+    color: #1f1722;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    margin: 0 10px 10px 10px;
   }
 }

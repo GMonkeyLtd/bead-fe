@@ -24,6 +24,10 @@ export default {
     "pages/home/index": {
       "network": "all",
       "packages": ["pages-design"]
+    },
+    "pages-design/design/index": {
+      "network": "all",
+      "packages": ["pages-user", "pages-utils"]
     }
   },
   h5: {
