@@ -17,6 +17,7 @@ export default defineAppConfig({
       root: 'pages-user',
       pages: [
         'order-detail/index',
+        'design-list/index',
       ]
     },
   ],

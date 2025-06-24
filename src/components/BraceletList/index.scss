@@ -1,0 +1,134 @@
+.bracelet-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 345px;
+  margin: 0 auto;
+
+  .bracelet-item {
+    width: 164.5px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    .bracelet-image-container {
+      position: relative;
+      width: 164.5px;
+      height: 164.5px;
+      border-radius: 10px;
+      overflow: hidden;
+
+      .bracelet-image {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+      }
+    }
+
+    .bracelet-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      width: 164.5px;
+
+      .bracelet-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 6px;
+
+        .bracelet-name {
+          font-family: 'Source Han Serif CN', serif;
+          font-weight: 500;
+          font-size: 14px;
+          line-height: 1.437em;
+          letter-spacing: 0.07em;
+          color: #1F1722;
+          opacity: 0.9;
+          text-align: left;
+          flex: 1;
+        }
+
+        .rating-icons {
+          position: relative;
+          width: 15.15px;
+          height: 10px;
+          flex-shrink: 0;
+
+          .rating-line {
+            position: absolute;
+            top: 5px;
+            left: 0;
+            width: 14.97px;
+            height: 0;
+            border-top: 0.9px solid #1F1722;
+          }
+
+          .rating-dot {
+            position: absolute;
+            width: 6.39px;
+            height: 5px;
+            border: 0.9px solid #1F1722;
+            border-radius: 50%;
+
+            &:nth-child(2) {
+              top: 0;
+              right: 0;
+            }
+
+            &:nth-child(3) {
+              bottom: 0;
+              right: 0;
+            }
+
+            &.active {
+              background-color: #1F1722;
+            }
+          }
+        }
+      }
+
+      .bracelet-number {
+        font-family: 'Noto Sans SC', sans-serif;
+        font-weight: 300;
+        font-size: 10px;
+        line-height: 1.35em;
+        letter-spacing: 0.1em;
+        color: rgba(31, 23, 34, 0.5);
+        text-align: center;
+        width: 100%;
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 375px) {
+  .bracelet-list {
+    width: 100%;
+    padding: 0 16px;
+    
+    .bracelet-item {
+      width: calc(50% - 8px);
+      
+      .bracelet-image-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+      }
+      
+      .bracelet-info {
+        width: 100%;
+      }
+    }
+  }
+} 

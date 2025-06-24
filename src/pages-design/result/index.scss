@@ -3,8 +3,6 @@
   box-sizing: border-box;
   height: 100vh;
   width: 100vw;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
-  padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
   font-family: "Source Han Serif CN", "SimSun", "宋体", serif;
 
   // background: linear-gradient(
@@ -221,14 +219,15 @@
     }
   }
   .result-content-card-action {
-    padding: 24px;
+    box-sizing: border-box;
+    height: 120px;
+    width: 100%;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+    padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
+    background: #ffffff;
     display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: calc(env(safe-area-inset-bottom) + 36px);
-    bottom: calc(constant(safe-area-inset-bottom) + 36px);
+    flex-direction: row;
+    gap: 16px;
+    box-shadow: 0px -5px 14px 0px rgba(0, 0, 0, 0.1);
   }
 }
