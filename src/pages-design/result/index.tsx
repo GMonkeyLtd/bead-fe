@@ -78,9 +78,20 @@ const Result = () => {
     // setBeadDescriptions(params.bead_ids_deduplication);
     // setDesignNo("00001");
     if (params?.designId) {
-      const result = designData.find((item: any) => item.design_id === params.designId);
-      const { image_urls, bracelet_name, recommendation_text, bead_ids_deduplication } = result;
-      console.log(image_urls[0],decodeURIComponent(image_urls[0]), "images_url");
+      const result = designData.find(
+        (item: any) => item.design_id === params.designId
+      );
+      const {
+        image_urls,
+        bracelet_name,
+        recommendation_text,
+        bead_ids_deduplication,
+      } = result;
+      console.log(
+        image_urls[0],
+        decodeURIComponent(image_urls[0]),
+        "images_url"
+      );
       setImageUrl(image_urls[0]);
       setBraceletName(bracelet_name);
       setBraceletDescription(recommendation_text);

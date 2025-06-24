@@ -1,6 +1,5 @@
 /* Figma个性化定制按钮样式 */
 
-
 .figma-customize-button {
   display: flex;
   align-items: center;
@@ -24,34 +23,28 @@
     )
     1;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0px 5px 8px 0px rgba(217, 205, 199, 0.12),
-      2px 12px 22px 0px rgba(83, 73, 68, 0.06),
-      inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.5);
-  }
 
-  &:active {
-    transform: translateY(0px);
-    box-shadow: 0px 2px 4px 0px rgba(217, 205, 199, 0.08),
-      inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.35);
-  }
-
-  box-shadow: 0px 3px 6px 0px #D9CDC712, 1px 10px 20px 0px #53494408, 4px 40px 16px 0px #00000000, 7px 63px 18px 0px #00000000, 0px 4px 6.1px 0px #FFFFFF6E inset;
-
+  box-shadow: 0px 3px 6px 0px #d9cdc762, 1px 10px 20px 0px #53494422,
+    4px 40px 16px 0px #00000000, 7px 63px 18px 0px #00000000,
+    0px 4px 6.1px 0px #ffffff6e inset;
 
   &.primary {
     background: #1f1722;
     border: 1px solid;
-    border-image-source: linear-gradient(360deg, rgba(0, 0, 0, 0.05) 0%, rgba(52, 52, 52, 0.39) 60.1%, rgba(0, 0, 0, 0.06) 100%);
+    border-image-source: linear-gradient(
+      360deg,
+      rgba(0, 0, 0, 0.05) 0%,
+      rgba(52, 52, 52, 0.39) 60.1%,
+      rgba(0, 0, 0, 0.06) 100%
+    );
     &:hover {
-      transform: translateY(-1px) ;
+      transform: translateY(-1px);
     }
     &:active {
       transform: translateY(1px);
     }
-    box-shadow: 0px -4px 16px 0px #0000004D inset, 0px -2px 6px 0px #FFFFFFBF inset;
-
+    box-shadow: 0px -4px 16px 0px #0000004d inset,
+      0px -2px 6px 0px #ffffffbf inset;
   }
 }
 
@@ -64,6 +57,7 @@
   text-align: center;
 
   /* 钻石渐变文字效果，匹配Figma设计 */
+  &:not(.primary) {
   background: radial-gradient(
     ellipse at 31.28% 83.62%,
     #b49677 0%,
@@ -72,20 +66,13 @@
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
 
   /* 文字阴影 */
   text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.46);
 
   &.primary {
-    background: radial-gradient(
-    ellipse at 31.28% 83.62%,
-    #FFF0DE 0%,
-    #FFE4B5 100%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
+    color: #ffeac9;
   }
 }
 

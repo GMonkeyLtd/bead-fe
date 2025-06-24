@@ -13,6 +13,12 @@ export default defineAppConfig({
         'custom-design/index',
       ]
     },
+    {
+      root: 'pages-user',
+      pages: [
+        'order-detail/index',
+      ]
+    },
   ],
   window: {
     backgroundTextStyle: 'light',

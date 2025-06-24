@@ -1,0 +1,27 @@
+.image-slider-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  
+  .image-slider {
+    width: 100%;
+    
+    .image-slider-item {
+      flex-shrink: 0;
+      
+      .image-slider-img {
+        display: block;
+        object-fit: cover;
+      }
+    }
+  }
+  
+  .gradient-mask {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 23px;
+    pointer-events: none;
+    background: linear-gradient(to left, #FBF6F2 0%, rgba(0, 0, 0, 0) 100%);
+  }
+} 
