@@ -156,6 +156,7 @@
           font-size: 40px;
           letter-spacing: 2px;
           font-family: "GlobalFont", "SimSun", "宋体", serif;
+          margin-bottom: 16px;
         }
 
         .result-content-card-text-content {
@@ -166,12 +167,12 @@
           position: relative;
           overflow: hidden;
 
-          &::after {
-            content: "...";
-            position: absolute;
-            bottom: 0;
-            right: 0;
-          }
+          // &::after {
+          //   content: "...";
+          //   position: absolute;
+          //   bottom: 0;
+          //   right: 0;
+          // }
         }
       }
     }

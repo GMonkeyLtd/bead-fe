@@ -1,10 +1,12 @@
-import http, { setBaseURL } from "./request";
+import http, { setBaseURL, setIsMock } from "./request";
 import Taro from "@tarojs/taro";
 
 // 在应用启动时设置API基础URL
 // setBaseURL("http://gmonkey.ai:8088/api/v1");
 setBaseURL("https://test.qianjunye.com:443/api/v1");
 // setBaseURL("http://192.168.189.246:8088/api/v1");
+
+setIsMock(true)
 
 // 定义用户相关的数据类型
 export interface User {
@@ -41,7 +43,7 @@ export interface QuickGenerateParams extends BaziParams {}
 
 export interface QuickGenerateByImageParams {
   image_base64: string[];
-  bead_ids: string[];
+  bead_info: PersonalizedGenerateResult[];
 }
 
 export interface PersonalizedGenerateResult {
@@ -51,6 +53,7 @@ export interface PersonalizedGenerateResult {
   color: string;
   wuxing: string;
   english: string;
+  bead_diameter: number;
 }
 
 export interface PersonalizedGenerate2Params {
@@ -137,6 +140,37 @@ export const userHistoryApi = {
         showLoading: false,
       }
     ),
+  getDesignById: (designId: number) =>
+    http.post<PersonalizedGenerateResult[]>(
+      `/user/getdesignitem`,
+      {
+        image_id: designId,
+      },
+      {
+        showLoading: true,
+      }
+    ),
+  createOrder: (params: { design_id: number; price: number }) =>
+    http.post<{
+      data: {
+        order_uuid: string;
+      };
+    }>(`/user/generateorder`, params, {
+      showLoading: true,
+      loadingText: "订单生成中...",
+    }),
+  getOrderById: (orderId: string) =>
+    http.post<{
+      data: {
+        any: [];
+      };
+    }>(`/user/queryorder`, { order_uuid: orderId }, { showLoading: true }),
+  cancelOrder: (orderId: string) =>
+    http.post<{
+      data: {
+        any: [];
+      };
+    }>(`/user/cancelorder`, { order_uuid: orderId }, { showLoading: true }),
 };
 
 // 文件相关API

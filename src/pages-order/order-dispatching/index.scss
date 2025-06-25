@@ -1,0 +1,146 @@
+.order-dispatching-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px 20px 20px;
+  box-sizing: border-box;
+
+  .merchant-matching-container {
+    margin-top: -50px;
+    width: 100%;
+    height: 50%;
+    background-image: url("https://zhuluoji.cn-sh2.ufileos.com/images-frontend/order-dispatching.png");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .dispatching-image-container {
+      position: relative;
+      width: 162px;
+      height: 162px;
+      .dispatching-rotate-image {
+        width: 162px;
+        height: 162px;
+        animation: rotate 3s linear infinite;
+        will-change: transform;
+      }
+      .ring-image {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: 44px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+    .merchant-matching-image {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 28px;
+      width: 112px;
+    }
+    .cancel-order-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: inline-flex;
+      padding: 6px 12px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      border-radius: 44px;
+      background: rgba(0, 0, 0, 0.04);
+
+      .cancel-order-text {
+        color: rgba(31, 23, 34, 0.6);
+        font-family: "Noto Sans SC";
+        font-size: 11px;
+        font-style: normal;
+        font-weight: 350;
+        line-height: 135%; /* 14.85px */
+      }
+    }
+  }
+  .text-container {
+    margin-top: -56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 90%;
+
+    .main-title {
+      font-family: "Source Han Serif CN", serif;
+      font-weight: 600;
+      font-size: 24px;
+      line-height: 1.4;
+      letter-spacing: 0.08em;
+      color: #1f1722;
+      opacity: 0.9;
+      text-align: center;
+    }
+
+    .sub-title {
+      font-family: "Noto Sans SC", sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      line-height: 1.2;
+      color: #1f1722;
+      opacity: 0.9;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .number-black {
+        font-weight: 400;
+        font-size: 15px;
+      }
+      .number-primary {
+        font-weight: 400;
+        color: #ff8800;
+        font-size: 15px;
+      }
+    }
+  }
+  .order-container {
+    width: 100%;
+  }
+  .order-dispatching-tips {
+    color: rgba(31, 23, 34, 0.5);
+    font-family: "Noto Sans SC";
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+  }
+
+  .order-dispatching-button {
+    margin-top: 40px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 16px;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

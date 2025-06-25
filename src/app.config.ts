@@ -20,12 +20,18 @@ export default defineAppConfig({
     {
       root: 'pages-user',
       pages: [
-        'order-detail/index',
-        'order-list/index',
         'design-list/index',
         'result/index',
       ]
     },
+    {
+      root: 'pages-order',
+      pages: [
+        'order-detail/index',
+        'order-list/index',
+        'order-dispatching/index',
+      ]
+    }
   ],
   window: {
     backgroundTextStyle: 'light',

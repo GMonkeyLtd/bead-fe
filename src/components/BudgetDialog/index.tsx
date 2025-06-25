@@ -3,15 +3,18 @@ import { View, Text, Input, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./index.scss";
 import CrystalButton from "../CrystalButton";
-import rightArrow from "@/assets/icons/right-arrow.svg";
+import rightArrowGolden from "@/assets/icons/right-arrow-golden.svg";
+import useKeyboardHeight from "@/hooks/useKeyboardHeight";
+import api from "@/utils/api";
+import { pageUrls } from "@/config/page-urls";
 
 interface BudgetDialogProps {
   visible: boolean;
   title?: string;
   designNumber?: string;
   productImage?: string;
-  onConfirm?: (budget: number) => void;
   onClose?: () => void;
+  onConfirm?: (budget: number) => void;
 }
 
 const BudgetDialog: React.FC<BudgetDialogProps> = ({
@@ -23,16 +26,25 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   onClose,
 }) => {
   const [budget, setBudget] = useState<string>('');
+  const { keyboardHeight } = useKeyboardHeight();
 
   const handleConfirm = () => {
-    if (!budget) {
-      Taro.showToast({
-        title: '请输入预算价格',
-        icon: 'error'
-      })
-    }
     const budgetValue = parseFloat(budget) || 0;
-    onConfirm?.(budgetValue);
+    if (onConfirm) {
+      onConfirm(budget);
+      return;
+    }
+    api.userHistory.createOrder({
+      design_id: parseInt(designNumber),
+      price: budgetValue
+    }).then((res) => {
+      const { order_uuid } = res?.data || {};
+      Taro.navigateTo({
+        url: `${pageUrls.orderDispatching}?orderid=${order_uuid}`
+      }).then(() => {
+        onClose?.();
+      });
+    });
   };
 
   const handleBudgetChange = (e: any) => {
@@ -42,10 +54,8 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     setBudget(numericValue);
   };
 
-  if (!visible) return null;
-
   return (
-    <View className="budget-dialog-overlay" onClick={onClose}>
+    <View className={`budget-dialog-overlay ${visible ? "visible" : ""}`} onClick={onClose} style={{ height: `calc(100vh - ${keyboardHeight}px)` }} >
       <View className="budget-dialog" onClick={(e) => e.stopPropagation()}>
         {/* 标题区域 */}
         <View className="budget-dialog-header">
@@ -78,8 +88,6 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                       // placeholderClass="budget-input-placeholder"
                       // placeholderTextColor="red"
                       placeholderStyle="color: #00000033;"
-                      adjustKeyboardTo="bottom"
-                      cursor={0}
                     />
                   </View>
                 </View>
@@ -115,7 +123,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
             text="确认"
             icon={
               <Image
-                src={rightArrow}
+                src={rightArrowGolden}
                 style={{ width: "16px", height: "10px" }}
               />
             }

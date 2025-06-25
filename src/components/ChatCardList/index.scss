@@ -11,3 +11,10 @@
   height: 100%;
   transition: transform 0.3s ease-in-out;
 }
+
+.chat-card-list-item {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}

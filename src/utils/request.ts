@@ -26,11 +26,11 @@ export interface ApiResponse<T = any> {
 // 默认配置
 const defaultConfig = {
   baseURL: '', // 在这里设置你的API基础URL
-  timeout: 60000,
+  timeout: 600000,
   showLoading: false,
-  loadingText: '定制中...',
+  loadingText: '加载中...',
   showError: true,
-  // isMock: true
+  isMock: false
 }
 
 // 请求拦截器 - 在发送请求前的处理
@@ -46,7 +46,7 @@ const requestInterceptor = async (config: RequestConfig) => {
     try {
       // 获取token，如果没有则自动登录
       const token = await AuthManager.getToken();
-      console.log(token, 'token')
+      // console.log(token, 'token')
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
         console.log('已添加认证token到请求头');
@@ -177,7 +177,7 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
       // 显示错误提示
       if (config.showError !== false) {
         Taro.showToast({
-          title: 'base' + JSON.stringify(error),
+          title: '出错啦～' + JSON.stringify(error),
           icon: 'none',
           duration: 5000,
         })
@@ -186,12 +186,10 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
       throw JSON.stringify(error)+ finalConfig.url
     }
   }
-  console.log(defaultConfig, defaultConfig.isMock, 'defaultConfig.isMock')
   if (defaultConfig.isMock) {
     const mockData = MockManager.getMockDataByUrl(config.url);
     console.log(mockData, 'mockData')
     if (mockData) {
-      console.log('使用Mock数据:', config.url);
       return mockData;
     }
   }
@@ -305,6 +303,10 @@ export const http = {
 // 设置基础URL
 export const setBaseURL = (baseURL: string) => {
   defaultConfig.baseURL = baseURL
+}
+
+export const setIsMock = (isMock: boolean) => {
+  defaultConfig.isMock = isMock
 }
 
 // 设置默认配置

@@ -1,30 +1,196 @@
 {
+  "code": 200,
   "data": {
-    "bracelet_name": "四季福缘",
+    "design_id": 22,
     "image_urls": [
-      "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"
+      "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250625140822.995_c960ac9f5690d772eb7fb50c9b6330b5.jpg"
     ],
-    "designId": "design-1234567890",
-    "bead_ids_deduplication": [
+    "recommendation_text": "碧海青天手串，融合海蓝宝的宁静与青金石的深邃，助您平衡身心，提升智慧与财运。",
+    "bracelet_name": "碧海青天",
+    "bead_info": [
       {
-        "color": "绿色",
-        "english": "Green Aventurine",
-        "function": "招财旺运",
-        "id": "59",
-        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png",
-        "name": "绿东陵",
-        "wuxing": "木"
+        "id": "19",
+        "name": "海蓝宝",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png"
       },
       {
-        "color": "浅黄色",
-        "english": "Citrine",
-        "function": "聚财纳福",
+        "id": "59",
+        "name": "绿东陵",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png"
+      },
+      {
+        "id": "77",
+        "name": "青金石",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png"
+      },
+      {
         "id": "38",
-        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%BB%84%E6%B0%B4%E6%99%B6.png",
         "name": "黄水晶",
-        "wuxing": "土"
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%BB%84%E6%B0%B4%E6%99%B6.png"
+      },
+      {
+        "id": "19",
+        "name": "海蓝宝",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png"
+      },
+      {
+        "id": "59",
+        "name": "绿东陵",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png"
+      },
+      {
+        "id": "77",
+        "name": "青金石",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png"
+      },
+      {
+        "id": "38",
+        "name": "黄水晶",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%BB%84%E6%B0%B4%E6%99%B6.png"
+      },
+      {
+        "id": "19",
+        "name": "海蓝宝",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png"
+      },
+      {
+        "id": "59",
+        "name": "绿东陵",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png"
+      },
+      {
+        "id": "77",
+        "name": "青金石",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png"
+      },
+      {
+        "id": "38",
+        "name": "黄水晶",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%BB%84%E6%B0%B4%E6%99%B6.png"
+      },
+      {
+        "id": "19",
+        "name": "海蓝宝",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png"
+      },
+      {
+        "id": "59",
+        "name": "绿东陵",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png"
+      },
+      {
+        "id": "77",
+        "name": "青金石",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png"
+      },
+      {
+        "id": "38",
+        "name": "黄水晶",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%BB%84%E6%B0%B4%E6%99%B6.png"
+      },
+      {
+        "id": "19",
+        "name": "海蓝宝",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png"
+      },
+      {
+        "id": "59",
+        "name": "绿东陵",
+        "color": "",
+        "wuxing": "",
+        "english": "",
+        "function": "",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%BB%BF%E4%B8%9C%E9%99%B5.png"
       }
     ],
-    "recommendation_text": "这款四季福缘手串精选绿东陵与黄水晶为主珠，配以白水晶与海蓝宝，象征春夏秋冬四季轮回。绿东陵带来生机与财运，黄水晶招财聚福，白水晶净化心灵，海蓝宝守护平安。佩戴此串，四季平安，福缘深厚。"
-  }
+    "bead_ids_deduplication": [
+      {
+        "id": "19",
+        "name": "海蓝宝",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E6%B5%B7%E8%93%9D%E5%AE%9D.png",
+        "color": "蓝色",
+        "wuxing": "水",
+        "english": "Aquamarine",
+        "function": "宁静"
+      },
+      {
+        "id": "77",
+        "name": "青金石",
+        "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E9%9D%92%E9%87%91%E7%9F%B3.png",
+        "color": "蓝色、金色、白色",
+        "wuxing": "水、金、土",
+        "english": "Lapis Lazuli",
+        "function": "智慧"
+      }
+    ]
+  },
+  "message": "Success"
 }

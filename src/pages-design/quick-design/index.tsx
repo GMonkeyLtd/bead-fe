@@ -25,7 +25,7 @@ const QuickDesign = () => {
       );
       quickDesignByImage(
         _beadData?.image_url,
-        _beadData?.bead_list?.map((item) => item.id)
+        _beadData?.bead_list
       );
       return;
     }
@@ -47,6 +47,7 @@ const QuickDesign = () => {
       bracelet_name,
       recommendation_text,
       bead_ids_deduplication,
+      design_id
     } = data;
     addDesignData({
       image_urls,
@@ -54,6 +55,7 @@ const QuickDesign = () => {
       recommendation_text,
       bead_ids_deduplication,
       design_id: uniqueId,
+      design_backend_id: design_id
     });
     Taro.redirectTo({
       url:
@@ -110,19 +112,26 @@ const QuickDesign = () => {
       });
   };
 
-  const quickDesignByImage = async (imageUrl, beadIds) => {
+  const quickDesignByImage = async (imageUrl, beadsData) => {
     setDesigning(true);
     try {
       const base64 = await imageToBase64(imageUrl, false);
       const res = await generateApi.personalizedGenerateByImage({
-        bead_ids: beadIds,
+        bead_info: beadsData,
         image_base64: [base64 as string],
       });
       console.log(res, "res");
       if (!res.data?.image_urls?.[0]) {
         throw new Error("生成失败");
       }
-      processDesignData(res.data);
+      Taro.redirectTo({
+        url:
+          pageUrls.result +
+          "?imageUrl=" +
+          encodeURIComponent(res.data?.image_urls?.[0]) +
+          "&designBackendId=" +
+          res.data?.design_id,
+      });
       console.log(res, "res");
     } catch (err) {
       console.error(err, "err");

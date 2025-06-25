@@ -3,6 +3,7 @@ import beadlistMock from '../mock/beadlist.json'
 import loginMock from '../mock/login.json'
 import personalizationstep1Mock from '../mock/personalizationstep1.json'
 import personalizationstep3Mock from '../mock/personalizationstep3.json'
+import queryorderMock from '../mock/queryorder.json'
 
 // Mock数据映射表
 const mockDataMap: Record<string, any> = {
@@ -10,6 +11,7 @@ const mockDataMap: Record<string, any> = {
   login: loginMock,
   personalizationstep1: personalizationstep1Mock,
   personalizationstep3: personalizationstep3Mock,
+  queryorder: queryorderMock,
 }
 
 /**

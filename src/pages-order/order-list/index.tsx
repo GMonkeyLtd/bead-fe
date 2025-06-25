@@ -81,7 +81,7 @@ const OrderListDemo: React.FC = () => {
   ];
 
   const handleContactMerchant = (orderId: string) => {
-    console.log("联系商家:", orderId);
+    Taro.makePhoneCall({ phoneNumber: "13800138000" });
     // 可以打开联系商家弹窗或跳转到聊天页面
   };
 

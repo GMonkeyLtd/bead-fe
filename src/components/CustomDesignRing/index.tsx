@@ -1,13 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Canvas, Button, View, Image } from "@tarojs/components";
+import { Canvas, View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { ImageCacheManager } from "@/utils/image-cache";
 import CrystalButton from "../CrystalButton";
 import "./CustomDesignRing.scss";
-import { getNavBarHeightAndTop } from "@/utils/style-tools";
-import { pageUrls } from "@/config/page-urls";
-import { generateUUID } from "@/utils/uuid";
-import { useDesign } from "@/store/DesignContext";
 
 interface Bead {
   image_url: string;
@@ -46,12 +42,14 @@ const CustomDesignRing = ({
   size = 0,
   spacing = 0,
   beadTypeMap = {},
+  onOk,
 }: {
   beads: Bead[];
   canvasId?: string;
   size?: number;
   spacing?: number;
   beadTypeMap?: any;
+  onOk?: (imageUrl: string, editedBeads: Bead[]) => void;
 }) => {
   const dpr = Taro.getSystemInfoSync().pixelRatio;
   const [dots, setDots] = useState<any[]>([]);
@@ -63,7 +61,6 @@ const CustomDesignRing = ({
   const [predictedLength, setPredictedLength] = useState<number>(0);
   const [canvasSize, setCanvasSize] = useState<number>(0);
   const [imageUrl, setImageUrl] = useState<string>('');
-  const { addBeadData } = useDesign();
 
   useEffect(() => {
     const systemInfo = Taro.getSystemInfoSync();
@@ -363,27 +360,7 @@ const CustomDesignRing = ({
     updateBeads(newDots);
   };
 
-  const onCreate = () => {
-      if (!imageUrl) {
-        return;
-      }
-      const beadDataId = "bead-" + generateUUID();
-      addBeadData({
-        image_url: imageUrl,
-        bead_list: beads.map((item) => ({
-          id: item.id,
-          image_url: item.image_url,
-          name: item.name,
-          description: item.description,
-          radius: item.radius
-        })),
-        bead_data_id: beadDataId,
-      });
-  
-      Taro.redirectTo({
-        url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
-      });
-  };
+ 
 
   const renderBeads = () => {
     const typeBeads = beadTypeMap[curWuxing];
@@ -566,7 +543,11 @@ const CustomDesignRing = ({
           }}
           onClick={() => {
             if (imageUrl) {
-              onCreate()
+              onOk?.(imageUrl, dots.map((item) => ({
+                id: item.id,
+                radius: item.radius,
+                image_url: item.image_url,
+              })))
             }
           }}
         >

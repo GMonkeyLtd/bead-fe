@@ -251,12 +251,7 @@ const ChatPage: React.FC = () => {
     const beadDataId = "bead-" + generateUUID();
     addBeadData({
       image_url: canvasImageUrl,
-      bead_list: beadImageData.map((item) => ({
-        id: item.id,
-        image_url: item.image_url,
-        name: item.name,
-        description: item.description,
-      })),
+      bead_list: beadImageData,
       bead_data_id: beadDataId,
     });
     Taro.redirectTo({
@@ -417,6 +412,10 @@ const ChatPage: React.FC = () => {
                 chatContents={messages}
                 messageIndex={messageIndex}
                 maxHeight={keyboardHeight > 0 ? 70 : 96}
+                onChange={(index) => {
+                  console.log(index);
+                  setMessageIndex(index);
+                }}
               />
             </View>
           </View>

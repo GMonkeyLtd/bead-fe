@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, Image } from '@tarojs/components';
-import copyIcon from '@/assets/icons/copy.svg';
-import './index.scss';
+import React from "react";
+import { View, Text, Image } from "@tarojs/components";
+import copyIcon from "@/assets/icons/copy.svg";
+import "./index.scss";
 
 interface BraceletCardProps {
   orderNumber: string;
@@ -25,20 +25,20 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
   quantity,
   price,
   productImage,
-  className = '',
-  orderAction
+  className = "",
+  orderAction,
 }) => {
   return (
     <View className={`bracelet-info ${className}`}>
       {/* 订单编号和复制 */}
-      <View className='order-info-container'>
+      <View className="order-info-container">
         <View className="order-info">
           <Text className="order-number">订单号：{orderNumber}</Text>
-            <Image 
-              src={copyIcon}
-              style={{ width: "16px", height: "16px" }}
-              // mode="aspectFit"
-            />
+          <Image
+            src={copyIcon}
+            style={{ width: "16px", height: "16px" }}
+            // mode="aspectFit"
+          />
         </View>
         {orderAction?.text && (
           <View className="order-action" onClick={orderAction.onClick}>
@@ -46,21 +46,20 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
           </View>
         )}
       </View>
-      
-      
+
       {/* 分割线 */}
       <View className="divider" />
-      
+
       {/* 商品信息 */}
       <View className="product-info">
         <View className="product-main">
           {/* 商品图片 */}
-          <Image 
-            className="product-image" 
+          <Image
+            className="product-image"
             src={productImage}
             mode="aspectFill"
           />
-          
+
           {/* 商品详情 */}
           <View className="product-details">
             <View className="product-title-section">
@@ -70,7 +69,7 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
             <Text className="product-quantity">数量：{quantity}颗</Text>
           </View>
         </View>
-        
+
         {/* 价格 */}
         <View className="price-section">
           <Text className="price">¥{price.toFixed(2)}</Text>
@@ -93,7 +92,7 @@ interface BeadDetailListProps {
 
 const BeadDetailList: React.FC<BeadDetailListProps> = ({
   beads,
-  className = ''
+  className = "",
 }) => {
   return (
     <View className={`bead-detail-list ${className}`}>
@@ -103,11 +102,15 @@ const BeadDetailList: React.FC<BeadDetailListProps> = ({
         <Text className="header-size">尺寸/规格</Text>
         <Text className="header-quantity">数量</Text>
       </View>
-      
+
       {/* 珠子列表 */}
       <View className="table-body">
         {beads.map((bead, index) => (
-          <View key={index} className="table-row" style={{ background: index % 2 === 0 ? '' : '#E6DED133' }}>
+          <View
+            key={index}
+            className="table-row"
+            style={{ background: index % 2 === 0 ? "" : "#E6DED133" }}
+          >
             <Text className="cell-name">{bead.name}</Text>
             <Text className="cell-size">{bead.size}</Text>
             <Text className="cell-quantity">x{bead.quantity}</Text>
@@ -118,9 +121,8 @@ const BeadDetailList: React.FC<BeadDetailListProps> = ({
   );
 };
 
-
 export interface BraceletInfoProps extends BraceletCardProps {
-  beads: BeadItem[];
+  beads?: BeadItem[];
   style?: React.CSSProperties;
 }
 const BraceletInfo: React.FC<BraceletInfoProps> = ({
@@ -131,25 +133,31 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
   price,
   productImage,
   style = {},
-  beads = [],
-  orderAction
+  beads,
+  orderAction,
 }) => {
   return (
-    <View style={{ display: "flex", flexDirection: "column", gap: "20px", ...style }}>
-        <BraceletOrderInfo
-          orderNumber={orderNumber}
-          productName={productName}
-          productNumber={productNumber}
-          quantity={quantity}
-          price={price}
-          productImage={productImage}
-          orderAction={orderAction}
-        />
+    <View
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "20px",
+        ...style,
+      }}
+    >
+      <BraceletOrderInfo
+        orderNumber={orderNumber}
+        productName={productName}
+        productNumber={productNumber}
+        quantity={quantity}
+        price={price}
+        productImage={productImage}
+        orderAction={orderAction}
+      />
 
-        <BeadDetailList beads={beads} />
-      </View>
+      {beads?.length > 0 && <BeadDetailList beads={beads} />}
+    </View>
   );
 };
 
-export default BraceletInfo; 
-
+export default BraceletInfo;

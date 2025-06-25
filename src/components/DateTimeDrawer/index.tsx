@@ -56,6 +56,8 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
     for (let i = 0; i < 24; i++) {
       hourList.push(i);
     }
+    // 添加一个-1，表示选择未知
+    hourList.unshift(-1);
     setHours(hourList);
 
     // 初始化当前月的日期
@@ -152,50 +154,36 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
     setGender(gender === '男' ? '女' : '男');
   };
 
-  const handleQuickCustomize = () => {
+  const getTransformedData = () => {
     const year = years[selectedIndexes[0]];
     const month = months[selectedIndexes[1]];
     const day = days[selectedIndexes[2]];
     
     let solarDate;
     if (dateType === '农历') {
-      const lunar = Lunar.fromYmd(year, month, day);
+      const lunar = Lunar.fromYmd(year, month, day);  
       solarDate = lunar.getSolar();
     } else {
       solarDate = Solar.fromYmd(year, month, day);
     }
 
-    const selectedDateTime = {
+    return {
       year: solarDate.getYear(),
       month: solarDate.getMonth(),
       day: solarDate.getDay(),
-      hour: hours[selectedIndexes[3]],
+      hour: hours[selectedIndexes[3]] === -1 ? 0 : hours[selectedIndexes[3]],
       gender,
+      isLunar: dateType === '农历'
     };
+  }
+
+  const handleQuickCustomize = () => {
+    const selectedDateTime = getTransformedData();
     onQuickCustomize?.(selectedDateTime);
   };
 
   const handlePersonalizeCustomize = () => {
-    const year = years[selectedIndexes[0]];
-    const month = months[selectedIndexes[1]];
-    const day = days[selectedIndexes[2]];
-    
-    let solarDate;
-    if (dateType === '农历') {
-      const lunar = Lunar.fromYmd(year, month, day);
-      solarDate = lunar.getSolar();
-    } else {
-      solarDate = Solar.fromYmd(year, month, day);
-    }
-
-    const selectedDateTime = {
-      year: solarDate.getYear(),
-      month: solarDate.getMonth(),
-      day: solarDate.getDay(),
-      hour: hours[selectedIndexes[3]],
-      gender,
-      isLunar: dateType === '农历'
-    };
+    const selectedDateTime = getTransformedData();
     onPersonalizeCustomize?.(selectedDateTime);
   };
 
@@ -265,7 +253,7 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
             </PickerViewColumn>
             <PickerViewColumn>
               {hours.map((hour) => (
-                <View key={hour} className="picker-item">{hour}时</View>
+                <View key={hour} className="picker-item">{hour === -1 ? '未知' : `${hour}时`}</View>
               ))}
             </PickerViewColumn>
           </PickerView>
