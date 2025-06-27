@@ -172,7 +172,7 @@ const DateTimeDrawer = ({ visible, onClose, onQuickCustomize, onPersonalizeCusto
       month: solarDate.getMonth(),
       day: solarDate.getDay(),
       hour: hours[selectedIndexes[3]] === -1 ? 0 : hours[selectedIndexes[3]],
-      gender,
+      gender: gender === '男' ? 1 : 0,
       isLunar: dateType === '农历'
     };
   }

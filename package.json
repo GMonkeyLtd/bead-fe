@@ -1,8 +1,8 @@
 {
-  "name": "crystal-divination",
+  "name": "cristal",
   "version": "1.0.0",
   "private": true,
-  "description": "bazi-cristal",
+  "description": "cristal",
   "templateInfo": {
     "name": "default",
     "typescript": true,

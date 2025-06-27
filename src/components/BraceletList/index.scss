@@ -1,12 +1,14 @@
 .bracelet-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  width: 345px;
-  margin: 0 auto;
+  gap: 8px;
+  padding: 0 auto;
+  // justify-content: center;
+  
+  padding-bottom: 120px;
 
   .bracelet-item {
-    width: 164.5px;
+    width: 180px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -19,8 +21,8 @@
 
     .bracelet-image-container {
       position: relative;
-      width: 164.5px;
-      height: 164.5px;
+      width: 180px;
+      height: 180px;
       border-radius: 10px;
       overflow: hidden;
 
@@ -36,13 +38,12 @@
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      width: 164.5px;
+      width: 180px;
 
       .bracelet-header {
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: space-between;
         width: 100%;
         gap: 6px;
 
@@ -55,45 +56,6 @@
           color: #1F1722;
           opacity: 0.9;
           text-align: left;
-          flex: 1;
-        }
-
-        .rating-icons {
-          position: relative;
-          width: 15.15px;
-          height: 10px;
-          flex-shrink: 0;
-
-          .rating-line {
-            position: absolute;
-            top: 5px;
-            left: 0;
-            width: 14.97px;
-            height: 0;
-            border-top: 0.9px solid #1F1722;
-          }
-
-          .rating-dot {
-            position: absolute;
-            width: 6.39px;
-            height: 5px;
-            border: 0.9px solid #1F1722;
-            border-radius: 50%;
-
-            &:nth-child(2) {
-              top: 0;
-              right: 0;
-            }
-
-            &:nth-child(3) {
-              bottom: 0;
-              right: 0;
-            }
-
-            &.active {
-              background-color: #1F1722;
-            }
-          }
         }
       }
 

@@ -14,8 +14,7 @@ export interface OrderItem {
   orderNumber: string;
   status: OrderStatus;
   merchantName: string;
-  merchantImage?: string;
-  price: number;
+  orderImage?: string;
   createTime: string;
   budget?: number; // 预算，用于显示"预算：不限"等
 }
@@ -25,7 +24,7 @@ interface OrderListProps {
   onContactMerchant?: (orderId: string) => void;
   onEvaluate?: (orderId: string) => void;
   onReorder?: (orderId: string) => void;
-  onItemClick?: (orderId: string) => void;
+  onItemClick?: (order: OrderItem) => void;
   showActions?: boolean;
   showImage?: boolean;
 }
@@ -61,24 +60,27 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
   // 根据订单状态获取商家显示文本
   const getMerchantDisplayText = (order: OrderItem): string => {
-    if (order.status === OrderStatus.PendingDispatch) {
+    console.log(order, "order");
+    if (
+      [
+        OrderStatus.PendingDispatch,
+        OrderStatus.Dispatching,
+        OrderStatus.PendingAcceptance,
+      ].includes(order.status)
+    ) {
       return "匹配商家中...";
     }
-    return order.merchantName;
+    return order.merchantName || "商家";
   };
 
   // 渲染订单操作按钮
   const renderOrderActions = (order: OrderItem) => {
     const isCompleted = order.status === OrderStatus.Completed;
-    const isInProgress = [
-      OrderStatus.PendingDispatch,
-      OrderStatus.PendingAcceptance,
-      OrderStatus.InService,
-    ].includes(order.status);
+
 
     return (
       <View className="order-actions">
-        {isInProgress && onContactMerchant && (
+        {order.status === OrderStatus.InService && onContactMerchant && (
           <View
             className="action-button contact-button"
             onClick={(e) => {
@@ -125,12 +127,9 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
   // 渲染价格或预算信息
   const renderPriceInfo = (order: OrderItem) => {
-    if (order.status === OrderStatus.Cancelled && order.budget !== undefined) {
-      return order.budget === 0
-        ? "预算：不限"
-        : `预算：¥${order.budget.toFixed(2)}`;
-    }
-    return `¥${order.price.toFixed(2)}`;
+    return order.budget === 0
+      ? "预算：不限"
+      : `预算：¥${order.budget.toFixed(2)}`;
   };
 
   return (
@@ -139,7 +138,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
         <View
           key={order.id}
           className="order-item"
-          onClick={() => onItemClick?.(order.id)}
+          onClick={() => onItemClick?.(order)}
         >
           {/* 订单头部：订单号和状态 */}
           <View className="order-header">
@@ -159,7 +158,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
                   <View className="merchant-image">
                     <Image
                       src={
-                        order.merchantImage ||
+                        order.orderImage ||
                         "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"
                       }
                       mode="aspectFill"

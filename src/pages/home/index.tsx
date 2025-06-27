@@ -9,6 +9,7 @@ import CrystalButton from "@/components/CrystalButton";
 import AppHeader from "@/components/AppHeader";
 import { AuthManager } from "@/utils/auth";
 import { pageUrls } from "@/config/page-urls";
+import TabBar from "@/components/TabBar";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
@@ -71,7 +72,7 @@ const Home = () => {
     month: number;
     day: number;
     hour: number;
-    gender: string;
+    gender: number;
     isLunar: boolean;
   }) => {
     Taro.redirectTo({
@@ -85,8 +86,9 @@ const Home = () => {
         "&hour=" +
         hour +
         "&gender=" +
-        gender,
-      isLunar: isLunar,
+        gender +
+        "&isLunar=" +
+        isLunar,
     });
   };
 
@@ -151,6 +153,7 @@ const Home = () => {
           </SwiperItem>
         ))}
       </Swiper>
+      <TabBar />
       <DateTimeDrawer
         onQuickCustomize={handleQuickCustomize}
         onPersonalizeCustomize={handlePersonalizeCustomize}

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Image, Text } from '@tarojs/components';
+import { View, Image, Text, ScrollView } from '@tarojs/components';
 import './index.scss';
+import RightArrowIcon from '@/assets/icons/right-arrow.svg';
 
 interface BraceletItem {
   id: string;
@@ -17,18 +18,10 @@ interface BraceletListProps {
 
 const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
   // 渲染评级图标
-  const renderRatingIcons = (rating: number = 5) => {
-    return (
-      <View className="rating-icons">
-        <View className="rating-line" />
-        <View className="rating-dot active" />
-        <View className="rating-dot active" />
-      </View>
-    );
-  };
 
   return (
     <View className="bracelet-list">
+  
       {items.map((item) => (
         <View 
           key={item.id}
@@ -45,7 +38,7 @@ const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
           <View className="bracelet-info">
             <View className="bracelet-header">
               <Text className="bracelet-name">{item.name}</Text>
-              {renderRatingIcons(item.rating)}
+              <Image src={RightArrowIcon} style={{ width: 15, height: 10 }} />
             </View>
             <Text className="bracelet-number">{item.number}</Text>
           </View>

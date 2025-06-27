@@ -1,86 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Taro from "@tarojs/taro";
 import { View } from "@tarojs/components";
 import { OrderStatus } from "@/utils/orderUtils";
 import OrderListComp, { OrderItem } from "@/components/OrderListComp";
+import api from "@/utils/api";
+import { pageUrls } from "@/config/page-urls";
 
 const OrderListDemo: React.FC = () => {
-  // 模拟订单数据
-  const mockOrders: OrderItem[] = [
-    {
-      id: "1",
-      orderNumber: "ADX2333",
-      status: OrderStatus.PendingDispatch,
-      merchantName: "东海县亿特珠宝有限公司",
-      merchantImage:
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-      price: 199.0,
-      createTime: "2025-04-08 14:27:39",
-    },
-    {
-      id: "2",
-      orderNumber: "ADX2333",
-      status: OrderStatus.PendingAcceptance,
-      merchantName: "东海县亿特珠宝有限公司",
-      merchantImage:
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-      price: 299.0,
-      createTime: "2025-04-08 14:27:39",
-    },
-    {
-      id: "3",
-      orderNumber: "ADX2333",
-      status: OrderStatus.Completed,
-      merchantName: "上上珠宝有限公司",
-      merchantImage:
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-      price: 299.0,
-      createTime: "2025-04-08 14:27:39",
-    },
-    {
-      id: "4",
-      orderNumber: "ADX2333",
-      status: OrderStatus.Cancelled,
-      merchantName: "山尺手作",
-      merchantImage:
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-      price: 299.0,
-      createTime: "2025-04-08 14:27:39",
-      budget: 0, // 预算不限
-    },
-    {
-      id: "5",
-      orderNumber: "ADX2333",
-      status: OrderStatus.Completed,
-      merchantName: "上上珠宝有限公司",
-      merchantImage:
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-      price: 299.0,
-      createTime: "2025-04-08 14:27:39",
-    },
-    {
-      id: "6",
-      orderNumber: "ADX2333",
-      status: OrderStatus.Completed,
-      merchantName: "上上珠宝有限公司",
-      merchantImage:
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-      price: 299.0,
-      createTime: "2025-04-08 14:27:39",
-    },
-    {
-      id: "7",
-      orderNumber: "ADX2333",
-      status: OrderStatus.Completed,
-      merchantName: "上上珠宝有限公司",
-      merchantImage:
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-      price: 299.0,
-      createTime: "2025-04-08 14:27:39",
-    },
-  ];
+  const [orders, setOrders] = useState<OrderItem[]>([]);
 
-  const handleContactMerchant = (orderId: string) => {
+  useEffect(() => {
+    api.userHistory.getOrderList().then((res) => {
+      const _orders = (res?.data?.orders || []).filter(item => !!item.design_info?.design_id).map(item => {
+        return {
+          id: item.order_uuid,
+          orderNumber: item.order_uuid,
+          status: item.order_status,
+          merchantName: item.merchant_info?.name,
+          orderImage: item.design_info?.image_url,
+          budget: item.price || 0,
+          createTime: item.created_at,
+        }
+      })
+      console.log('orders', _orders);
+      setOrders(_orders);
+    });
+  }, []);
+
+  const handleContactMerchant = () => {
     Taro.makePhoneCall({ phoneNumber: "13800138000" });
     // 可以打开联系商家弹窗或跳转到聊天页面
   };
@@ -95,10 +42,16 @@ const OrderListDemo: React.FC = () => {
     // 重新下单逻辑
   };
 
-  const handleItemClick = (orderId: string) => {
-    Taro.navigateTo({
-      url: `/pages-user/order-detail/index?orderId=${orderId}`,
-    });
+  const handleItemClick = (order: OrderItem) => {
+    if ([OrderStatus.Dispatching, OrderStatus.PendingAcceptance, OrderStatus.PendingDispatch].includes(order.status)) {
+      Taro.navigateTo({
+        url: `${pageUrls.orderDispatching}?orderId=${order.id}`,
+      });
+    } else {
+      Taro.navigateTo({
+        url: `${pageUrls.orderDetail}?orderId=${order.id}`,
+      });
+    }
     // 跳转到订单详情页
   };
 
@@ -120,10 +73,10 @@ const OrderListDemo: React.FC = () => {
         }}
       >
         <OrderListComp
-          orders={mockOrders}
+          orders={orders}
           onContactMerchant={handleContactMerchant}
-          onEvaluate={handleEvaluate}
-          onReorder={handleReorder}
+          // onEvaluate={handleEvaluate}
+          // onReorder={handleReorder}
           onItemClick={handleItemClick}
         />
       </View>

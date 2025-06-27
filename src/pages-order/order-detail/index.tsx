@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image } from "@tarojs/components";
 import "./index.scss";
 import CrystalContainer from "@/components/CrystalContainer";
@@ -15,23 +15,38 @@ import CrystalButton from "@/components/CrystalButton";
 import shareDesignImage from "@/assets/icons/share-design.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import StatusBadge, { StatusBadgeType } from "@/components/StatusBadge";
+import Taro from "@tarojs/taro";
+import api, { userApi, userHistoryApi } from "@/utils/api";
 
 const OrderDetail: React.FC = () => {
-  const beadData = [
-    { name: "水晶弹力线", size: "透明", quantity: 1 },
-    { name: "粉水晶", size: "8mm", quantity: 12 },
-    { name: "海蓝宝", size: "8mm", quantity: 6 },
-    { name: "海蓝宝", size: "8mm", quantity: 6 },
-    { name: "海蓝宝", size: "8mm", quantity: 6 },
-    { name: "海蓝宝", size: "8mm", quantity: 6 },
-    { name: "紫水晶", size: "8mm", quantity: 6 },
-    { name: "紫水晶", size: "8mm", quantity: 6 },
-    { name: "紫水晶", size: "8mm", quantity: 6 },
-    { name: "紫水晶", size: "8mm", quantity: 6 },
-    { name: "紫水晶", size: "8mm", quantity: 6 },
-  ];
+  const [order, setOrder] = useState<any>(null);
 
-  const orderStatus = OrderStatusEnum.InService;
+  useEffect(() => {
+    const instance = Taro.getCurrentInstance();
+    const params = instance.router?.params;
+    const orderId = params?.orderId;
+    console.log(orderId, "orderId");
+    api.userHistory.getOrderById(orderId || "").then((res) => {
+      const _order = res?.data?.orders?.[0];
+      setOrder(_order);
+    });
+  }, []);
+
+  const orderStatus = order?.order_status;
+
+  const beadsData = order?.design_info?.beads_info?.reduce((acc: any[], item: any) => {
+    const existingBead = acc.find(bead => bead.name === item?.name);
+    if (existingBead) {
+      existingBead.quantity += item?.quantity || 1;
+    } else {
+      acc.push({  
+        name: item?.name,
+        size: item?.size,
+        quantity: item?.quantity || 1,
+      });
+    }
+    return acc;
+  }, []);
 
   return (
     <CrystalContainer
@@ -53,21 +68,15 @@ const OrderDetail: React.FC = () => {
           overflowY: "auto",
         }}
       >
-        <MerchantCard
-          name="东海县亿特珠宝有限公司"
+        {order?.merchant_info && <MerchantCard
+          name={order?.merchant_info?.name}
           status="已接单"
-          address="江苏省连云港市东海县牛山镇北城西路60号"
-          rating={4.9}
-          dealRate={88}
-          responseRate={62}
-          historyCount={20}
-          historyImages={[
-            "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-            "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-            "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-            "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-            "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png",
-          ]}
+          address={order?.merchant_info?.address}
+          rating={order?.merchant_info?.rating || 100}
+          dealRate={order?.merchant_info?.transaction_rate}
+          responseRate={order?.merchant_info?.response_rate}
+          historyCount={order?.merchant_info?.transaction_rate?.length}
+          historyImages={order?.merchant_info?.transaction_history?.images_url || []}
           onCall={console.log}
           onWechat={console.log}
           onRemind={console.log}
@@ -76,25 +85,36 @@ const OrderDetail: React.FC = () => {
           showRemark={orderStatus === OrderStatusEnum.Completed}
           showHistory={orderStatus !== OrderStatusEnum.Cancelled}
           showRemind={orderStatus === OrderStatusEnum.PendingAcceptance}
-        />
+        />}
+        {order?.design_info && (
         <BraceletInfo
-          orderNumber="ADX2333"
-          productName="夏日睡莲"
-          productNumber="NO.0001"
-          quantity={24}
-          price={299.0}
-          productImage="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"
-          beads={beadData}
-          orderAction={processingOrderStatus.includes(orderStatus) ? {
-            text: "取消订单",
-            onClick: () => {
-              console.log("取消订单");
-            },
-          } : undefined}
-        />
+          orderNumber={order?.order_uuid}
+          productName={order?.design_info?.word_info?.bracelet_name}
+          productNumber={order?.design_info?.design_id}
+          quantity={order?.design_info?.beads_info?.length}
+          price={order?.price}
+          productImage={order?.design_info?.image_url}
+          beads={beadsData}
+          orderAction={
+            processingOrderStatus.includes(orderStatus)
+              ? {
+                  text: "取消订单",
+                  onClick: () => {
+                    userHistoryApi.cancelOrder(order?.order_uuid).then(() => {
+                      Taro.showToast({
+                        title: "取消订单成功",
+                        icon: "success",
+                      });
+                      Taro.navigateBack();
+                    });
+                  },
+                }
+              : undefined
+          }
+        />)}
       </View>
 
-      <View className="order-action-container">
+      {/* <View className="order-action-container">
         <CrystalButton
           onClick={console.log}
           text="分享"
@@ -105,7 +125,7 @@ const OrderDetail: React.FC = () => {
               style={{ width: "24px", height: "24px" }}
             />
           }
-          style={{ marginTop: '20px', marginLeft: '24px'}}
+          style={{ marginTop: "20px", marginLeft: "24px" }}
         />
         <CrystalButton
           onClick={console.log}
@@ -115,7 +135,7 @@ const OrderDetail: React.FC = () => {
               ? "更换商家"
               : "重新匹配商家"
           }
-          style={{ flex: 1, marginTop: '20px', marginRight: '24px'}}
+          style={{ flex: 1, marginTop: "20px", marginRight: "24px" }}
           prefixIcon={
             <Image
               src={createBeadImage}
@@ -124,7 +144,7 @@ const OrderDetail: React.FC = () => {
             />
           }
         />
-      </View>
+      </View> */}
     </CrystalContainer>
   );
 };

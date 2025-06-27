@@ -1,5 +1,6 @@
 import PosterGenerator from "@/components/PosterGenerator";
 import { QR_CODE_IMAGE_URL } from "@/config";
+import { pageUrls } from "@/config/page-urls";
 import { View, Text, Image, Button } from "@tarojs/components";
 import { useState } from "react";
 import Taro from "@tarojs/taro";
@@ -64,6 +65,12 @@ const Dev = () => {
     setShowBudgetDialog(false)
   }
 
+  const handleGoToContactPreference = () => {
+    Taro.navigateTo({
+      url: pageUrls.contactPreference
+    })
+  }
+
   return (
     <View style={{ width: '100vw', height: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', paddingTop: '50px', paddingBottom: '50px' }}>
       {/* <PosterGenerator data={posterData} onGenerated={handleGenerated} showPoster={true} />
@@ -74,8 +81,12 @@ const Dev = () => {
         打开订单预算弹窗
       </Button> */}
       
+      <Button onClick={handleGoToContactPreference}>
+        测试联系方式选择页面
+      </Button>
+      
       <BudgetDialog
-        visible={true}
+        visible={showBudgetDialog}
         title="夏日睡莲"
         designNumber="0001"
         productImage="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"

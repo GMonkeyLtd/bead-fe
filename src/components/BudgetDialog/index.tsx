@@ -5,7 +5,7 @@ import "./index.scss";
 import CrystalButton from "../CrystalButton";
 import rightArrowGolden from "@/assets/icons/right-arrow-golden.svg";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";
-import api from "@/utils/api";
+import api, { userApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 
 interface BudgetDialogProps {
@@ -28,10 +28,26 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   const [budget, setBudget] = useState<string>('');
   const { keyboardHeight } = useKeyboardHeight();
 
-  const handleConfirm = () => {
+
+  const handleConfirm = async () => {
+
+    const userData = await userApi.getUserInfo();
+    const { default_contact, phone, wechat_id } = userData?.data || {};
+    if (default_contact === 0 && !phone) {
+      Taro.navigateTo({
+        url: `${pageUrls.contactPreference}?budget=${budget}&designId=${designNumber}`
+      });
+      return;
+    } 
+    if (default_contact === 1 && !wechat_id) {
+      Taro.navigateTo({
+        url: `${pageUrls.contactPreference}?budget=${budget}&designId=${designNumber}`
+      });
+      return;
+    }
     const budgetValue = parseFloat(budget) || 0;
     if (onConfirm) {
-      onConfirm(budget);
+      onConfirm(budgetValue);
       return;
     }
     api.userHistory.createOrder({
@@ -40,7 +56,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     }).then((res) => {
       const { order_uuid } = res?.data || {};
       Taro.navigateTo({
-        url: `${pageUrls.orderDispatching}?orderid=${order_uuid}`
+        url: `${pageUrls.orderDispatching}?orderId=${order_uuid}`
       }).then(() => {
         onClose?.();
       });
@@ -85,6 +101,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                       onInput={handleBudgetChange}
                       type="digit"
                       placeholder="0.00"
+                      focus={true}
                       // placeholderClass="budget-input-placeholder"
                       // placeholderTextColor="red"
                       placeholderStyle="color: #00000033;"

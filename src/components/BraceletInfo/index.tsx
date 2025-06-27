@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image } from "@tarojs/components";
 import copyIcon from "@/assets/icons/copy.svg";
 import "./index.scss";
+import Taro from "@tarojs/taro";
 
 interface BraceletCardProps {
   orderNumber: string;
@@ -28,6 +29,19 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
   className = "",
   orderAction,
 }) => {
+
+  const handleCopyImageUrl = (orderNumber: string) => {
+    Taro.setClipboardData({
+      data: orderNumber,
+      success: () => {
+        Taro.showModal({
+          title: '复制成功',
+          content: '图片链接已复制，您可以在浏览器中粘贴访问',
+          showCancel: false
+        })
+      }
+    })
+  }
   return (
     <View className={`bracelet-info ${className}`}>
       {/* 订单编号和复制 */}
@@ -37,7 +51,7 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
           <Image
             src={copyIcon}
             style={{ width: "16px", height: "16px" }}
-            // mode="aspectFit"
+            onClick={() => handleCopyImageUrl(orderNumber)}
           />
         </View>
         {orderAction?.text && (

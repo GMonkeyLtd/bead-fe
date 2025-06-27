@@ -1,0 +1,207 @@
+.contact-preference {
+  padding: 24px;
+  box-sizing: border-box;
+
+  &-container {
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+  }
+
+  &-title {
+    font-family: "Source Han Serif CN", serif;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.437;
+    letter-spacing: 0.1em;
+    color: #1f1722;
+    text-align: center;
+    margin-bottom: 28px;
+    opacity: 0.9;
+  }
+
+  &-options {
+    display: flex;
+    justify-content: space-between;
+    gap: 93px;
+    margin-bottom: 28px;
+
+    .icon-image {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+
+    .contact-preference-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &-text {
+        font-family: "Source Han Serif CN", serif;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.437;
+        letter-spacing: 0.167em;
+        color: #1f1722;
+        transition: color 0.3s ease;
+      }
+    }
+  }
+
+
+  &-form {
+
+    &-group {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 8px;
+      border: 1px solid #f2efec;
+
+      &.phone-input {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .country-code {
+          font-family: "Noto Sans SC", sans-serif;
+          font-size: 13px;
+          color: #1f1722;
+          opacity: 0.9;
+        }
+
+        .divider {
+          width: 1px;
+          height: 16px;
+          background: #f2efec;
+        }
+
+        .phone-input-field {
+          flex: 1;
+          border: none;
+          outline: none;
+          font-family: "Noto Sans SC", sans-serif;
+          font-size: 13px;
+          color: rgba(31, 23, 34, 0.3);
+          height: 48px;
+          box-sizing: border-box;
+
+          &::placeholder {
+            color: rgba(31, 23, 34, 0.3);
+          }
+        }
+      }
+
+      &.code-input {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+
+        .code-input-field {
+          flex: 1;
+          border: none;
+          outline: none;
+          font-family: "Noto Sans SC", sans-serif;
+          font-size: 13px;
+          color: rgba(31, 23, 34, 0.3);
+          height: 48px;
+          box-sizing: border-box;
+
+          &::placeholder {
+            color: rgba(31, 23, 34, 0.3);
+          }
+        }
+
+        .get-code-btn {
+          background: rgba(0, 0, 0, 0.04);
+          border-radius: 44px;
+          padding: 6px 12px;
+          border: none;
+          font-family: "Noto Sans SC", sans-serif;
+          font-size: 11px;
+          font-weight: 350;
+          color: #1f1722;
+          cursor: pointer;
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: rgba(0, 0, 0, 0.08);
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+
+  &-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+
+    .agreement-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .checkbox {
+        width: 12px;
+        height: 12px;
+        background: linear-gradient(
+          315deg,
+          #ff9114 19.68%,
+          #ffca40 59.79%,
+          #ffe0f9 100%
+        );
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        .check-icon {
+          width: 5px;
+          height: 4px;
+        }
+
+        &.unchecked {
+          background: #f2efec;
+          border: 1px solid #ddd;
+
+          .check-icon {
+            display: none;
+          }
+        }
+      }
+
+      .agreement-text {
+        font-family: "Noto Sans SC", sans-serif;
+        font-size: 11px;
+        font-weight: 300;
+        line-height: 1.2;
+        color: rgba(31, 23, 34, 0.5);
+        opacity: 0.9;
+
+        .link {
+          color: rgba(31, 23, 34, 0.5);
+          text-decoration: underline;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}

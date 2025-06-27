@@ -1,9 +1,9 @@
-import { View, Button, Text, Image } from "@tarojs/components";
+import { View, Image } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
 import Taro from "@tarojs/taro";
 import "./index.scss";
 import AppHeader from "@/components/AppHeader";
-import { getNavBarHeightAndTop, getSafeArea } from "@/utils/style-tools";
+import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import logoSvg from "@/assets/icons/logo.svg";
 import expendImage from "@/assets/icons/expend.svg";
 import CrystalButton from "@/components/CrystalButton";
@@ -16,6 +16,7 @@ import BudgetDialog from "@/components/BudgetDialog";
 import { OrderStatus } from "@/utils/orderUtils";
 import OrderListComp from "@/components/OrderListComp";
 import api from "@/utils/api";
+import { pageUrls } from "@/config/page-urls";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -25,11 +26,12 @@ const Result = () => {
   const [braceletDescription, setBraceletDescription] = useState("");
   const { designData } = useDesign();
   const [shareImageUrl, setShareImageUrl] = useState("");
-  console.log(designData, "designData");
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
-  const [designNo, setDesignNo] = useState("000001");
+  const [designNo, setDesignNo] = useState("");
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [orderList, setOrderList] = useState<any[]>([]);
+
+  console.log(orderList, "orderList");
 
   const posterData = useMemo(() => {
     return {
@@ -41,13 +43,24 @@ const Result = () => {
     };
   }, [braceletName, braceletDescription, beadDescriptions, imageUrl]);
 
+
+  const getOrderData = (orderUuid: string[]) => {
+    api.userHistory.getOrderById(orderUuid).then((res) => {
+      res.data.orders?.length > 0 && setOrderList(res.data.orders);
+    });
+  }
+
   const getDesignData = (designId: string) => {
     api.userHistory.getDesignById(parseInt(designId)).then((res) => {
       const {
         id,
         image_url,
-        word_info
+        word_info,
+        order_uuid
       } = res?.data || {};
+      if (order_uuid?.length > 0) {
+        getOrderData(order_uuid);
+      }
 
       const {
         bracelet_name,
@@ -73,7 +86,7 @@ const Result = () => {
     // 获取传入的图片URL参数
     const instance = Taro.getCurrentInstance();
     const params = instance.router?.params;
-    if (true || params?.designBackendId) {
+    if (params?.designBackendId) {
       const imageUrl = params?.imageUrl || "";
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
       getDesignData(params?.designBackendId);
@@ -236,15 +249,34 @@ const Result = () => {
           </View>
         </View>
 
-        {orderList.length > 0 && (
+        {orderList?.length > 0 && (
           <View className="result-order-list-container">
             <View className="result-order-list-title">
               {`相关订单（${orderList.length}）`}
             </View>
             <OrderListComp
-              orders={orderList}
+              orders={orderList.map((item) => ({
+                id: item.order_uuid,
+                orderNumber: item.order_uuid,
+                status: item.order_status,
+                merchantName: item.merchant_info?.name,
+                createTime: item.created_at,
+                budget: item.price,
+              }))}
               showActions={false}
               showImage={false}
+              onItemClick={(item) => {
+                console.log(item, "item");
+                if ([OrderStatus.PendingDispatch, OrderStatus.PendingAcceptance, OrderStatus.Dispatching].includes(item.status)) {
+                  Taro.navigateTo({
+                    url: `${pageUrls.orderDispatching}?orderId=${item.id}`,
+                  });
+                } else {
+                  Taro.navigateTo({
+                    url: `${pageUrls.orderDetail}?orderId=${item.id}`,
+                  });
+                }
+              }}
             />
           </View>
         )}
@@ -276,13 +308,13 @@ const Result = () => {
           }
         />
       </View>
-      <BudgetDialog
+      {budgetDialogShow && (<BudgetDialog
         visible={budgetDialogShow}
         title={braceletName}
         designNumber={designNo}
         productImage={imageUrl}
         onClose={() => setBudgetDialogShow(false)}
-      />
+      />)}
       <PosterGenerator data={posterData} onGenerated={setShareImageUrl} />
     </View>
   );

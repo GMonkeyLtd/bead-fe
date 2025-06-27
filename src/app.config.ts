@@ -20,8 +20,9 @@ export default defineAppConfig({
     {
       root: 'pages-user',
       pages: [
-        'design-list/index',
+        'user-center/index',
         'result/index',
+        'contact-preference/index',
       ]
     },
     {

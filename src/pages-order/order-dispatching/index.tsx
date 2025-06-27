@@ -12,46 +12,46 @@ import { useOrderPolling } from "@/hooks/useOrderPolling";
 import api from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 
-const OrderDispatching = ({
-  ringImageUrl = "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250625140822.995_c960ac9f5690d772eb7fb50c9b6330b5.jpg",
-}: {
-  ringImageUrl: string;
-}) => {
+const OrderDispatching = () => {
   const [totalCustomers, setTotalCustomers] = useState(999);
   const [successOrders, setSuccessOrders] = useState(888);
   const [showEditPrice, setShowEditPrice] = useState(false);
-  
-  const { orderid, designBackendId } = Taro.getCurrentInstance().router?.params || {};
+
+  const { orderId, designBackendId } =
+    Taro.getCurrentInstance().router?.params || {};
 
   // 使用轮询 hook
-  const { isPolling } = useOrderPolling({
-    orderId: orderid,
-    interval: 100000, // 3秒轮询间隔
+  const { isPolling, orderInfo } = useOrderPolling({
+    orderId: orderId,
+    interval: 3000, // 3秒轮询间隔
     onStatusChange: (newStatus) => {
-      console.log('订单状态变化:', newStatus);
+      console.log("订单状态变化:", newStatus);
       // 可以在这里添加状态变化时的额外逻辑
     },
   });
 
-  const handleCancelOrder = (orderid: string) => {
-    api.userHistory.cancelOrder(orderid).then((res) => {
-      Taro.redirectTo({
-        url: `${pageUrls.result}?=designBackendId${orderid}`,
-      });
+  const handleCancelOrder = () => {
+    api.userHistory.cancelOrder(orderId || "").then((res) => {
+      Taro.navigateBack();
     });
-  }
+  };
 
   return (
     <PageContainer>
       <View className="order-dispatching-container">
         <View className="merchant-matching-container">
           <View className="dispatching-image-container">
-            <Image src={MERCHANT_MATCHING_IMAGE_URL} className="dispatching-rotate-image" />
-            <Image src={ringImageUrl} className="ring-image" />
             <Image
-              src={merchantMatching}
-              className="merchant-matching-image"
+              src={MERCHANT_MATCHING_IMAGE_URL}
+              className="dispatching-rotate-image"
             />
+            {orderInfo?.design_info?.image_url && (
+              <Image
+                src={orderInfo?.design_info?.image_url}
+                className="ring-image"
+              />
+            )}
+            <Image src={merchantMatching} className="merchant-matching-image" />
           </View>
           <View className="cancel-order-container" onClick={handleCancelOrder}>
             <View className="cancel-order-text">取消订单</View>
@@ -69,23 +69,25 @@ const OrderDispatching = ({
         </View>
 
         <View className="order-container">
-          <BraceletInfo
-            orderNumber="ADX2333"
-            productName="夏日睡莲"
-            productNumber="NO.0001"
-            quantity={24}
-            price={299.0}
-            productImage="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"
-            style={{
-              width: "100%",
-              boxSizing: "border-box",
-              display: "flex",
-              padding: "24px",
-              backgroundColor: "#fff",
-              borderRadius: "16px 20px",
-              boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
-            }}
-          />
+          {orderInfo && (
+            <BraceletInfo
+              orderNumber={orderInfo?.order_uuid}
+              productName={orderInfo?.design_info?.word_info?.bracelet_name}
+              productNumber={orderInfo?.design_info?.design_id}
+              quantity={orderInfo?.design_info?.beads_number}
+              price={orderInfo?.price}
+              productImage={orderInfo?.design_info?.image_url}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                display: "flex",
+                padding: "24px",
+                backgroundColor: "#fff",
+                borderRadius: "16px 20px",
+                boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
+              }}
+            />
+          )}
         </View>
         <View className="order-dispatching-tips">
           找到商家后，我们将通过"微信-服务通知"告诉你
@@ -93,30 +95,36 @@ const OrderDispatching = ({
 
         <View className="order-dispatching-button">
           <CrystalButton
-            text="修改预算"
-            onClick={() => setShowEditPrice(true)}
+            text="查看订单"
+            onClick={() =>
+              Taro.redirectTo({
+                url: pageUrls.orderList,
+              })
+            }
             isPrimary
             style={{ width: "200px" }}
           />
         </View>
 
         {/* 开发调试用：显示轮询状态 */}
-        {process.env.NODE_ENV === 'development' && (
+        {/* {process.env.NODE_ENV === 'development' && (
           <View style={{ marginTop: '10px', textAlign: 'center', fontSize: '12px', color: '#999' }}>
             轮询状态: {isPolling ? '进行中' : '已停止'}
           </View>
-        )}
+        )} */}
       </View>
-      <BudgetDialog
-        visible={showEditPrice}
-        onClose={() => setShowEditPrice(false)}
-        title="夏日睡莲"
-        designNumber="0001"
-        onConfirm={(budget) => {
-          console.log(budget);
-          setShowEditPrice(false);
-        }}
-      />
+      {showEditPrice && (
+        <BudgetDialog
+          visible={showEditPrice}
+          onClose={() => setShowEditPrice(false)}
+          title="夏日睡莲"
+          designNumber="0001"
+          onConfirm={(budget) => {
+            console.log(budget);
+            setShowEditPrice(false);
+          }}
+        />
+      )}
     </PageContainer>
   );
 };

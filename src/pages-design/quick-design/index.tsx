@@ -92,7 +92,6 @@ const QuickDesign = () => {
         if (!res.data?.images_url?.[0]) {
           throw new Error("生成失败");
         }
-        console.log(res, "res");
         processDesignData(res);
       })
       .catch((err) => {

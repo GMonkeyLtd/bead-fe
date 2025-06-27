@@ -20,7 +20,7 @@
  * ```
  */
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import Taro from '@tarojs/taro';
 import api from '@/utils/api';
 import { OrderStatus } from '@/utils/orderUtils';
@@ -37,35 +37,33 @@ interface UseOrderPollingReturn {
   startPolling: () => void;
   stopPolling: () => void;
   isPolling: boolean;
+  orderInfo: any;
 }
 
 export const useOrderPolling = ({
   orderId,
-  interval = 3000,
-  onStatusChange,
-  shouldStopPolling = (status) => status !== OrderStatus.PendingDispatch,
+  interval = 3000
 }: UseOrderPollingOptions): UseOrderPollingReturn => {
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isPollingRef = useRef<boolean>(false);
+  const [orderInfo, setOrderInfo] = useState<any>(null);
+
+  const shouldStopPolling = (status) => ![OrderStatus.PendingDispatch, OrderStatus.Dispatching, OrderStatus.PendingAcceptance].includes(status)
 
   const queryOrder = useCallback(async (orderIdToQuery: string): Promise<boolean> => {
     try {
-      const res = await api.userHistory.getOrderById(orderIdToQuery);
+      const res = await api.userHistory.getOrderById(orderIdToQuery, { showLoading: false });
       console.log('查询订单结果:', res);
       
       // 根据实际 API 返回结构调整数据获取方式，使用类型断言
-      const orderData = res?.data as any;
+      const orderData = res?.data?.orders?.[0] as any;
+      setOrderInfo(orderData);
       const orderStatusStr = orderData?.order_status;
       
       // 将字符串状态转换为数字进行比较
       const order_status = orderStatusStr ? parseInt(orderStatusStr, 10) : undefined;
       
       console.log('订单状态:', order_status);
-      
-      // 调用状态变化回调
-      if (order_status !== undefined && onStatusChange) {
-        onStatusChange(order_status);
-      }
       
       // 检查是否应该停止轮询
       if (order_status !== undefined && shouldStopPolling(order_status)) {
@@ -88,7 +86,7 @@ export const useOrderPolling = ({
       console.error('查询订单失败:', error);
       return true; // 出错时继续轮询
     }
-  }, [onStatusChange, shouldStopPolling]);
+  }, []);
 
   const stopPolling = useCallback(() => {
     if (pollingTimerRef.current) {
@@ -140,5 +138,6 @@ export const useOrderPolling = ({
     startPolling,
     stopPolling,
     isPolling: isPollingRef.current,
+    orderInfo,
   };
 }; 

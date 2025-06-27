@@ -1,0 +1,89 @@
+.crystal-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: stretch;
+  gap: 20px;
+  padding: 24px 40px 80px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(40px);
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0.5) 100%
+  ) 1;
+  z-index: 1000;
+
+  .tab-bar-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    .tab-icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .tab-text {
+      font-family: 'Source Han Serif CN', serif;
+      font-weight: 500;
+      font-size: 22px;
+      line-height: 1.437;
+      text-align: center;
+      transition: color 0.2s ease;
+
+      &.active {
+        color: #1F1722;
+      }
+
+      &.inactive {
+        color: rgba(31, 23, 34, 0.3);
+      }
+    }
+  }
+}
+
+// 适配不同屏幕尺寸
+@media screen and (max-width: 750px) {
+  .crystal-tab-bar {
+    width: 100%;
+    padding: 12px 20px 40px;
+    gap: 10px;
+
+    .tab-bar-item {
+      gap: 6px;
+
+      .tab-icon {
+        width: 32px;
+        height: 32px;
+
+        svg {
+          width: 32px;
+          height: 32px;
+        }
+      }
+
+      .tab-text {
+        font-size: 11px;
+      }
+    }
+  }
+} 

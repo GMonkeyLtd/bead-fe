@@ -1,0 +1,313 @@
+.page-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+}
+
+.page-top-container {
+  width: 100%;
+  padding: 20px 24px;
+  background: linear-gradient(180deg, #ffffff00 0%, #5c3f050a 100%);
+  box-sizing: border-box;
+}
+
+/* 功能卡片区域 */
+.feature-cards {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 32px 0 20px;
+  box-sizing: border-box;
+}
+
+/* 基础卡片样式 */
+.feature-card {
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    .title-text {
+      font-family: "Source Han Serif CN", serif;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 1.44;
+    }
+  }
+
+  .card-desc {
+    font-family: "Noto Sans SC", sans-serif;
+    font-weight: 350;
+    font-size: 10px;
+    line-height: 1.35;
+    color: rgba(31, 23, 34, 0.5);
+  }
+}
+
+/* 我的收益卡片 */
+.income-card {
+  background: linear-gradient(135deg, #fff4ec 0%, #f9decc 100%);
+  border: 1px solid;
+  border-image: linear-gradient(135deg, #fff4ec 0%, #f9decc 100%) 1;
+  position: relative;
+
+  .card-content {
+    background: #faeadf;
+  }
+
+  // 钱包图标背景
+  &::before {
+    content: "";
+    position: absolute;
+    right: -20px;
+    top: -10px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(
+      135deg,
+      rgba(253, 165, 57, 0.2) 0%,
+      rgba(255, 163, 71, 0.2) 100%
+    );
+    border-radius: 50%;
+    opacity: 0.3;
+  }
+
+  .title-text {
+    color: #532a0e;
+  }
+
+  .card-value {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+
+    .value-text {
+      font-family: "Source Han Serif CN", serif;
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 1.44;
+      color: #fa7900;
+    }
+
+    .unit-text {
+      font-family: "Noto Sans SC", sans-serif;
+      font-weight: 350;
+      font-size: 10px;
+      line-height: 1.35;
+      color: rgba(31, 23, 34, 0.5);
+      padding-bottom: 4px;
+    }
+  }
+
+  .withdraw-btn {
+    background: linear-gradient(
+      135deg,
+      #ff8d3f 0%,
+      #ff9114 19.68%,
+      #ffca40 59.79%,
+      #ffe0f9 100%
+    );
+    border: 1px solid transparent;
+    border-radius: 22px;
+    padding: 8px 16px;
+    box-shadow: 0px 2px 4px 0px rgba(217, 205, 199, 0.1),
+      inset 0px 1px 2px 0px rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0px 4px 8px 0px rgba(217, 205, 199, 0.15),
+        inset 0px 1px 2px 0px rgba(255, 255, 255, 0.5);
+    }
+
+    .withdraw-text {
+      font-family: "Noto Sans SC", sans-serif;
+      font-weight: 500;
+      font-size: 11px;
+      line-height: 1.35;
+      color: #ffffff;
+      text-align: center;
+    }
+  }
+}
+
+/* 订单和资料卡片容器 */
+.feature-cards-row {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+
+  .feature-card {
+    flex: 1;
+  }
+}
+
+/* 我的订单卡片 */
+.order-card {
+  border: 1px solid #fadddf;
+  position: relative;
+
+  .card-content {
+    background: #fbe6e8;
+  }
+
+  // 订单图标背景
+  &::before {
+    content: "";
+    position: absolute;
+    right: -15px;
+    top: -8px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 148, 148, 0.2) 0%,
+      rgba(255, 120, 102, 0.2) 100%
+    );
+    border-radius: 8px;
+    opacity: 0.3;
+  }
+
+  .title-text {
+    color: #3f0622;
+  }
+
+  .card-info {
+    width: 100%;
+  }
+}
+
+/* 编辑资料卡片 */
+.profile-card {
+  background: linear-gradient(135deg, #f8f1ff 0%, #ecdef9 100%);
+  border: 1px solid;
+  border-image: linear-gradient(135deg, #f8f1ff 0%, #ecdef9 100%) 1;
+  position: relative;
+
+  .card-content {
+    background: #f0e9f6;
+  }
+
+  // 编辑资料图标背景
+  &::before {
+    content: "";
+    position: absolute;
+    right: -15px;
+    top: -8px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(
+      135deg,
+      rgba(181, 57, 253, 0.2) 0%,
+      rgba(249, 71, 255, 0.2) 100%
+    );
+    border-radius: 8px;
+    opacity: 0.3;
+  }
+
+  .title-text {
+    color: rgba(45, 8, 59, 0.9);
+  }
+
+  .card-info {
+    width: 100%;
+  }
+}
+
+/* 箭头图标 */
+.arrow-icon {
+  width: 12px;
+  height: 8px;
+  position: relative;
+
+  .arrow-line {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 12px;
+    height: 0;
+    border-top: 0.72px solid rgba(95, 16, 54, 0.5);
+  }
+
+  .arrow-dot {
+    position: absolute;
+    right: 0;
+    width: 5px;
+    height: 4px;
+    border: 0.72px solid rgba(95, 16, 54, 0.5);
+    border-radius: 50%;
+
+    &.top {
+      top: 0;
+    }
+
+    &.bottom {
+      bottom: 0;
+    }
+  }
+}
+
+/* 为编辑资料卡片的箭头使用不同颜色 */
+.profile-card .arrow-icon {
+  .arrow-line {
+    border-top-color: rgba(45, 13, 57, 0.5);
+  }
+
+  .arrow-dot {
+    border-color: rgba(45, 13, 57, 0.5);
+  }
+}
+
+.image-history-container {
+  width: 100%;
+  padding: 0 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.image-history-title {
+  color: #000;
+  font-family: "Source Han Serif CN";
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  padding: 20px 24px;
+  position: relative;
+  width: 52px;
+  box-sizing: content-box;
+}

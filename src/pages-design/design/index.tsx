@@ -137,7 +137,7 @@ const ChatPage: React.FC = () => {
         birth_day: parseInt(day || "0"),
         birth_hour: parseInt(hour || "0"),
         is_lunar: isLunar,
-        // gender: parseInt(gender || "0"),
+        sex: parseInt(gender || "0"),
       });
       processResult(res);
     } catch (err) {
@@ -200,6 +200,7 @@ const ChatPage: React.FC = () => {
       return;
     }
     const beadDataId = "bead-" + generateUUID();
+    console.log(beadImageData, "beadImageData");
     addBeadData({
       image_url: canvasImageUrl,
       bead_list: beadImageData.map((item) => ({
@@ -207,6 +208,7 @@ const ChatPage: React.FC = () => {
         image_url: item.image_url,
         name: item.name,
         description: item.description,
+        bead_diameter: item.bead_diameter,
       })),
       bead_data_id: beadDataId,
     });

@@ -6,16 +6,15 @@ import Taro from "@tarojs/taro";
 setBaseURL("https://test.qianjunye.com:443/api/v1");
 // setBaseURL("http://192.168.189.246:8088/api/v1");
 
-setIsMock(true)
+// setIsMock(true)
 
 // 定义用户相关的数据类型
 export interface User {
-  id: number;
-  username: string;
-  email: string;
-  avatar?: string;
-  nickname?: string;
-  openid?: string;
+  nick_name: string;
+  avatar_url?: string;
+  phone?: string;
+  wechat_id?: string;
+  wechat_avatar_url?: number;
 }
 
 export interface LoginParams {
@@ -82,11 +81,11 @@ export const userApi = {
     }),
 
   // 获取用户信息
-  getUserInfo: (userId: number) => http.get<User>(`/user/${userId}`),
+  getUserInfo: () => http.post<User>(`/user/getuserinfo`),
 
   // 更新用户信息
-  updateUser: (userId: number, data: Partial<User>) =>
-    http.put<User>(`/user/${userId}`, data),
+  updateUser: (data: Partial<User>) =>
+    http.post<User>(`/user/updateuserInfo`, data),
 
   // 用户退出登录
   logout: () => http.post("/auth/logout"),
@@ -159,12 +158,18 @@ export const userHistoryApi = {
       showLoading: true,
       loadingText: "订单生成中...",
     }),
-  getOrderById: (orderId: string) =>
+  getOrderById: (orderId: string | string[], config?: {}) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/queryorder`, { order_uuid: orderId }, { showLoading: true }),
+    }>(`/user/queryorder`, { order_uuids: Array.isArray(orderId) ? orderId : [orderId] }, { showLoading: true, ...config }),
+  getOrderList: () =>
+    http.post<{
+      data: {
+        any: [];
+      };
+    }>(`/user/queryorder`, {}, { showLoading: true }),
   cancelOrder: (orderId: string) =>
     http.post<{
       data: {
