@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState } from "react";
 import { View, Canvas, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
+import logo from "@/assets/logo/logo.svg";
 import {
   CRYSTAL_BROWN_BG_IMAGE_URL,
   CRYSTALS_BG_IMAGE_URL,
   FONT_URL,
+  LOGO_IMAGE_URL,
   LOGO_SLOGAN_IMAGE_URL,
   POSTER_BG_IMAGE_URL,
 } from "@/config";
@@ -270,11 +272,11 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         0,
         0,
         crystalsBgImgWidth,
-        crystalsBgImgHeight,
+        crystalsBgImgHeight * 0.5,
         0,
-        canvasHeight - crystalsBgImgHeight * dpr * 0.6,
+        canvasHeight - crystalsBgImgHeight * dpr * 0.5,
         canvasWidth,
-        crystalsBgImgHeight * dpr * 0.6
+        crystalsBgImgHeight * dpr * 0.5
       );
 
       // 绘制卡片白色背景
@@ -291,7 +293,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       ctx.fill();
 
       // 卡片上半部份图片
-      const { path: mainImgPath, width: mainImgWidth } = await loadImage(
+      const { path: mainImgPath, width: mainImgWidth, height: mainImgHeight } = await loadImage(
         data.mainImage
       );
       drawRoundedRect({
@@ -306,9 +308,9 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       ctx.drawImage(
         mainImgPath,
         0,
-        100 * dpr,
+        0,
         mainImgWidth,
-        mainImgWidth,
+        mainImgHeight,
         98 * dpr,
         38 * dpr,
         370 * dpr,
@@ -321,9 +323,6 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       gradient.addColorStop(0, "rgba(174, 171, 168, 0.21)");
       gradient.addColorStop(0.75, "rgba(255, 255, 255, 0.72)");
       gradient.addColorStop(1, "rgba(255, 255, 255, 0.32)");
-      // gradient.addColorStop(0, "rgba(242, 127, 12, 0.89)");
-      // gradient.addColorStop(0.75, "rgba(49, 24, 240, 0.89)");
-      // gradient.addColorStop(1, "rgba(36, 228, 32, 0.8)");
 
       ctx.strokeStyle = gradient as any;
       ctx.lineWidth = 2 * dpr;
@@ -348,7 +347,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         textBaseline: "top",
         fontFamily: getFontFamily(true),
       });
-      ctx.fillText(data.title, 135 * dpr, 380 * dpr);
+      ctx.fillText(data.title, 135 * dpr, 360 * dpr);
 
       // 绘制描述文字（如果需要）
       if (data.description) {
@@ -436,14 +435,14 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
 
       // 绘制logo和slogan
       const { path: logoSloganImgPath } = await loadImage(
-        LOGO_SLOGAN_IMAGE_URL
+        LOGO_IMAGE_URL
       );
       ctx.drawImage(
         logoSloganImgPath,
         236 * dpr,
         674 * dpr,
         94 * dpr,
-        54 * dpr
+        44 * dpr
       );
 
       ctx.draw();

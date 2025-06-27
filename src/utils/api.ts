@@ -85,7 +85,7 @@ export const userApi = {
 
   // 更新用户信息
   updateUser: (data: Partial<User>) =>
-    http.post<User>(`/user/updateuserInfo`, data),
+    http.post<User>(`/user/updateuserinfo`, data),
 
   // 用户退出登录
   logout: () => http.post("/auth/logout"),

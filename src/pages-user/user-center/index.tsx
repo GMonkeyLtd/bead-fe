@@ -44,13 +44,15 @@ const UserCenterPage: React.FC = () => {
     });
   };
 
-
   return (
     <CrystalContainer showBack={false}>
       <View className="page-content">
         <View className="page-top-container">
           <UserInfoCard
-            userName={userInfo?.nick_name || "微信用户" + Math.random().toString(36).substring(2, 15)}
+            userName={
+              userInfo?.nick_name ||
+              "微信用户" + Math.random().toString(36).substring(2, 15)
+            }
             userSlogan="璞光集，好运气"
             avatar="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/default-avatar.png" // 替换为实际头像URL
             showAction={false}
@@ -97,33 +99,50 @@ const UserCenterPage: React.FC = () => {
               </View>
 
               {/* 编辑资料卡片 */}
-              {/* <View className="feature-card profile-card" onClick={handleEditProfileClick}>
-              <View className="card-content">
-                <View className="card-info">
-                  <View className="card-title">
-                    <Text className="title-text">编辑资料</Text>
-                    <View className="arrow-icon">
-                      <View className="arrow-line"></View>
-                      <View className="arrow-dot top"></View>
-                      <View className="arrow-dot bottom"></View>
+              <View
+                className="feature-card profile-card"
+                onClick={() => {
+                  Taro.navigateTo({
+                    url: pageUrls.contactPreference,
+                  });
+                }}
+              >
+                <View className="card-content">
+                  <View className="card-info">
+                    <View className="card-title">
+                      <Text className="title-text">编辑资料</Text>
                     </View>
                   </View>
-                  <Text className="card-desc">90% 完善度</Text>
+                  <Image
+                    src={rightArrow}
+                    style={{ width: "12px", height: "8px" }}
+                  />
                 </View>
               </View>
-            </View> */}
             </View>
           </View>
         </View>
-        <View className="image-history-title">
-          <Image src={MyWorkIcon} style={{ width: "35px", height: "12px", position: "absolute", bottom: "12px", right: "20px" }} />
-          我的作品
-        </View>
-        {imageHistory.length > 0 && (
-          <View className="image-history-container">    
-            <BraceletList items={imageHistory} onItemClick={handleItemClick} />
+          <View className="image-history-title">
+            <Image
+              src={MyWorkIcon}
+              style={{
+                width: "35px",
+                height: "12px",
+                position: "absolute",
+                bottom: "12px",
+                right: "20px",
+              }}
+            />
+            我的作品
           </View>
-        )}
+          {imageHistory.length > 0 && (
+            <View className="image-history-container">
+              <BraceletList
+                items={imageHistory}
+                onItemClick={handleItemClick}
+              />
+            </View>
+          )}
       </View>
       <TabBar />
     </CrystalContainer>

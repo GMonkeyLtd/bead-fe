@@ -37,9 +37,10 @@ export default defineAppConfig({
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#F4F1EE',
-    navigationBarTitleText: '琉光纪',
+    navigationBarTitleText: '璞光纪',
     navigationBarTextStyle: 'black',
-    backgroundColor: '#F4F1EE'
+    backgroundColor: '#F4F1EE',
+    enablePullDownRefresh: true
   },
 
 })

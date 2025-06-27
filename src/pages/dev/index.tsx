@@ -73,15 +73,15 @@ const Dev = () => {
 
   return (
     <View style={{ width: '100vw', height: '90vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', paddingTop: '50px', paddingBottom: '50px' }}>
-      {/* <PosterGenerator data={posterData} onGenerated={handleGenerated} showPoster={true} />
-      <View onClick={handleSave}>
+      <PosterGenerator data={posterData} onGenerated={handleGenerated} showPoster={true} />
+      {/* <View onClick={handleSave}>
         保存
       </View>
       <Button onClick={handleOpenDialog}>
         打开订单预算弹窗
       </Button> */}
       
-      <Button onClick={handleGoToContactPreference}>
+      {/* <Button onClick={handleGoToContactPreference}>
         测试联系方式选择页面
       </Button>
       
@@ -92,7 +92,7 @@ const Dev = () => {
         productImage="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"
         onConfirm={handleConfirm}
         onClose={handleCloseDialog}
-      />
+      /> */}
     </View>
   );
 };

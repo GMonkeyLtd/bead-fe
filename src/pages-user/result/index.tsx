@@ -7,7 +7,7 @@ import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import logoSvg from "@/assets/icons/logo.svg";
 import expendImage from "@/assets/icons/expend.svg";
 import CrystalButton from "@/components/CrystalButton";
-import { CRYSTALS_BG_IMAGE_URL, QR_CODE_IMAGE_URL } from "@/config";
+import { CRYSTALS_BG_IMAGE_URL, LOGO_IMAGE_URL, LOGO_WITH_BACKGROUND_IMAGE_URL, QR_CODE_IMAGE_URL } from "@/config";
 import { useDesign } from "@/store/DesignContext";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import shareDesignImage from "@/assets/icons/share-design.svg";
@@ -201,7 +201,7 @@ const Result = () => {
           <View className="result-content-card-image" onClick={viewImage}>
             {/* <Image mode="widthFix" src={imageUrl} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} /> */}
             <View className="logo-image-container" onClick={viewImage}>
-              <Image className="logo-image" src={logoSvg} mode="widthFix" />
+              <Image className="logo-image" src={LOGO_IMAGE_URL} mode="widthFix" />
             </View>
             <Image className="expend-image" src={expendImage} mode="widthFix" />
           </View>

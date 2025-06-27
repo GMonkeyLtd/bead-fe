@@ -1,6 +1,6 @@
 
 
-export const BASE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/beads-background.png";
+export const BASE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/beads-base-image.png";
 export const ASSISTANT_LG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/assistant-lg.png";
 export const ASSISTANT_SM_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/assistant-sm.png";
 export const QR_CODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/qrcode.jpg";
@@ -18,6 +18,8 @@ export const DEFAULT_PHONE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/imag
 export const SELECTED_PHONE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/phone-selected.png";
 export const DEFAULT_WECHAT_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wechat-default.png";
 export const SELECTED_WECHAT_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wechat-selected.png";
+export const LOGO_WITH_BACKGROUND_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/logo-with-background.png";
+export const LOGO_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/logo-image.png";
 
 
 

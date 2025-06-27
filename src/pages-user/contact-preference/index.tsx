@@ -114,7 +114,7 @@ const ContactPreference = () => {
           price: parseFloat(budget),
         });
         const { order_uuid } = res?.data || {};
-        Taro.navigateTo({
+        Taro.redirectTo({
           url: `${pageUrls.orderDispatching}?orderId=${order_uuid}`
         });
         return;
