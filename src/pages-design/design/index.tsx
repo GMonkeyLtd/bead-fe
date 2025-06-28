@@ -256,7 +256,7 @@ const ChatPage: React.FC = () => {
       bead_list: beadImageData,
       bead_data_id: beadDataId,
     });
-    Taro.redirectTo({
+    Taro.navigateTo({
       url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
     });
   };
@@ -308,19 +308,21 @@ const ChatPage: React.FC = () => {
                     ))}
                 </View>
               </View>
-              <View className="result-link ">
-                <View
-                  className="crystal-gradient-text"
-                  onClick={handleNextStep}
-                  style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
-                >
-                  发起定制派单
+              {canvasImageUrl && (
+                <View className="result-link ">
+                  <View
+                    className="crystal-gradient-text"
+                    onClick={handleNextStep}
+                    style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
+                  >
+                    发起定制派单
+                  </View>
+                  <Image
+                    src={arrowRight}
+                    style={{ width: "16px", height: "16px" }}
+                  />
                 </View>
-                <Image
-                  src={arrowRight}
-                  style={{ width: "16px", height: "16px" }}
-                />
-              </View>
+              )}
             </View>
             <View className="result-image">
               <CircleRingImage
