@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Image, Text, ScrollView } from '@tarojs/components';
-import './index.scss';
-import RightArrowIcon from '@/assets/icons/right-arrow.svg';
+import React from "react";
+import { View, Image, Text, ScrollView } from "@tarojs/components";
+import "./index.scss";
+import RightArrowIcon from "@/assets/icons/right-arrow.svg";
 
 interface BraceletItem {
   id: string;
@@ -21,15 +21,14 @@ const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
 
   return (
     <View className="bracelet-list">
-  
       {items.map((item) => (
-        <View 
+        <View
           key={item.id}
           className="bracelet-item"
           onClick={() => onItemClick?.(item)}
         >
           <View className="bracelet-image-container">
-            <Image 
+            <Image
               className="bracelet-image"
               src={item.image}
               mode="aspectFill"
@@ -37,10 +36,22 @@ const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
           </View>
           <View className="bracelet-info">
             <View className="bracelet-header">
-              <Text className="bracelet-name">{item.name}</Text>
+              <View className="bracelet-name-container">
+                <Text className="bracelet-name">{item.name}</Text>
+              </View>
               <Image src={RightArrowIcon} style={{ width: 15, height: 10 }} />
             </View>
-            <Text className="bracelet-number">{item.number}</Text>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                width: "100%",
+              }}
+            >
+              <Text className="bracelet-number">{`NO.${item.id}`}</Text>
+            </View>
           </View>
         </View>
       ))}
@@ -48,4 +59,4 @@ const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
   );
 };
 
-export default BraceletList; 
+export default BraceletList;

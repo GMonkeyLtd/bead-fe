@@ -7,6 +7,7 @@ import wechatIcon from "@/assets/icons/wechat.svg";
 import remarkIcon from "@/assets/icons/remark.svg";
 import createBeadIcon from "@/assets/icons/create-bead.svg";
 import "./index.scss";
+import Taro from "@tarojs/taro";
 
 // 订单数据接口
 export interface OrderItem {
@@ -21,7 +22,6 @@ export interface OrderItem {
 
 interface OrderListProps {
   orders: OrderItem[];
-  onContactMerchant?: (orderId: string) => void;
   onEvaluate?: (orderId: string) => void;
   onReorder?: (orderId: string) => void;
   onItemClick?: (order: OrderItem) => void;
@@ -31,7 +31,6 @@ interface OrderListProps {
 
 const OrderListComp: React.FC<OrderListProps> = ({
   orders = [],
-  onContactMerchant,
   onEvaluate,
   onReorder,
   onItemClick,
@@ -80,12 +79,12 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
     return (
       <View className="order-actions">
-        {order.status === OrderStatus.InService && onContactMerchant && (
+        {order.status === OrderStatus.InService && (
           <View
             className="action-button contact-button"
             onClick={(e) => {
               e.stopPropagation();
-              onContactMerchant(order.id);
+              Taro.makePhoneCall({ phoneNumber: order.merchantPhone || '13800138000' });
             }}
           >
             <Image src={phoneIcon} className="action-icon" />

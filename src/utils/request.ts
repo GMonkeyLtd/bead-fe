@@ -2,6 +2,58 @@ import Taro from '@tarojs/taro'
 import { AuthManager } from './auth'
 import { MockManager } from './mockManager'
 
+// 取消令牌类
+export class CancelToken {
+  private _isCancelled: boolean = false
+  private _reason?: string
+  private _requestTask?: Taro.RequestTask<any> | Taro.UploadTask
+
+  constructor() {}
+
+  // 取消请求
+  cancel(reason?: string) {
+    this._isCancelled = true
+    this._reason = reason || '请求已被取消'
+    
+    // 如果有关联的请求任务，则取消它
+    if (this._requestTask) {
+      console.log('cancel request',reason, this._requestTask)
+      this._requestTask.abort()
+    }
+  }
+
+  // 检查是否已被取消
+  get isCancelled(): boolean {
+    return this._isCancelled
+  }
+
+  // 获取取消原因
+  get reason(): string | undefined {
+    return this._reason
+  }
+
+  // 设置请求任务（内部使用）
+  _setRequestTask(task: Taro.RequestTask<any> | Taro.UploadTask) {
+    this._requestTask = task
+    // 如果已经被取消，立即取消任务
+    if (this._isCancelled && this._requestTask) {
+      this._requestTask.abort()
+    }
+  }
+
+  // 抛出取消错误
+  throwIfCancelled() {
+    if (this._isCancelled) {
+      throw new Error(`请求已取消: ${this._reason}`)
+    }
+  }
+
+  // 静态方法：创建新的取消令牌
+  static create(): CancelToken {
+    return new CancelToken()
+  }
+}
+
 // 定义请求配置接口
 export interface RequestConfig {
   url: string
@@ -13,6 +65,7 @@ export interface RequestConfig {
   loadingText?: string
   showError?: boolean
   skipAuth?: boolean // 是否跳过认证检查
+  cancelToken?: CancelToken // 取消令牌
 }
 
 // 定义响应数据接口
@@ -123,9 +176,16 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
 const request = async <T = any>(config: RequestConfig): Promise<T> => {
   let retryCount = 0;
   const maxRetries = 1; // 最多重试1次（用于token过期后重新登录）
+  
   const executeRequest = async (): Promise<T> => {
+    // 检查取消令牌
+    config.cancelToken?.throwIfCancelled()
+    
     // 请求前拦截处理
     const finalConfig = await requestInterceptor(config)
+
+    // 再次检查取消令牌
+    config.cancelToken?.throwIfCancelled()
 
     // 显示加载提示
     if (config.showLoading !== false) {
@@ -136,7 +196,7 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
     }
 
     try {
-      const response = await Taro.request({
+      const requestTask = Taro.request({
         url: finalConfig.url,
         method: finalConfig.method || 'GET',
         data: finalConfig.data,
@@ -144,16 +204,31 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
         timeout: finalConfig.timeout || defaultConfig.timeout,
       })
 
+      // 将请求任务关联到取消令牌
+      if (config.cancelToken) {
+        config.cancelToken._setRequestTask(requestTask)
+      }
+
+      const response = await requestTask
+
       // 隐藏加载提示
       if (config.showLoading !== false) {
         Taro.hideLoading()
       }
+
+      // 最后检查取消令牌
+      config.cancelToken?.throwIfCancelled()
 
       return await responseInterceptor<T>(response)
     } catch (error: any) {
       // 隐藏加载提示
       if (config.showLoading !== false) {
         Taro.hideLoading()
+      }
+
+      // 检查是否为取消错误
+      if (config.cancelToken?.isCancelled || error.errMsg?.includes('request:fail abort')) {
+        throw new Error(config.cancelToken?.reason || '请求已被取消')
       }
 
       // 如果是认证错误且还有重试次数，尝试重新登录后重试
@@ -186,6 +261,7 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
       throw JSON.stringify(error)+ finalConfig.url
     }
   }
+  
   if (defaultConfig.isMock) {
     const mockData = MockManager.getMockDataByUrl(config.url);
     console.log(mockData, 'mockData')
@@ -194,6 +270,55 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
     }
   }
   return await executeRequest();
+}
+
+// 请求管理类 - 用于管理多个请求
+export class RequestManager {
+  private cancelTokens: Map<string, CancelToken> = new Map()
+
+  // 创建带标识的请求
+  createRequest<T = any>(
+    key: string,
+    requestFn: (cancelToken: CancelToken) => Promise<T>
+  ): Promise<T> {
+    // 如果已存在同名请求，先取消它
+    this.cancel(key)
+    
+    // 创建新的取消令牌
+    const cancelToken = CancelToken.create()
+    this.cancelTokens.set(key, cancelToken)
+    
+    const promise = requestFn(cancelToken)
+    
+    // 请求完成后清理取消令牌
+    promise.finally(() => {
+      this.cancelTokens.delete(key)
+    })
+    
+    return promise
+  }
+
+  // 取消指定请求
+  cancel(key: string, reason?: string) {
+    const cancelToken = this.cancelTokens.get(key)
+    if (cancelToken) {
+      cancelToken.cancel(reason)
+      this.cancelTokens.delete(key)
+    }
+  }
+
+  // 取消所有请求
+  cancelAll(reason?: string) {
+    this.cancelTokens.forEach((cancelToken, key) => {
+      cancelToken.cancel(reason)
+    })
+    this.cancelTokens.clear()
+  }
+
+  // 检查请求是否存在
+  hasRequest(key: string): boolean {
+    return this.cancelTokens.has(key)
+  }
 }
 
 // 封装常用的HTTP方法
@@ -247,11 +372,17 @@ export const http = {
   },
 
   // 文件上传 - 统一使用token认证
-  upload: async (url: string, filePath: string, formData?: Record<string, any>): Promise<any> => {
+  upload: async (url: string, filePath: string, formData?: Record<string, any>, cancelToken?: CancelToken): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
+        // 检查取消令牌
+        cancelToken?.throwIfCancelled()
+        
         // 获取认证token
         const token = await AuthManager.getToken();
+        
+        // 再次检查取消令牌
+        cancelToken?.throwIfCancelled()
         
         // 显示上传进度
         Taro.showLoading({ title: '上传中...', mask: true })
@@ -266,6 +397,13 @@ export const http = {
           },
           success: (res) => {
             Taro.hideLoading()
+            
+            // 检查是否已被取消
+            if (cancelToken?.isCancelled) {
+              reject(new Error(cancelToken.reason || '上传已被取消'))
+              return
+            }
+            
             try {
               const data = JSON.parse(res.data)
               if (data.code === 200 || data.success) {
@@ -283,10 +421,22 @@ export const http = {
           },
           fail: (error) => {
             Taro.hideLoading()
+            
+            // 检查是否为取消错误
+            if (cancelToken?.isCancelled || error.errMsg?.includes('uploadFile:fail abort')) {
+              reject(new Error(cancelToken?.reason || '上传已被取消'))
+              return
+            }
+            
             Taro.showToast({ title: '上传失败', icon: 'none' })
             reject(error)
           },
         })
+
+        // 将上传任务关联到取消令牌
+        if (cancelToken) {
+          cancelToken._setRequestTask(uploadTask)
+        }
 
         // 可以通过uploadTask监听上传进度
         uploadTask.progress((res) => {

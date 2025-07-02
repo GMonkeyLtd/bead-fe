@@ -64,7 +64,6 @@ const TabBar: React.FC<TabBarProps> = ({ onTabChange }) => {
     <View className="crystal-tab-bar">
       {TAB_BAR_ITEMS.map((item) => {
         const isActive = isActiveTab(item);
-        console.log(item, isActive, 'isActive');
         return (
           <View
             key={item.key}

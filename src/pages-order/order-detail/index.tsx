@@ -22,6 +22,11 @@ const OrderDetail: React.FC = () => {
   const [order, setOrder] = useState<any>(null);
 
   useEffect(() => {
+    Taro.getUserInfo({
+      success: (res) => {
+        console.log(res, 'res')
+      }
+    })
     const instance = Taro.getCurrentInstance();
     const params = instance.router?.params;
     const orderId = params?.orderId;

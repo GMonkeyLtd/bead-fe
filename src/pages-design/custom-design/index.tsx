@@ -7,18 +7,15 @@ import { useDesign } from "@/store/DesignContext";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
 
-
 const CustomDesign = () => {
   const [designData, setDesignData] = useState<any[]>([]);
   const [beadTypeMap, setBeadTypeMap] = useState<any>({});
   const [allBeadList, setAllBeadList] = useState<any[]>([]);
   const { beadData, addBeadData } = useDesign();
 
-  const {beadDataId} = Taro.getCurrentInstance()?.router?.params || {};
-  console.log(Taro.getCurrentInstance()?.router?.params, 'custom-design')
+  const { beadDataId } = Taro.getCurrentInstance()?.router?.params || {};
 
   useEffect(() => {
-
     beadsApi.getBeadList().then((res) => {
       const resData = res.data;
       setAllBeadList(resData);
@@ -37,20 +34,23 @@ const CustomDesign = () => {
         }, {})
       );
     });
+  }, []);
+
+  useEffect(() => {
 
     if (beadDataId) {
       const _beadData = beadData.find(
         (item) => item.bead_data_id === beadDataId
       );
-      setDesignData(_beadData)
+      console.log(_beadData, beadDataId, "_beadData");
+      setDesignData(_beadData);
     }
-  }, []);
+  }, [beadDataId, beadData]);
 
   const onCreate = (imageUrl: string, editedBeads: any[]) => {
     if (!imageUrl) {
       return;
     }
-    console.log(editedBeads,allBeadList, 'editedBeads')
     const beadDataId = "bead-" + generateUUID();
     addBeadData({
       image_url: imageUrl,
@@ -58,8 +58,8 @@ const CustomDesign = () => {
         const _beadData = allBeadList?.find((_item) => _item.id === item.id);
         return {
           ..._beadData,
-          bead_diameter: item.radius
-        }
+          bead_diameter: item.radius,
+        };
       }),
       bead_data_id: beadDataId,
     });
@@ -67,7 +67,7 @@ const CustomDesign = () => {
     Taro.redirectTo({
       url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
     });
-};
+  };
 
   return (
     <PageContainer>

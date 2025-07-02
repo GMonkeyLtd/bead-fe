@@ -294,7 +294,8 @@ const CustomDesignRing = ({
     // setDots(dotsWithNewPositions);
   };
 
-  const onClockwiseMove = () => {
+  const onClockwiseMove = (e) => {
+    e.stopPropagation();
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要移动的珠子",
@@ -312,7 +313,8 @@ const CustomDesignRing = ({
     setSelectedBeadIndex(nextIndex);
   };
 
-  const onCounterclockwiseMove = () => {
+  const onCounterclockwiseMove = (e) => {
+    e.stopPropagation();
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要移动的珠子",
@@ -330,7 +332,8 @@ const CustomDesignRing = ({
     setSelectedBeadIndex(nextIndex);
   };
 
-  const onDelete = () => {
+  const onDelete = (e) => {
+    e.stopPropagation();
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要删除的珠子",
@@ -475,7 +478,6 @@ const CustomDesignRing = ({
           flexShrink: 0,
           flexGrow: 0,
         }}
-        onClick={() => setSelectedBeadIndex(-1)}
       >
         <View
           style={{
@@ -513,6 +515,7 @@ const CustomDesignRing = ({
               flexShrink: 0,
               flexGrow: 0,
             }}
+            onClick={() => setSelectedBeadIndex(-1)}
           >
             <Canvas
               canvasId={canvasId}

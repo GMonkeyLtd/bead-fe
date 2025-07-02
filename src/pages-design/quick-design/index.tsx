@@ -1,6 +1,6 @@
 import { View, Image } from "@tarojs/components";
-import { useState, useEffect } from "react";
-import Taro from "@tarojs/taro";
+import { useState, useEffect, useRef } from "react";
+import Taro, { useDidHide } from "@tarojs/taro";
 import "./index.scss";
 import { generateApi } from "@/utils/api";
 import { imageToBase64 } from "@/utils/imageUtils";
@@ -9,14 +9,26 @@ import { DESIGNING_IMAGE_URL } from "@/config";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
 import PageContainer from "@/components/PageContainer";
+import { CancelToken } from "@/utils/request";
 
 const QuickDesign = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [designing, setDesigning] = useState(true);
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender, isLunar, beadDataId } = params || {};
+  const cancelTokenForImage = useRef<CancelToken>(null);
+  const cancelTokenForInfo = useRef<CancelToken>(null);
 
   const { addDesignData, beadData } = useDesign();
+
+  useDidHide(() => {
+    if (cancelTokenForImage.current) {
+      cancelTokenForImage.current.cancel('page hide')
+    }
+    if (cancelTokenForInfo.current) {
+      cancelTokenForInfo.current.cancel('page hide')
+    }
+  })
 
   useEffect(() => {
     if (beadDataId) {
@@ -79,6 +91,7 @@ const QuickDesign = () => {
       return;
     }
     setDesigning(true);
+    cancelTokenForInfo.current = CancelToken.create();
     generateApi
       .quickGenerate({
         birth_year: parseInt(year || "0"),
@@ -87,12 +100,14 @@ const QuickDesign = () => {
         birth_hour: parseInt(hour || "0"),
         is_lunar: isLunar,
         sex: parseInt(gender || "0"),
+      }, {
+        cancelToken: cancelTokenForInfo.current
       })
       .then((res) => {
-        if (!res.data?.images_url?.[0]) {
+        if (!res?.images_url?.[0]) {
           throw new Error("生成失败");
         }
-        processDesignData(res);
+        processDesignData({ image_urls: res?.images_url });
       })
       .catch((err) => {
         Taro.showToast({
@@ -115,9 +130,12 @@ const QuickDesign = () => {
     setDesigning(true);
     try {
       const base64 = await imageToBase64(imageUrl, false);
+      cancelTokenForImage.current = CancelToken.create();
       const res = await generateApi.personalizedGenerateByImage({
         bead_info: beadsData,
         image_base64: [base64 as string],
+      }, {
+        cancelToken: cancelTokenForImage.current
       });
       console.log(res, "res");
       if (!res.data?.image_urls?.[0]) {
@@ -158,7 +176,7 @@ const QuickDesign = () => {
               className="quick-design-loading-image"
             />
             <View className="quick-design-loading-title">
-              制作中
+              渲染中
               <View className="quick-design-loading-title-dot">
                 <View className="quick-design-loading-title-dot-item">...</View>
               </View>

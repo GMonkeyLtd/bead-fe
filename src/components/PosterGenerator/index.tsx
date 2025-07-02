@@ -452,6 +452,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         width: canvasWidth,
         height: canvasHeight,
         success: (res) => {
+          console.log("绘制海报成功")
           setCanvasImageUrl(res.tempFilePath);
           onGenerated?.(res.tempFilePath);
         },

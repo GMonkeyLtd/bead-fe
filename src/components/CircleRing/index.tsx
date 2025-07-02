@@ -104,6 +104,13 @@ const CircleRing = ({
           quality: 1,
           success: (res) => {
             onChange("success", res.tempFilePath);
+            // 保存图片到相册
+            Taro.saveImageToPhotosAlbum({
+              filePath: res.tempFilePath,
+              success: () => {
+                console.log("保存图片到相册成功");
+              },
+            });
             console.log("生成临时文件成功", res.tempFilePath);
           },
           fail: (err) => {

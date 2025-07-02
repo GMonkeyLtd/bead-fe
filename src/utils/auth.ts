@@ -48,11 +48,9 @@ export const AuthManager = {
     async getToken(): Promise<string | null> {
       // 先检查是否已有token
       const currentToken = Taro.getStorageSync('token');
-      console.log(currentToken, 'currentToken')
       if (currentToken) {
         return currentToken;
       }
-      console.log(isLoggingIn, loginPromise, 'isLoggingIn, loginPromise')
       // 如果正在登录中，等待登录完成
       if (isLoggingIn && loginPromise) {
         return await loginPromise;
@@ -110,7 +108,6 @@ export const AuthManager = {
 
         const res = await this.callLoginApi(loginRes.code);
         console.log("登录响应:", res);
-        console.log(res, 'res')
   
         if (res.data.token) {
           // 保存登录信息到本地缓存

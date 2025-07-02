@@ -30,7 +30,8 @@ const ChatCardList = ({ messageIndex, maxHeight, chatContents, onChange }: ChatC
             <ChatBubble
               message={content}
               style={{
-                maxHeight: maxHeight - 24,
+                width: "100%",
+                height: maxHeight - 24,
                 overflow: "auto",
               }}
             />

@@ -1,4 +1,4 @@
-import http, { setBaseURL, setIsMock } from "./request";
+import http, { setBaseURL, setIsMock, CancelToken, RequestManager } from "./request";
 import Taro from "@tarojs/taro";
 
 // 在应用启动时设置API基础URL
@@ -7,6 +7,9 @@ setBaseURL("https://test.qianjunye.com:443/api/v1");
 // setBaseURL("http://192.168.189.246:8088/api/v1");
 
 // setIsMock(true)
+
+// 创建全局请求管理器
+export const requestManager = new RequestManager();
 
 // 定义用户相关的数据类型
 export interface User {
@@ -71,75 +74,124 @@ export interface QuickGenerateResult {
   [key: string]: any;
 }
 
+// 扩展的API配置接口，支持取消令牌
+export interface ApiConfig {
+  cancelToken?: CancelToken;
+  showLoading?: boolean;
+  loadingText?: string;
+  showError?: boolean;
+}
+
 // 用户相关API
 export const userApi = {
   // 用户登录 - 跳过认证检查，避免循环依赖
-  login: (params: LoginParams) =>
+  login: (params: LoginParams, config?: ApiConfig) =>
     http.post<LoginResult>("/user/login", params, {
       skipAuth: true,
       showLoading: false,
+      cancelToken: config?.cancelToken,
+      ...config,
     }),
 
   // 获取用户信息
-  getUserInfo: () => http.post<User>(`/user/getuserinfo`),
+  getUserInfo: (config?: ApiConfig) => 
+    http.post<User>(`/user/getuserinfo`, {}, {
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
 
   // 更新用户信息
-  updateUser: (data: Partial<User>) =>
-    http.post<User>(`/user/updateuserinfo`, data),
+  updateUser: (data: Partial<User>, config?: ApiConfig) =>
+    http.post<User>(`/user/updateuserinfo`, data, {
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
 
   // 用户退出登录
-  logout: () => http.post("/auth/logout"),
+  logout: (config?: ApiConfig) => 
+    http.post("/auth/logout", {}, {
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
 };
 
 // 生成相关API
 export const generateApi = {
   // 八字查询
-  bazi: (params: BaziParams) =>
-    http.post<BaziResult>("/user/querybazi", params, { skipAuth: true }),
-  // 快速生成
-  quickGenerate: (params: QuickGenerateParams) =>
+  bazi: (params: BaziParams, config?: ApiConfig) =>
+    http.post<BaziResult>("/user/querybazi", params, { 
+      skipAuth: true,
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
+  
+  // 快速生成 - 支持取消
+  quickGenerate: (params: QuickGenerateParams, config?: ApiConfig) =>
     http.post<QuickGenerateResult>("/user/oneclick", params, {
       showLoading: false,
+      cancelToken: config?.cancelToken,
+      ...config,
     }),
-  personalizedGenerate: (params: PersonalizedGenerateParams) =>
+  
+  // 个性化生成第一步 - 支持取消
+  personalizedGenerate: (params: PersonalizedGenerateParams, config?: ApiConfig) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep1",
       params,
-      { showLoading: false }
+      { 
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
     ),
-  personalizedGenerate2: (params: PersonalizedGenerate2Params) =>
+  
+  // 个性化生成第二步 - 支持取消
+  personalizedGenerate2: (params: PersonalizedGenerate2Params, config?: ApiConfig) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep2",
       params,
-      { showLoading: false }
+      { 
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
     ),
-  personalizedGenerateByImage: (params: QuickGenerateByImageParams) =>
+  
+  // 通过图片生成 - 支持取消
+  personalizedGenerateByImage: (params: QuickGenerateByImageParams, config?: ApiConfig) =>
     http.post<QuickGenerateResult>("/user/personalizationstep3", params, {
       showLoading: false,
+      cancelToken: config?.cancelToken,
+      ...config,
     }),
 };
 
 export const beadsApi = {
-  getBeadList: () =>
+  getBeadList: (config?: ApiConfig) =>
     http.get<PersonalizedGenerateResult[]>(
       "/user/beadlist",
       {},
       {
         showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
       }
     ),
 };
 
 export const userHistoryApi = {
-  getImageHistory: () =>
+  getImageHistory: (config?: ApiConfig) =>
     http.get<PersonalizedGenerateResult[]>(
       "/user/getimagehistory",
       {},
       {
         showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
       }
     ),
-  getDesignById: (designId: number) =>
+  
+  getDesignById: (designId: number, config?: ApiConfig) =>
     http.post<PersonalizedGenerateResult[]>(
       `/user/getdesignitem`,
       {
@@ -147,9 +199,12 @@ export const userHistoryApi = {
       },
       {
         showLoading: true,
+        cancelToken: config?.cancelToken,
+        ...config,
       }
     ),
-  createOrder: (params: { design_id: number; price: number }) =>
+  
+  createOrder: (params: { design_id: number; price: number }, config?: ApiConfig) =>
     http.post<{
       data: {
         order_uuid: string;
@@ -157,32 +212,76 @@ export const userHistoryApi = {
     }>(`/user/generateorder`, params, {
       showLoading: true,
       loadingText: "订单生成中...",
+      cancelToken: config?.cancelToken,
+      ...config,
     }),
-  getOrderById: (orderId: string | string[], config?: {}) =>
+  
+  getOrderById: (orderId: string | string[], config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/queryorder`, { order_uuids: Array.isArray(orderId) ? orderId : [orderId] }, { showLoading: true, ...config }),
-  getOrderList: () =>
+    }>(`/user/queryorder`, { order_uuids: Array.isArray(orderId) ? orderId : [orderId] }, { 
+      showLoading: true, 
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
+  
+  getOrderList: (config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/queryorder`, {}, { showLoading: true }),
-  cancelOrder: (orderId: string) =>
+    }>(`/user/queryorder`, {}, { 
+      showLoading: true,
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
+  
+  cancelOrder: (orderId: string, config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/cancelorder`, { order_uuid: orderId }, { showLoading: true }),
+    }>(`/user/cancelorder`, { order_uuid: orderId }, { 
+      showLoading: true,
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
 };
 
 // 文件相关API
 export const fileApi = {
-  // 上传文件
-  upload: (filePath: string, formData?: Record<string, any>) =>
-    http.upload("/upload", filePath, formData),
+  // 上传文件 - 支持取消
+  upload: (filePath: string, formData?: Record<string, any>, config?: ApiConfig) =>
+    http.upload("/upload", filePath, formData, config?.cancelToken),
+};
+
+// 便捷的API调用方法，支持自动管理取消令牌
+export const managedApi = {
+  // 快速生成 - 自动管理取消令牌
+  quickGenerate: (key: string, params: QuickGenerateParams) =>
+    requestManager.createRequest(key, (cancelToken) =>
+      generateApi.quickGenerate(params, { cancelToken })
+    ),
+
+  // 个性化生成 - 自动管理取消令牌
+  personalizedGenerate: (key: string, params: PersonalizedGenerateParams) =>
+    requestManager.createRequest(key, (cancelToken) =>
+      generateApi.personalizedGenerate(params, { cancelToken })
+    ),
+
+  // 通过图片生成 - 自动管理取消令牌
+  personalizedGenerateByImage: (key: string, params: QuickGenerateByImageParams) =>
+    requestManager.createRequest(key, (cancelToken) =>
+      generateApi.personalizedGenerateByImage(params, { cancelToken })
+    ),
+
+  // 文件上传 - 自动管理取消令牌
+  upload: (key: string, filePath: string, formData?: Record<string, any>) =>
+    requestManager.createRequest(key, (cancelToken) =>
+      fileApi.upload(filePath, formData, { cancelToken })
+    ),
 };
 
 // 导出所有API
@@ -192,4 +291,5 @@ export default {
   bead: beadsApi,
   file: fileApi,
   userHistory: userHistoryApi,
+  managed: managedApi,
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Taro from "@tarojs/taro";
+import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import { View } from "@tarojs/components";
 import { OrderStatus } from "@/utils/orderUtils";
 import OrderListComp, { OrderItem } from "@/components/OrderListComp";
@@ -9,7 +9,7 @@ import { pageUrls } from "@/config/page-urls";
 const OrderListDemo: React.FC = () => {
   const [orders, setOrders] = useState<OrderItem[]>([]);
 
-  useEffect(() => {
+  const getOrderList = () => {
     api.userHistory.getOrderList().then((res) => {
       const _orders = (res?.data?.orders || []).filter(item => !!item.design_info?.design_id).map(item => {
         return {
@@ -25,12 +25,15 @@ const OrderListDemo: React.FC = () => {
       console.log('orders', _orders);
       setOrders(_orders);
     });
-  }, []);
+  }
 
-  const handleContactMerchant = () => {
-    Taro.makePhoneCall({ phoneNumber: "13800138000" });
-    // 可以打开联系商家弹窗或跳转到聊天页面
-  };
+  useDidShow(() => {
+    getOrderList();
+  });
+
+  usePullDownRefresh(() => {
+    getOrderList();
+  });
 
   const handleEvaluate = (orderId: string) => {
     console.log("评价订单:", orderId);
@@ -43,7 +46,7 @@ const OrderListDemo: React.FC = () => {
   };
 
   const handleItemClick = (order: OrderItem) => {
-    if ([OrderStatus.Dispatching, OrderStatus.PendingAcceptance, OrderStatus.PendingDispatch].includes(order.status)) {
+    if ([OrderStatus.Dispatching, OrderStatus.PendingDispatch].includes(order.status)) {
       Taro.navigateTo({
         url: `${pageUrls.orderDispatching}?orderId=${order.id}`,
       });
@@ -74,7 +77,7 @@ const OrderListDemo: React.FC = () => {
       >
         <OrderListComp
           orders={orders}
-          onContactMerchant={handleContactMerchant}
+          // onContactMerchant={handleContactMerchant}
           // onEvaluate={handleEvaluate}
           // onReorder={handleReorder}
           onItemClick={handleItemClick}

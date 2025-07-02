@@ -4,7 +4,7 @@ import BraceletList from "@/components/BraceletList";
 import "./index.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import UserInfoCard from "@/components/UserInfoCard";
-import Taro from "@tarojs/taro";
+import Taro, { useDidShow } from "@tarojs/taro";
 import rightArrow from "@/assets/icons/right-arrow.svg";
 import TabBar from "@/components/TabBar";
 import { userHistoryApi, userApi } from "@/utils/api";
@@ -14,9 +14,9 @@ import { pageUrls } from "@/config/page-urls";
 const UserCenterPage: React.FC = () => {
   const [showIncomeCard, setShowIncomeCard] = useState(false);
   const [imageHistory, setImageHistory] = useState<any[]>([]);
-  const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [userInfo, setUserInfo] = useState(null);
 
-  useEffect(() => {
+  const initPageData = () => {
     userApi.getUserInfo().then((res) => {
       setUserInfo(res?.data);
     });
@@ -30,7 +30,11 @@ const UserCenterPage: React.FC = () => {
       });
       setImageHistory(history);
     });
-  }, []);
+  }
+
+  useDidShow(() => {
+    initPageData();
+  })
 
   const handleItemClick = (item: any) => {
     Taro.navigateTo({

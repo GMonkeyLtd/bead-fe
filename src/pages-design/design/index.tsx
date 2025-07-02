@@ -1,27 +1,8 @@
-/**
- * 微信小程序图片加载配置说明：
- *
- * 1. 域名白名单配置：
- *    - 登录微信公众平台 (mp.weixin.qq.com)
- *    - 进入小程序后台 -> 开发 -> 开发管理 -> 开发设置 -> 服务器域名
- *    - 在 "downloadFile合法域名" 中添加：https://117.50.252.189
- *
- * 2. 如果是IP地址访问，可能需要：
- *    - 配置代理服务器
- *    - 使用域名替代IP地址
- *    - 确保服务器支持HTTPS
- *
- * 3. 图片格式要求：
- *    - 支持 jpg, png, gif, webp
- *    - 建议使用HTTPS协议
- *    - 图片大小不超过10MB
- */
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Textarea } from "@tarojs/components";
 import { isEmptyMessage } from "../../utils/messageFormatter";
 import "./index.scss";
-import Taro from "@tarojs/taro";
+import Taro, { useDidHide } from "@tarojs/taro";
 import { Image } from "@tarojs/components";
 import sendSvg from "@/assets/icons/send.svg";
 import activeSendSvg from "@/assets/icons/active-send.svg";
@@ -39,6 +20,7 @@ import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
 import PageContainer from "@/components/PageContainer";
 import editBead from "@/assets/icons/edit-bead.svg";
+import { CancelToken } from "@/utils/request";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -76,17 +58,15 @@ const ChatPage: React.FC = () => {
 
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender, isLunar } = params || {};
-  const { addBeadData, addDesignData } = useDesign();
+  const { addBeadData } = useDesign();
+
+  const generateRequestRef = useRef<CancelToken>(null);
+  const generateRequest2Ref = useRef<CancelToken>(null);
 
   // 键盘适配逻辑
   useEffect(() => {
     // 监听键盘弹起
     const onKeyboardHeightChange = (res) => {
-      // 设置CSS变量
-      // document.documentElement.style.setProperty(
-      //   "--keyboard-height",
-      //   `${res.height}px`
-      // );
       setKeyboardHeight(res.height);
     };
 
@@ -101,6 +81,11 @@ const ChatPage: React.FC = () => {
       document.documentElement.style.removeProperty("--keyboard-height");
     };
   }, []);
+
+  useDidHide(() => {
+    generateRequestRef.current?.cancel("page hide");
+    generateRequest2Ref.current?.cancel("page hide");
+  });
 
   const processResult = (res: any) => {
     const resData = res.data || {};
@@ -131,6 +116,7 @@ const ChatPage: React.FC = () => {
   ) => {
     setIsLoading(true);
     try {
+      generateRequestRef.current = CancelToken.create();
       const res: any = await api.generate.personalizedGenerate({
         birth_year: parseInt(year || "0"),
         birth_month: parseInt(month || "0"),
@@ -138,7 +124,11 @@ const ChatPage: React.FC = () => {
         birth_hour: parseInt(hour || "0"),
         is_lunar: isLunar,
         sex: parseInt(gender || "0"),
-      });
+        },
+        {
+          cancelToken: generateRequestRef.current,
+        }
+      );
       processResult(res);
     } catch (err) {
       Taro.showToast({
@@ -180,9 +170,12 @@ const ChatPage: React.FC = () => {
     setIsLoading(true);
     setInputValue("");
     try {
+      generateRequest2Ref.current = CancelToken.create();
       const res: any = await api.generate.personalizedGenerate2({
         ids: beadImageData.map((item) => item.id),
         context: inputValue,
+      }, {
+        cancelToken: generateRequest2Ref.current,
       });
       processResult(res);
     } catch (error) {
@@ -204,10 +197,7 @@ const ChatPage: React.FC = () => {
     addBeadData({
       image_url: canvasImageUrl,
       bead_list: beadImageData.map((item) => ({
-        id: item.id,
-        image_url: item.image_url,
-        name: item.name,
-        description: item.description,
+        ...item,
         bead_diameter: item.bead_diameter,
       })),
       bead_data_id: beadDataId,
@@ -315,7 +305,7 @@ const ChatPage: React.FC = () => {
                     onClick={handleNextStep}
                     style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
                   >
-                    发起定制派单
+                    查看结果
                   </View>
                   <Image
                     src={arrowRight}
@@ -359,7 +349,7 @@ const ChatPage: React.FC = () => {
                   });
                 }}
               >
-                发起定制派单
+                查看结果
               </View>
               <Image
                 src={arrowRight}

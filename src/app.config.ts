@@ -1,20 +1,14 @@
 export default defineAppConfig({
   pages: [
-    'pages/home/index',
-    'pages/dev/index',
+    'pages/home/index'
   ],
   subPackages: [
     {
       root: 'pages-design',
       pages: [
         'quick-design/index',
-        'design/index'
-      ]
-    },
-    {
-      root: 'pages-utils',
-      pages: [
-        'custom-design/index',
+        'design/index',
+        'custom-design/index'
       ]
     },
     {

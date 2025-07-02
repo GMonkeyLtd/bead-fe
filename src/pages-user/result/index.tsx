@@ -20,6 +20,7 @@ import { pageUrls } from "@/config/page-urls";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
+  const [originImageUrl, setOriginImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
   const [braceletName, setBraceletName] = useState("");
@@ -30,8 +31,7 @@ const Result = () => {
   const [designNo, setDesignNo] = useState("");
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [orderList, setOrderList] = useState<any[]>([]);
-
-  console.log(orderList, "orderList");
+  const [autoShare, setAutoShare] = useState(false);
 
   const posterData = useMemo(() => {
     return {
@@ -70,7 +70,7 @@ const Result = () => {
 
       setImageUrl(image_url);
       setBraceletName(bracelet_name);
-      setBeadDescriptions(bead_ids_deduplication);
+      setBeadDescriptions(bead_ids_deduplication?.length > 2 ? bead_ids_deduplication.slice(0, 2) : bead_ids_deduplication);
       setDesignNo(id);
       setBraceletDescription(recommendation_text);
     }).catch((err) => {
@@ -113,13 +113,15 @@ const Result = () => {
   }, []);
 
   // 保存图片到相册
-  const saveImage = async () => {
-    if (!shareImageUrl) {
+  const saveImage = async (url: string) => {
+    console.log(url, 'url')
+    if (!url) {
       Taro.showToast({
-        title: "没有图片可保存",
+        title: "分享图正在制作中...",
         icon: "none",
       });
-      return;
+      setAutoShare(true);
+      return; 
     }
     try {
       Taro.showToast({
@@ -128,7 +130,7 @@ const Result = () => {
       });
 
       await Taro.saveImageToPhotosAlbum({
-        filePath: shareImageUrl,
+        filePath: url,
       });
 
       Taro.showToast({
@@ -267,7 +269,7 @@ const Result = () => {
               showImage={false}
               onItemClick={(item) => {
                 console.log(item, "item");
-                if ([OrderStatus.PendingDispatch, OrderStatus.PendingAcceptance, OrderStatus.Dispatching].includes(item.status)) {
+                if ([OrderStatus.PendingDispatch, OrderStatus.Dispatching].includes(item.status)) {
                   Taro.navigateTo({
                     url: `${pageUrls.orderDispatching}?orderId=${item.id}`,
                   });
@@ -283,7 +285,7 @@ const Result = () => {
       </View>
       <View className="result-content-card-action">
         <CrystalButton
-          onClick={saveImage}
+          onClick={() => saveImage(shareImageUrl)}
           text="分享"
           style={{ marginTop: "20px", marginLeft: "24px" }}
           prefixIcon={
@@ -315,7 +317,14 @@ const Result = () => {
         productImage={imageUrl}
         onClose={() => setBudgetDialogShow(false)}
       />)}
-      <PosterGenerator data={posterData} onGenerated={setShareImageUrl} />
+      <PosterGenerator data={posterData} onGenerated={(url) => {
+        setShareImageUrl(url);
+        console.log(autoShare, 'autoShare')
+        if (autoShare) {
+          saveImage(url);
+          setAutoShare(false);
+        }
+      }} />
     </View>
   );
 };
