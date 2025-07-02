@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Input, Button, Text, Image } from "@tarojs/components";
 import Taro, { navigateTo, showToast } from "@tarojs/taro";
-import "./index.scss";  
+import styles from "./index.module.scss";  
 import { MerchantAuthManager } from "@/utils/auth-merchant";
 import MerchantHeader from "@/components/MerchantHeader";
 import { pageUrls } from "@/config/page-urls";
@@ -73,18 +73,18 @@ export default function Login() {
   };
 
   return (
-    <View className="login-page">
+    <View className={styles.loginPage}>
       <MerchantHeader title="商家管理后台" />
-      <View className="login-container">
-        <View className="login-header">
-          <Text className="login-title">商家管理后台</Text>
-          <Text className="login-subtitle">请使用手机号登录</Text>
+      <View className={styles.loginContainer}>
+        <View className={styles.loginHeader}>
+          <Text className={styles.loginTitle}>商家管理后台</Text>
+          <Text className={styles.loginSubtitle}>请使用手机号登录</Text>
         </View>
 
-        <View className="login-form">
-          <View className="form-item">
+        <View className={styles.loginForm}>
+          <View className={styles.formItem}>
             <Input
-              className="form-input"
+              className={styles.formInput}
               type="number"
               placeholder="请输入手机号"
               value={phone}
@@ -93,9 +93,9 @@ export default function Login() {
             />
           </View>
 
-          <View className="form-item">
+          <View className={styles.formItem}>
             <Input
-              className="form-input"
+              className={styles.formInput}
               password
               placeholder="请输入密码"
               value={password}
@@ -104,7 +104,7 @@ export default function Login() {
           </View>
 
           <Button
-            className="login-btn"
+            className={styles.loginBtn}
             onClick={handleLogin}
             loading={loading}
             disabled={loading}
@@ -113,8 +113,8 @@ export default function Login() {
           </Button>
         </View>
 
-        <View className="login-footer">
-          <Text className="footer-text">没有账号？请联系管理员注册</Text>
+        <View className={styles.loginFooter}>
+          <Text className={styles.footerText}>没有账号？请联系管理员注册</Text>
         </View>
       </View>
     </View>

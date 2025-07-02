@@ -1,6 +1,6 @@
 import React from "react";
 import { Image, Text, View } from "@tarojs/components";
-import "./index.scss";
+import styles from "./index.module.scss";
 import switchIcon from "@/assets/icons/switch.svg";
 import CrystalButton from "../CrystalButton";
 
@@ -22,22 +22,22 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
   showAction = true,
 }) => {
   return (
-    <View className="user-info-card">
+    <View className={styles.userInfoCard}>
       {/* 用户信息区域 */}
-      <View className="user-section">
+      <View className={styles.userSection}>
         {/* 用户头像 */}
-        <View className="user-avatar">
+        <View className={styles.userAvatar}>
           <Image 
             src={avatar} 
             mode="aspectFill"
-            className="avatar-image"
+            className={styles.avatarImage}
           />
         </View>
         
         {/* 用户文本信息 */}
-        <View className="user-text-info">
-          <Text className="user-name">{userName}</Text>
-          <Text className="user-slogan">{userSlogan}</Text>
+        <View className={styles.userTextInfo}>
+          <Text className={styles.userName}>{userName}</Text>
+          <Text className={styles.userSlogan}>{userSlogan}</Text>
         </View>
       </View>
 
@@ -46,14 +46,14 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
         // <CrystalButton 
         //   onClick={onActionClick}
         //   text={actionText}
-        //   prefix={<Image src={switchIcon} className="exchange-icon" />}
+        //   prefix={<Image src={switchIcon} className={styles.exchangeIcon} />}
         // />
         
-        <View className="action-section" onClick={onActionClick}>
-          <View className="action-icon">
-            <Image src={switchIcon} className="exchange-icon" />
+        <View className={styles.actionSection} onClick={onActionClick}>
+          <View className={styles.actionIcon}>
+            <Image src={switchIcon} className={styles.exchangeIcon} />
           </View>
-          <Text className="action-text">{actionText}</Text>
+          <Text className={styles.actionText}>{actionText}</Text>
         </View>
       )}
     </View>

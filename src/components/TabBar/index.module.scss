@@ -1,4 +1,4 @@
-.crystal-tab-bar {
+.crystalTabBar {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -20,7 +20,7 @@
   ) 1;
   z-index: 1000;
 
-  .tab-bar-item {
+  .tabBarItem {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -34,7 +34,7 @@
       transform: scale(0.98);
     }
 
-    .tab-icon {
+    .tabIcon {
       width: 28px;
       height: 28px;
       display: flex;
@@ -42,7 +42,7 @@
       align-items: center;
     }
 
-    .tab-text {
+    .tabText {
       font-family: 'Source Han Serif CN', serif;
       font-weight: 500;
       font-size: 22px;
@@ -63,15 +63,15 @@
 
 // 适配不同屏幕尺寸
 @media screen and (max-width: 750px) {
-  .crystal-tab-bar {
+  .crystalTabBar {
     width: 100%;
     padding: 12px 20px 40px;
     gap: 10px;
 
-    .tab-bar-item {
+    .tabBarItem {
       gap: 6px;
 
-      .tab-icon {
+      .tabIcon {
         width: 32px;
         height: 32px;
 
@@ -81,7 +81,7 @@
         }
       }
 
-      .tab-text {
+      .tabText {
         font-size: 11px;
       }
     }

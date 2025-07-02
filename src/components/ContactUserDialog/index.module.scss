@@ -1,4 +1,4 @@
-.contact-dialog-overlay {
+.contactDialogOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.contact-dialog {
+.contactDialog {
   width: calc(100% - 40px);
   height: 235px;
   background-color: #ffffff;
@@ -21,19 +21,19 @@
   position: relative;
 }
 
-.contact-dialog-content {
+.contactDialogContent {
   padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px; 
 }
 
-.contact-dialog-header {
+.contactDialogHeader {
   display: flex;
   flex-direction: column;
 }
 
-.contact-dialog-header-title {
+.contactDialogHeaderTitle {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -42,7 +42,7 @@
   height: 26px;
 }
 
-.contact-dialog-title-text {
+.contactDialogTitleText {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 500;
   font-size: 14px;
@@ -54,7 +54,7 @@
   text-align: center;
 }
 
-.close-btn {
+.closeBtn {
   width: 20px;
   height: 20px;
   display: flex;
@@ -63,7 +63,7 @@
   cursor: pointer;
 }
 
-.close-icon {
+.closeIcon {
   position: relative;
   width: 15px;
   height: 15px;
@@ -71,7 +71,7 @@
   border-radius: 50%;
 }
 
-.close-line {
+.closeLine {
   position: absolute;
   width: 5px;
   height: 1.67px;
@@ -81,15 +81,15 @@
   transform-origin: center;
 }
 
-.close-line-1 {
+.closeLine1 {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.close-line-2 {
+.closeLine2 {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.subtitle-text {
+.subtitleText {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 300;
   font-size: 11px;
@@ -100,7 +100,7 @@
   margin-top: 4px;
 }
 
-.contact-info-card {
+.contactInfoCard {
   background-color: #f5f5f5;
   border-radius: 10px;
   height: 40px;
@@ -111,17 +111,17 @@
   gap: 16px;
   cursor: pointer;
   margin-top: 8px;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+
+  &:active {
+    background-color: #e8e8e8;
+  }
 }
 
-.contact-info-card:hover {
-  background-color: #f0f0f0;
-}
-
-.contact-info-card:active {
-  background-color: #e8e8e8;
-}
-
-.contact-number {
+.contactNumber {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 400;
   font-size: 13px;
@@ -132,7 +132,7 @@
   flex: 1;
 }
 
-.contact-dialog-copy-icon {
+.contactDialogCopyIcon {
   width: 16px;
   height: 16px;
   display: flex;
@@ -140,52 +140,52 @@
   align-items: center;
   cursor: pointer;
   transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
-.contact-dialog-copy-icon:hover {
-  transform: scale(1.1);
-}
-
-.contact-dialog-copy-icon:active {
-  transform: scale(0.95);
-}
-
-.copy-icon-inner {
+.copyIconInner {
   width: 10px;
   height: 10px;
   background-color: rgba(31, 23, 34, 0.4);
   border-radius: 2px;
   position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 6px;
+    height: 1px;
+    background-color: rgba(31, 23, 34, 0.6);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 2px;
+    width: 6px;
+    height: 1px;
+    background-color: rgba(31, 23, 34, 0.6);
+  }
 }
 
-.copy-icon-inner::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 6px;
-  height: 1px;
-  background-color: rgba(31, 23, 34, 0.6);
-}
-
-.copy-icon-inner::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 2px;
-  width: 6px;
-  height: 1px;
-  background-color: rgba(31, 23, 34, 0.6);
-}
-
-.contact-dialog-footer {
+.contactDialogFooter {
   position: absolute;
   bottom: 20px;
   left: 20px;
   right: 20px;
 }
 
-.contact-dialog-return-btn {
+.contactDialogReturnBtn {
   width: 100%;
   height: 34px;
   background-color: #ffffff;
@@ -198,18 +198,18 @@
   padding: 6px 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #fbcc8e;
+  }
+
+  &:active {
+    background-color: #fbcc8e;
+    transform: translateY(1px);
+  }
 }
 
-.contact-dialog-return-btn:hover {
-  background-color: #fbcc8e;
-}
-
-.contact-dialog-return-btn:active {
-  background-color: #fbcc8e;
-  transform: translateY(1px);
-}
-
-.contact-dialog-return-text {
+.contactDialogReturnText {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 500;
   font-size: 12px;

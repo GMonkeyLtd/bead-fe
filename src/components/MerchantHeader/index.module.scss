@@ -1,4 +1,4 @@
-.top-header-container {
+.topHeaderContainer {
   width: 100%;
   height: 54px;
   display: flex;
@@ -11,13 +11,13 @@
   // 渐变背景 - 基于Figma设计中的渐变
   background: #000000;
   
-  .signal-group {
+  .signalGroup {
     position: relative;
     width: 33.35px;
     height: 13px;
     flex-shrink: 0;
     
-    .signal-bars {
+    .signalBars {
       position: absolute;
       left: 0;
       top: 0;
@@ -25,7 +25,7 @@
       height: 12px;
     }
     
-    .signal-red {
+    .signalRed {
       position: absolute;
       right: 0;
       top: 0.87px;
@@ -34,14 +34,14 @@
     }
   }
   
-  .top-separator {
+  .topSeparator {
     width: 1px;
     height: 8px;
     background-color: #5D5D5D;
     flex-shrink: 0;
   }
   
-  .top-header-title {
+  .topHeaderTitle {
     font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     font-weight: 500;
     font-size: 16px;
@@ -51,4 +51,4 @@
     color: #FFFFFF;
     flex-shrink: 0;
   }
-}
+} 

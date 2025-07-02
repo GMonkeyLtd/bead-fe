@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import "./index.scss";
+import styles from "./index.module.scss";
 import HomeIcon from '@/assets/tabbar-icons/home.svg'
 import UserIcon from '@/assets/tabbar-icons/user.svg'
 import HomeActiveIcon from '@/assets/tabbar-icons/home-active.svg'
@@ -61,17 +61,17 @@ const TabBar: React.FC<TabBarProps> = ({ onTabChange }) => {
   };
 
   return (
-    <View className="crystal-tab-bar">
+    <View className={styles.crystalTabBar}>
       {TAB_BAR_ITEMS.map((item) => {
         const isActive = isActiveTab(item);
         return (
           <View
             key={item.key}
-            className="tab-bar-item"
+            className={styles.tabBarItem}
             onClick={() => handleTabClick(item)}
           >
-            <Image src={isActive ? item.iconActive : item.icon} className="tab-icon" />
-            <Text className={`tab-text ${isActive ? "active" : "inactive"}`}>
+            <Image src={isActive ? item.iconActive : item.icon} className={styles.tabIcon} />
+            <Text className={`${styles.tabText} ${isActive ? styles.active : styles.inactive}`}>
               {item.text}
             </Text>
           </View>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Image } from "@tarojs/components";
 import BraceletList from "@/components/BraceletList";
-import "./index.scss";
+import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import UserInfoCard from "@/components/UserInfoCard";
 import Taro, { useDidShow } from "@tarojs/taro";
@@ -50,8 +50,8 @@ const UserCenterPage: React.FC = () => {
 
   return (
     <CrystalContainer showBack={false}>
-      <View className="page-content">
-        <View className="page-top-container">
+      <View className={styles.pageContent}>
+        <View className={styles.pageTopContainer}>
           <UserInfoCard
             userName={
               userInfo?.nick_name?.slice(0, 10) ||
@@ -68,36 +68,36 @@ const UserCenterPage: React.FC = () => {
           />
 
           {/* 功能卡片区域 */}
-          <View className="feature-cards">
+          <View className={styles.featureCards}>
             {/* 我的收益卡片 */}
-            {/* <View className="feature-card income-card">
-            <View className="card-content">
-              <View className="card-info">
-                <View className="card-title">
-                  <Text className="title-text">我的收益</Text>
+            {/* <View className={`${styles.featureCard} ${styles.incomeCard}`}>
+            <View className={styles.cardContent}>
+              <View className={styles.cardInfo}>
+                <View className={styles.cardTitle}>
+                  <Text className={styles.titleText}>我的收益</Text>
                 </View>
-                <View className="card-value">
-                  <Text className="value-text">12.00</Text>
-                  <Text className="unit-text">元</Text>
+                <View className={styles.cardValue}>
+                  <Text className={styles.valueText}>12.00</Text>
+                  <Text className={styles.unitText}>元</Text>
                 </View>
               </View>
-              <View className="withdraw-btn" onClick={handleWithdraw}>
-                <Text className="withdraw-text">提现</Text>
+              <View className={styles.withdrawBtn} onClick={handleWithdraw}>
+                <Text className={styles.withdrawText}>提现</Text>
               </View>
             </View>
           </View> */}
 
             {/* 我的订单和编辑资料卡片容器 */}
-            <View className="feature-cards-row">
+            <View className={styles.featureCardsRow}>
               {/* 我的订单卡片 */}
               <View
-                className="feature-card order-card"
+                className={`${styles.featureCard} ${styles.orderCard}`}
                 onClick={handleOrdersClick}
               >
-                <View className="card-content">
-                  <View className="card-info">
-                    <View className="card-title">
-                      <Text className="title-text">我的订单</Text>
+                <View className={styles.cardContent}>
+                  <View className={styles.cardInfo}>
+                    <View className={styles.cardTitle}>
+                      <Text className={styles.titleText}>我的订单</Text>
                     </View>
                   </View>
                   <Image
@@ -109,17 +109,17 @@ const UserCenterPage: React.FC = () => {
 
               {/* 编辑资料卡片 */}
               <View
-                className="feature-card profile-card"
+                className={`${styles.featureCard} ${styles.profileCard}`}
                 onClick={() => {
                   Taro.navigateTo({
                     url: pageUrls.contactPreference,
                   });
                 }}
               >
-                <View className="card-content">
-                  <View className="card-info">
-                    <View className="card-title">
-                      <Text className="title-text">编辑资料</Text>
+                <View className={styles.cardContent}>
+                  <View className={styles.cardInfo}>
+                    <View className={styles.cardTitle}>
+                      <Text className={styles.titleText}>编辑资料</Text>
                     </View>
                   </View>
                   <Image
@@ -131,7 +131,7 @@ const UserCenterPage: React.FC = () => {
             </View>
           </View>
         </View>
-          <View className="image-history-title">
+          <View className={styles.imageHistoryTitle}>
             <Image
               src={MyWorkIcon}
               style={{
@@ -145,7 +145,7 @@ const UserCenterPage: React.FC = () => {
             我的作品
           </View>
           {imageHistory.length > 0 && (
-            <View className="image-history-container">
+            <View className={styles.imageHistoryContainer}>
               <BraceletList
                 items={imageHistory}
                 onItemClick={handleItemClick}

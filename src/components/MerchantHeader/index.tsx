@@ -1,5 +1,5 @@
 import { View, Text, Image } from '@tarojs/components'
-import './index.scss'
+import styles from './index.module.scss'
 import signalBars from '../../assets/icons/signal-bars.svg'
 import signalRed from '../../assets/icons/signal-red.svg'
 import logo from '@/assets/logo/logo-white.svg';
@@ -11,25 +11,25 @@ interface HeaderProps {
 
 export default function MerchantHeader({ title = '商家管理后台', showSignal = true }: HeaderProps) {
   return (
-    <View className="top-header-container">
+    <View className={styles.topHeaderContainer}>
       {showSignal && (
-        <View className="signal-group">
+        <View className={styles.signalGroup}>
           <Image 
-            className="signal-bars" 
+            className={styles.signalBars} 
             src={logo}
             mode="aspectFit"
           />
           {/* <Image 
-            className="signal-red" 
+            className={styles.signalRed} 
             src={signalRed}
             mode="aspectFit"
           /> */}
         </View>
       )}
       
-      <View className="top-separator" />
+      <View className={styles.topSeparator} />
       
-      <Text className="top-header-title">{title}</Text>
+      <Text className={styles.topHeaderTitle}>{title}</Text>
     </View>
   )
 } 

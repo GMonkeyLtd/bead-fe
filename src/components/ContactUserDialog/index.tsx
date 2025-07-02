@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image } from '@tarojs/components';
 import { makePhoneCall, showToast, setClipboardData } from '@tarojs/taro';
-import './index.scss';
+import styles from './index.module.scss';
 import closeIcon from '@/assets/icons/close.svg';
 import copyIcon from '@/assets/icons/copy.svg';
 
@@ -112,11 +112,11 @@ const ContactUserDialog: React.FC<ContactUserDialogProps> = ({
     if (userInfo.default_contact === 0) {
       // 电话联系
       return (
-        <View className='contact-info-card' onClick={handleCallPhone}>
-          <Text className='contact-number'>
+        <View className={styles.contactInfoCard} onClick={handleCallPhone}>
+          <Text className={styles.contactNumber}>
             {formatPhoneNumber(userInfo.phone || '')}
           </Text>
-          <View className='contact-dialog-copy-icon' onClick={(e) => {
+          <View className={styles.contactDialogCopyIcon} onClick={(e) => {
             e.stopPropagation();
             handleCopyContact();
           }}>
@@ -127,11 +127,11 @@ const ContactUserDialog: React.FC<ContactUserDialogProps> = ({
     } else {
       // 微信联系
       return (
-        <View className='contact-info-card' onClick={handleContactWechat}>
-          <Text className='contact-number'>
+        <View className={styles.contactInfoCard} onClick={handleContactWechat}>
+          <Text className={styles.contactNumber}>
             微信号：{userInfo.wechat_id || '未提供'}
           </Text>
-          <View className='contact-dialog-copy-icon' onClick={(e) => {
+          <View className={styles.contactDialogCopyIcon} onClick={(e) => {
             e.stopPropagation();
             handleCopyContact();
           }}>
@@ -143,18 +143,18 @@ const ContactUserDialog: React.FC<ContactUserDialogProps> = ({
   };
 
   return (
-    <View className='contact-dialog-overlay'>
-      <View className='contact-dialog'>
+    <View className={styles.contactDialogOverlay}>
+      <View className={styles.contactDialog}>
         {/* 头部区域 */}
-        <View className='contact-dialog-content'>
-          <View className='contact-dialog-header'>
-            <View className='contact-dialog-header-title'>
-              <Text className='contact-dialog-title-text'>
+        <View className={styles.contactDialogContent}>
+          <View className={styles.contactDialogHeader}>
+            <View className={styles.contactDialogHeaderTitle}>
+              <Text className={styles.contactDialogTitleText}>
                 {userInfo.default_contact === 0 ? '用户手机号' : '用户微信号'}
               </Text>
               <Image src={closeIcon} style={{ width: '20px', height: '20px' }} onClick={onClose}/>
             </View>
-            {/* <Text className='subtitle-text'>给商家的一句话，商家手册</Text> */}
+            {/* <Text className={styles.subtitleText}>给商家的一句话，商家手册</Text> */}
           </View>
 
           {/* 联系信息区域 */}
@@ -162,9 +162,9 @@ const ContactUserDialog: React.FC<ContactUserDialogProps> = ({
         </View>
 
         {/* 底部按钮 */}
-        <View className='contact-dialog-footer'>
-          <View className='contact-dialog-return-btn' onClick={onClose}>
-            <Text className='contact-dialog-return-text'>返回</Text>
+        <View className={styles.contactDialogFooter}>
+          <View className={styles.contactDialogReturnBtn} onClick={onClose}>
+            <Text className={styles.contactDialogReturnText}>返回</Text>
           </View>
         </View>
       </View>

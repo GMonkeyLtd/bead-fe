@@ -1,4 +1,4 @@
-.user-info-card {
+.userInfoCard {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -7,14 +7,14 @@
   box-sizing: border-box;
 }
 
-.user-section {
+.userSection {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 14px;
 }
 
-.user-avatar {
+.userAvatar {
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -23,20 +23,20 @@
   flex-shrink: 0;
 }
 
-.avatar-image {
+.avatarImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.user-text-info {
+.userTextInfo {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 4px;
 }
 
-.user-name {
+.userName {
   font-family: 'Source Han Serif CN', serif;
   font-weight: 500;
   font-size: 18px;
@@ -45,7 +45,7 @@
   margin: 0;
 }
 
-.user-slogan {
+.userSlogan {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 300;
   font-size: 10px;
@@ -54,7 +54,7 @@
   margin: 0;
 }
 
-.action-section {
+.actionSection {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -77,40 +77,40 @@
   }
 }
 
-.action-icon {
+.actionIcon {
   width: 18px;
   height: 18px;
   position: relative;
   flex-shrink: 0;
 }
 
-.exchange-icon {
+.exchangeIcon {
   width: 100%;
   height: 100%;
   position: relative;
 }
 
-.exchange-line {
+.exchangeLine {
   position: absolute;
   background: #FF9421;
   border-radius: 1px;
 }
 
-.exchange-line-1 {
+.exchangeLine1 {
   width: 7px;
   height: 2.33px;
   left: 4.67px;
   top: 3.5px;
 }
 
-.exchange-line-2 {
+.exchangeLine2 {
   width: 7px;
   height: 2.33px;
   left: 2.33px;
   top: 8.17px;
 }
 
-.action-text {
+.actionText {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 350;
   font-size: 11px;
