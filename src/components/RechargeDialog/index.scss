@@ -1,0 +1,211 @@
+.recharge-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.recharge-dialog {
+  background: #FFFFFF;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.dialog-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  
+  &:active {
+    background: #F5F5F5;
+  }
+}
+
+.dialog-content {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.amount-section,
+.custom-amount-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.preset-amounts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.amount-btn {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #FFFFFF;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  &.selected {
+    border-color: #FF8800;
+    background: #FFF7E6;
+    color: #FF8800;
+  }
+}
+
+.amount-input {
+  width: 100%;
+  padding: 12px 16px !important;
+  border: 1px solid #E0E0E0 !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  background: #FFFFFF !important;
+  
+  &:focus {
+    border-color: #FF8800 !important;
+  }
+}
+
+.current-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #F8F9FA;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.amount-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.amount-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #FF8800;
+}
+
+.dialog-footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #F0F0F0;
+  background: #FAFAFA;
+}
+
+.recharge-cancel-btn {
+  flex: 1;
+  height: 48px !important;
+  background: #F5F5F5 !important;
+  color: #666 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  
+  &:active {
+    background: #E8E8E8 !important;
+  }
+  
+  &[disabled] {
+    opacity: 0.6;
+  }
+}
+
+.recharge-confirm-btn {
+  flex: 2;
+  height: 48px !important;
+  background: linear-gradient(135deg, #FF9114 0%, #FFCA40 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 12px rgba(255, 145, 20, 0.3) !important;
+  margin-top: 0px;
+  
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(255, 145, 20, 0.3) !important;
+  }
+  
+  &[disabled] {
+    opacity: 0.6;
+    transform: none !important;
+  }
+}
+
+// 响应式设计
+@media (max-width: 375px) {
+  .recharge-dialog {
+    width: 95%;
+    margin: 0 2.5%;
+  }
+  
+  .dialog-header,
+  .dialog-footer {
+    padding: 16px 20px;
+  }
+  
+  .dialog-content {
+    padding: 20px;
+  }
+  
+  .preset-amounts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .amount-btn {
+    padding: 10px;
+    font-size: 14px;
+  }
+} 

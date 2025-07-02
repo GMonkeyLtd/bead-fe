@@ -54,12 +54,17 @@ const UserCenterPage: React.FC = () => {
         <View className="page-top-container">
           <UserInfoCard
             userName={
-              userInfo?.nick_name ||
+              userInfo?.nick_name?.slice(0, 10) ||
               "微信用户" + Math.random().toString(36).substring(2, 15)
             }
             userSlogan="璞光集，好运气"
             avatar="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/default-avatar.png" // 替换为实际头像URL
-            showAction={false}
+            showAction={userInfo?.is_merchant}
+            onActionClick={() => {
+              Taro.redirectTo({
+                url: pageUrls.merchantLogin,
+              })
+            }}
           />
 
           {/* 功能卡片区域 */}

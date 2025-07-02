@@ -1,6 +1,8 @@
 import React from "react";
 import { Image, Text, View } from "@tarojs/components";
 import "./index.scss";
+import switchIcon from "@/assets/icons/switch.svg";
+import CrystalButton from "../CrystalButton";
 
 interface UserInfoCardProps {
   userName: string;
@@ -41,12 +43,15 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
 
       {/* 操作按钮区域 */}
       {showAction && (
+        // <CrystalButton 
+        //   onClick={onActionClick}
+        //   text={actionText}
+        //   prefix={<Image src={switchIcon} className="exchange-icon" />}
+        // />
+        
         <View className="action-section" onClick={onActionClick}>
           <View className="action-icon">
-            <View className="exchange-icon">
-              <View className="exchange-line exchange-line-1" />
-              <View className="exchange-line exchange-line-2" />
-            </View>
+            <Image src={switchIcon} className="exchange-icon" />
           </View>
           <Text className="action-text">{actionText}</Text>
         </View>

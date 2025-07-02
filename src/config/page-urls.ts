@@ -9,4 +9,8 @@ export const pageUrls = {
   orderDetail: '/pages-order/order-detail/index',
   userCenter: '/pages-user/user-center/index',
   contactPreference: '/pages-user/contact-preference/index',
+  merchantLogin: '/pages-merchant/login/index',
+  merchantGrabOrders: '/pages-merchant/grab-orders/index',
+  merchantOrderManagement: '/pages-merchant/order-management/index',
+  merchantUserCenter: '/pages-merchant/user-center/index',
 }

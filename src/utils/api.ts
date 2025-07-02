@@ -1,16 +1,12 @@
-import http, { setBaseURL, setIsMock, CancelToken, RequestManager } from "./request";
+import http, { setBaseURL, setIsMock, CancelToken } from "./request";
 import Taro from "@tarojs/taro";
 
 // 在应用启动时设置API基础URL
 // setBaseURL("http://gmonkey.ai:8088/api/v1");
-setBaseURL("https://test.qianjunye.com:443/api/v1");
+// setBaseURL("https://test.qianjunye.com:443/api/v1");
 // setBaseURL("http://192.168.189.246:8088/api/v1");
 
 // setIsMock(true)
-
-// 创建全局请求管理器
-export const requestManager = new RequestManager();
-
 // 定义用户相关的数据类型
 export interface User {
   nick_name: string;
@@ -257,32 +253,6 @@ export const fileApi = {
     http.upload("/upload", filePath, formData, config?.cancelToken),
 };
 
-// 便捷的API调用方法，支持自动管理取消令牌
-export const managedApi = {
-  // 快速生成 - 自动管理取消令牌
-  quickGenerate: (key: string, params: QuickGenerateParams) =>
-    requestManager.createRequest(key, (cancelToken) =>
-      generateApi.quickGenerate(params, { cancelToken })
-    ),
-
-  // 个性化生成 - 自动管理取消令牌
-  personalizedGenerate: (key: string, params: PersonalizedGenerateParams) =>
-    requestManager.createRequest(key, (cancelToken) =>
-      generateApi.personalizedGenerate(params, { cancelToken })
-    ),
-
-  // 通过图片生成 - 自动管理取消令牌
-  personalizedGenerateByImage: (key: string, params: QuickGenerateByImageParams) =>
-    requestManager.createRequest(key, (cancelToken) =>
-      generateApi.personalizedGenerateByImage(params, { cancelToken })
-    ),
-
-  // 文件上传 - 自动管理取消令牌
-  upload: (key: string, filePath: string, formData?: Record<string, any>) =>
-    requestManager.createRequest(key, (cancelToken) =>
-      fileApi.upload(filePath, formData, { cancelToken })
-    ),
-};
 
 // 导出所有API
 export default {
@@ -291,5 +261,4 @@ export default {
   bead: beadsApi,
   file: fileApi,
   userHistory: userHistoryApi,
-  managed: managedApi,
 };

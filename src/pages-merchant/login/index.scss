@@ -1,0 +1,269 @@
+.login-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #F3F0ED;
+}
+
+.login-container {
+  flex: 1;
+  background: #F3F0ED;
+  padding: 120px 32px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Web端登录容器优化 */
+@media screen and (min-width: 768px) {
+  .login-page {
+    background: linear-gradient(135deg, #FF9114 0%, #FFCA40 60%, #FFE0F9 100%);
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .login-container {
+    max-width: 450px;
+    height: 400px;
+    width: 90%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 16px 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    justify-content: flex-start;
+    gap: 32px;
+    animation: slideUp 0.6s ease-out;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .login-container {
+    height: 400px;
+    max-width: 500px;
+    padding: 16px 24px;
+  }
+}
+
+.login-header {
+  margin-top: 40px;
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+/* Web端头部优化 */
+@media screen and (min-width: 768px) {
+  .login-header {
+    margin-top: 0;
+    margin-bottom: 32px;
+  }
+}
+
+.login-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 12px;
+  display: block;
+  letter-spacing: 2px;
+}
+
+/* Web端标题优化 */
+@media screen and (min-width: 768px) {
+  .login-title {
+    font-size: 32px;
+    color: #1F1722;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #FF9114 0%, #FFCA40 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.login-subtitle {
+  font-size: 16px;
+  color: #000000;
+  display: block;
+}
+
+/* Web端副标题优化 */
+@media screen and (min-width: 768px) {
+  .login-subtitle {
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+.login-form {
+  flex: 1;
+}
+
+/* Web端表单优化 */
+@media screen and (min-width: 768px) {
+  .login-form {
+    flex: none;
+    width: 100%;
+  }
+}
+
+.form-item {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+/* Web端表单项优化 */
+@media screen and (min-width: 768px) {
+  .form-item {
+    margin-bottom: 24px;
+    
+    &:hover .form-input {
+      border-color: #FF8800;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.form-input {
+  width: 100%;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 6px 20px;
+  font-size: 16px;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  
+  &::placeholder {
+    color: #999;
+  }
+}
+
+/* Web端输入框优化 */
+@media screen and (min-width: 768px) {
+  .form-input {
+    height: 48px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    
+    &:focus {
+      border-color: #FF8800;
+      box-shadow: 0 0 0 3px rgba(255, 136, 0, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    &::placeholder {
+      color: #aaa;
+    }
+  }
+}
+
+.login-btn {
+  width: 100%;
+  height: 52px;
+  background: #FFC45D;
+  color: #261808 !important;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none !important;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #F5F5F5 !important;
+  }
+  
+  &.button-loading {
+    background: rgba(255, 255, 255, 0.8) !important;
+  }
+}
+
+/* Web端按钮优化 */
+@media screen and (min-width: 768px) {
+  .login-btn {
+    height: 48px;
+    background: linear-gradient(135deg, #FF9114 0%, #FFCA40 100%);
+    color: #ffffff !important;
+    font-size: 16px;
+    margin-top: 32px;
+    cursor: pointer;
+    
+    &:hover {
+      background: linear-gradient(135deg, #FF8800 0%, #FFB35D 100%) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 145, 20, 0.3) !important;
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    &.button-loading {
+      background: #ccc !important;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 60px;
+}
+
+/* Web端页脚优化 */
+@media screen and (min-width: 768px) {
+  .login-footer {
+    margin-top: 32px;
+  }
+}
+
+.footer-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Web端页脚文字优化 */
+@media screen and (min-width: 768px) {
+  .footer-text {
+    color: #999;
+    font-size: 12px;
+  }
+}
+
+/* Web端额外装饰 */
+@media screen and (min-width: 768px) {
+  .login-page::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(255, 145, 20, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 202, 64, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(255, 224, 249, 0.2) 0%, transparent 50%);
+    animation: backgroundMove 20s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes backgroundMove {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+} 

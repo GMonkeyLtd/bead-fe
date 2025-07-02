@@ -1,3 +1,5 @@
+import { StatusBadgeType } from "@/components/StatusBadge";
+
 export enum OrderStatus {
   PendingDispatch = '0', // 待派单
   Dispatching = '1', // 派单中
@@ -32,4 +34,15 @@ export const formatOrderStatus = (status: OrderStatus) => {
     return "进行中";
   }
   return OrderStatusMap[status];
+};
+
+export const getStatusBadgeType = (status: OrderStatus): StatusBadgeType => {
+  switch (status) {
+    case OrderStatus.Cancelled:
+      return StatusBadgeType.Error;
+    case OrderStatus.Completed:
+      return StatusBadgeType.Success;
+    default:
+      return StatusBadgeType.Processing;
+  }
 };

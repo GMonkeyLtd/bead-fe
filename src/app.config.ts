@@ -26,6 +26,15 @@ export default defineAppConfig({
         'order-list/index',
         'order-dispatching/index',
       ]
+    },
+    {
+      root: 'pages-merchant',
+      pages: [
+        'login/index',
+        'grab-orders/index',
+        'order-management/index',
+        'user-center/index',
+      ]
     }
   ],
   window: {

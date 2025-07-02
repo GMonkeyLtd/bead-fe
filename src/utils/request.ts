@@ -1,6 +1,8 @@
 import Taro from '@tarojs/taro'
 import { AuthManager } from './auth'
+import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
+import { pageUrls } from '@/config/page-urls'
 
 // 取消令牌类
 export class CancelToken {
@@ -57,6 +59,7 @@ export class CancelToken {
 // 定义请求配置接口
 export interface RequestConfig {
   url: string
+  merchantBaseUrl?: string
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   data?: any
   header?: Record<string, string>
@@ -78,16 +81,19 @@ export interface ApiResponse<T = any> {
 
 // 默认配置
 const defaultConfig = {
-  baseURL: '', // 在这里设置你的API基础URL
+  baseURL: 'https://test.qianjunye.com:443/api/v1', // 在这里设置你的API基础URL
   timeout: 600000,
   showLoading: false,
   loadingText: '加载中...',
   showError: true,
-  isMock: false
+  isMock: false,
+  merchantBaseUrl: 'http://106.75.254.80:8181/api/v1'
 }
+const checkMerchant = url => url.includes('/merchant')
 
 // 请求拦截器 - 在发送请求前的处理
 const requestInterceptor = async (config: RequestConfig) => {
+  const isMerchant = checkMerchant(config.url)
   // 添加通用headers
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -98,13 +104,18 @@ const requestInterceptor = async (config: RequestConfig) => {
   if (!config.skipAuth) {
     try {
       // 获取token，如果没有则自动登录
-      const token = await AuthManager.getToken();
+      const token = isMerchant ? await MerchantAuthManager.getToken() : await AuthManager.getToken();
       // console.log(token, 'token')
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
         console.log('已添加认证token到请求头');
       } else {
         console.warn('获取token失败，可能登录失败');
+        if (isMerchant) {
+          Taro.redirectTo({
+            url: pageUrls.merchantLogin,
+          })
+        }
         // 可以选择抛出错误或者继续请求
         // throw new Error('用户未登录');
       }
@@ -114,10 +125,11 @@ const requestInterceptor = async (config: RequestConfig) => {
       throw new Error('认证失败，请重试');
     }
   }
+  console.log(config.url, config.merchantBaseUrl, 'config.url')
   return {
     ...config,
     header: headers,
-    url: defaultConfig.baseURL + config.url,
+    url: isMerchant ? defaultConfig.merchantBaseUrl + config.url : defaultConfig.baseURL + config.url,
   }
 }
 
@@ -134,7 +146,10 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
           resolve(data)
         } else if (data.code === 401) {
           // token过期或无效，清除本地认证信息
-          AuthManager.clearAuth();
+          MerchantAuthManager.clearAuth();
+          Taro.redirectTo({
+            url: pageUrls.merchantLogin,
+          })
           reject(new Error('登录已过期，请重新登录'));
         } else {
           reject(new Error(data.message || '请求失败1'));
@@ -272,54 +287,6 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
   return await executeRequest();
 }
 
-// 请求管理类 - 用于管理多个请求
-export class RequestManager {
-  private cancelTokens: Map<string, CancelToken> = new Map()
-
-  // 创建带标识的请求
-  createRequest<T = any>(
-    key: string,
-    requestFn: (cancelToken: CancelToken) => Promise<T>
-  ): Promise<T> {
-    // 如果已存在同名请求，先取消它
-    this.cancel(key)
-    
-    // 创建新的取消令牌
-    const cancelToken = CancelToken.create()
-    this.cancelTokens.set(key, cancelToken)
-    
-    const promise = requestFn(cancelToken)
-    
-    // 请求完成后清理取消令牌
-    promise.finally(() => {
-      this.cancelTokens.delete(key)
-    })
-    
-    return promise
-  }
-
-  // 取消指定请求
-  cancel(key: string, reason?: string) {
-    const cancelToken = this.cancelTokens.get(key)
-    if (cancelToken) {
-      cancelToken.cancel(reason)
-      this.cancelTokens.delete(key)
-    }
-  }
-
-  // 取消所有请求
-  cancelAll(reason?: string) {
-    this.cancelTokens.forEach((cancelToken, key) => {
-      cancelToken.cancel(reason)
-    })
-    this.cancelTokens.clear()
-  }
-
-  // 检查请求是否存在
-  hasRequest(key: string): boolean {
-    return this.cancelTokens.has(key)
-  }
-}
 
 // 封装常用的HTTP方法
 export const http = {
@@ -453,6 +420,10 @@ export const http = {
 // 设置基础URL
 export const setBaseURL = (baseURL: string) => {
   defaultConfig.baseURL = baseURL
+}
+
+export const setMerchantBaseURL = (url: string) => {
+  defaultConfig.merchantBaseUrl = url
 }
 
 export const setIsMock = (isMock: boolean) => {
