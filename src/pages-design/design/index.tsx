@@ -203,7 +203,7 @@ const ChatPage: React.FC = () => {
       bead_data_id: beadDataId,
     });
 
-    Taro.redirectTo({
+    Taro.navigateTo({
       url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
     });
   };

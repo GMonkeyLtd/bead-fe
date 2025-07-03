@@ -6,6 +6,7 @@ import { OrderStatus } from "@/utils/orderUtils";
 import MerchantHeader from "@/components/MerchantHeader";
 import OrderList from "@/components/OrderList";
 import "./index.scss";
+import TabBar from "@/components/TabBar";
 
 interface DesignInfo {
   id: string;
@@ -39,20 +40,6 @@ export default function GrabOrders() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // 计算统计数据
-  const stats = useMemo(() => {
-    const totalOrders = orders.length;
-    const waitingOrders = orders.filter(order => order.status === OrderStatus.PendingDispatch).length;
-    const matchingOrders = orders.filter(order => order.status === OrderStatus.Dispatching).length;
-    const totalAmount = orders.reduce((sum, order) => sum + order.price, 0);
-    
-    return {
-      total: totalOrders,
-      waiting: waitingOrders,
-      matching: matchingOrders,
-      amount: totalAmount.toFixed(2)
-    };
-  }, [orders]);
 
   console.log(orders, "grab orders");
   const loadOrders = async () => {
@@ -60,8 +47,8 @@ export default function GrabOrders() {
     try {
       // 模拟API调用
       api.user.getDispatch().then((res: any) => {
-        console.log(res.orders, "res.data.orders");
-        const orderList = res.orders
+        console.log(res.data.orders, "res.data.orders");
+        const orderList = res.data.orders
           ?.map((item) => {
             return {
               id: item.order_uuid,
@@ -158,8 +145,12 @@ export default function GrabOrders() {
         showActions={true}
         isGrab={true}
         emptyText="暂无订单"
-        className="orders-list"
+        style={{
+          height: "calc(100vh - 160px)",
+        }}
       />
+
+      <TabBar isMerchant={true} />
     </View>
   );
 }

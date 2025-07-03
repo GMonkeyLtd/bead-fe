@@ -1,10 +1,11 @@
-.order-list-container {
+.orderListContainer {
   padding: 20px 16px;
+  box-sizing: border-box;
 }
 
 /* Web端容器优化 */
 @media screen and (min-width: 768px) {
-  .order-list-container {
+  .orderListContainer {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -13,7 +14,7 @@
 
 /* 中等屏幕优化 - 3列布局 */
 @media screen and (min-width: 1024px) {
-  .order-list-container {
+  .orderListContainer {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
@@ -21,7 +22,7 @@
 
 /* 大屏幕优化 - 4列布局 */
 @media screen and (min-width: 1400px) {
-  .order-list-container {
+  .orderListContainer {
     grid-template-columns: repeat(4, 1fr);
     gap: 24px;
   }
@@ -29,7 +30,7 @@
 
 /* 超大屏幕优化 */
 @media screen and (min-width: 1800px) {
-  .order-list-container {
+  .orderListContainer {
     max-width: 1600px;
     margin: 0 auto;
     grid-template-columns: repeat(4, 1fr);
@@ -37,14 +38,14 @@
   }
 }
 
-.empty-state {
+.emptyState {
   text-align: center;
   padding: 80px 20px;
 }
 
 /* Web端空状态优化 */
 @media screen and (min-width: 768px) {
-  .empty-state {
+  .emptyState {
     padding: 80px 32px;
     background: #ffffff;
     border-radius: 12px;
@@ -56,7 +57,7 @@
 
 /* 中等屏幕空状态优化 */
 @media screen and (min-width: 1024px) {
-  .empty-state {
+  .emptyState {
     padding: 100px 40px;
     margin: 30px 0;
   }
@@ -64,38 +65,38 @@
 
 /* 大屏幕空状态优化 */
 @media screen and (min-width: 1400px) {
-  .empty-state {
+  .emptyState {
     padding: 120px 50px;
     margin: 40px 0;
   }
 }
 
-.empty-text {
+.emptyText {
   font-size: 16px;
   color: #999;
 }
 
 /* Web端文字响应式优化 */
 @media screen and (min-width: 768px) {
-  .empty-text {
+  .emptyText {
     font-size: 16px;
     color: #999;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .empty-text {
+  .emptyText {
     font-size: 18px;
   }
 }
 
 @media screen and (min-width: 1400px) {
-  .empty-text {
+  .emptyText {
     font-size: 20px;
   }
 }
 
-.order-card {
+.orderCard {
   background: #FFFFFF;
   border-radius: 10px;
   padding: 16px;
@@ -106,7 +107,7 @@
 
 /* Web端订单卡片优化 */
 @media screen and (min-width: 768px) {
-  .order-card {
+  .orderCard {
     width: 100%;
     margin-bottom: 0;
     border-radius: 12px;
@@ -124,19 +125,19 @@
 
 /* 中等屏幕卡片优化 */
 @media screen and (min-width: 1024px) {
-  .order-card {
+  .orderCard {
     padding: 20px;
   }
 }
 
 /* 大屏幕卡片优化 */
 @media screen and (min-width: 1400px) {
-  .order-card {
+  .orderCard {
     padding: 22px;
   }
 }
 
-.order-header {
+.orderHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -145,30 +146,30 @@
 
 /* Web端订单头部响应式优化 */
 @media screen and (min-width: 768px) {
-  .order-header {
+  .orderHeader {
     margin-bottom: 16px;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .order-header {
+  .orderHeader {
     margin-bottom: 18px;
   }
 }
 
 @media screen and (min-width: 1400px) {
-  .order-header {
+  .orderHeader {
     margin-bottom: 20px;
   }
 }
 
-.order-status {
+.orderStatus {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.status-tag {
+.statusTag {
   background: #FFEDD8;
   border-radius: 4px;
   padding: 2px 6px;
@@ -181,7 +182,7 @@
 
 /* Web端状态标签优化 */
 @media screen and (min-width: 768px) {
-  .status-tag {
+  .statusTag {
     padding: 4px 12px;
     border-radius: 6px;
     font-weight: 500;
@@ -194,7 +195,7 @@
   }
 }
 
-.status-text {
+.statusText {
   font-size: 11px;
   font-weight: 350;
   color: #583408;
@@ -202,13 +203,13 @@
 
 /* Web端状态文字优化 */
 @media screen and (min-width: 768px) {
-  .status-text {
+  .statusText {
     font-size: 12px;
     font-weight: 500;
   }
 }
 
-.order-no {
+.orderNo {
   font-size: 11px;
   font-weight: 300;
   color: #1F1722;
@@ -217,14 +218,14 @@
 
 /* Web端订单号优化 */
 @media screen and (min-width: 768px) {
-  .order-no {
+  .orderNo {
     font-size: 12px;
     font-weight: 400;
     opacity: 0.9;
   }
 }
 
-.detail-btn {
+.detailBtn {
   background: rgba(0, 0, 0, 0.04) !important;
   color: rgba(31, 23, 34, 0.6) !important;
   border-radius: 44px !important;
@@ -239,7 +240,7 @@
 
 /* Web端详情按钮优化 */
 @media screen and (min-width: 768px) {
-  .detail-btn {
+  .detailBtn {
     font-size: 12px !important;
     padding: 8px 16px !important;
     
@@ -251,7 +252,7 @@
   }
 }
 
-.order-content {
+.orderContent {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -260,25 +261,25 @@
 
 /* Web端订单内容响应式优化 */
 @media screen and (min-width: 768px) {
-  .order-content {
+  .orderContent {
     margin-bottom: 24px;
     align-items: flex-start;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .order-content {
+  .orderContent {
     margin-bottom: 20px;
   }
 }
 
 @media screen and (min-width: 1400px) {
-  .order-content {
+  .orderContent {
     margin-bottom: 22px;
   }
 }
 
-.order-info {
+.orderInfo {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -287,12 +288,12 @@
 
 /* Web端订单信息优化 */
 @media screen and (min-width: 768px) {
-  .order-info {
+  .orderInfo {
     gap: 16px;
   }
 }
 
-.order-image {
+.orderImage {
   width: 39px;
   height: 39px;
   border-radius: 4px;
@@ -302,7 +303,7 @@
 
 /* Web端图片响应式优化 */
 @media screen and (min-width: 768px) {
-  .order-image {
+  .orderImage {
     width: 56px;
     height: 56px;
     border-radius: 8px;
@@ -311,20 +312,20 @@
 }
 
 @media screen and (min-width: 1024px) {
-  .order-image {
+  .orderImage {
     width: 52px;
     height: 52px;
   }
 }
 
 @media screen and (min-width: 1400px) {
-  .order-image {
+  .orderImage {
     width: 48px;
     height: 48px;
   }
 }
 
-.order-details {
+.orderDetails {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -333,12 +334,12 @@
 
 /* Web端订单详情优化 */
 @media screen and (min-width: 768px) {
-  .order-details {
+  .orderDetails {
     gap: 8px;
   }
 }
 
-.order-desc {
+.orderDesc {
   font-size: 13px;
   font-weight: 600;
   color: #1F1722;
@@ -350,7 +351,7 @@
 
 /* Web端订单描述优化 */
 @media screen and (min-width: 768px) {
-  .order-desc {
+  .orderDesc {
     font-size: 16px;
     font-weight: 600;
     opacity: 1;
@@ -358,7 +359,7 @@
   }
 }
 
-.order-time {
+.orderTime {
   font-size: 10px;
   font-weight: 300;
   color: rgba(31, 23, 34, 0.5);
@@ -367,14 +368,14 @@
 
 /* Web端订单时间优化 */
 @media screen and (min-width: 768px) {
-  .order-time {
+  .orderTime {
     font-size: 12px;
     font-weight: 400;
     opacity: 0.8;
   }
 }
 
-.user-name {
+.userName {
   font-size: 10px;
   font-weight: 300;
   color: rgba(31, 23, 34, 0.6);
@@ -383,14 +384,14 @@
 
 /* Web端用户名优化 */
 @media screen and (min-width: 768px) {
-  .user-name {
+  .userName {
     font-size: 12px;
     font-weight: 400;
     opacity: 0.9;
   }
 }
 
-.order-price {
+.orderPrice {
   font-size: 14px;
   font-weight: 500;
   color: #1F1722;
@@ -399,7 +400,7 @@
 
 /* Web端价格优化 */
 @media screen and (min-width: 768px) {
-  .order-price {
+  .orderPrice {
     font-size: 20px;
     font-weight: 600;
     color: #FF8800;
@@ -407,7 +408,7 @@
   }
 }
 
-.order-divider {
+.orderDivider {
   height: 1px;
   background: linear-gradient(to right, #F2EFEC, rgba(255, 255, 255, 0.5));
   margin-bottom: 16px;
@@ -415,13 +416,13 @@
 
 /* Web端分割线优化 */
 @media screen and (min-width: 768px) {
-  .order-divider {
+  .orderDivider {
     margin-bottom: 16px;
     background: #f0f0f0;
   }
 }
 
-.order-actions {
+.orderActions {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -429,7 +430,7 @@
 
 /* Web端操作区域响应式优化 */
 @media screen and (min-width: 768px) {
-  .order-actions {
+  .orderActions {
     flex-direction: row;
     gap: 16px;
     justify-content: flex-start;
@@ -437,18 +438,18 @@
 }
 
 @media screen and (min-width: 1024px) {
-  .order-actions {
+  .orderActions {
     gap: 14px;
   }
 }
 
 @media screen and (min-width: 1400px) {
-  .order-actions {
+  .orderActions {
     gap: 12px;
   }
 }
 
-.action-buttons {
+.actionButtons {
   display: flex;
   gap: 10px;
   flex: 1;
@@ -456,25 +457,25 @@
 
 /* Web端操作按钮组响应式优化 */
 @media screen and (min-width: 768px) {
-  .action-buttons {
+  .actionButtons {
     gap: 12px;
     flex: none;
   }
 }
 
 @media screen and (min-width: 1024px) {
-  .action-buttons {
+  .actionButtons {
     gap: 10px;
   }
 }
 
 @media screen and (min-width: 1400px) {
-  .action-buttons {
+  .actionButtons {
     gap: 8px;
   }
 }
 
-.call-btn {
+.callBtn {
   flex: 1;
   height: 34px;
   background: rgba(255, 179, 93, 0.21) !important;
@@ -493,7 +494,7 @@
 
 /* Web端呼叫按钮响应式优化 */
 @media screen and (min-width: 768px) {
-  .call-btn {
+  .callBtn {
     flex: none;
     min-width: 100px;
     height: 36px !important;
@@ -509,7 +510,7 @@
 }
 
 @media screen and (min-width: 1024px) {
-  .call-btn {
+  .callBtn {
     min-width: 90px;
     height: 34px !important;
     font-size: 11px !important;
@@ -517,20 +518,19 @@
 }
 
 @media screen and (min-width: 1400px) {
-  .call-btn {
+  .callBtn {
     min-width: 85px;
     height: 32px !important;
     font-size: 11px !important;
   }
 }
 
-.phone-icon {
+.phoneIcon {
   width: 14px;
   height: 14px;
 }
 
-.order-cancel-btn {
-  height: 34px;
+.orderCancelBtn {
   background: #FFE1E1 !important;
   color: #C00E0E !important;
   border: 1px solid #C00E0E !important;
@@ -547,7 +547,7 @@
 
 /* Web端取消按钮响应式优化 */
 @media screen and (min-width: 768px) {
-  .order-cancel-btn {
+  .orderCancelBtn {
     height: 36px !important;
     border-radius: 8px !important;
     font-size: 12px !important;
@@ -563,7 +563,7 @@
 }
 
 @media screen and (min-width: 1024px) {
-  .order-cancel-btn {
+  .orderCancelBtn {
     height: 34px !important;
     min-width: 75px;
     font-size: 11px !important;
@@ -571,14 +571,14 @@
 }
 
 @media screen and (min-width: 1400px) {
-  .order-cancel-btn {
+  .orderCancelBtn {
     height: 32px !important;
     min-width: 70px;
     font-size: 11px !important;
   }
 }
 
-.complete-btn {
+.completeBtn {
   width: 100%;
   height: 34px;
   background: #0EC04C !important;
@@ -596,7 +596,7 @@
 
 /* Web端完成按钮响应式优化 */
 @media screen and (min-width: 768px) {
-  .complete-btn {
+  .completeBtn {
     width: auto !important;
     min-width: 100px;
     height: 36px !important;
@@ -612,7 +612,7 @@
 }
 
 @media screen and (min-width: 1024px) {
-  .complete-btn {
+  .completeBtn {
     min-width: 90px;
     height: 34px !important;
     font-size: 11px !important;
@@ -620,14 +620,14 @@
 }
 
 @media screen and (min-width: 1400px) {
-  .complete-btn {
+  .completeBtn {
     min-width: 85px;
     height: 32px !important;
     font-size: 11px !important;
   }
 }
 
-.grab-btn {
+.grabBtn {
   width: 100%;
   height: 34px;
   background: linear-gradient(135deg, #FF9114 0%, #FFCA40 100%) !important;
@@ -645,7 +645,7 @@
 
 /* Web端抢单按钮响应式优化 */
 @media screen and (min-width: 768px) {
-  .grab-btn {
+  .grabBtn {
     width: auto !important;
     min-width: 120px;
     height: 40px !important;
@@ -666,7 +666,7 @@
 }
 
 @media screen and (min-width: 1024px) {
-  .grab-btn {
+  .grabBtn {
     min-width: 110px;
     height: 38px !important;
     font-size: 13px !important;
@@ -674,7 +674,7 @@
 }
 
 @media screen and (min-width: 1400px) {
-  .grab-btn {
+  .grabBtn {
     min-width: 100px;
     height: 36px !important;
     font-size: 12px !important;
@@ -683,7 +683,7 @@
 
 /* Web端批量操作 */
 @media screen and (min-width: 768px) {
-  .bulk-actions {
+  .bulkActions {
     position: sticky;
     top: 0;
     background: #ffffff;
@@ -700,7 +700,7 @@
     }
   }
   
-  .bulk-selection {
+  .bulkSelection {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -708,13 +708,13 @@
     font-size: 14px;
   }
   
-  .bulk-buttons {
+  .bulkButtons {
     display: flex;
     gap: 8px;
     margin-left: auto;
   }
   
-  .bulk-btn {
+  .bulkBtn {
     padding: 8px 16px;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -753,7 +753,7 @@
 
 /* Web端选择框 */
 @media screen and (min-width: 768px) {
-  .order-checkbox {
+  .orderCheckbox {
     position: absolute;
     top: 16px;
     left: 16px;
@@ -785,7 +785,7 @@
     }
   }
   
-  .order-card.selectable {
+  .orderCard.selectable {
     position: relative;
     padding-left: 48px;
   }
@@ -793,7 +793,7 @@
 
 /* Web端悬浮操作菜单 */
 @media screen and (min-width: 768px) {
-  .order-hover-menu {
+  .orderHoverMenu {
     position: absolute;
     top: 16px;
     right: 16px;
@@ -803,11 +803,11 @@
     transition: all 0.3s ease;
   }
   
-  .order-card:hover .order-hover-menu {
+  .orderCard:hover .orderHoverMenu {
     opacity: 1;
   }
   
-  .hover-menu-btn {
+  .hoverMenuBtn {
     width: 32px;
     height: 32px;
     border: 1px solid #ddd;
@@ -831,28 +831,28 @@
 
 // 响应式设计
 @media (max-width: 375px) {
-  .order-card {
+  .orderCard {
     padding: 14px;
     margin-bottom: 10px;
   }
   
-  .order-details {
+  .orderDetails {
     gap: 6px;
   }
   
-  .order-desc {
+  .orderDesc {
     font-size: 12px;
   }
   
-  .action-buttons {
+  .actionButtons {
     gap: 8px;
   }
   
-  .call-btn,
-  .cancel-btn,
-  .complete-btn,
-  .grab-btn {
+  .callBtn,
+  .cancelBtn,
+  .completeBtn,
+  .grabBtn {
     height: 32px !important;
     font-size: 10px !important;
   }
-}
+} 

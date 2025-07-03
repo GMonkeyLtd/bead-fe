@@ -6,6 +6,7 @@ import MerchantHeader from "@/components/MerchantHeader";
 import OrderList from "@/components/OrderList";
 import api from "@/utils/api-merchant";
 import { OrderStatus } from "@/utils/orderUtils";
+import TabBar from "@/components/TabBar";
 
 interface Order {
   id: string;
@@ -35,14 +36,13 @@ export default function OrderManagement() {
   }, [tab]);
 
   const loadOrders = async () => {
-    console.log("loadOrders");
     setLoading(true);
     Taro.showLoading();
     try {
       // 模拟API调用
       api.user.getOrderList().then((res: any) => {
-        console.log(res.orders, "res.data.orders");
-        const orderList = res.orders?.map((item) => {
+        console.log(res.data.orders, "res.data.orders");
+        const orderList = res.data.orders?.map((item) => {
           return {
             id: item.order_uuid,
             orderNo: item.order_uuid,
@@ -55,7 +55,7 @@ export default function OrderManagement() {
             userInfo: item.user_info || {},
           };
         });
-        setOrders(orderList);
+        setOrders(orderList || []);
       });
     } catch (error) {
       showToast({
@@ -72,19 +72,24 @@ export default function OrderManagement() {
     loadOrders();
   }, []);
 
-  const currentOrders = useMemo(
-    () => {
-      console.log(orders, activeTab, "useMemo orders, activeTab");
-      if (activeTab === "进行中") {
-        return orders.filter((item) => item.status as OrderStatus === OrderStatus.InService);
-      } else if (activeTab === "已完成") {
-        return orders.filter((item) => item.status as OrderStatus === OrderStatus.Completed);
-      } else if (activeTab === "已取消") {
-        return orders.filter((item) => [OrderStatus.Cancelled, OrderStatus.MerchantCancel].includes(item.status as OrderStatus));
-      }
-    },
-    [orders, activeTab]
-  );
+  const currentOrders = useMemo(() => {
+    console.log(orders, activeTab, "useMemo orders, activeTab");
+    if (activeTab === "进行中") {
+      return orders.filter(
+        (item) => (item.status as OrderStatus) === OrderStatus.InService
+      );
+    } else if (activeTab === "已完成") {
+      return orders.filter(
+        (item) => (item.status as OrderStatus) === OrderStatus.Completed
+      );
+    } else if (activeTab === "已取消") {
+      return orders.filter((item) =>
+        [OrderStatus.Cancelled, OrderStatus.MerchantCancel].includes(
+          item.status as OrderStatus
+        )
+      );
+    }
+  }, [orders, activeTab]);
 
   console.log(currentOrders, "currentOrders");
 
@@ -103,7 +108,15 @@ export default function OrderManagement() {
         ))}
       </View>
 
-      <OrderList className="order-management-list" orders={currentOrders || []} loading={loading} onRefresh={loadOrders} />
+      <OrderList
+        orders={currentOrders || []}
+        loading={loading}
+        onRefresh={loadOrders}
+        style={{
+          height: "calc(100vh - 220px)",
+        }}
+      />
+      <TabBar isMerchant={true} />
     </View>
   );
 }

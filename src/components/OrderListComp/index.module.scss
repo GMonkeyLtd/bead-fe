@@ -1,11 +1,11 @@
-.order-list {
+.orderList {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 0;
 }
 
-.order-item {
+.orderItem {
   background: rgba(255, 255, 255, 0.4);
   // border: 1px solid;
   // border-image: linear-gradient(
@@ -35,14 +35,14 @@
   }
 }
 
-.order-header {
+.orderHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
 }
 
-.order-number {
+.orderNumber {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
   font-size: 11px;
@@ -51,27 +51,27 @@
   opacity: 0.8;
 }
 
-.order-content {
+.orderContent {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.order-main {
+.orderMain {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 10px;
 }
 
-.merchant-section {
+.merchantSection {
   display: flex;
   align-items: center;
   gap: 12px;
   flex: 1;
 }
 
-.merchant-image {
+.merchantImage {
   width: 39px;
   height: 39px;
   border-radius: 4px;
@@ -79,19 +79,19 @@
   flex-shrink: 0;
 }
 
-.merchant-img {
+.merchantImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.merchant-info {
+.merchantInfo {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.merchant-name {
+.merchantName {
   font-family: "Source Han Serif CN", serif;
   font-weight: 600;
   font-size: 13px;
@@ -101,7 +101,7 @@
   opacity: 0.9;
 }
 
-.order-time {
+.orderTime {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
   font-size: 10px;
@@ -110,7 +110,7 @@
   opacity: 0.9;
 }
 
-.order-price {
+.orderPrice {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 500;
   font-size: 14px;
@@ -119,7 +119,7 @@
   flex-shrink: 0;
 }
 
-.order-divider {
+.orderDivider {
   width: 100%;
   height: 1px;
   // background: linear-gradient(
@@ -130,14 +130,14 @@
   background-color: #F2EFEC;
 }
 
-.order-actions {
+.orderActions {
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
   gap: 10px;
 }
 
-.action-button {
+.actionButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -154,13 +154,13 @@
   }
 }
 
-.action-icon {
+.actionIcon {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
 }
 
-.action-text {
+.actionText {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 350;
   font-size: 11px;
@@ -169,26 +169,26 @@
   white-space: nowrap;
 }
 
-.contact-button {
+.contactButton {
   background: #ffffff;
   border-color: rgba(84, 62, 55, 0.09);
 
-  .action-icon {
+  .actionIcon {
     filter: brightness(0) saturate(100%) invert(11%) sepia(16%) saturate(1157%)
       hue-rotate(274deg) brightness(94%) contrast(95%);
   }
 }
 
-.evaluate-button {
+.evaluateButton {
   background: #ffffff;
   border-color: rgba(84, 62, 55, 0.09);
 
-  .action-text {
+  .actionText {
     text-align: center;
   }
 }
 
-.reorder-button {
+.reorderButton {
   background: #ffffff;
   border-color: rgba(84, 62, 55, 0.09);
-}
+} 

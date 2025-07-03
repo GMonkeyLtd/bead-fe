@@ -75,7 +75,7 @@ const CustomDesign = () => {
         beads={designData?.bead_list?.map((item) => ({
           id: item.id,
           image_url: item.image_url,
-          radius: item.bead_diameter,
+          radius: item.bead_diameter * 1.5,
         }))}
         size={300}
         beadTypeMap={beadTypeMap}

@@ -109,15 +109,15 @@ export const MerchantAuthManager = {
         });
         console.log(loginRes, 'loginRes')
         
-        if (!loginRes.token) {
+        if (!loginRes.data?.token) {
           throw new Error('获取登录凭证失败');
         }
 
-        if (loginRes.token) {
+        if (loginRes.data?.token) {
           // 保存登录信息到本地缓存
-          MerchantAuthManager.saveAuth(loginRes.token);
+          MerchantAuthManager.saveAuth(loginRes.data.token);
   
-          return loginRes.token;
+          return loginRes.data.token;
         } else {
           throw new Error('登录响应中没有token');
         }

@@ -157,12 +157,8 @@ const QuickDesign = () => {
         icon: "none",
       });
       setTimeout(() => {
-        Taro.redirectTo({
-          url: pageUrls.home,
-        });
+        Taro.navigateBack();
       }, 3000)
-    } finally {
-      setDesigning(false);
     }
   };
 

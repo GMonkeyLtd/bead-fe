@@ -4,6 +4,7 @@ import Taro, { showToast, showModal } from "@tarojs/taro";
 import RechargeDialog from "@/components/RechargeDialog";
 import "./index.scss";
 import api from "@/utils/api-merchant";
+import TabBar from "@/components/TabBar";
 
 interface UserInfo {
   name: string;
@@ -27,7 +28,7 @@ export default function UserCenter() {
     try {
       const res = await api.user.getMerchantInfo();
       console.log(res, "res");
-      setUserInfo(res);
+      setUserInfo(res?.data || {});
     } catch (error) {
       showToast({
         title: "加载用户信息失败",
@@ -202,6 +203,7 @@ export default function UserCenter() {
         onClose={() => setRechargeDialogVisible(false)}
         onSuccess={handleRechargeSuccess}
       />
+      <TabBar isMerchant={true} />
     </View>
   );
 }

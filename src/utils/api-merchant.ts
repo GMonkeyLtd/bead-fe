@@ -77,12 +77,13 @@ export interface RechargeParams {
 }
 
 export interface WxPayParams {
-  appId: string;
-  timeStamp: string;
-  nonceStr: string;
+  prepay_id: string;
+  app_id: string;
+  time_stamp: string;
+  nonce_str: string;
   package: string;
-  signType: string;
-  paySign: string;
+  sign_type: string;
+  pay_sign: string;
 }
 
 export interface RechargeResult {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, Button, Image, ScrollView } from "@tarojs/components";
 import Taro, { showToast, showModal } from "@tarojs/taro";
-import "./index.scss";
+import styles from "./index.module.scss";
 import StatusBadge from "../StatusBadge";
 import {
   formatOrderStatus,
@@ -41,6 +41,7 @@ export interface OrderListProps {
   showActions?: boolean;
   emptyText?: string;
   className?: string;
+  style?: React.CSSProperties;
   isGrab?: boolean;
 }
 
@@ -53,6 +54,7 @@ export default function OrderList({
   emptyText = "暂无订单",
   className = "",
   isGrab = false,
+  style
 }: OrderListProps) {
   const [detailData, setDetailData] = useState<Order | null>(null);
   const [contactDialogVisible, setContactDialogVisible] = useState(false);
@@ -169,7 +171,7 @@ export default function OrderList({
 
     if (isGrab) {
       return (
-        <View className="grab-btn" onClick={() => handleGrabOrder(order)}>
+        <View className={styles.grabBtn} onClick={() => handleGrabOrder(order)}>
           立即抢单
         </View>
       );
@@ -177,21 +179,21 @@ export default function OrderList({
 
     if (order.status === OrderStatus.InService) {
       return (
-        <View className="order-actions">
-          <View className="action-buttons">
-            <View className="call-btn" onClick={() => handleCallUser(order)}>
-              <Image src={phoneIcon} className="phone-icon" />
+        <View className={styles.orderActions}>
+          <View className={styles.actionButtons}>
+            <View className={styles.callBtn} onClick={() => handleCallUser(order)}>
+              <Image src={phoneIcon} className={styles.phoneIcon} />
               联系用户
             </View>
             <View
-              className="order-cancel-btn"
+              className={styles.orderCancelBtn}
               onClick={() => handleCancelOrder(order)}
             >
               取消订单
             </View>
           </View>
           <View
-            className="complete-btn"
+            className={styles.completeBtn}
             onClick={() => handleCompleteOrder(order)}
           >
             完成订单
@@ -203,60 +205,61 @@ export default function OrderList({
 
   return (
     <ScrollView
-      className={`order-list-container ${className}`}
+      className={`${styles.orderListContainer} ${className}`}
       scrollY
       refresherEnabled={!!onRefresh}
       refresherTriggered={loading}
       onRefresherRefresh={onRefresh}
+      style={style}
     >
       {orders.length === 0 || loading ? (
-        <View className="empty-state">
-          <Text className="empty-text">
+        <View className={styles.emptyState}>
+          <Text className={styles.emptyText}>
             {loading ? "加载中..." : emptyText}
           </Text>
         </View>
       ) : (
         orders.map((order) => (
-          <View key={order.id} className="order-card">
-            <View className="order-header">
-              <View className="order-status">
+          <View key={order.id} className={styles.orderCard}>
+            <View className={styles.orderHeader}>
+              <View className={styles.orderStatus}>
                 <StatusBadge
                   type={getStatusBadgeType(order.status)}
                   text={formatOrderStatus(order.status)}
                 />
-                <Text className="order-no">订单号：{order.orderNo}</Text>
+                <Text className={styles.orderNo}>订单号：{order.orderNo}</Text>
               </View>
               <View
-                className="detail-btn"
+                className={styles.detailBtn}
                 onClick={() => handleOrderDetail(order)}
               >
                 明细
               </View>
             </View>
 
-            <View className="order-content">
-              <View className="order-info">
+            <View className={styles.orderContent}>
+              <View className={styles.orderInfo}>
                 <Image
-                  className="order-image"
+                  className={styles.orderImage}
                   src={order.image}
                   mode="aspectFill"
                   lazyLoad
                   showMenuByLongpress={false}
                 />
-                <View className="order-details">
-                  <Text className="order-desc">
+                <View className={styles.orderDetails}>
+                  <Text className={styles.orderDesc}>
                     {order.userInfo?.nick_name || "微信用户"}
                   </Text>
-                  <Text className="order-time">{order.createTime}</Text>
+                  <Text className={styles.orderTime}>{order.createTime}</Text>
                 </View>
               </View>
-              <Text className="order-price">¥{order.price.toFixed(2)}</Text>
+              <Text className={styles.orderPrice}>¥{order.price.toFixed(2)}</Text>
             </View>
 
             {showActions &&
               isGrab &&
               order.status === OrderStatus.InService && (
-                <View className="order-divider"></View>
+                <View className={styles.orderDivider}></View>
               )}
 
             {renderActionButtons(order)}

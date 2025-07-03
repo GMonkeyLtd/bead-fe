@@ -6,7 +6,7 @@ import phoneIcon from "@/assets/icons/phone.svg";
 import wechatIcon from "@/assets/icons/wechat.svg";
 import remarkIcon from "@/assets/icons/remark.svg";
 import createBeadIcon from "@/assets/icons/create-bead.svg";
-import "./index.scss";
+import styles from "./index.module.scss";
 import Taro from "@tarojs/taro";
 
 // 订单数据接口
@@ -18,6 +18,7 @@ export interface OrderItem {
   orderImage?: string;
   createTime: string;
   budget?: number; // 预算，用于显示"预算：不限"等
+  merchantPhone?: string; // 商家电话
 }
 
 interface OrderListProps {
@@ -64,7 +65,6 @@ const OrderListComp: React.FC<OrderListProps> = ({
       [
         OrderStatus.PendingDispatch,
         OrderStatus.Dispatching,
-        OrderStatus.PendingAcceptance,
       ].includes(order.status)
     ) {
       return "匹配商家中...";
@@ -78,17 +78,17 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
 
     return (
-      <View className="order-actions">
+      <View className={styles.orderActions}>
         {order.status === OrderStatus.InService && (
           <View
-            className="action-button contact-button"
+            className={`${styles.actionButton} ${styles.contactButton}`}
             onClick={(e) => {
               e.stopPropagation();
               Taro.makePhoneCall({ phoneNumber: order.merchantPhone || '13800138000' });
             }}
           >
-            <Image src={phoneIcon} className="action-icon" />
-            <Text className="action-text">联系商家</Text>
+            <Image src={phoneIcon} className={styles.actionIcon} />
+            <Text className={styles.actionText}>联系商家</Text>
           </View>
         )}
 
@@ -96,26 +96,26 @@ const OrderListComp: React.FC<OrderListProps> = ({
           <>
             {onEvaluate && (
               <View
-                className="action-button evaluate-button"
+                className={`${styles.actionButton} ${styles.evaluateButton}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onEvaluate(order.id);
                 }}
               >
-                <Image src={remarkIcon} className="action-icon" />
-                <Text className="action-text">评价</Text>
+                <Image src={remarkIcon} className={styles.actionIcon} />
+                <Text className={styles.actionText}>评价</Text>
               </View>
             )}
             {onReorder && (
               <View
-                className="action-button reorder-button"
+                className={`${styles.actionButton} ${styles.reorderButton}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onReorder(order.id);
                 }}
               >
-                <Image src={createBeadIcon} className="action-icon" />
-                <Text className="action-text">再来一单</Text>
+                <Image src={createBeadIcon} className={styles.actionIcon} />
+                <Text className={styles.actionText}>再来一单</Text>
               </View>
             )}
           </>
@@ -126,22 +126,25 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
   // 渲染价格或预算信息
   const renderPriceInfo = (order: OrderItem) => {
+    if (order.budget === undefined) {
+      return "预算：不限";
+    }
     return order.budget === 0
       ? "预算：不限"
       : `预算：¥${order.budget.toFixed(2)}`;
   };
 
   return (
-    <View className="order-list">
+    <View className={styles.orderList}>
       {orders.map((order) => (
         <View
           key={order.id}
-          className="order-item"
+          className={styles.orderItem}
           onClick={() => onItemClick?.(order)}
         >
           {/* 订单头部：订单号和状态 */}
-          <View className="order-header">
-            <Text className="order-number">订单号：{order.orderNumber}</Text>
+          <View className={styles.orderHeader}>
+            <Text className={styles.orderNumber}>订单号：{order.orderNumber}</Text>
             <StatusBadge
               type={getStatusBadgeType(order.status)}
               text={getStatusText(order.status)}
@@ -149,37 +152,37 @@ const OrderListComp: React.FC<OrderListProps> = ({
           </View>
 
           {/* 订单内容 */}
-          <View className="order-content">
-            <View className="order-main">
+          <View className={styles.orderContent}>
+            <View className={styles.orderMain}>
               {/* 商品图片和商家信息 */}
-              <View className="merchant-section">
+              <View className={styles.merchantSection}>
                 {showImage && (
-                  <View className="merchant-image">
+                  <View className={styles.merchantImage}>
                     <Image
                       src={
                         order.orderImage ||
                         "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"
                       }
                       mode="aspectFill"
-                      className="merchant-img"
+                      className={styles.merchantImg}
                     />
                   </View>
                 )}
-                <View className="merchant-info">
-                  <Text className="merchant-name">
+                <View className={styles.merchantInfo}>
+                  <Text className={styles.merchantName}>
                     {getMerchantDisplayText(order)}
                   </Text>
-                  <Text className="order-time">{order.createTime}</Text>
+                  <Text className={styles.orderTime}>{order.createTime}</Text>
                 </View>
               </View>
 
               {/* 价格信息 */}
-              <Text className="order-price">{renderPriceInfo(order)}</Text>
+              <Text className={styles.orderPrice}>{renderPriceInfo(order)}</Text>
             </View>
 
             {/* 分割线 */}
             {order.status === OrderStatus.Completed && showActions && (
-              <View className="order-divider" />
+              <View className={styles.orderDivider} />
             )}
 
             {/* 操作按钮 */}

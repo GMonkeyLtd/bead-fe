@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, Button, Input } from "@tarojs/components";
 import Taro, { showToast, showModal } from "@tarojs/taro";
-import api, { RechargeParams, WxPayParams } from "@/utils/api";
+import api, { RechargeParams, WxPayParams } from "@/utils/api-merchant";
 import "./index.scss";
 
 interface RechargeDialogProps {
@@ -34,32 +34,15 @@ export default function RechargeDialog({
 
   // 微信支付
   const handleWxPay = async (wxPayParams: WxPayParams) => {
-    return new Promise((resolve, reject) => {
-      // 检查是否在微信环境
-      if (typeof wx === 'undefined') {
-        showToast({
-          title: "请在微信中打开",
-          icon: "none",
-        });
-        reject(new Error("请在微信中打开"));
-        return;
-      }
-
-      wx.chooseWXPay({
-        ...wxPayParams,
-        success: (res) => {
-          console.log("支付成功", res);
-          resolve(res);
-        },
-        fail: (err) => {
-          console.log("支付失败", err);
-          reject(err);
-        },
-        cancel: () => {
-          console.log("用户取消支付");
-          reject(new Error("用户取消支付"));
-        }
-      });
+ // Taro 支付调用
+    Taro.requestPayment({
+      timeStamp: wxPayParams.time_stamp,  // 秒级时间戳
+      nonceStr: wxPayParams.nonce_str,
+      package: wxPayParams.package, // 服务端返回
+      signType: wxPayParams.sign_type,
+      paySign: wxPayParams.pay_sign,
+      success: () => Taro.showToast({ title: '支付成功' }),
+      fail: (err) => console.error('支付失败', err)
     });
   };
 
@@ -70,22 +53,6 @@ export default function RechargeDialog({
     if (amount <= 0) {
       showToast({
         title: "请输入有效金额",
-        icon: "none",
-      });
-      return;
-    }
-
-    if (amount < 1) {
-      showToast({
-        title: "充值金额不能少于1元",
-        icon: "none",
-      });
-      return;
-    }
-
-    if (amount > 10000) {
-      showToast({
-        title: "单次充值不能超过10000元",
         icon: "none",
       });
       return;
@@ -128,12 +95,6 @@ export default function RechargeDialog({
     } finally {
       setLoading(false);
     }
-  };
-
-  // 选择预设金额
-  const handleSelectAmount = (amount: number) => {
-    setSelectedAmount(amount);
-    setCustomAmount("");
   };
 
   // 输入自定义金额
