@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { View, Text, Button, Input } from "@tarojs/components";
 import Taro, { showToast, showModal } from "@tarojs/taro";
 import api, { RechargeParams, WxPayParams } from "@/utils/api-merchant";
@@ -7,11 +7,18 @@ import "./index.scss";
 interface RechargeDialogProps {
   visible: boolean;
   onClose: () => void;
-  onSuccess?: (amount: number) => void;
+  onSuccess?: (amount: number, status: PaymentStatus) => void;
 }
 
 // 预设充值金额
 const PRESET_AMOUNTS = [50, 100, 200, 500, 1000, 2000];
+
+enum PaymentStatus {
+  Processing = 0,
+  Success = 1,
+  Failed = 2,
+  Canceled = 3,
+}
 
 export default function RechargeDialog({ 
   visible, 
@@ -21,7 +28,25 @@ export default function RechargeDialog({
   const [customAmount, setCustomAmount] = useState("");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const pollingTimerRef = useRef<any>(null);
 
+  const stopPolling = () => {
+    if (pollingTimerRef.current) {
+      console.log("停止轮询订单状态");
+      clearInterval(pollingTimerRef.current);
+      pollingTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    console.log('useEffect');
+    
+    return () => {
+      stopPolling();
+    }
+  }, [])
+
+  // 将 early return 移动到所有 hooks 调用之后
   if (!visible) return null;
 
   // 获取当前选中的金额
@@ -46,6 +71,75 @@ export default function RechargeDialog({
     });
   };
 
+  const shouldStopPolling = (status: PaymentStatus) => {
+    return status === PaymentStatus.Success || status === PaymentStatus.Failed || status === PaymentStatus.Canceled;
+  }
+
+  const queryPaymentStatus = async (tradeId: string): Promise<boolean> => {
+    try {
+      const res = await api.user.queryPaymentStatus(tradeId);
+      console.log("查询订单结果:", res);
+
+      // 根据实际 API 返回结构调整数据获取方式，使用类型断言
+      const status = res?.data?.trade_status as PaymentStatus;
+
+      // 检查是否应该停止轮询
+      if (status !== undefined && shouldStopPolling(status)) {
+        console.log("订单状态已变更，停止轮询");
+        if (status === PaymentStatus.Success) {
+          showToast({
+            title: "充值成功",
+            icon: "success",
+          });
+          // 根据新状态决定跳转页面
+          onSuccess?.(res?.data?.amount, status);
+          setTimeout(() => {
+            onClose();
+          }, 3000);
+        }
+        if (status === PaymentStatus.Failed) {
+          showToast({
+            title: "充值失败",
+            icon: "none",
+          });
+        }
+        if (status === PaymentStatus.Canceled) {
+          showToast({
+            title: "充值已取消",
+            icon: "none",
+          });
+        }
+        return false; // 表示轮询应该停止
+      }
+
+      return true; // 表示轮询应该继续
+    } catch (error) {
+      console.error("查询订单失败:", error);
+      return true; // 出错时继续轮询
+    }
+  }
+
+  const startPolling = (_tradeId: string) => {
+
+    console.log("开始轮询订单状态");
+
+    // 先立即查询一次
+    queryPaymentStatus(_tradeId);
+
+    // 设置定时器，每指定间隔查询一次
+    pollingTimerRef.current = setInterval(async () => {
+      if (!_tradeId) {
+        stopPolling();
+        return;
+      }
+
+      const shouldContinue = await queryPaymentStatus(_tradeId);
+      if (!shouldContinue) {
+        stopPolling();
+      }
+    }, 3000);
+  };
+
   // 处理充值
   const handleRecharge = async () => {
     const amount = getCurrentAmount();
@@ -64,19 +158,14 @@ export default function RechargeDialog({
       // 调用充值接口
       const rechargeParams: RechargeParams = { amount };
       const result = await api.user.recharge(rechargeParams);
+      console.log(result, 'recharge result')
       
       // 调用微信支付
-      await handleWxPay(result.wx_pay_params);
-      
-      // 支付成功
-      showToast({
-        title: "充值成功",
-        icon: "success",
-      });
+      await handleWxPay(result.data);
 
-      // 通知父组件刷新余额
-      onSuccess?.(amount);
-      onClose();
+      const tradeId = result.data.trade_uuid;
+      startPolling(tradeId);
+      
 
     } catch (error: any) {
       console.error("充值失败:", error);

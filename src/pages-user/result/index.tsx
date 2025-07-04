@@ -1,13 +1,18 @@
 import { View, Image } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
-import Taro from "@tarojs/taro";
+import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import "./index.scss";
 import AppHeader from "@/components/AppHeader";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import logoSvg from "@/assets/icons/logo.svg";
 import expendImage from "@/assets/icons/expend.svg";
 import CrystalButton from "@/components/CrystalButton";
-import { CRYSTALS_BG_IMAGE_URL, LOGO_IMAGE_URL, LOGO_WITH_BACKGROUND_IMAGE_URL, QR_CODE_IMAGE_URL } from "@/config";
+import {
+  CRYSTALS_BG_IMAGE_URL,
+  LOGO_IMAGE_URL,
+  LOGO_WITH_BACKGROUND_IMAGE_URL,
+  QR_CODE_IMAGE_URL,
+} from "@/config";
 import { useDesign } from "@/store/DesignContext";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import shareDesignImage from "@/assets/icons/share-design.svg";
@@ -17,6 +22,8 @@ import { OrderStatus } from "@/utils/orderUtils";
 import OrderListComp from "@/components/OrderListComp";
 import api from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
+import { computeBraceletLength } from "@/utils/cystal-tools";
+import BraceletDetailDialog from "@/components/BraceletDetailDialog";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -29,9 +36,11 @@ const Result = () => {
   const [shareImageUrl, setShareImageUrl] = useState("");
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
   const [designNo, setDesignNo] = useState("");
+  const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [orderList, setOrderList] = useState<any[]>([]);
   const [autoShare, setAutoShare] = useState(false);
+  const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
 
   const posterData = useMemo(() => {
     return {
@@ -43,46 +52,45 @@ const Result = () => {
     };
   }, [braceletName, braceletDescription, beadDescriptions, imageUrl]);
 
-
   const getOrderData = (orderUuid: string[]) => {
     api.userHistory.getOrderById(orderUuid).then((res) => {
       res.data.orders?.length > 0 && setOrderList(res.data.orders);
     });
-  }
+  };
 
   const getDesignData = (designId: string) => {
-    api.userHistory.getDesignById(parseInt(designId)).then((res) => {
-      const {
-        id,
-        image_url,
-        word_info,
-        order_uuid
-      } = res?.data || {};
-      if (order_uuid?.length > 0) {
-        getOrderData(order_uuid);
-      }
+    api.userHistory
+      .getDesignById(parseInt(designId))
+      .then((res) => {
+        const { id, image_url, word_info, order_uuid, beads_info } =
+          res?.data || {};
+        if (order_uuid?.length > 0) {
+          getOrderData(order_uuid);
+        }
+        setBeadsInfo(beads_info);
+        const { bracelet_name, recommendation_text, bead_ids_deduplication } =
+          word_info;
 
-      const {
-        bracelet_name,
-        recommendation_text,
-        bead_ids_deduplication
-      } = word_info;
-
-      setImageUrl(image_url);
-      setBraceletName(bracelet_name);
-      setBeadDescriptions(bead_ids_deduplication?.length > 2 ? bead_ids_deduplication.slice(0, 2) : bead_ids_deduplication);
-      setDesignNo(id);
-      setBraceletDescription(recommendation_text);
-    }).catch((err) => {
-      console.log(err, "err");
-      Taro.showToast({
-        title: "加载失败",
-        icon: "none",
+        setImageUrl(image_url);
+        setBraceletName(bracelet_name);
+        setBeadDescriptions(
+          bead_ids_deduplication?.length > 2
+            ? bead_ids_deduplication.slice(0, 2)
+            : bead_ids_deduplication
+        );
+        setDesignNo(id);
+        setBraceletDescription(recommendation_text);
+      })
+      .catch((err) => {
+        console.log(err, "err");
+        Taro.showToast({
+          title: "加载失败",
+          icon: "none",
+        });
       });
-    });
-  }
+  };
 
-  useEffect(() => {
+  const initData = () => {
     // 获取传入的图片URL参数
     const instance = Taro.getCurrentInstance();
     const params = instance.router?.params;
@@ -101,7 +109,7 @@ const Result = () => {
         bracelet_name,
         recommendation_text,
         bead_ids_deduplication,
-        design_backend_id
+        design_backend_id,
       } = result;
 
       setImageUrl(image_urls[0]);
@@ -110,18 +118,36 @@ const Result = () => {
       setBeadDescriptions(bead_ids_deduplication);
       setDesignNo(design_backend_id);
     }
+  };
+
+  useEffect(() => {
+    initData();
   }, []);
+
+  useDidShow(() => {
+    initData();
+  });
+
+  usePullDownRefresh(() => {
+    initData();
+  });
+
+  const predictedBraceletLength = useMemo(() => {
+    return beadsInfo?.length > 0
+      ? computeBraceletLength(beadsInfo, "bead_diameter")
+      : 0;
+  }, [beadsInfo]);
 
   // 保存图片到相册
   const saveImage = async (url: string) => {
-    console.log(url, 'url')
+    console.log(url, "url");
     if (!url) {
       Taro.showToast({
         title: "分享图正在制作中...",
         icon: "none",
       });
       setAutoShare(true);
-      return; 
+      return;
     }
     try {
       Taro.showToast({
@@ -203,7 +229,11 @@ const Result = () => {
           <View className="result-content-card-image" onClick={viewImage}>
             {/* <Image mode="widthFix" src={imageUrl} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} /> */}
             <View className="logo-image-container" onClick={viewImage}>
-              <Image className="logo-image" src={LOGO_IMAGE_URL} mode="widthFix" />
+              <Image
+                className="logo-image"
+                src={LOGO_IMAGE_URL}
+                mode="widthFix"
+              />
             </View>
             <Image className="expend-image" src={expendImage} mode="widthFix" />
           </View>
@@ -212,8 +242,27 @@ const Result = () => {
               {designNo && (
                 <View className="result-content-card-subtitle">{`设计编号：${designNo}`}</View>
               )}
-              <View className="result-content-card-text-title">
-                {braceletName}
+              <View className="result-content-card-text-title-container">
+                <View className="result-content-card-text-title">
+                  {braceletName}
+                </View>
+                <View className="bracelet-length-info-container" onClick={() => beadsInfo?.length > 0 && setBraceletDetailDialogShow(true)}>
+                  <View className="bracelet-length-info-count-container">
+                    <View className="bracelet-length-info-count">
+                      {beadsInfo?.length || 0}
+                    </View>
+                    <View className="bracelet-length-info-unit">颗</View>
+                  </View>
+                  {predictedBraceletLength > 0 && (
+                    <View className="bracelet-length-info-size-container">
+                      {/* <View>{`${predictedBraceletLength}～${
+                        predictedBraceletLength + 0.5
+                      } cm`}</View>
+                      <View style={{ width: "1px", height: "12px", backgroundColor: "#1F1722", opacity: 0.7 }}></View> */}
+                      <View>明细 ></View>
+                    </View>
+                  )}
+                </View>
               </View>
               <View className="result-content-card-text-content">
                 {braceletDescription}
@@ -268,8 +317,12 @@ const Result = () => {
               showActions={false}
               showImage={false}
               onItemClick={(item) => {
-                console.log(item, "item");
-                if ([OrderStatus.PendingDispatch, OrderStatus.Dispatching].includes(item.status)) {
+                if (
+                  [
+                    OrderStatus.PendingDispatch,
+                    OrderStatus.Dispatching,
+                  ].includes(item.status)
+                ) {
                   Taro.navigateTo({
                     url: `${pageUrls.orderDispatching}?orderId=${item.id}`,
                   });
@@ -310,21 +363,34 @@ const Result = () => {
           }
         />
       </View>
-      {budgetDialogShow && (<BudgetDialog
-        visible={budgetDialogShow}
-        title={braceletName}
-        designNumber={designNo}
-        productImage={imageUrl}
-        onClose={() => setBudgetDialogShow(false)}
-      />)}
-      <PosterGenerator data={posterData} onGenerated={(url) => {
-        setShareImageUrl(url);
-        console.log(autoShare, 'autoShare')
-        if (autoShare) {
-          saveImage(url);
-          setAutoShare(false);
-        }
-      }} />
+      {budgetDialogShow && (
+        <BudgetDialog
+          visible={budgetDialogShow}
+          title={braceletName}
+          designNumber={designNo}
+          productImage={imageUrl}
+          onClose={() => setBudgetDialogShow(false)}
+        />
+      )}
+      <PosterGenerator
+        data={posterData}
+        onGenerated={(url) => {
+          setShareImageUrl(url);
+          console.log(autoShare, "autoShare");
+          if (autoShare) {
+            saveImage(url);
+            setAutoShare(false);
+          }
+        }}
+      />
+      {braceletDetailDialogShow && beadsInfo?.length > 0 && (
+        <BraceletDetailDialog
+          visible={braceletDetailDialogShow}
+          beads={beadsInfo}
+          title={braceletName}
+          onClose={() => setBraceletDetailDialogShow(false)}
+        />
+      )}
     </View>
   );
 };

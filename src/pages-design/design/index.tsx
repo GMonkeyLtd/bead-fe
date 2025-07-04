@@ -193,7 +193,6 @@ const ChatPage: React.FC = () => {
       return;
     }
     const beadDataId = "bead-" + generateUUID();
-    console.log(beadImageData, "beadImageData");
     addBeadData({
       image_url: canvasImageUrl,
       bead_list: beadImageData.map((item) => ({
@@ -262,14 +261,17 @@ const ChatPage: React.FC = () => {
     return (
       <View className="result-container">
         <View className="result-title">
-          <View className="result-title-text">当前方案</View>
-          <Image
+          <View className="result-title-text">定制方案</View>
+          {/* <Image
             src={editBead}
             style={{ width: "20px", height: "20px" }}
             onClick={() => {
               handleEditBead();
             }}
-          />
+          /> */}
+          <View className="diy-adjust" onClick={handleEditBead}>
+            DIY调整
+          </View>
         </View>
         <View className="result-card">
           <View className="result-content">

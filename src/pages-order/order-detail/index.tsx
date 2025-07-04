@@ -30,7 +30,6 @@ const OrderDetail: React.FC = () => {
     const instance = Taro.getCurrentInstance();
     const params = instance.router?.params;
     const orderId = params?.orderId;
-    console.log(orderId, "orderId");
     api.userHistory.getOrderById(orderId || "").then((res) => {
       const _order = res?.data?.orders?.[0];
       setOrder(_order);
@@ -38,20 +37,6 @@ const OrderDetail: React.FC = () => {
   }, []);
 
   const orderStatus = order?.order_status;
-
-  const beadsData = order?.design_info?.beads_info?.reduce((acc: any[], item: any) => {
-    const existingBead = acc.find(bead => bead.name === item?.name);
-    if (existingBead) {
-      existingBead.quantity += item?.quantity || 1;
-    } else {
-      acc.push({  
-        name: item?.name,
-        size: item?.size,
-        quantity: item?.quantity || 1,
-      });
-    }
-    return acc;
-  }, []);
 
   return (
     <CrystalContainer
@@ -99,7 +84,7 @@ const OrderDetail: React.FC = () => {
           quantity={order?.design_info?.beads_info?.length}
           price={order?.price}
           productImage={order?.design_info?.image_url}
-          beads={beadsData}
+          beads={order?.design_info?.beads_info || []}
           orderAction={
             processingOrderStatus.includes(orderStatus)
               ? {

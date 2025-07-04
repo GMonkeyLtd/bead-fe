@@ -49,7 +49,7 @@ const UserCenterPage: React.FC = () => {
   };
 
   return (
-    <CrystalContainer showBack={false}>
+    <CrystalContainer showBack={false} showHome={false}>
       <View className={styles.pageContent}>
         <View className={styles.pageTopContainer}>
           <UserInfoCard

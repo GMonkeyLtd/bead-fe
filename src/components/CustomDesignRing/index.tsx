@@ -4,10 +4,12 @@ import Taro from "@tarojs/taro";
 import { ImageCacheManager } from "@/utils/image-cache";
 import CrystalButton from "../CrystalButton";
 import "./CustomDesignRing.scss";
+import { computeBraceletLength } from "@/utils/cystal-tools";
 
 interface Bead {
   image_url: string;
-  radius: number;
+  radius: number;  // 渲染直径
+  bead_diameter: number; // 珠子直径
   id?: string | number;
 }
 
@@ -80,16 +82,8 @@ const CustomDesignRing = ({
 
   useEffect(() => {
     if (!dots.length) return;
-    const dotsLength = dots.map((dot) => dot.radius);
-    // 所有珠子能围成的周长
-    const allLength = dotsLength.reduce((sum, radius) => sum + radius, 0);
-    // 围成圆的半径
-    const ringRadius = allLength / (2 * Math.PI);
-    // 珠子的平均半径
-    const averageRadius = allLength / (2 * dotsLength.length);
-    // 手围 = （围成圆的半径 - 珠子的平均半径）* 2 * PI
-    const predictLength = (ringRadius - averageRadius) * 2 * Math.PI;
-    setPredictedLength(Math.floor(predictLength / 10));
+    const predictLength = computeBraceletLength(dots);
+    setPredictedLength(predictLength);
   }, [dots]);
 
   const processImages = async (_beads: Bead[]) => {
@@ -276,6 +270,7 @@ const CustomDesignRing = ({
     });
     query.exec();
   };
+  console.log(selectedBeadIndex, 'selectedBeadIndex');
 
   const onWuxingChange = (wuxing: string) => {
     setCurWuxing(wuxing);
@@ -342,9 +337,10 @@ const CustomDesignRing = ({
       return;
     }
     const newDots = [...dots];
+    const nextIndex = (selectedBeadIndex + 1) % newDots.length;
     newDots.splice(selectedBeadIndex, 1);
     updateBeads(newDots);
-    setSelectedBeadIndex(selectedBeadIndex + 1);
+    setSelectedBeadIndex(nextIndex);
   };
 
   const handleBeadClick = (bead: any, size: number) => {
@@ -352,12 +348,14 @@ const CustomDesignRing = ({
     if (selectedBeadIndex === -1) {
       newDots.push({
         ...bead,
-        radius: size,
+        radius: size * 1.5,
+        bead_diameter: size,
       });
     } else {
       newDots[selectedBeadIndex] = {
         ...bead,
-        radius: size,
+        radius: size * 1.5,
+        bead_diameter: size,
       };
     }
     updateBeads(newDots);
@@ -548,8 +546,8 @@ const CustomDesignRing = ({
             if (imageUrl) {
               onOk?.(imageUrl, dots.map((item) => ({
                 id: item.id,
-                radius: item.radius,
                 image_url: item.image_url,
+                bead_diameter: item.bead_diameter,
               })))
             }
           }}

@@ -7,17 +7,27 @@ import logoWhite from "@/assets/logo/logo-white.svg";
 import logo from "@/assets/logo/logo.svg";
 import backIcon from "@/assets/icons/back.svg";
 import backIconWhite from "@/assets/icons/back-white.svg";
+import homeIcon from "@/assets/icons/home.svg";
+import homeIconWhite from "@/assets/icons/home-white.svg";
 
 const AppHeader = ({
   isWhite = false,
   showBack = true,
+  showHome = true,
+  onBack,
   style = {},
 }: {
   isWhite?: boolean;
   showBack?: boolean;
+  showHome?: boolean;
+  onBack?: () => void;
   style?: React.CSSProperties;
 }) => {
-  const { height: navBarHeight, top: navBarTop, width: navBarWidth } = getNavBarHeightAndTop();
+  const {
+    height: navBarHeight,
+    top: navBarTop,
+    width: navBarWidth,
+  } = getNavBarHeightAndTop();
   useEffect(() => {
     if (isWhite) {
       Taro.setNavigationBarColor({
@@ -48,14 +58,21 @@ const AppHeader = ({
         ...style,
       }}
     >
+      <View style={{ height: "100%", alignItems: "center", display: "flex", gap: '8px' }}>
+        
       {showBack && (
         <View
-          style={{ height: "24px", width: "60px" }}
-        >
-          <Image
-            src={isWhite ? backIconWhite : backIcon}
-            style={{ height: "24px", width: "24px" }}
-            onClick={() => {
+          style={{
+            height: "100%",
+            width: "32px",
+            alignItems: "center",
+            display: "flex",
+            justifyContent: "center",
+          }}
+          onClick={() => {
+            if (onBack) {
+              onBack();
+            } else {
               if (Taro.getCurrentPages().length === 1) {
                 Taro.navigateTo({
                   url: pageUrls.home,
@@ -63,10 +80,46 @@ const AppHeader = ({
               } else {
                 Taro.navigateBack();
               }
-            }}
+            }
+          }}
+        >
+          <Image
+            src={isWhite ? backIconWhite : backIcon}
+            style={{ height: "24px", width: "24px" }}
           />
         </View>
       )}
+      {showBack && showHome && (
+        <View
+          style={{
+            height: "20px",
+            width: "1px",
+            backgroundColor: isWhite ? "rgba(255, 255, 255, 0.30)" : "rgba(0, 0, 0, 0.30)",
+          }}
+        />
+      )}
+      {showHome && (
+        <View
+          style={{
+            height: "100%",
+            width: "32px",
+            alignItems: "center",
+            display: "flex",
+            justifyContent: "center",
+          }}
+          onClick={() => {
+            Taro.navigateTo({
+              url: pageUrls.home,
+            });
+          }}
+        >
+          <Image
+            src={isWhite ? homeIconWhite : homeIcon}
+            style={{ height: "24px", width: "24px" }}
+          />
+        </View>
+      )}
+      </View>
       <Image
         src={isWhite ? logoWhite : logo}
         style={{ height: "24px", flex: 1 }}

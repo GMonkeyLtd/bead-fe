@@ -87,7 +87,7 @@ const defaultConfig = {
   loadingText: '加载中...',
   showError: true,
   isMock: false,
-  merchantBaseUrl: 'http://106.75.254.80:8181/api/v1'
+  merchantBaseUrl: 'https://test.qianjunye.com/api/v1'
 }
 const checkMerchant = url => url.includes('/merchant')
 
@@ -189,6 +189,7 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
 
 // 核心请求函数
 const request = async <T = any>(config: RequestConfig): Promise<T> => {
+  const isMerchant = checkMerchant(config.url)
   let retryCount = 0;
   const maxRetries = 1; // 最多重试1次（用于token过期后重新登录）
   
@@ -253,8 +254,15 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
         
         try {
           // 清除旧的认证信息并重新登录
-          AuthManager.clearAuth();
-          await AuthManager.login();
+          if (isMerchant) {
+            MerchantAuthManager.clearAuth();
+            Taro.redirectTo({
+              url: pageUrls.merchantLogin,
+            })
+          } else {
+            AuthManager.clearAuth();
+            await AuthManager.login();
+          }
           
           // 递归重试请求
           return await executeRequest();

@@ -104,10 +104,25 @@ interface BeadDetailListProps {
   className?: string;
 }
 
-const BeadDetailList: React.FC<BeadDetailListProps> = ({
+export const BeadDetailList: React.FC<BeadDetailListProps> = ({
   beads,
   className = "",
 }) => {
+
+  const beadsData = (beads || [])?.reduce((acc: any[], item: any) => {
+    const existingBead = acc.find(bead => bead.name === item?.name);
+    if (existingBead) {
+      existingBead.quantity += item?.quantity || 1;
+    } else {
+      acc.push({  
+        name: item?.name,
+        size: item?.size,
+        quantity: item?.quantity || 1,
+      });
+    }
+    return acc;
+  }, []);
+  
   return (
     <View className={`bead-detail-list ${className}`}>
       {/* 表头 */}
@@ -119,7 +134,7 @@ const BeadDetailList: React.FC<BeadDetailListProps> = ({
 
       {/* 珠子列表 */}
       <View className="table-body">
-        {beads.map((bead, index) => (
+        {beadsData.map((bead, index) => (
           <View
             key={index}
             className="table-row"
@@ -150,6 +165,7 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
   beads,
   orderAction,
 }) => {
+
   return (
     <View
       style={{

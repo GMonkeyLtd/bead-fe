@@ -11,14 +11,14 @@ export const MerchantAuthManager = {
     saveAuth: (token: string, userInfo?: any) => {
       Taro.setStorageSync('merchant-token', token)
       if (userInfo) {
-        Taro.setStorageSync('userInfo', userInfo)
+        Taro.setStorageSync('merchant-userInfo', userInfo)
       }
     },
   
     // 清除登录信息
     clearAuth: () => {
       Taro.removeStorageSync('merchant-token')
-      Taro.removeStorageSync('userInfo')
+      Taro.removeStorageSync('merchant-userInfo')
     },
   
     // 检查是否已登录
@@ -29,7 +29,7 @@ export const MerchantAuthManager = {
   
     // 获取用户信息
     getUserInfo: () => {
-      return Taro.getStorageSync('userInfo')
+      return Taro.getStorageSync('merchant-userInfo')
     },
   
     // 获取认证信息

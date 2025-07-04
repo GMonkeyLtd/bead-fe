@@ -155,6 +155,12 @@ export const userApi = {
   // 充值结果查询
   queryRechargeResult: (orderId: string) =>
     http.post("/merchant/queryrechargeresult", { order_id: orderId }),
+
+  // 轮询订单状态
+  queryPaymentStatus: (tradeId: string) =>
+    http.post("/merchant/querypaymentstatus", { trade_uuid: tradeId }, {
+      showLoading: false,
+    }),
 };
 
 // 导出所有API

@@ -104,6 +104,7 @@ const Home = () => {
           zIndex: 1000,
         }}
         showBack={false}
+        showHome={false}
       />
       <Swiper
         className="banner-swiper"

@@ -138,9 +138,10 @@
 
       .result-content-card-text {
         position: relative;
-        width: 55%;
+        width: 100%;
         color: #1f1722;
         padding: 0 24px;
+        box-sizing: border-box;
 
         .result-content-card-subtitle {
           font-weight: 300;
@@ -156,7 +157,59 @@
           font-size: 40px;
           letter-spacing: 2px;
           font-family: "GlobalFont", "SimSun", "宋体", serif;
+        }
+
+        .result-content-card-text-title-container {
+          display: flex;
+          width: 100%;
+          justify-content: space-between;
+          align-items: flex-start;
           margin-bottom: 16px;
+        }
+        .bracelet-length-info-container {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 4px;
+          padding-top: 4px;
+        }
+
+        .bracelet-length-info-count-container {
+          display: flex;
+          justify-content: center;
+          align-items: flex-end;
+          gap: 8px;
+          
+          .bracelet-length-info-count {
+            font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-weight: 500;
+            font-size: 18px;
+            line-height: 1em;
+            text-align: bottom;
+            color: #1F1722;
+          }
+          .bracelet-length-info-unit {
+            font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-weight: 300;
+            font-size: 12px;
+            line-height: 1em;
+            text-align: bottom;
+            color: #1F1722;
+          }
+
+        }
+        .bracelet-length-info-size-container {
+          display: flex;
+          gap: 4px;
+          align-items: center;
+
+          font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          font-weight: 300;
+          font-size: 12px;
+          line-height: 1.2em;
+          text-align: center;
+          color: #1F1722;
+          opacity: 0.9;
         }
 
         .result-content-card-text-content {

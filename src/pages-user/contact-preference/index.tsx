@@ -26,6 +26,7 @@ const ContactPreference = () => {
   const [countdown, setCountdown] = useState(0);
   const [isGettingCode, setIsGettingCode] = useState(false);
   const [wechatNumber, setWechatNumber] = useState("");
+  const [phoneCode, setPhoneCode] = useState("");
 
   const { budget, designId } = Taro.getCurrentInstance()?.router?.params || {};
 
@@ -97,7 +98,7 @@ const ContactPreference = () => {
     try {
       // 这里调用保存联系方式的API
       const data = {
-        default_contact: selectedMethod === 'phone' ? 0 : 1,
+        default_contact: selectedMethod === "phone" ? 0 : 1,
         phone: selectedMethod === "phone" ? phoneNumber : "",
         wechat_id: selectedMethod === "wechat" ? wechatNumber : "",
       };
@@ -109,13 +110,13 @@ const ContactPreference = () => {
         icon: "success",
       });
       if (budget && designId) {
-       const res = await api.userHistory.createOrder({
+        const res = await api.userHistory.createOrder({
           design_id: parseInt(designId),
           price: parseFloat(budget),
         });
         const { order_uuid } = res?.data || {};
         Taro.redirectTo({
-          url: `${pageUrls.orderDispatching}?orderId=${order_uuid}`
+          url: `${pageUrls.orderDispatching}?orderId=${order_uuid}`,
         });
         return;
       }
@@ -136,6 +137,12 @@ const ContactPreference = () => {
   const isFormValid =
     isAgreed &&
     (selectedMethod === "wechat" || (phoneNumber && verificationCode));
+
+  const getPhoneNumber = (e) => {
+    if (e.detail.code) {
+      setPhoneCode(e.detail.code);
+    }
+  };
 
   return (
     <PageContainer>
@@ -186,7 +193,7 @@ const ContactPreference = () => {
         </View>
 
         {/* 表单区域 */}
-        {selectedMethod === "phone" && (
+        {selectedMethod === "phone" ? null : (
           <View className="contact-preference-form">
             {/* 手机号码输入 */}
             <View className="contact-preference-form-group phone-input">
@@ -238,12 +245,18 @@ const ContactPreference = () => {
 
       {/* 底部操作区域 */}
       <View className="contact-preference-footer">
-        <CrystalButton
-          onClick={handleSave}
-          text="保存"
-          isPrimary={true}
-          style={{ width: "220px" }}
-        />
+        {selectedMethod === "phone" ? (
+          <button openType="getPhoneNumber" onGetPhoneNumber={getPhoneNumber}>
+            一键获取手机号
+          </button>
+        ) : (
+          <CrystalButton
+            onClick={handleSave}
+            text="保存"
+            isPrimary={true}
+            style={{ width: "220px" }}
+          />
+        )}
         {/* <Button
           className="save-button"
           onClick={handleSave}

@@ -10,6 +10,7 @@ const CrystalContainer = ({
   keyboardVisible = false,
   disablePaddingBottom = false,
   showBack = true,
+  showHome = true,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -17,6 +18,7 @@ const CrystalContainer = ({
   keyboardVisible?: boolean;
   disablePaddingBottom?: boolean;
   showBack?: boolean;
+  showHome?: boolean;
 }) => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
 
@@ -26,16 +28,17 @@ const CrystalContainer = ({
         keyboardVisible ? "keyboard-visible" : ""
       }`}
       style={{
-        background: "linear-gradient(180deg, rgba(213, 195, 157, 0.50) 0%, rgba(252, 245, 240, 0.80) 19.55%, #FFFCFA 100%)",
+        background:
+          "linear-gradient(180deg, rgba(213, 195, 157, 0.50) 0%, rgba(252, 245, 240, 0.80) 19.55%, #FFFCFA 100%)",
         backdropFilter: "blur(24px)",
         ...(disablePaddingBottom && {
           paddingBottom: 0,
         }),
       }}
     >
-      <AppHeader isWhite={isWhite} showBack={showBack} />
+      <AppHeader isWhite={isWhite} showBack={showBack} showHome={showHome} />
       <View
-        className='page-children-container'
+        className="page-children-container"
         style={{
           position: "relative",
           width: "100vw",
@@ -44,7 +47,7 @@ const CrystalContainer = ({
           boxSizing: "border-box",
         }}
       >
-         <View
+        <View
           style={{
             position: "absolute",
             top: `-${navBarTop + navBarHeight}px`,
@@ -59,7 +62,7 @@ const CrystalContainer = ({
             style={{ width: "100%" }}
           />
         </View>
-        <View style={{...style, position: "relative", height: "100%"}}>
+        <View style={{ ...style, position: "relative", height: "100%" }}>
           {children}
         </View>
       </View>

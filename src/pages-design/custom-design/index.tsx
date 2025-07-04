@@ -58,7 +58,7 @@ const CustomDesign = () => {
         const _beadData = allBeadList?.find((_item) => _item.id === item.id);
         return {
           ..._beadData,
-          bead_diameter: item.radius,
+          bead_diameter: item.bead_diameter,
         };
       }),
       bead_data_id: beadDataId,
@@ -76,6 +76,7 @@ const CustomDesign = () => {
           id: item.id,
           image_url: item.image_url,
           radius: item.bead_diameter * 1.5,
+          bead_diameter: item.bead_diameter,
         }))}
         size={300}
         beadTypeMap={beadTypeMap}

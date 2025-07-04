@@ -70,7 +70,8 @@ const TAB_BAR_ITEMS_MERCHANT = [
 
 const TabBar: React.FC<TabBarProps> = ({ onTabChange, isMerchant = false }) => {
   const isActiveTab = (item: TabBarItem) => {
-    const currentPath = Taro.getCurrentPages()[0].route;
+    const currentPages = Taro.getCurrentPages();
+    const currentPath = currentPages[currentPages.length - 1].route;
     return currentPath ? item.path?.includes(currentPath) : "";
   };
 

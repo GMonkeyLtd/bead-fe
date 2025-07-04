@@ -95,10 +95,10 @@ const OrderDispatching = () => {
 
         <View className="order-dispatching-button">
           <CrystalButton
-            text="查看订单"
+            text="订单详情"
             onClick={() =>
               Taro.redirectTo({
-                url: pageUrls.orderList,
+                url: pageUrls.orderDetail + `?orderId=${orderId}`,
               })
             }
             isPrimary
