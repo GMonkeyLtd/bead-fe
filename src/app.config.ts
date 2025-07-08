@@ -17,6 +17,7 @@ export default defineAppConfig({
         'user-center/index',
         'result/index',
         'contact-preference/index',
+        'modify-user/index',
       ]
     },
     {
@@ -34,6 +35,12 @@ export default defineAppConfig({
         'grab-orders/index',
         'order-management/index',
         'user-center/index',
+      ]
+    },
+    {
+      root: 'pages-common',
+      pages: [
+        'webview/index',
       ]
     }
   ],

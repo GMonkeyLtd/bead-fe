@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { View, Input, Button, Text, Image } from "@tarojs/components";
 import Taro, { navigateTo, showToast } from "@tarojs/taro";
-import styles from "./index.module.scss";  
+import styles from "./index.module.scss";
 import { MerchantAuthManager } from "@/utils/auth-merchant";
 import MerchantHeader from "@/components/MerchantHeader";
 import { pageUrls } from "@/config/page-urls";
+import { LinkUtils } from "@/utils/linkUtils";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
@@ -113,8 +114,16 @@ export default function Login() {
           </Button>
         </View>
 
-        <View className={styles.loginFooter}>
-          <Text className={styles.footerText}>没有账号？请联系管理员注册</Text>
+        <View
+          className={styles.loginFooter}
+          onClick={() =>
+            LinkUtils.openExternalUrl(
+              "https://wcny9i0iojri.feishu.cn/share/base/form/shrcnORTv1xvukgDCYwa5IsNJgf",
+              "商家注册"
+            )
+          }
+        >
+          <Text className={styles.footerText}>没有账号？点击注册</Text>
         </View>
       </View>
     </View>

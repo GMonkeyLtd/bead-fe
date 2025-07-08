@@ -10,13 +10,28 @@ import AppHeader from "@/components/AppHeader";
 import { AuthManager } from "@/utils/auth";
 import { pageUrls } from "@/config/page-urls";
 import TabBar from "@/components/TabBar";
+import apiSession from "@/utils/api-session";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
+  const [checkFirst, setCheckFirst] = useState(false);
+  const [lastSessionId, setLastSessionId] = useState("");
 
   useEffect(() => {
     AuthManager.clearAuth();
     AuthManager.login();
+
+    apiSession.getLastSession().then((res) => {
+      console.log("getLastSession res: ", res);
+      if (res.data?.session_id) {
+        setLastSessionId(res.data.session_id);
+      }
+    }).catch((e) => {
+      setLastSessionId("");
+      console.error("getLastSession error: ", e);
+    }).finally(() => {
+      setCheckFirst(true);
+    });
   }, []);
 
   const startDesign = () => {
@@ -139,7 +154,15 @@ const Home = () => {
                 </View>
                 <View className="crystal-action-section">
                   <CrystalButton
-                    onClick={startDesign}
+                    onClick={() => {
+                      if (!checkFirst || !lastSessionId) {
+                        startDesign();
+                      } else {
+                        Taro.redirectTo({
+                          url: pageUrls.design + '?session_id=' + lastSessionId,
+                        });
+                      }
+                    }}
                     text="开启定制"
                     icon={
                       <Image

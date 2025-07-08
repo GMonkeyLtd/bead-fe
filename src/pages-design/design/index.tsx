@@ -21,6 +21,7 @@ import { pageUrls } from "@/config/page-urls";
 import PageContainer from "@/components/PageContainer";
 import editBead from "@/assets/icons/edit-bead.svg";
 import { CancelToken } from "@/utils/request";
+import apiSession from "@/utils/api-session";
 
 const TAGS = [
   { id: "1", title: "升值加薪" },
@@ -57,7 +58,7 @@ const ChatPage: React.FC = () => {
   const [messageIndex, setMessageIndex] = useState(0);
 
   const params = Taro.getCurrentInstance()?.router?.params;
-  const { year, month, day, hour, gender, isLunar } = params || {};
+  const { year, month, day, hour, gender, isLunar, session_id } = params || {};
   const { addBeadData } = useDesign();
 
   const generateRequestRef = useRef<CancelToken>(null);
@@ -142,6 +143,12 @@ const ChatPage: React.FC = () => {
   };
 
   useEffect(() => {
+    if (session_id) {
+      apiSession.getSessionDetail(session_id).then((res) => {
+        console.log(res);
+      });
+      return;
+    }
     initGenerate(
       year,
       month,
@@ -158,7 +165,7 @@ const ChatPage: React.FC = () => {
       ...prev,
       "你好，我是你的私人疗愈师。你可以叫我莉莉，下面是我给你设计的一款水晶手串。\n\n你最近有什么心愿嘛？",
     ]);
-  }, []);
+  }, [session_id]);
 
   useEffect(() => {
     setMessageIndex(messages.length - 1);

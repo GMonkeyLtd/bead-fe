@@ -1,86 +1,63 @@
-import { useState } from "react";
-import { View, Text, Input, Button, Image } from "@tarojs/components";
+import { useEffect, useState } from "react";
+import { View, Text, Input, Button, Image, Checkbox } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import PageContainer from "@/components/PageContainer";
-import phoneIcon from "@/assets/icons/phone.svg";
-import wechatIcon from "@/assets/icons/wechat.svg";
-import checkIcon from "@/assets/icons/check-white.svg";
 import {
   DEFAULT_PHONE_IMAGE_URL,
   SELECTED_PHONE_IMAGE_URL,
   DEFAULT_WECHAT_IMAGE_URL,
   SELECTED_WECHAT_IMAGE_URL,
+  SERVICE_DOC_PDF_URL,
+  PRIVACY_POLICY_PDF_URL,
 } from "@/config";
 import "./index.scss";
 import CrystalButton from "@/components/CrystalButton";
 import api, { userApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
+import LinkUtils from "@/utils/linkUtils";
 
 type ContactMethod = "phone" | "wechat";
 
 const ContactPreference = () => {
   const [selectedMethod, setSelectedMethod] = useState<ContactMethod>("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
   const [isAgreed, setIsAgreed] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const [isGettingCode, setIsGettingCode] = useState(false);
   const [wechatNumber, setWechatNumber] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
 
   const { budget, designId } = Taro.getCurrentInstance()?.router?.params || {};
 
-  // 获取验证码
-  const handleGetVerificationCode = async () => {
-    if (!phoneNumber || phoneNumber.length !== 11) {
-      Taro.showToast({
-        title: "请输入正确的手机号码",
-        icon: "none",
-      });
-      return;
-    }
-
-    setIsGettingCode(true);
-
+  const getUserInfo = async () => {
     try {
-      // 开始倒计时
-      setCountdown(60);
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      Taro.showToast({
-        title: "验证码已发送",
-        icon: "success",
-      });
+      const res = await userApi.getUserInfo();
+      const { default_contact, phone, wechat_id } = res?.data || {};
+      if (default_contact === 0) {
+        setSelectedMethod("phone");
+      } else if (default_contact === 1) {
+        setSelectedMethod("wechat");
+      }
+      phone && setPhoneNumber(phone);
+      wechat_id && setWechatNumber(wechat_id);
     } catch (error) {
-      console.error("获取验证码失败:", error);
-      Taro.showToast({
-        title: "获取验证码失败",
-        icon: "none",
-      });
-    } finally {
-      setIsGettingCode(false);
+      console.error("获取用户信息失败:", error);
     }
-  };
+  }
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
 
   // 保存联系方式
-  const handleSave = async () => {
+  const handleSave = async ({ phoneCode, selectedMethod }: { phoneCode?: string, selectedMethod?: ContactMethod }) => {
     if (!isAgreed) {
       Taro.showToast({
-        title: "请先同意用户协议和隐私政策",
+        title: "请先同意服务条款和隐私政策",
         icon: "none",
       });
       return;
     }
 
-    if (selectedMethod === "phone" && !phoneNumber) {
+    if (selectedMethod === "phone" && !phoneCode) {
       Taro.showToast({
         title: "请完善手机号码",
         icon: "none",
@@ -99,7 +76,7 @@ const ContactPreference = () => {
       // 这里调用保存联系方式的API
       const data = {
         default_contact: selectedMethod === "phone" ? 0 : 1,
-        phone: selectedMethod === "phone" ? phoneNumber : "",
+        phone_code: selectedMethod === "phone" ? phoneCode : "",
         wechat_id: selectedMethod === "wechat" ? wechatNumber : "",
       };
 
@@ -121,9 +98,16 @@ const ContactPreference = () => {
         return;
       }
 
+      getUserInfo();
       // 保存成功后的跳转逻辑
       setTimeout(() => {
-        Taro.navigateBack();
+        if (Taro.getCurrentPages().length === 1) {
+          Taro.navigateTo({
+            url: pageUrls.home,
+          });
+        } else {
+          Taro.navigateBack();
+        }
       }, 1500);
     } catch (error) {
       console.error("保存失败:", error);
@@ -134,13 +118,48 @@ const ContactPreference = () => {
     }
   };
 
-  const isFormValid =
-    isAgreed &&
-    (selectedMethod === "wechat" || (phoneNumber && verificationCode));
 
   const getPhoneNumber = (e) => {
+    if (!isAgreed) {
+      Taro.showToast({
+        title: "请先同意服务条款和隐私政策",
+        icon: "none",
+      });
+      return;
+    }
     if (e.detail.code) {
       setPhoneCode(e.detail.code);
+      handleSave({ phoneCode: e.detail.code, selectedMethod: "phone" });
+    }
+  };
+
+  const previewDoc = async (url: string) => {
+    try {
+      // 1. 显示加载状态
+      Taro.showLoading({ title: '加载协议中...' });
+
+      // 2. 下载 PDF 文件
+      const { tempFilePath } = await Taro.downloadFile({
+        url
+      });
+
+      // 3. 关闭加载状态
+      Taro.hideLoading();
+
+      // 4. 使用微信原生预览打开
+      await Taro.openDocument({
+        filePath: tempFilePath,
+        fileType: 'pdf',
+        showMenu: true // 显示右上角菜单（分享/保存等）
+      });
+    } catch (error) {
+      Taro.hideLoading();
+      Taro.showToast({
+        title: '协议加载失败',
+        icon: 'error',
+        duration: 2000
+      });
+      console.error('协议预览失败:', error);
     }
   };
 
@@ -193,40 +212,13 @@ const ContactPreference = () => {
         </View>
 
         {/* 表单区域 */}
-        {selectedMethod === "phone" ? null : (
+        {selectedMethod === "phone" && phoneNumber && (
           <View className="contact-preference-form">
             {/* 手机号码输入 */}
-            <View className="contact-preference-form-group phone-input">
-              <Text className="country-code">+86</Text>
-              <View className="divider" />
-              <Input
-                className="phone-input-field"
-                placeholder="请输入你的手机号码"
-                value={phoneNumber}
-                onInput={(e) => setPhoneNumber(e.detail.value)}
-                type="number"
-                maxlength={11}
-              />
-            </View>
-
-            {/* 验证码输入 */}
-            {/* <View className="contact-preference-form-group code-input">
-            <Input
-            className="code-input-field"
-            placeholder="输入验证码"
-            value={verificationCode}
-            onInput={(e) => setVerificationCode(e.detail.value)}
-            type="number"
-            maxlength={6}
-            />
-            <Button
-            className="get-code-btn"
-            onClick={handleGetVerificationCode}
-            disabled={isGettingCode || countdown > 0 || !phoneNumber}
-            >
-            {countdown > 0 ? `${countdown}s` : "获取验证码"}
-            </Button>
-        </View> */}
+              <View className="current-phone-number">
+                <Text className="current-phone-number-label">当前手机号：</Text>
+                <Text className="current-phone-number-value">{phoneNumber}</Text>
+              </View>
           </View>
         )}
         {selectedMethod === "wechat" && (
@@ -245,13 +237,25 @@ const ContactPreference = () => {
 
       {/* 底部操作区域 */}
       <View className="contact-preference-footer">
-        {selectedMethod === "phone" ? (
-          <button openType="getPhoneNumber" onGetPhoneNumber={getPhoneNumber}>
-            一键获取手机号
+        {selectedMethod === "phone" ?(
+          <button
+            openType={isAgreed ? "getPhoneNumber" : undefined}
+            onGetPhoneNumber={getPhoneNumber}
+            className="figma-customize-button primary"
+            onClick={() => {
+              if (!isAgreed) {
+                Taro.showToast({
+                  title: "请先同意服务条款和隐私政策",
+                  icon: "none",
+                });
+              }
+            }}
+          >
+            <Text className="figma-button-text primary">{!phoneNumber ? "一键获取手机号" : "一键更换手机号"}</Text>
           </button>
         ) : (
           <CrystalButton
-            onClick={handleSave}
+            onClick={() => handleSave({ selectedMethod: selectedMethod, phoneCode: phoneCode })}
             text="保存"
             isPrimary={true}
             style={{ width: "220px" }}
@@ -268,33 +272,36 @@ const ContactPreference = () => {
         </Button> */}
 
         {/* 用户协议勾选 */}
-        <View className="agreement-checkbox">
-          <View
+        <View className="agreement-checkbox" onClick={() => setIsAgreed(prev => !prev)}>
+          {/* <View
             className={`checkbox ${isAgreed ? "" : "unchecked"}`}
-            onClick={() => setIsAgreed(!isAgreed)}
+            onClick={() => setIsAgreed(prev => !prev)}
           >
             {isAgreed && (
               <img src={checkIcon} alt="已同意" className="check-icon" />
             )}
-          </View>
+          </View> */}
+          <Checkbox checked={isAgreed}  />
           <Text className="agreement-text">
             已阅读并同意
             <Text
               className="link"
-              onClick={() => {
+              onClick={(e) => {
                 // 打开用户协议页面
-                console.log("打开用户协议");
+                e.stopPropagation();
+                previewDoc(SERVICE_DOC_PDF_URL);
               }}
             >
               {" "}
-              用户协议{" "}
+              服务条款{" "}
             </Text>
             和
             <Text
               className="link"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 // 打开隐私政策页面
-                console.log("打开隐私政策");
+                previewDoc(PRIVACY_POLICY_PDF_URL)
               }}
             >
               {" "}

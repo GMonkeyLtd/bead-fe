@@ -178,6 +178,7 @@ const CustomDesignRing = ({
     
     const ctx = Taro.createCanvasContext(canvasId);
     ctx.clearRect(0, 0, canvasSize, canvasSize);
+
     dotList.forEach((item, index) => {
       if (index === selectedBeadIndex) {
         return;
@@ -213,8 +214,16 @@ const CustomDesignRing = ({
         destHeight: targetSize * dpr,
         destWidth: targetSize * dpr,
         quality: 1,
+        // fileType: 'jpg',
         success: (res) => {
           setImageUrl(res.tempFilePath);
+          // 将图片保存到相册
+          Taro.saveImageToPhotosAlbum({
+            filePath: res.tempFilePath,
+            success: () => {
+              Taro.showToast({ title: "保存成功", icon: "success" });
+            },
+          }); 
           console.log("生成临时文件成功", res.tempFilePath);
         },
         fail: (err) => {
@@ -270,7 +279,6 @@ const CustomDesignRing = ({
     });
     query.exec();
   };
-  console.log(selectedBeadIndex, 'selectedBeadIndex');
 
   const onWuxingChange = (wuxing: string) => {
     setCurWuxing(wuxing);

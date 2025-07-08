@@ -13,4 +13,6 @@ export const pageUrls = {
   merchantGrabOrders: '/pages-merchant/grab-orders/index',
   merchantOrderManagement: '/pages-merchant/order-management/index',
   merchantUserCenter: '/pages-merchant/user-center/index',
+  modifyUser: '/pages-user/modify-user/index',
+  webview: '/pages-common/webview/index',
 }

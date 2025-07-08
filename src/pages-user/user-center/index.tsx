@@ -112,7 +112,7 @@ const UserCenterPage: React.FC = () => {
                 className={`${styles.featureCard} ${styles.profileCard}`}
                 onClick={() => {
                   Taro.navigateTo({
-                    url: pageUrls.contactPreference,
+                    url: pageUrls.modifyUser,
                   });
                 }}
               >

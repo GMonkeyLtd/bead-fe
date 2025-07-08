@@ -81,9 +81,66 @@ interface Bead {
   index: number;
 }
 
+
+interface Position {
+  x: number;
+  y: number;
+  angle: number;
+  radius: number;
+  index?: string | number;
+}
+  // 计算每个珠子的圆心坐标
+export const calcPositionsWithBeadSize = (
+    dots: any[],
+    spacing: number,
+    ringRadius: number,
+    // 圆心坐标
+    center: { x: number, y: number } 
+  ) => {
+    let currentAngle = 0;
+    const positions: Position[] = [];
+
+    for (let i = 0; i < dots.length; i++) {
+      const j = (i + 1) % dots.length;
+      const r1 = dots[i].radius;
+      const r2 = dots[j].radius;
+      const L = r1 + r2 + spacing;
+      // 计算相邻小圆的中心角 theta_ij
+      const theta = 2 * Math.asin(L / (2 * ringRadius));
+
+      // 记录当前小圆的位置
+      positions.push({
+        radius: dots[i].radius,
+        x: center.x + ringRadius * Math.cos(currentAngle),
+        y: center.y + ringRadius * Math.sin(currentAngle),
+        angle: currentAngle,
+        index: i,
+      });
+
+      // 更新角度
+      currentAngle += theta;
+    }
+    return positions;
+  }
+
+export const calculateBeadArrangementBySize = (
+  ringRadius: number,
+  beadSizeList: number[],
+  center: { x: number, y: number }
+) => {
+  // 通过所要围成圆的半径，和现有珠子尺寸，计算珠子放大后的半径
+  const actualRingRadius = beadSizeList.reduce((sum, size) => sum + size, 0);
+  const sizeRatio = actualRingRadius / ringRadius;
+  const scaledRadiusList = beadSizeList.map((size) => {size * sizeRatio / 2});
+
+  const positions = calcPositionsWithBeadSize(scaledRadiusList, 0, ringRadius, center);
+  
+  return positions;
+};
+
 export const calculateBeadArrangement = (
   ringRadius: number,
-  beadCount: number
+  beadCount: number,
 ) => {
   // 计算小圆珠的半径
   // 当n个小圆围成大圆时，小圆半径计算公式：
@@ -112,10 +169,7 @@ export const calculateBeadArrangement = (
     });
   }
 
-  return {
-    beadRadius,
-    beads,
-  };
+  return beads;
 };
 
 export const computeBraceletLength = (beads: Bead[], key: string = 'radius') => {

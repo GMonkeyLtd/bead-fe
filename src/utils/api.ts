@@ -253,7 +253,6 @@ export const fileApi = {
     http.upload("/upload", filePath, formData, config?.cancelToken),
 };
 
-
 // 导出所有API
 export default {
   user: userApi,

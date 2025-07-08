@@ -3,7 +3,10 @@ import { Canvas, View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./index.scss";
 import { ImageCacheManager } from "@/utils/image-cache";
-import { calculateBeadArrangement } from "@/utils/cystal-tools";
+import {
+  calculateBeadArrangement,
+  calculateBeadArrangementBySize,
+} from "@/utils/cystal-tools";
 import { BASE_IMAGE_URL } from "@/config";
 /**
  * 水晶手链组件 - 动态计算珠子数量
@@ -34,6 +37,8 @@ const CircleRing = ({
   dotsBgImageData,
   canvasId = "circle-canvas",
   showCanvas = false,
+  // 是否区分珠子尺寸
+  isDifferentSize = false,
   onChange = (
     status: "idle" | "downloading" | "success" | "error",
     canvasImage: string
@@ -51,9 +56,16 @@ const CircleRing = ({
     [dotsBgImageData]
   );
 
-  const beads = calculateBeadArrangement(ringRadius, dotsBgImagePath.length);
+  const beads = isDifferentSize
+    ? calculateBeadArrangementBySize(
+        ringRadius,
+        dotsBgImageData.map((item: any) => item.bead_diameter),
+        { x: ringRadius, y: ringRadius }
+      )
+    : calculateBeadArrangement(ringRadius, dotsBgImagePath.length);
 
   // 处理图片路径（下载网络图片）
+
   useEffect(() => {
     if (!dotsBgImagePath || dotsBgImagePath.length === 0) {
       setDownloadStatus("success");
@@ -83,14 +95,19 @@ const CircleRing = ({
   }, [dotsBgImagePath, ringRadius]);
 
   // 绘制Canvas内容
-  const drawCanvas = async() => {
+  const drawCanvas = async () => {
     try {
-     
       const ctx = Taro.createCanvasContext(canvasId);
       ctx.clearRect(0, 0, targetSize, targetSize);
 
       dots.forEach((dot: any, index) => {
-        const { x, y, radius } = beads.beads[index];
+        const { x, y } = beads[index];
+        let radius = 0;
+        if (isDifferentSize) {
+          radius = beads.beads[index].radius;
+        } else {
+          radius = beads.beads[index].radius;
+        }
         ctx.drawImage(dot, x - radius, y - radius, radius * 2, radius * 2);
       });
 
@@ -129,7 +146,7 @@ const CircleRing = ({
       const ctx = Taro.createCanvasContext(canvasId + "placeholder");
       ctx.clearRect(0, 0, targetSize, targetSize);
       ctx.setFillStyle("rgba(232, 217, 187, 0.8)");
-      beads.beads.forEach(({ x, y, radius }: any) => {
+      beads.forEach(({ x, y, radius }: any) => {
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
         ctx.fill();
@@ -151,23 +168,23 @@ const CircleRing = ({
   if (downloadStatus === "success") {
     return (
       <Canvas
-          canvasId={canvasId}
-          id={canvasId}
-          height={`${targetSize * dpr}px`}
-          width={`${targetSize * dpr}px`} 
-          // className={rotate ? "circle-canvas-rotate" : ""}
-          style={{
-            width: `${targetSize}px`,
-            height: `${targetSize}px`,
-            visibility: showCanvas ? "visible" : "hidden",
-            position: "absolute",
-            top: `-999999px`,
-            left: `-999999px`,
-            zIndex: -100,
-            transition: "display 0.3s ease-in-out",
-          }}
-        />
-    )
+        canvasId={canvasId}
+        id={canvasId}
+        height={`${targetSize * dpr}px`}
+        width={`${targetSize * dpr}px`}
+        // className={rotate ? "circle-canvas-rotate" : ""}
+        style={{
+          width: `${targetSize}px`,
+          height: `${targetSize}px`,
+          visibility: showCanvas ? "visible" : "hidden",
+          position: "absolute",
+          top: `-999999px`,
+          left: `-999999px`,
+          zIndex: -100,
+          transition: "display 0.3s ease-in-out",
+        }}
+      />
+    );
   }
   return null;
 };
@@ -212,5 +229,5 @@ export const CircleRingImage = ({
         className={rotate ? "circle-image-rotate" : ""}
       />
     </View>
-  )
-}
+  );
+};

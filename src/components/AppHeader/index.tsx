@@ -16,12 +16,14 @@ const AppHeader = ({
   showHome = true,
   onBack,
   style = {},
+  headerContent = "",
 }: {
   isWhite?: boolean;
   showBack?: boolean;
   showHome?: boolean;
   onBack?: () => void;
   style?: React.CSSProperties;
+  headerContent?: string;
 }) => {
   const {
     height: navBarHeight,
@@ -58,73 +60,87 @@ const AppHeader = ({
         ...style,
       }}
     >
-      <View style={{ height: "100%", alignItems: "center", display: "flex", gap: '8px' }}>
-        
-      {showBack && (
-        <View
-          style={{
-            height: "100%",
-            width: "32px",
-            alignItems: "center",
-            display: "flex",
-            justifyContent: "center",
-          }}
-          onClick={() => {
-            if (onBack) {
-              onBack();
-            } else {
-              if (Taro.getCurrentPages().length === 1) {
-                Taro.navigateTo({
-                  url: pageUrls.home,
-                });
+      <View
+        style={{
+          height: "100%",
+          alignItems: "center",
+          display: "flex",
+          gap: "8px",
+        }}
+      >
+        {showBack && (
+          <View
+            style={{
+              height: "100%",
+              width: "32px",
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+            }}
+            onClick={() => {
+              if (onBack) {
+                onBack();
               } else {
-                Taro.navigateBack();
+                if (Taro.getCurrentPages().length === 1) {
+                  Taro.navigateTo({
+                    url: pageUrls.home,
+                  });
+                } else {
+                  Taro.navigateBack();
+                }
               }
-            }
-          }}
-        >
-          <Image
-            src={isWhite ? backIconWhite : backIcon}
-            style={{ height: "24px", width: "24px" }}
+            }}
+          >
+            <Image
+              src={isWhite ? backIconWhite : backIcon}
+              style={{ height: "24px", width: "24px" }}
+            />
+          </View>
+        )}
+        {showBack && showHome && (
+          <View
+            style={{
+              height: "20px",
+              width: "1px",
+              backgroundColor: isWhite
+                ? "rgba(255, 255, 255, 0.30)"
+                : "rgba(0, 0, 0, 0.30)",
+            }}
           />
+        )}
+        {showHome && (
+          <View
+            style={{
+              height: "100%",
+              width: "32px",
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+            }}
+            onClick={() => {
+              Taro.navigateTo({
+                url: pageUrls.home,
+              });
+            }}
+          >
+            <Image
+              src={isWhite ? homeIconWhite : homeIcon}
+              style={{ height: "24px", width: "24px" }}
+            />
+          </View>
+        )}
+      </View>
+      {headerContent ? (
+        <View style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          {headerContent}
         </View>
-      )}
-      {showBack && showHome && (
-        <View
-          style={{
-            height: "20px",
-            width: "1px",
-            backgroundColor: isWhite ? "rgba(255, 255, 255, 0.30)" : "rgba(0, 0, 0, 0.30)",
-          }}
+      ) : (
+        <Image
+          src={isWhite ? logoWhite : logo}
+          style={{ height: "24px", flex: 1 }}
+          mode="aspectFit"
         />
       )}
-      {showHome && (
-        <View
-          style={{
-            height: "100%",
-            width: "32px",
-            alignItems: "center",
-            display: "flex",
-            justifyContent: "center",
-          }}
-          onClick={() => {
-            Taro.navigateTo({
-              url: pageUrls.home,
-            });
-          }}
-        >
-          <Image
-            src={isWhite ? homeIconWhite : homeIcon}
-            style={{ height: "24px", width: "24px" }}
-          />
-        </View>
-      )}
-      </View>
-      <Image
-        src={isWhite ? logoWhite : logo}
-        style={{ height: "24px", flex: 1 }}
-        mode="aspectFit"
-      />
     </View>
   );
 };

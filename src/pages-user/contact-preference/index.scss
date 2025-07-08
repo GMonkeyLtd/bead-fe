@@ -98,6 +98,7 @@
             color: rgba(31, 23, 34, 0.3);
           }
         }
+
       }
 
       &.code-input {
@@ -143,6 +144,23 @@
           }
         }
       }
+    }
+  }
+
+  .current-phone-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Noto Sans SC", sans-serif;
+    font-size: 16px;
+
+    .current-phone-number-label {
+      color: #6553409c;
+      opacity: 0.6;
+    }
+
+    .current-phone-number-value {
+      color: #1f1722;
     }
   }
 

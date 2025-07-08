@@ -20,8 +20,12 @@ export const DEFAULT_WECHAT_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/ima
 export const SELECTED_WECHAT_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wechat-selected.png";
 export const LOGO_WITH_BACKGROUND_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/logo-with-background.png";
 export const LOGO_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/logo-image.png";
+export const APP_QRCODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/app-qrcode.png";
 
 
 
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
+
+export const SERVICE_DOC_PDF_URL = "https://zhuluoji.cn-sh2.ufileos.com/resources/%E7%92%9E%E5%85%89%E9%9B%86%E6%9C%8D%E5%8A%A1%E6%9D%A1%E6%AC%BE%20(1).pdf";
+export const PRIVACY_POLICY_PDF_URL = "/https://zhuluoji.cn-sh2.ufileos.com/resources/%E7%92%9E%E5%85%89%E9%9B%86%E9%9A%90%E7%A7%81%E6%94%BF%E7%AD%96%20(1).pdf";

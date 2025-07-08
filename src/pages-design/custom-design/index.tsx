@@ -6,6 +6,7 @@ import PageContainer from "@/components/PageContainer";
 import { useDesign } from "@/store/DesignContext";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
+import { CircleRing } from "@/components/CircleRing";
 
 const CustomDesign = () => {
   const [designData, setDesignData] = useState<any[]>([]);
