@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import apiSession, { CreateSessionResponse, DesignDraftResponse, BeadItem } from '../utils/api-session';
+import apiSession, { CreateSessionResponse, DesignDraftResponse, BeadItem, MessageItem } from '../utils/api-session';
 
 export interface SessionResult {
   systemMessages: string[];
@@ -35,10 +35,10 @@ export const useSessionResultHandler = ({
   // 计算出现频率最高的两个珠子
   const getTopTwoBeads = useCallback((beads: BeadItem[] | any[]): BeadItem[] | null => {
     if (!beads || beads.length === 0) return null;
-    
+
     // 统计每个珠子ID的出现次数
     const beadCountMap = new Map<string | number, { count: number, bead: BeadItem }>();
-    
+
     beads.forEach(bead => {
       const beadId = bead.id || bead.bead_id;
       if (beadCountMap.has(beadId)) {
@@ -47,13 +47,13 @@ export const useSessionResultHandler = ({
         beadCountMap.set(beadId, { count: 1, bead });
       }
     });
-    
+
     // 按出现次数排序并取前两个
     const sortedBeads = Array.from(beadCountMap.values())
       .sort((a, b) => b.count - a.count)
       .slice(0, 2)
       .map(item => item.bead);
-    
+
     return sortedBeads;
   }, []);
 
@@ -62,16 +62,16 @@ export const useSessionResultHandler = ({
     console.log(data, 'processSessionData')
     // 提取system消息的content
     const systemMessages = data.messages.filter(msg => msg.role === 'system')?.map(msg => msg.content) || [];
-    
+
     // 提取recommends
     const recommends = data.recommends || [];
 
     // 检查latest_draft的progress
     const latestDraft = data.latest_draft;
-    
+
     // 计算最高频率的两个珠子
     const topTwoBeads = latestDraft?.beads ? getTopTwoBeads(latestDraft.beads) : null;
-    
+
     setResult(prev => ({
       ...prev,
       systemMessages,
@@ -94,59 +94,67 @@ export const useSessionResultHandler = ({
     }
   }, [getTopTwoBeads]);
 
+  const updateSessionData = useCallback(({ newMessage, newRecommends, sessionId, draftId }: { newMessage: MessageItem, newRecommends: string[], sessionId?: string, draftId?: string }) => {
+    if (sessionId && draftId) {
+      startPolling(sessionId, draftId);
+    } else {
+      setResult(prev => ({ ...prev, systemMessages: [...prev.systemMessages, newMessage.content], recommends: newRecommends }));
+    }
+  }, []);
+
   // 轮询设计稿进度
   const startPolling = useCallback(async (sessionId: string, draftId: string) => {
     setResult(prev => ({ ...prev, isPolling: true, error: null }));
     setRetryCount(0);
 
-          const pollDraft = async () => {
-        try {
-          const response = await apiSession.getDesignDraft({
-            session_id: sessionId,
-            draft_id: draftId
-          }) as DesignDraftResponse;
+    const pollDraft = async () => {
+      try {
+        const response = await apiSession.getDesignDraft({
+          session_id: sessionId,
+          draft_id: draftId
+        }) as DesignDraftResponse;
 
-          if (response.code === 200 && response.data) {
-            const draftData = response.data;
-            const topTwoBeads = draftData.beads ? getTopTwoBeads(draftData.beads) : null;
-            
-            if (draftData.progress === 100) {
-              // 设计稿完成
-              setResult(prev => ({
-                ...prev,
-                draft: draftData,
-                topTwoBeads,
-                isPolling: false
-              }));
-              return true; // 停止轮询
-            } else {
-              // 设计稿未完成，更新进度
-              setResult(prev => ({
-                ...prev,
-                draft: draftData,
-                topTwoBeads
-              }));
-              return false; // 继续轮询
-            }
-          } else {
-            throw new Error(response.message || '获取设计稿失败');
-          }
-        } catch (error: any) {
-          console.error('轮询设计稿出错:', error);
-          setRetryCount(prev => prev + 1);
-          
-          if (retryCount >= maxRetries) {
+        if (response.code === 200 && response.data) {
+          const draftData = response.data;
+          const topTwoBeads = draftData.beads ? getTopTwoBeads(draftData.beads) : null;
+
+          if (draftData.progress === 100) {
+            // 设计稿完成
             setResult(prev => ({
               ...prev,
-              isPolling: false,
-              error: `轮询失败，已重试${maxRetries}次`
+              draft: draftData,
+              topTwoBeads,
+              isPolling: false
             }));
             return true; // 停止轮询
+          } else {
+            // 设计稿未完成，更新进度
+            setResult(prev => ({
+              ...prev,
+              draft: draftData,
+              topTwoBeads
+            }));
+            return false; // 继续轮询
           }
-          
-          return false; // 继续轮询
+        } else {
+          throw new Error(response.message || '获取设计稿失败');
         }
-      };
+      } catch (error: any) {
+        console.error('轮询设计稿出错:', error);
+        setRetryCount(prev => prev + 1);
+
+        if (retryCount >= maxRetries) {
+          setResult(prev => ({
+            ...prev,
+            isPolling: false,
+            error: `轮询失败，已重试${maxRetries}次`
+          }));
+          return true; // 停止轮询
+        }
+
+        return false; // 继续轮询
+      }
+    };
 
     // 开始轮询
     const poll = async () => {
@@ -183,6 +191,7 @@ export const useSessionResultHandler = ({
     stopPolling,
     retryPolling,
     topTwoBeads: result.topTwoBeads,
-    processSessionData
+    processSessionData,
+    updateSessionData
   };
 }; 

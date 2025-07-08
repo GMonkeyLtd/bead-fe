@@ -23,6 +23,7 @@ import editBead from "@/assets/icons/edit-bead.svg";
 import { CancelToken } from "@/utils/request";
 import apiSession from "@/utils/api-session";
 import { useSessionResultHandler } from "@/hooks/useSessionResultHandler";
+import DateTimeDrawer from "@/components/DateTimeDrawer";
 
 const ChatPage: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
@@ -33,7 +34,7 @@ const ChatPage: React.FC = () => {
   const [canvasImageStatus, setCanvasImageStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
-  
+
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -41,15 +42,17 @@ const ChatPage: React.FC = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
   const { year, month, day, hour, gender, isLunar, session_id } = params || {};
   const { addBeadData } = useDesign();
+  const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
 
   const [sessionData, setSessionData] = useState<any>(null);
   const [sessionId, setSessionId] = useState<string>("");
   const generateRequestRef = useRef<CancelToken>(null);
   const generateRequest2Ref = useRef<CancelToken>(null);
 
-  const { result, stopPolling, retryPolling, processSessionData } = useSessionResultHandler({
-    sessionData: sessionData,
-  });
+  const { result, stopPolling, retryPolling, processSessionData, updateSessionData } =
+    useSessionResultHandler({
+      sessionData: sessionData,
+    });
 
   // 键盘适配逻辑
   useEffect(() => {
@@ -71,26 +74,51 @@ const ChatPage: React.FC = () => {
   }, []);
 
   useDidHide(() => {
-    generateRequestRef.current?.cancel("page hide");
-    generateRequest2Ref.current?.cancel("page hide");
+    stopPolling();
   });
 
   const processResult = (resData: any) => {
-    console.log(resData, 'resData')
-    // setSessionData(resData);
     processSessionData(resData);
   };
 
-  const initChat = () => {
+  const processChatResult = (resData: any) => {
+    updateSessionData({
+      newMessage: {
+        role: resData.role,
+        content: resData.content,
+        created_at: resData.created_at,
+        message_id: resData.message_id,
+      },
+      newRecommends: resData.recommends || [],
+      sessionId: sessionId,
+      draftId: resData.draft_id,
+    });
+  };
+
+  const initChat = ({
+    birth_year,
+    birth_month,
+    birth_day,
+    birth_hour,
+    sex,
+    is_lunar,
+  }: {
+    birth_year: number;
+    birth_month: number;
+    birth_day: number;
+    birth_hour: number;
+    sex: number;
+    is_lunar: boolean;
+  }) => {
     apiSession
       .createSession({
         birth_info: {
-          birth_year: parseInt(year || "0"),
-          birth_month: parseInt(month || "0"),
-          birth_day: parseInt(day || "0"),
-          birth_hour: parseInt(hour || "0"),
-          is_lunar: isLunar === "true" ? true : false,
-          sex: parseInt(gender || "0"),
+          birth_year,
+          birth_month,
+          birth_day,
+          birth_hour,
+          is_lunar,
+          sex,
         },
       })
       .then((res) => {
@@ -111,12 +139,22 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     if (session_id) {
       apiSession.getSessionDetail(session_id).then((res) => {
-        console.log(res.data, 'res.data')
+        console.log(res.data, "res.data");
+        setSessionId(session_id);
         processResult(res.data);
       });
       return;
     }
-    initChat();
+    if (year && month && day && hour && gender && isLunar) {
+    initChat({
+      birth_year: parseInt(year || "0") || 0,
+      birth_month: parseInt(month || "0") || 0,
+      birth_day: parseInt(day || "0") || 0,
+      birth_hour: parseInt(hour || "0") || 0,
+      sex: parseInt(gender || "0"),
+        is_lunar: isLunar === "true" ? true : false,
+      });
+    }
   }, [session_id]);
 
   useEffect(() => {
@@ -130,21 +168,23 @@ const ChatPage: React.FC = () => {
     if (isEmptyMessage(inputValue) || isLoading) return;
     setIsLoading(true);
     setInputValue("");
-    try {
-      apiSession.chat({
+    apiSession
+      .chat({
         session_id: sessionId,
         message: inputValue,
-      }).then((res) => {
-        processResult(res.data);
+      })
+      .then((res) => {
+        processChatResult(res.data);
+      })
+      .catch((err) => {
+        Taro.showToast({
+          title: "定制失败:" + JSON.stringify(err),
+          icon: "none",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-    } catch (error) {
-      Taro.showToast({
-        title: "生成失败:" + error.message,
-        icon: "none",
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleNextStep = () => {
@@ -154,9 +194,9 @@ const ChatPage: React.FC = () => {
     const beadDataId = "bead-" + generateUUID();
     addBeadData({
       image_url: canvasImageUrl,
-      bead_list: beadImageData.map((item) => ({
+      bead_list: result?.draft?.beads?.map((item) => ({
         ...item,
-        bead_diameter: item.bead_diameter,
+        bead_diameter: item.bead_diameter || item.diameter,
       })),
       bead_data_id: beadDataId,
     });
@@ -205,7 +245,7 @@ const ChatPage: React.FC = () => {
       return;
     }
     const beadDataId = "bead-" + generateUUID();
-    console.log(result?.draft?.beads, beadDataId, 'handleEditBead')
+    console.log(result?.draft?.beads, beadDataId, "handleEditBead");
     addBeadData({
       image_url: canvasImageUrl,
       bead_list: result?.draft?.beads,
@@ -215,6 +255,8 @@ const ChatPage: React.FC = () => {
       url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
     });
   };
+
+  console.log(result, "result");
 
   const renderKeyboardHide = () => {
     if (!canvasImageUrl || result?.isPolling) {
@@ -240,7 +282,6 @@ const ChatPage: React.FC = () => {
               <View className="result-text">
                 <View className="result-text-title">{result?.draft?.name}</View>
                 <View className="result-text-content-container">
-                  
                   {(result?.topTwoBeads || [])?.length > 0 &&
                     result?.topTwoBeads?.map((item, index) => (
                       <View className="result-text-content" key={index}>
@@ -331,6 +372,8 @@ const ChatPage: React.FC = () => {
     );
   };
 
+  console.log(result?.draft?.beads, canvasImageUrl, "result?.draft?.beads, canvasImageUrl");
+
   return (
     <PageContainer keyboardHeight={keyboardHeight}>
       <View
@@ -355,6 +398,14 @@ const ChatPage: React.FC = () => {
             className="assistant-image"
             mode="aspectFill"
           />
+          <View
+            className="reset-design-info-link"
+            onClick={() => {
+              setShowDateTimeDrawer(true);
+            }}
+          >
+            重置信息
+          </View>
 
           <View className="message-container">
             <View className="message-header">
@@ -434,6 +485,23 @@ const ChatPage: React.FC = () => {
             showCanvas={false}
           />
         )}
+        <DateTimeDrawer
+          onPersonalizeCustomize={(data) => {
+            initChat({
+              birth_year: data.year,
+              birth_month: data.month,
+              birth_day: data.day,
+              birth_hour: data.hour,
+              sex: data.gender,
+              is_lunar: data.isLunar,
+            });
+            setShowDateTimeDrawer(false);
+          }}
+          visible={showDateTimeDrawer}
+          onClose={() => {
+            setShowDateTimeDrawer(false);
+          }}
+        />
       </View>
     </PageContainer>
   );

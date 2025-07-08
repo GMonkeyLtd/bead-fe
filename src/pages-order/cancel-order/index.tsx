@@ -5,6 +5,8 @@ import './index.scss';
 import api from '@/utils/api-merchant';
 import PageContainer from '@/components/PageContainer';
 import CrystalButton from '@/components/CrystalButton';
+import { imageToBase64 } from '@/utils/imageUtils';
+import { pageUrls } from '@/config/page-urls';
 
 interface OrderInfo {
   id: string;
@@ -106,12 +108,13 @@ const CancelOrderPage: React.FC = () => {
       // TODO: 这里后续可以上传图片到服务器并记录取消原因
       console.log("取消原因:", reason);
       console.log("上传图片:", images);
+      const imageBase64s = await Promise.all(images.map(image => imageToBase64(image)));  
       
-      const result = await api.user.cancelOrder(orderInfo.id);
+      const result = await api.user.cancelOrder(orderInfo.id, imageBase64s as string[], reason);
       
       if (result.code === 200) {
         showToast({
-          title: "取消订单成功",
+          title: "已提交订单取消申请，请耐心等待审核",
           icon: "success",
         });
         
@@ -138,7 +141,13 @@ const CancelOrderPage: React.FC = () => {
 
   // 返回上一页
   const handleBack = () => {
-    Taro.navigateBack();
+    if (Taro.getCurrentPages().length === 1) {
+      Taro.navigateTo({
+        url: pageUrls.merchantOrderManagement,
+      });
+    } else {
+      Taro.navigateBack();
+    }
   };
 
   if (!orderInfo) {
@@ -152,7 +161,7 @@ const CancelOrderPage: React.FC = () => {
   }
 
   return (
-    <PageContainer>
+    <PageContainer showHeader={false}>
       <View className="cancel-order-page">
         {/* 订单信息 */}
         <View className="order-info-section">
@@ -171,7 +180,10 @@ const CancelOrderPage: React.FC = () => {
         {/* 取消原因输入 */}
         <View className="reason-section">
           <View className="section-header">
-            <Text className="section-title">取消原因 *</Text>
+            <View className="section-title-label">
+              <Text className="section-title">取消原因</Text>
+              <Text className="section-required">*</Text>
+            </View>
           </View>
           <View className="reason-card">
             <Textarea
@@ -190,8 +202,11 @@ const CancelOrderPage: React.FC = () => {
         {/* 图片上传区域 */}
         <View className="image-section">
           <View className="section-header">
-            <Text className="section-title">上传图片（可选）</Text>
-            <Text className="section-subtitle">最多可上传3张图片，支持订单相关截图或说明图片</Text>
+            <View className="section-title-label">
+              <Text className="section-title">上传图片</Text>
+              <Text className="section-required">*</Text>
+            </View>
+             <Text className="section-subtitle">最多可上传3张图片，支持订单相关截图或说明图片</Text>
           </View>
           
           <View className="image-card">

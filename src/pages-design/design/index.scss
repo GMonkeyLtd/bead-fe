@@ -18,6 +18,20 @@
     padding: 0 24px;
   }
 
+  .reset-design-info-link {
+    position: absolute;
+    right: 24px;
+    top: 24px;
+    color: #1f1722;
+    font-family: "Noto Sans SC";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    letter-spacing: 2px;
+    opacity: 0.9;
+  }
+
   .history-controller {
     display: flex;
     gap: 10px;
@@ -125,7 +139,6 @@
       opacity: 0.9;
     }
   }
-
 
   .result-link {
     display: flex;

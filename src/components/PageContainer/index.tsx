@@ -7,11 +7,13 @@ const PageContainer = ({
   isWhite = false,
   keyboardHeight = 0,
   headerContent = "",
+  showHeader = true,
 }: {
   children: React.ReactNode;
   isWhite?: boolean;
   keyboardHeight?: number;
   headerContent?: React.ReactNode;
+  showHeader?: boolean;
 }) => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
 
@@ -23,14 +25,14 @@ const PageContainer = ({
         height: `calc(100vh - ${keyboardHeight}px)`,
       }}
     >
-      <AppHeader isWhite={isWhite} headerContent={headerContent} />
+      {showHeader && <AppHeader isWhite={isWhite} headerContent={headerContent} />}
       <View
         className="page-children-container"
         style={{
           position: "relative",
           width: "100vw",
           height: `calc(100% - ${navBarTop + navBarHeight + keyboardHeight}px)`,
-          top: `${navBarTop + navBarHeight}px`,
+          top: showHeader ? `${navBarTop + navBarHeight}px` : 0,
         }}
       >
         {children}

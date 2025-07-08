@@ -58,7 +58,7 @@ const UserCenterPage: React.FC = () => {
               "微信用户" + Math.random().toString(36).substring(2, 15)
             }
             userSlogan="璞光集，好运气"
-            avatar="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/default-avatar.png" // 替换为实际头像URL
+            avatar={userInfo?.avatar_url || "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/default-avatar.png"} // 替换为实际头像URL
             showAction={userInfo?.is_merchant}
             onActionClick={() => {
               Taro.redirectTo({
