@@ -5,10 +5,11 @@ import { ImageCacheManager } from "@/utils/image-cache";
 import CrystalButton from "../CrystalButton";
 import "./CustomDesignRing.scss";
 import { computeBraceletLength } from "@/utils/cystal-tools";
+import CircleRing, { CircleRingImage } from "../CircleRing";
 
 interface Bead {
   image_url: string;
-  radius: number;  // 渲染直径
+  render_diameter: number; // 渲染直径
   bead_diameter: number; // 珠子直径
   id?: string | number;
 }
@@ -62,7 +63,8 @@ const CustomDesignRing = ({
   const [curWuxing, setCurWuxing] = useState<string>("");
   const [predictedLength, setPredictedLength] = useState<number>(0);
   const [canvasSize, setCanvasSize] = useState<number>(0);
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [createFlag, setCreateFlag] = useState<boolean>(false);
 
   useEffect(() => {
     const systemInfo = Taro.getSystemInfoSync();
@@ -85,6 +87,20 @@ const CustomDesignRing = ({
     const predictLength = computeBraceletLength(dots);
     setPredictedLength(predictLength);
   }, [dots]);
+
+  useEffect(() => {
+    if (imageUrl && createFlag) {
+      setCreateFlag(false);
+      onOk?.(
+        imageUrl,
+        dots.map((item) => ({
+          id: item.id,
+          image_url: item.image_url,
+          bead_diameter: item.bead_diameter,
+        }))
+      );
+    }
+  }, [imageUrl]);
 
   const processImages = async (_beads: Bead[]) => {
     const processedPaths = await ImageCacheManager.processImagePaths(
@@ -109,7 +125,7 @@ const CustomDesignRing = ({
 
   const processBeads = async (_beads: Bead[]) => {
     setBeadStatus("processing");
-    setImageUrl('');
+    setImageUrl("");
     const beadsWithImageData = await processImages(_beads);
     const positions = computeBeadPositions(beadsWithImageData, spacing);
     setDots(positions);
@@ -134,7 +150,7 @@ const CustomDesignRing = ({
   function calcRingRadius(beads: any[], spacing: number) {
     if (!beads.length) return 0;
     const totalArcLen = beads.reduce(
-      (sum, b) => sum + 2 * b.radius + spacing,
+      (sum, b) => sum + b.render_diameter + spacing,
       0
     );
     return totalArcLen / (2 * Math.PI);
@@ -153,8 +169,8 @@ const CustomDesignRing = ({
 
     for (let i = 0; i < dots.length; i++) {
       const j = (i + 1) % dots.length;
-      const r1 = dots[i].radius;
-      const r2 = dots[j].radius;
+      const r1 = dots[i].render_diameter / 2;
+      const r2 = dots[j].render_diameter / 2;
       const L = r1 + r2 + spacing;
       // 计算相邻小圆的中心角 theta_ij
       const theta = 2 * Math.asin(L / (2 * ringRadius));
@@ -162,6 +178,7 @@ const CustomDesignRing = ({
       // 记录当前小圆的位置
       positions.push({
         ...dots[i],
+        radius: r1,
         x: center + ringRadius * Math.cos(currentAngle),
         y: center + ringRadius * Math.sin(currentAngle),
         angle: currentAngle,
@@ -175,7 +192,7 @@ const CustomDesignRing = ({
 
   const drawCanvas = async (dotList: any[], selectedBeadIndex: number) => {
     if (!dotList.length) return;
-    
+
     const ctx = Taro.createCanvasContext(canvasId);
     ctx.clearRect(0, 0, canvasSize, canvasSize);
 
@@ -205,33 +222,27 @@ const CustomDesignRing = ({
     }
 
     ctx.draw();
-    ctx.draw(true, () => {
-      
-      Taro.canvasToTempFilePath({
-        x: 0,
-        y: 0,
-        canvasId: canvasId,
-        destHeight: targetSize * dpr,
-        destWidth: targetSize * dpr,
-        quality: 1,
-        // fileType: 'jpg',
-        success: (res) => {
-          setImageUrl(res.tempFilePath);
-          // 将图片保存到相册
-          Taro.saveImageToPhotosAlbum({
-            filePath: res.tempFilePath,
-            success: () => {
-              Taro.showToast({ title: "保存成功", icon: "success" });
-            },
-          }); 
-          console.log("生成临时文件成功", res.tempFilePath);
-        },
-        fail: (err) => {
-          console.error("生成临时文件失败:", err);
-          Taro.showToast({ title: "生成图片失败", icon: "none" });
-        },
-      });
-    });
+    // ctx.draw(true, () => {
+
+    //   Taro.canvasToTempFilePath({
+    //     x: 0,
+    //     y: 0,
+    //     canvasId: canvasId,
+    //     destHeight: targetSize * dpr,
+    //     destWidth: targetSize * dpr,
+    //     quality: 1,
+    //     // fileType: 'jpg',
+    //     success: (res) => {
+    //       setImageUrl(res.tempFilePath);
+
+    //       console.log("生成临时文件成功", res.tempFilePath);
+    //     },
+    //     fail: (err) => {
+    //       console.error("生成临时文件失败:", err);
+    //       Taro.showToast({ title: "生成图片失败", icon: "none" });
+    //     },
+    //   });
+    // });
   };
 
   // 处理Canvas点击事件
@@ -356,20 +367,18 @@ const CustomDesignRing = ({
     if (selectedBeadIndex === -1) {
       newDots.push({
         ...bead,
-        radius: size * 1.5,
+        render_diameter: size * 1.5,
         bead_diameter: size,
       });
     } else {
       newDots[selectedBeadIndex] = {
         ...bead,
-        radius: size * 1.5,
+        render_diameter: size * 1.5,
         bead_diameter: size,
       };
     }
     updateBeads(newDots);
   };
-
- 
 
   const renderBeads = () => {
     const typeBeads = beadTypeMap[curWuxing];
@@ -386,8 +395,8 @@ const CustomDesignRing = ({
           padding: "0px 0px 24px 12px",
           gap: "16px",
           borderRadius: "0 8px 8px 0",
-          height: '100%',
-          boxSizing: 'border-box'
+          height: "100%",
+          boxSizing: "border-box",
           // backgroundColor: "#f7eed4e8",
           // boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
         }}
@@ -469,6 +478,8 @@ const CustomDesignRing = ({
     );
   };
 
+  console.log(dots?.length, createFlag, "dots?.length, createFlag");
+
   return (
     <View className="custom-design-ring-container">
       {/* 顶部内容区域 */}
@@ -540,24 +551,18 @@ const CustomDesignRing = ({
         <View
           style={{
             position: "absolute",
-            top: '24px',
-            right: '24px',
-            border: '1px solid #e4c0a0',
-            opacity: imageUrl ? 1: 0.3,
-            background: '#e4c0a038',
-            borderRadius: '8px',
-            padding: '4px 8px',
-            fontSize: '14px',
-            boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)"
+            top: "24px",
+            right: "24px",
+            border: "1px solid #e4c0a0",
+            opacity: 1,
+            background: "#e4c0a038",
+            borderRadius: "8px",
+            padding: "4px 8px",
+            fontSize: "14px",
+            boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
           }}
           onClick={() => {
-            if (imageUrl) {
-              onOk?.(imageUrl, dots.map((item) => ({
-                id: item.id,
-                image_url: item.image_url,
-                bead_diameter: item.bead_diameter,
-              })))
-            }
+            setCreateFlag(true);
           }}
         >
           去制作
@@ -580,11 +585,11 @@ const CustomDesignRing = ({
         </View>
       </View>
       {/* 左侧纵向Tab选择器 */}
-      <View className="custom-design-ring-bottom-container">
+      {/* <View className="custom-design-ring-bottom-container">
         <View
           style={{
             width: "60px",
-            height: '100%',
+            height: "100%",
             backgroundColor: "#f5f5f5",
             borderRadius: "8px 0 0 8px",
             padding: "8px",
@@ -635,7 +640,19 @@ const CustomDesignRing = ({
           ))}
         </View>
         {renderBeads()}
-      </View>
+      </View> */}
+      <CircleRing
+        dotsBgImageData={dots}
+        targetSize={1024}
+        canvasId="circle-ring-canvas111"
+        isDifferentSize
+        onChange={(status, canvasImage) => {
+          setImageUrl(canvasImage);
+          console.log(status, canvasImage, "onChange");
+        }}
+        showCanvas
+      />
+      {imageUrl && <CircleRingImage size={1024} imageUrl={imageUrl} />}
     </View>
   );
 };

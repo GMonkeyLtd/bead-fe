@@ -26,6 +26,7 @@ export default defineAppConfig({
         'order-detail/index',
         'order-list/index',
         'order-dispatching/index',
+        'cancel-order/index',
       ]
     },
     {

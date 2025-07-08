@@ -1,0 +1,263 @@
+/* 取消订单页面样式 */
+
+.cancel-order-page {
+  min-height: 100vh;
+  background: #f3efec;
+  padding-bottom: 120px; /* 为底部按钮预留空间 */
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  
+  text {
+    font-family: "Noto Sans SC", sans-serif;
+    font-size: 16px;
+    color: #666;
+  }
+}
+
+/* 订单信息区域 */
+.order-info-section {
+  padding: 20px 24px;
+}
+
+.order-info-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.label {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #666;
+}
+
+.value {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #1f1722;
+  
+  &.price {
+    color: #ff6b35;
+    font-size: 16px;
+  }
+}
+
+/* 通用区域样式 */
+.reason-section,
+.image-section {
+  padding: 0 24px 20px;
+}
+
+.section-header {
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #1f1722;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.section-subtitle {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #999;
+  display: block;
+}
+
+/* 原因输入区域 */
+.reason-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reason-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0;
+  border: none;
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: 14px;
+  color: #333;
+  background: transparent;
+  box-sizing: border-box;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+  
+  &::placeholder {
+    color: #ccc;
+  }
+}
+
+.char-count {
+  display: block;
+  text-align: right;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+/* 图片上传区域 */
+.image-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.image-item {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #e5e5e5;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.add-image-btn {
+  width: 80px;
+  height: 80px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #fafafa;
+  transition: all 0.3s ease;
+  
+  &:active {
+    border-color: #ff6b35;
+    background: #fff5f2;
+  }
+}
+
+.add-image-text {
+  font-size: 24px;
+  color: #ccc;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.add-image-label {
+  font-size: 10px;
+  color: #999;
+  text-align: center;
+}
+
+/* 底部按钮区域 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  padding: 20px 24px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  padding-bottom: calc(20px + constant(safe-area-inset-bottom));
+  border-top: 1px solid #f2efec;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .cancel-order-page {
+    padding-bottom: 100px;
+  }
+  
+  .order-info-section,
+  .reason-section,
+  .image-section {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .bottom-actions {
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    padding-bottom: calc(16px + constant(safe-area-inset-bottom));
+  }
+  
+  .image-item,
+  .add-image-btn {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .image-list {
+    gap: 10px;
+  }
+  
+  .section-title {
+    font-size: 15px;
+  }
+  
+  .reason-textarea {
+    min-height: 100px;
+    font-size: 13px;
+  }
+} 

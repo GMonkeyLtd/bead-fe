@@ -44,27 +44,35 @@ const CircleRing = ({
     canvasImage: string
   ) => {},
 }) => {
+  if (!dotsBgImageData || dotsBgImageData.length === 0) {
+    return null;
+  }
   const [dots, setDots] = useState<any[]>([]);
   const [downloadStatus, setDownloadStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
   const ringRadius = targetSize / 2;
   const dpr = Taro.getSystemInfoSync().pixelRatio;
+  console.log(dotsBgImageData, 'dotsBgImageData')
 
   const dotsBgImagePath = useMemo(
     () => dotsBgImageData.map((item: any) => item.image_url),
     [dotsBgImageData]
   );
 
-  const beads = isDifferentSize
+  const beads = useMemo(() => {
+    return isDifferentSize
     ? calculateBeadArrangementBySize(
         ringRadius,
         dotsBgImageData.map((item: any) => item.bead_diameter),
         { x: ringRadius, y: ringRadius }
       )
     : calculateBeadArrangement(ringRadius, dotsBgImagePath.length);
+  }, [dotsBgImageData, ringRadius, isDifferentSize]);
 
   // 处理图片路径（下载网络图片）
+
+  console.log(beads, 'beads')
 
   useEffect(() => {
     if (!dotsBgImagePath || dotsBgImagePath.length === 0) {
@@ -99,15 +107,10 @@ const CircleRing = ({
     try {
       const ctx = Taro.createCanvasContext(canvasId);
       ctx.clearRect(0, 0, targetSize, targetSize);
-
+      console.log(dots, beads, 'in canvas')
       dots.forEach((dot: any, index) => {
-        const { x, y } = beads[index];
-        let radius = 0;
-        if (isDifferentSize) {
-          radius = beads.beads[index].radius;
-        } else {
-          radius = beads.beads[index].radius;
-        }
+        const { x, y, radius } = beads[index];  
+        console.log(x, y, radius, 'x, y, radius')
         ctx.drawImage(dot, x - radius, y - radius, radius * 2, radius * 2);
       });
 
@@ -163,7 +166,9 @@ const CircleRing = ({
     } else {
       drawPlaceHolder();
     }
-  }, [dots, downloadStatus]);
+  }, [dots, beads, downloadStatus]);
+
+  console.log(downloadStatus, 'downloadStatus')
 
   if (downloadStatus === "success") {
     return (
@@ -176,12 +181,16 @@ const CircleRing = ({
         style={{
           width: `${targetSize}px`,
           height: `${targetSize}px`,
-          visibility: showCanvas ? "visible" : "hidden",
-          position: "absolute",
-          top: `-999999px`,
-          left: `-999999px`,
-          zIndex: -100,
-          transition: "display 0.3s ease-in-out",
+          ...(!showCanvas ? {
+            visibility: "visible",
+            position: "absolute",
+            top: `-999999px`,
+            left: `-999999px`,
+            zIndex: -100,
+            transition: "display 0.3s ease-in-out",
+          } : {
+            
+          })  
         }}
       />
     );

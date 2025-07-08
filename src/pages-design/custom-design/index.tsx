@@ -38,7 +38,7 @@ const CustomDesign = () => {
   }, []);
 
   useEffect(() => {
-
+    console.log(beadData, beadDataId, "beadDataId");
     if (beadDataId) {
       const _beadData = beadData.find(
         (item) => item.bead_data_id === beadDataId
@@ -52,33 +52,42 @@ const CustomDesign = () => {
     if (!imageUrl) {
       return;
     }
-    const beadDataId = "bead-" + generateUUID();
-    addBeadData({
-      image_url: imageUrl,
-      bead_list: editedBeads.map((item) => {
-        const _beadData = allBeadList?.find((_item) => _item.id === item.id);
-        return {
-          ..._beadData,
-          bead_diameter: item.bead_diameter,
-        };
-      }),
-      bead_data_id: beadDataId,
+    Taro.saveImageToPhotosAlbum({
+      filePath: imageUrl,
+      success: () => {
+        Taro.showToast({ title: "保存成功", icon: "success" });
+      },
     });
+    // const beadDataId = "bead-" + generateUUID();
+    // addBeadData({
+    //   image_url: imageUrl,
+    //   bead_list: editedBeads.map((item) => {
+    //     const _beadData = allBeadList?.find((_item) => _item.id === item.id);
+    //     return {
+    //       ..._beadData,
+    //       bead_diameter: item.bead_diameter || item.diameter,
+    //     };
+    //   }),
+    //   bead_data_id: beadDataId,
+    // });
 
-    Taro.redirectTo({
-      url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
-    });
+    // Taro.redirectTo({
+    //   url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
+    // });
   };
 
   return (
     <PageContainer>
       <CustomDesignRing
-        beads={designData?.bead_list?.map((item) => ({
-          id: item.id,
-          image_url: item.image_url,
-          radius: item.bead_diameter * 1.5,
-          bead_diameter: item.bead_diameter,
-        }))}
+        beads={designData?.bead_list?.map((item) => {
+          const diameter = item.bead_diameter || item.diameter;
+          return {
+            id: item.id || item.bead_id,
+            image_url: item.image_url,
+            render_diameter: diameter * 3,
+            bead_diameter: diameter,
+          };
+        })}
         size={300}
         beadTypeMap={beadTypeMap}
         onOk={onCreate}

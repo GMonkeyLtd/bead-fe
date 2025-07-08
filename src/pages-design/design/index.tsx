@@ -22,37 +22,18 @@ import PageContainer from "@/components/PageContainer";
 import editBead from "@/assets/icons/edit-bead.svg";
 import { CancelToken } from "@/utils/request";
 import apiSession from "@/utils/api-session";
-
-const TAGS = [
-  { id: "1", title: "升值加薪" },
-  { id: "2", title: "身体健康" },
-  { id: "3", title: "发偏财" },
-  { id: "8", title: "学业进步" },
-  { id: "4", title: "家庭和睦" },
-  { id: "5", title: "事业成功" },
-  { id: "9", title: "人际关系" },
-  { id: "10", title: "健康长寿" },
-  { id: "11", title: "桃花运" },
-  { id: "12", title: "考试顺利" },
-  { id: "13", title: "财运亨通" },
-  { id: "14", title: "爱情甜蜜" },
-  { id: "15", title: "家庭和睦" },
-];
+import { useSessionResultHandler } from "@/hooks/useSessionResultHandler";
 
 const ChatPage: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<string[]>([]);
-  const [beadName, setBeadName] = useState<string>("");
+  const [messages, setMessages] = useState<string[]>([
+    "你好，我是你的私人疗愈师，你可以叫我莉莉。",
+  ]);
   const [canvasImageUrl, setCanvasImageUrl] = useState<string>("");
   const [canvasImageStatus, setCanvasImageStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
-  const [beadDescriptions, setBeadDescriptions] = useState<
-    { image_url: string; description: string }[]
-  >([]);
-  const [beadImageData, setBeadImageData] = useState<
-    PersonalizedGenerateResult[]
-  >([]);
+  
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -61,8 +42,14 @@ const ChatPage: React.FC = () => {
   const { year, month, day, hour, gender, isLunar, session_id } = params || {};
   const { addBeadData } = useDesign();
 
+  const [sessionData, setSessionData] = useState<any>(null);
+  const [sessionId, setSessionId] = useState<string>("");
   const generateRequestRef = useRef<CancelToken>(null);
   const generateRequest2Ref = useRef<CancelToken>(null);
+
+  const { result, stopPolling, retryPolling, processSessionData } = useSessionResultHandler({
+    sessionData: sessionData,
+  });
 
   // 键盘适配逻辑
   useEffect(() => {
@@ -88,88 +75,55 @@ const ChatPage: React.FC = () => {
     generateRequest2Ref.current?.cancel("page hide");
   });
 
-  const processResult = (res: any) => {
-    const resData = res.data || {};
-    setBeadImageData(resData.recommendations as PersonalizedGenerateResult[]);
-    setBeadName(resData.bracelet_name);
-    setBeadDescriptions(
-      resData.crystal_ids_deduplication.slice(0, 2).map((item) => {
-        const recommendation = resData.recommendations.find(
-          (recommendation) => recommendation.id === item.id
-        );
-        return {
-          image_url: recommendation?.image_url || "",
-          description: item.function,
-          name: recommendation?.name || "",
-        };
-      })
-    );
-    setMessages((prev) => [...prev, resData.recommendation_text]);
+  const processResult = (resData: any) => {
+    console.log(resData, 'resData')
+    // setSessionData(resData);
+    processSessionData(resData);
   };
 
-  const initGenerate = async (
-    year,
-    month,
-    day,
-    hour,
-    gender,
-    isLunar: boolean
-  ) => {
-    setIsLoading(true);
-    try {
-      generateRequestRef.current = CancelToken.create();
-      const res: any = await api.generate.personalizedGenerate({
-        birth_year: parseInt(year || "0"),
-        birth_month: parseInt(month || "0"),
-        birth_day: parseInt(day || "0"),
-        birth_hour: parseInt(hour || "0"),
-        is_lunar: isLunar,
-        sex: parseInt(gender || "0"),
+  const initChat = () => {
+    apiSession
+      .createSession({
+        birth_info: {
+          birth_year: parseInt(year || "0"),
+          birth_month: parseInt(month || "0"),
+          birth_day: parseInt(day || "0"),
+          birth_hour: parseInt(hour || "0"),
+          is_lunar: isLunar === "true" ? true : false,
+          sex: parseInt(gender || "0"),
         },
-        {
-          cancelToken: generateRequestRef.current,
+      })
+      .then((res) => {
+        const data = res.data || {};
+        if (data.session_id) {
+          setSessionId(data.session_id);
+          processResult(data);
         }
-      );
-      processResult(res);
-    } catch (err) {
-      Taro.showToast({
-        title: "生成失败:" + JSON.stringify(err),
-        icon: "none",
+      })
+      .catch((err) => {
+        Taro.showToast({
+          title: "获取会话失败:" + JSON.stringify(err),
+          icon: "none",
+        });
       });
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   useEffect(() => {
     if (session_id) {
       apiSession.getSessionDetail(session_id).then((res) => {
-        console.log(res);
+        console.log(res.data, 'res.data')
+        processResult(res.data);
       });
       return;
     }
-    initGenerate(
-      year,
-      month,
-      day,
-      hour,
-      gender,
-      isLunar === "true" ? true : false
-    );
-
-    // 检查图片URL
-
-    // 按照Figma设计稿的文本格式
-    setMessages((prev) => [
-      ...prev,
-      "你好，我是你的私人疗愈师。你可以叫我莉莉，下面是我给你设计的一款水晶手串。\n\n你最近有什么心愿嘛？",
-    ]);
+    initChat();
   }, [session_id]);
 
   useEffect(() => {
-    setMessageIndex(messages.length - 1);
-  }, [messages]);
+    if (result.systemMessages?.length > 0) {
+      setMessageIndex(result.systemMessages.length - 1);
+    }
+  }, [result.systemMessages?.length]);
 
   // 发送消息
   const handleSend = async () => {
@@ -177,14 +131,12 @@ const ChatPage: React.FC = () => {
     setIsLoading(true);
     setInputValue("");
     try {
-      generateRequest2Ref.current = CancelToken.create();
-      const res: any = await api.generate.personalizedGenerate2({
-        ids: beadImageData.map((item) => item.id),
-        context: inputValue,
-      }, {
-        cancelToken: generateRequest2Ref.current,
+      apiSession.chat({
+        session_id: sessionId,
+        message: inputValue,
+      }).then((res) => {
+        processResult(res.data);
       });
-      processResult(res);
     } catch (error) {
       Taro.showToast({
         title: "生成失败:" + error.message,
@@ -233,11 +185,14 @@ const ChatPage: React.FC = () => {
           style={{
             width: "22px",
             height: "22px",
-            opacity: messageIndex === messages.length - 1 ? 0.2 : 1,
+            opacity:
+              messageIndex === result?.systemMessages?.length - 1 ? 0.2 : 1,
           }}
           onClick={() => {
             setMessageIndex((prev) =>
-              prev < messages.length - 1 ? prev + 1 : messages.length - 1
+              prev < result?.systemMessages?.length - 1
+                ? prev + 1
+                : result?.systemMessages?.length - 1
             );
           }}
         />
@@ -246,10 +201,14 @@ const ChatPage: React.FC = () => {
   };
 
   const handleEditBead = () => {
+    if (!result?.draft?.beads || result?.draft?.beads?.length === 0) {
+      return;
+    }
     const beadDataId = "bead-" + generateUUID();
+    console.log(result?.draft?.beads, beadDataId, 'handleEditBead')
     addBeadData({
       image_url: canvasImageUrl,
-      bead_list: beadImageData,
+      bead_list: result?.draft?.beads,
       bead_data_id: beadDataId,
     });
     Taro.navigateTo({
@@ -258,7 +217,7 @@ const ChatPage: React.FC = () => {
   };
 
   const renderKeyboardHide = () => {
-    if (isLoading || !beadImageData.length || !canvasImageUrl) {
+    if (!canvasImageUrl || result?.isPolling) {
       return (
         <View className="result-container">
           <SkeletonCard />
@@ -269,25 +228,21 @@ const ChatPage: React.FC = () => {
       <View className="result-container">
         <View className="result-title">
           <View className="result-title-text">定制方案</View>
-          {/* <Image
-            src={editBead}
-            style={{ width: "20px", height: "20px" }}
-            onClick={() => {
-              handleEditBead();
-            }}
-          /> */}
-          <View className="diy-adjust" onClick={handleEditBead}>
-            DIY调整
-          </View>
+          {result?.draft?.beads && result?.draft?.beads?.length > 0 && (
+            <View className="diy-adjust" onClick={handleEditBead}>
+              DIY调整
+            </View>
+          )}
         </View>
         <View className="result-card">
           <View className="result-content">
             <View className="result-left">
               <View className="result-text">
-                <View className="result-text-title">{beadName}</View>
+                <View className="result-text-title">{result?.draft?.name}</View>
                 <View className="result-text-content-container">
-                  {beadDescriptions.length > 0 &&
-                    beadDescriptions.map((item, index) => (
+                  
+                  {(result?.topTwoBeads || [])?.length > 0 &&
+                    result?.topTwoBeads?.map((item, index) => (
                       <View className="result-text-content" key={index}>
                         <Image
                           src={item.image_url}
@@ -301,7 +256,7 @@ const ChatPage: React.FC = () => {
                           {item.name + ":"}
                         </View>
                         <View className="result-text-content-description">
-                          {item.description}
+                          {item.funcs[0]}
                         </View>
                       </View>
                     ))}
@@ -412,11 +367,10 @@ const ChatPage: React.FC = () => {
             {/* 助手欢迎消息 - 按照Figma设计样式，包含三角形指示器 */}
             <View className="message-wrapper">
               <ChatCardList
-                chatContents={messages}
+                chatContents={result?.systemMessages}
                 messageIndex={messageIndex}
                 maxHeight={keyboardHeight > 0 ? 70 : 96}
                 onChange={(index) => {
-                  console.log(index);
                   setMessageIndex(index);
                 }}
               />
@@ -428,14 +382,19 @@ const ChatPage: React.FC = () => {
 
         {/* 输入区域 */}
         <View className="input-container">
-          <TagList
-            tags={TAGS}
-            onTagSelect={(tag) => {
-              setInputValue((prev) =>
-                !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
-              );
-            }}
-          />
+          {result?.recommends?.length > 0 && (
+            <TagList
+              tags={result?.recommends?.map((item) => ({
+                id: item,
+                title: item,
+              }))}
+              onTagSelect={(tag) => {
+                setInputValue((prev) =>
+                  !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
+                );
+              }}
+            />
+          )}
           <View className="input-wrapper">
             <Textarea
               className="message-input"
@@ -463,16 +422,18 @@ const ChatPage: React.FC = () => {
           </View>
         </View>
         {/* 用于拼接珠串图片的隐藏Canvas */}
-        <CircleRing
-          dotsBgImageData={beadImageData}
-          targetSize={1024}
-          canvasId="circle-ring-canvas"
-          onChange={(status, canvasImage) => {
-            setCanvasImageUrl(canvasImage);
-            setCanvasImageStatus(status);
-          }}
-          showCanvas={false}
-        />
+        {result?.draft?.beads && result?.draft?.beads?.length > 0 && (
+          <CircleRing
+            dotsBgImageData={result?.draft?.beads || []}
+            targetSize={1024}
+            canvasId="circle-ring-canvas"
+            onChange={(status, canvasImage) => {
+              setCanvasImageUrl(canvasImage);
+              setCanvasImageStatus(status);
+            }}
+            showCanvas={false}
+          />
+        )}
       </View>
     </PageContainer>
   );

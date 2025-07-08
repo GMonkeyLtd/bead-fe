@@ -12,6 +12,7 @@ import BeadOrderDialog from "@/components/BeadOrderDialog";
 import ContactUserDialog from "@/components/ContactUserDialog";
 import phoneIcon from "@/assets/icons/phone.svg";
 import api from "@/utils/api-merchant";
+import { pageUrls } from "@/config/page-urls";
 
 export interface Order {
   id: string;
@@ -78,6 +79,8 @@ export default function OrderList({
     setCurrentUserInfo(null);
   };
 
+
+
   const handleAddWechat = (order: Order) => {
     showModal({
       title: "添加微信",
@@ -86,25 +89,11 @@ export default function OrderList({
     });
   };
 
-  const handleCancelOrder = async (order: Order) => {
-    const res = await showModal({
-      title: "确认取消",
-      content: `确定要取消订单 ${order.orderNo} 吗？`,
-      confirmText: "确认取消",
-      cancelText: "取消",
+  const handleCancelOrder = (order: Order) => {
+    // 跳转到取消订单页面，传递订单信息
+    Taro.navigateTo({
+      url: `${pageUrls.cancelOrder}?orderId=${order.id}&orderNo=${order.orderNo}&price=${order.price}`
     });
-
-    if (res.confirm) {
-      api.user.cancelOrder(order.id).then((res: any) => {
-        if (res.code === 200) {
-          showToast({
-            title: "取消订单成功",
-            icon: "success",
-          });
-          onRefresh?.();
-        }
-      });
-    }
   };
 
   const handleCompleteOrder = async (order: Order) => {
@@ -296,6 +285,8 @@ export default function OrderList({
                 onClose={handleCloseContactDialog}
               />
             )}
+
+
           </View>
         ))
       )}

@@ -7,6 +7,7 @@ export const pageUrls = {
   orderList: '/pages-order/order-list/index',
   orderDispatching: '/pages-order/order-dispatching/index',
   orderDetail: '/pages-order/order-detail/index',
+  cancelOrder: '/pages-order/cancel-order/index',
   userCenter: '/pages-user/user-center/index',
   contactPreference: '/pages-user/contact-preference/index',
   merchantLogin: '/pages-merchant/login/index',
@@ -15,4 +16,5 @@ export const pageUrls = {
   merchantUserCenter: '/pages-merchant/user-center/index',
   modifyUser: '/pages-user/modify-user/index',
   webview: '/pages-common/webview/index',
+  
 }
