@@ -1,5 +1,5 @@
 import { View, Image } from "@tarojs/components";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import "./index.scss";
 import AppHeader from "@/components/AppHeader";
@@ -39,8 +39,8 @@ const Result = () => {
   const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [orderList, setOrderList] = useState<any[]>([]);
-  const [autoShare, setAutoShare] = useState(false);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
+  const autoShareRef = useRef(false);
 
   const posterData = useMemo(() => {
     return {
@@ -146,7 +146,7 @@ const Result = () => {
         title: "分享图正在制作中...",
         icon: "none",
       });
-      setAutoShare(true);
+      autoShareRef.current = true;
       return;
     }
     try {
@@ -170,6 +170,7 @@ const Result = () => {
         icon: "error",
       });
     } finally {
+      autoShareRef.current = false;
       setLoading(false);
     }
   };
@@ -376,10 +377,8 @@ const Result = () => {
         data={posterData}
         onGenerated={(url) => {
           setShareImageUrl(url);
-          console.log(autoShare, "autoShare");
-          if (autoShare) {
+          if (autoShareRef.current) {
             saveImage(url);
-            setAutoShare(false);
           }
         }}
       />
