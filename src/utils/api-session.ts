@@ -140,10 +140,10 @@ export default {
   ) => {
     return http.get<DesignDraftResponse>(
       `/user/sessions/${params.session_id}/drafts/${params.draft_id}`,
-      {
-        cancelToken: config?.cancelToken,
-        ...config,
-      }
+      // {
+      //   cancelToken: config?.cancelToken,
+      //   ...config,
+      // }
     );
   },
 };

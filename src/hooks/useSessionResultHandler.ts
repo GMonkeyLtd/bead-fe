@@ -19,7 +19,7 @@ export interface UseSessionResultHandlerParams {
 export const useSessionResultHandler = ({
   sessionData,
   pollingInterval = 2000,
-  maxRetries = 20
+  maxRetries = 2
 }: UseSessionResultHandlerParams) => {
   const [result, setResult] = useState<SessionResult>({
     systemMessages: [],
@@ -55,50 +55,6 @@ export const useSessionResultHandler = ({
       .map(item => item.bead);
 
     return sortedBeads;
-  }, []);
-
-  // 处理生成内容的函数
-  const processSessionData = useCallback((data: CreateSessionResponse['data']) => {
-    // 提取system消息的content
-    const systemMessages = data.messages.filter(msg => msg.role === 'system')?.map(msg => msg.content) || [];
-
-    // 提取recommends
-    const recommends = data.recommends || [];
-
-    // 检查latest_draft的progress
-    const latestDraft = data.latest_draft;
-
-    // 计算最高频率的两个珠子
-    const topTwoBeads = latestDraft?.beads ? getTopTwoBeads(latestDraft.beads) : null;
-
-    setResult(prev => ({
-      ...prev,
-      systemMessages,
-      recommends,
-      topTwoBeads,
-      error: null
-    }));
-
-    // 如果progress不为100，开始轮询
-    if (latestDraft && latestDraft.progress !== 100) {
-      startPolling(data.session_id, latestDraft.draft_id);
-    } else if (latestDraft && latestDraft.progress === 100) {
-      // 如果progress已经是100，直接设置draft
-      setResult(prev => ({
-        ...prev,
-        draft: latestDraft,
-        topTwoBeads,
-        isPolling: false
-      }));
-    }
-  }, [getTopTwoBeads]);
-
-  const updateSessionData = useCallback(({ newMessage, newRecommends, sessionId, draftId }: { newMessage: MessageItem, newRecommends: string[], sessionId?: string, draftId?: string }) => {
-    if (sessionId && draftId) {
-      startPolling(sessionId, draftId);
-    } else {
-      setResult(prev => ({ ...prev, systemMessages: [...prev.systemMessages, newMessage.content], recommends: newRecommends }));
-    }
   }, []);
 
   // 轮询设计稿进度
@@ -176,7 +132,52 @@ export const useSessionResultHandler = ({
     if (sessionData?.latest_draft && sessionData.latest_draft.progress !== 100) {
       startPolling(sessionData.session_id, sessionData.latest_draft.draft_id);
     }
-  }, [sessionData, startPolling]);
+  }, [sessionData, startPolling, retryCount]);
+
+    // 处理生成内容的函数
+    const processSessionData = useCallback((data: CreateSessionResponse['data']) => {
+      // 提取system消息的content
+      console.log(data.messages, "data");
+      const systemMessages = data.messages.filter(msg => ['system', 'assistant'].includes(msg.role))?.map(msg => msg.content) || [];
+  
+      // 提取recommends
+      const recommends = data.recommends || [];
+  
+      // 检查latest_draft的progress
+      const latestDraft = data.latest_draft;
+  
+      // 计算最高频率的两个珠子
+      const topTwoBeads = latestDraft?.beads ? getTopTwoBeads(latestDraft.beads) : null;
+  
+      setResult(prev => ({
+        ...prev,
+        systemMessages,
+        recommends,
+        topTwoBeads,
+        error: null
+      }));
+  
+      // 如果progress不为100，开始轮询
+      if (latestDraft && latestDraft.progress !== 100) {
+        startPolling(data.session_id, latestDraft.draft_id);
+      } else if (latestDraft && latestDraft.progress === 100) {
+        // 如果progress已经是100，直接设置draft
+        setResult(prev => ({
+          ...prev,
+          draft: latestDraft,
+          topTwoBeads,
+          isPolling: false
+        }));
+      }
+    }, [getTopTwoBeads]);
+  
+    const updateSessionData = useCallback(({ newMessage, newRecommends, sessionId, draftId }: { newMessage: MessageItem, newRecommends: string[], sessionId?: string, draftId?: string }) => {
+      if (sessionId && draftId) {
+        startPolling(sessionId, draftId);
+      } else {
+        setResult(prev => ({ ...prev, systemMessages: [...prev.systemMessages, newMessage.content], recommends: newRecommends }));
+      }
+    }, [startPolling, setResult]);
 
   // 当sessionData改变时处理数据
   useEffect(() => {

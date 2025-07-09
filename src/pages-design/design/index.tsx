@@ -44,14 +44,11 @@ const ChatPage: React.FC = () => {
   const { addBeadData } = useDesign();
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
 
-  const [sessionData, setSessionData] = useState<any>(null);
   const [sessionId, setSessionId] = useState<string>("");
-  const generateRequestRef = useRef<CancelToken>(null);
-  const generateRequest2Ref = useRef<CancelToken>(null);
 
   const { result, stopPolling, retryPolling, processSessionData, updateSessionData } =
     useSessionResultHandler({
-      sessionData: sessionData,
+      sessionData: null,
     });
 
   // 键盘适配逻辑
@@ -368,6 +365,8 @@ const ChatPage: React.FC = () => {
     );
   };
 
+  console.log(result?.systemMessages, "result?.systemMessages");
+
   return (
     <PageContainer keyboardHeight={keyboardHeight}>
       <View
@@ -481,6 +480,7 @@ const ChatPage: React.FC = () => {
         )}
         <DateTimeDrawer
           onPersonalizeCustomize={(data) => {
+            setCanvasImageUrl("");
             initChat({
               birth_year: data.year,
               birth_month: data.month,
