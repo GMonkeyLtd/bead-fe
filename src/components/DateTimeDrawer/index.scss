@@ -147,6 +147,9 @@
 
 .button-container {
   padding: 16px 24px 20px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .button-row {
