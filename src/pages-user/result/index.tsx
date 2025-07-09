@@ -165,10 +165,10 @@ const Result = () => {
       });
     } catch (error) {
       console.error("保存图片失败:", error);
-      Taro.showToast({
-        title: "保存失败",
-        icon: "error",
-      });
+      // Taro.showToast({
+      //   title: "保存失败",
+      //   icon: "error",
+      // });
     } finally {
       autoShareRef.current = false;
       setLoading(false);
