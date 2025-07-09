@@ -352,7 +352,7 @@ const Result = () => {
             />
           }
         />
-        <CrystalButton
+        {/* <CrystalButton
           onClick={doCreate}
           isPrimary
           text="制作成品"
@@ -364,7 +364,7 @@ const Result = () => {
               style={{ width: "24px", height: "24px" }}
             />
           }
-        />
+        /> */}
       </View>
       {budgetDialogShow && (
         <BudgetDialog
