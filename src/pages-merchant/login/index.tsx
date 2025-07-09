@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { View, Input, Button, Text, Image } from "@tarojs/components";
-import Taro, { navigateTo, showToast } from "@tarojs/taro";
+import Taro, { navigateTo, redirectTo, showToast } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import { MerchantAuthManager } from "@/utils/auth-merchant";
 import MerchantHeader from "@/components/MerchantHeader";
@@ -15,7 +15,7 @@ export default function Login() {
   useEffect(() => {
     const isLogin = MerchantAuthManager.checkLogin();
     if (isLogin) {
-      navigateTo({
+      redirectTo({
         url: pageUrls.merchantGrabOrders,
       });
     }

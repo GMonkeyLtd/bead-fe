@@ -85,7 +85,7 @@ const defaultConfig = {
   showLoading: false,
   loadingText: '加载中...',
   showError: true,
-  isMock: true,
+  isMock: false,
   merchantBaseUrl: 'https://test.qianjunye.com/api/v1'
 }
 const checkMerchant = url => url.includes('/merchant')

@@ -45,6 +45,7 @@ const CustomDesignRing = ({
   size = 0,
   spacing = 0,
   beadTypeMap = {},
+  renderRatio = 2,
   onOk,
 }: {
   beads: Bead[];
@@ -52,6 +53,7 @@ const CustomDesignRing = ({
   size?: number;
   spacing?: number;
   beadTypeMap?: any;
+  renderRatio?: number;
   onOk?: (imageUrl: string, editedBeads: Bead[]) => void;
 }) => {
   const dpr = Taro.getSystemInfoSync().pixelRatio;
@@ -86,7 +88,7 @@ const CustomDesignRing = ({
 
   useEffect(() => {
     if (!dots.length) return;
-    const predictLength = computeBraceletLength(dots);
+    const predictLength = computeBraceletLength(dots, 'bead_diameter');
     setPredictedLength(predictLength);
   }, [dots]);
 
@@ -225,27 +227,6 @@ const CustomDesignRing = ({
     }
 
     ctx.draw();
-    // ctx.draw(true, () => {
-
-    //   Taro.canvasToTempFilePath({
-    //     x: 0,
-    //     y: 0,
-    //     canvasId: canvasId,
-    //     destHeight: targetSize * dpr,
-    //     destWidth: targetSize * dpr,
-    //     quality: 1,
-    //     // fileType: 'jpg',
-    //     success: (res) => {
-    //       setImageUrl(res.tempFilePath);
-
-    //       console.log("生成临时文件成功", res.tempFilePath);
-    //     },
-    //     fail: (err) => {
-    //       console.error("生成临时文件失败:", err);
-    //       Taro.showToast({ title: "生成图片失败", icon: "none" });
-    //     },
-    //   });
-    // });
   };
 
   // 处理Canvas点击事件
@@ -307,8 +288,7 @@ const CustomDesignRing = ({
 
   const updateBeads = (newDots: any[]) => {
     processBeads(newDots);
-    // const dotsWithNewPositions = computeBeadPositions(newDots, spacing);
-    // setDots(dotsWithNewPositions);
+    setImageUrl("");
   };
 
   const onClockwiseMove = () => {
@@ -367,13 +347,13 @@ const CustomDesignRing = ({
     if (selectedBeadIndex === -1) {
       newDots.push({
         ...bead,
-        render_diameter: size * 1.5,
+        render_diameter: size * renderRatio,
         bead_diameter: size,
       });
     } else {
       newDots[selectedBeadIndex] = {
         ...bead,
-        render_diameter: size * 1.5,
+        render_diameter: size * renderRatio,
         bead_diameter: size,
       };
     }
@@ -552,7 +532,7 @@ const CustomDesignRing = ({
             top: "24px",
             right: "24px",
             border: "1px solid #e4c0a0",
-            opacity: 1,
+            opacity: !imageUrl ? 0.5 : 1,
             background: "#e4c0a038",
             borderRadius: "8px",
             padding: "4px 8px",
@@ -560,7 +540,12 @@ const CustomDesignRing = ({
             boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
           }}
           onClick={() => {
-            setCreateFlag(true);
+            onOk?.(imageUrl, dots.map((item) => ({
+              id: item.id,
+              image_url: item.image_url,
+              bead_diameter: item.bead_diameter,
+              render_diameter: item.render_diameter,
+            })));
           }}
         >
           去制作
@@ -583,7 +568,7 @@ const CustomDesignRing = ({
         </View>
       </View>
       {/* 左侧纵向Tab选择器 */}
-      {/* <View className="custom-design-ring-bottom-container">
+      <View className="custom-design-ring-bottom-container">
         <View
           style={{
             width: "60px",
@@ -638,18 +623,18 @@ const CustomDesignRing = ({
           ))}
         </View>
         {renderBeads()}
-      </View> */}
+      </View>
       <CircleRing
         dotsBgImageData={dots}
         targetSize={1024}
         canvasId="circle-ring-canvas111"
         isDifferentSize
+        fileType="jpg"
         onChange={(status, canvasImage) => {
           console.log("CircleRing onChange:", status, canvasImage);
           setImageUrl(canvasImage);
         }}
       />
-      {imageUrl && <CircleRingImage size={300} imageUrl={imageUrl} />}
     </View>
   );
 };

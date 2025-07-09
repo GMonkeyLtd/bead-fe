@@ -50,28 +50,30 @@ const CustomDesign = () => {
     if (!imageUrl) {
       return;
     }
-    Taro.saveImageToPhotosAlbum({
-      filePath: imageUrl,
-      success: () => {
-        Taro.showToast({ title: "保存成功", icon: "success" });
-      },
+    console.log("editedBeads", editedBeads);
+    // Taro.saveImageToPhotosAlbum({
+    //   filePath: imageUrl,
+      
+    //   success: () => {
+    //     Taro.showToast({ title: "保存成功", icon: "success" });
+    //   },
+    // });
+    const beadDataId = "bead-" + generateUUID();
+    addBeadData({
+      image_url: imageUrl,
+      bead_list: editedBeads.map((item) => {
+        const _beadData = allBeadList?.find((_item) => _item.id === item.id);
+        return {
+          ..._beadData,
+          bead_diameter: item.bead_diameter || item.diameter,
+        };
+      }),
+      bead_data_id: beadDataId,
     });
-    // const beadDataId = "bead-" + generateUUID();
-    // addBeadData({
-    //   image_url: imageUrl,
-    //   bead_list: editedBeads.map((item) => {
-    //     const _beadData = allBeadList?.find((_item) => _item.id === item.id);
-    //     return {
-    //       ..._beadData,
-    //       bead_diameter: item.bead_diameter || item.diameter,
-    //     };
-    //   }),
-    //   bead_data_id: beadDataId,
-    // });
 
-    // Taro.redirectTo({
-    //   url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
-    // });
+    Taro.redirectTo({
+      url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
+    });
   };
 
   return (
@@ -89,6 +91,7 @@ const CustomDesign = () => {
         size={300}
         beadTypeMap={beadTypeMap}
         onOk={onCreate}
+        renderRatio={3}
       />
     </PageContainer>
   );

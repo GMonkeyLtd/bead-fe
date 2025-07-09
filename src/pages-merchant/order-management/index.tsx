@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { View, Text } from "@tarojs/components";
-import Taro, { showToast, useDidShow } from "@tarojs/taro";
+import Taro, { showToast, useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import "./index.scss";
 import MerchantHeader from "@/components/MerchantHeader";
 import OrderList from "@/components/OrderList";
@@ -70,6 +70,9 @@ export default function OrderManagement() {
     loadOrders();
   }); 
 
+  usePullDownRefresh(() => {
+    loadOrders();
+  });
 
   const currentOrders = useMemo(() => {
     if (activeTab === "进行中") {

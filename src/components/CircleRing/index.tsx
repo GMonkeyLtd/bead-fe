@@ -39,6 +39,7 @@ const CircleRing = ({
   showCanvas = false,
   // 是否区分珠子尺寸
   isDifferentSize = false,
+  fileType = "png",
   onChange = (
     status: "idle" | "downloading" | "success" | "error",
     canvasImage: string
@@ -116,6 +117,7 @@ const CircleRing = ({
           destHeight: targetSize * dpr,
           destWidth: targetSize * dpr,
           quality: 1,
+          fileType,
           success: (res) => {
             onChange("success", res.tempFilePath);
             // 保存图片到相册
@@ -161,8 +163,6 @@ const CircleRing = ({
       drawPlaceHolder();
     }
   }, [dots, beads, downloadStatus]);
-
-  console.log(downloadStatus, 'downloadStatus')
 
   if (downloadStatus === "success") {
     return (
