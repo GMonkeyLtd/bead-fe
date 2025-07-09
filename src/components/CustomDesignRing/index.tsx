@@ -60,6 +60,8 @@ const CustomDesignRing = ({
   const [beadStatus, setBeadStatus] = useState<
     "idle" | "processing" | "success" | "error"
   >("idle");
+
+
   const [curWuxing, setCurWuxing] = useState<string>("");
   const [predictedLength, setPredictedLength] = useState<number>(0);
   const [canvasSize, setCanvasSize] = useState<number>(0);
@@ -97,6 +99,7 @@ const CustomDesignRing = ({
           id: item.id,
           image_url: item.image_url,
           bead_diameter: item.bead_diameter,
+          render_diameter: item.render_diameter,
         }))
       );
     }
@@ -308,8 +311,7 @@ const CustomDesignRing = ({
     // setDots(dotsWithNewPositions);
   };
 
-  const onClockwiseMove = (e) => {
-    e.stopPropagation();
+  const onClockwiseMove = () => {
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要移动的珠子",
@@ -327,8 +329,7 @@ const CustomDesignRing = ({
     setSelectedBeadIndex(nextIndex);
   };
 
-  const onCounterclockwiseMove = (e) => {
-    e.stopPropagation();
+  const onCounterclockwiseMove = () => {
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要移动的珠子",
@@ -346,8 +347,7 @@ const CustomDesignRing = ({
     setSelectedBeadIndex(nextIndex);
   };
 
-  const onDelete = (e) => {
-    e.stopPropagation();
+  const onDelete = () => {
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要删除的珠子",
@@ -645,11 +645,11 @@ const CustomDesignRing = ({
         canvasId="circle-ring-canvas111"
         isDifferentSize
         onChange={(status, canvasImage) => {
+          console.log("CircleRing onChange:", status, canvasImage);
           setImageUrl(canvasImage);
         }}
-        showCanvas
       />
-      {imageUrl && <CircleRingImage size={1024} imageUrl={imageUrl} />}
+      {imageUrl && <CircleRingImage size={300} imageUrl={imageUrl} />}
     </View>
   );
 };

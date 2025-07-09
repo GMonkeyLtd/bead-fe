@@ -17,7 +17,6 @@ const PageContainer = ({
 }) => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
 
-  console.log("keyboardHeight", keyboardHeight);
   return (
     <View
       className={`crystal-common-container `}

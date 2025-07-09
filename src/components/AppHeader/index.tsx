@@ -23,7 +23,7 @@ const AppHeader = ({
   showHome?: boolean;
   onBack?: () => void;
   style?: React.CSSProperties;
-  headerContent?: string;
+  headerContent?: React.ReactNode;
 }) => {
   const {
     height: navBarHeight,

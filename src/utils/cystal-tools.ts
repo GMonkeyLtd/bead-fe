@@ -89,9 +89,9 @@ interface Position {
   radius: number;
   index?: string | number;
 }
-  // 计算每个珠子的圆心坐标
-export const calcPositionsWithBeadSize = (
-    dots: number[],
+  // 计算每个珠子的圆心坐标 - 使用渲染直径（和CustomDesignRing保持一致）
+export const calcPositionsWithRenderDiameter = (
+    renderDiameterList: number[],
     spacing: number,
     ringRadius: number,
     // 圆心坐标
@@ -101,13 +101,16 @@ export const calcPositionsWithBeadSize = (
     let currentAngle = 0;
     const positions: Position[] = [];
 
-    for (let i = 0; i < dots.length; i++) {
-      const j = (i + 1) % dots.length;
-      const r1 = Math.floor(dots[i] / 2);
-      const r2 = Math.floor(dots[j] / 2);
+    for (let i = 0; i < renderDiameterList.length; i++) {
+      const j = (i + 1) % renderDiameterList.length;
+      // 和CustomDesignRing中calcPositions保持一致的计算方式
+      const r1 = renderDiameterList[i] / 2; // 渲染直径除以2得到半径
+      const r2 = renderDiameterList[j] / 2; // 渲染直径除以2得到半径
       const L = r1 + r2 + spacing;
-      // 计算相邻小圆的中心角 theta_ij
-      const theta = 2 * Math.asin(L / (2 * ringRadius));
+      
+      // 确保不会出现无效的计算
+      const sinValue = Math.min(1, L / (2 * ringRadius));
+      const theta = 2 * Math.asin(sinValue);
 
       // 记录当前小圆的位置
       positions.push({
@@ -121,6 +124,45 @@ export const calcPositionsWithBeadSize = (
       // 更新角度
       currentAngle += theta;
     }
+    
+    return positions;
+  }
+
+  // 计算每个珠子的圆心坐标 - 老版本（保留备用）
+export const calcPositionsWithBeadSize = (
+    dots: number[],
+    spacing: number,
+    ringRadius: number,
+    // 圆心坐标
+    center: { x: number, y: number } 
+  ) => {
+
+    let currentAngle = 0;
+    const positions: Position[] = [];
+
+    for (let i = 0; i < dots.length; i++) {
+      const j = (i + 1) % dots.length;
+      const r1 = dots[i]; // 直接使用半径，不再除以2
+      const r2 = dots[j]; // 直接使用半径，不再除以2
+      const L = r1 + r2 + spacing;
+      
+      // 确保不会出现无效的计算
+      const sinValue = Math.min(1, L / (2 * ringRadius));
+      const theta = 2 * Math.asin(sinValue);
+
+      // 记录当前小圆的位置
+      positions.push({
+        radius: r1,
+        x: center.x + ringRadius * Math.cos(currentAngle),
+        y: center.y + ringRadius * Math.sin(currentAngle),
+        angle: currentAngle,
+        index: i,
+      });
+
+      // 更新角度
+      currentAngle += theta;
+    }
+    
     return positions;
   }
 
@@ -129,11 +171,22 @@ export const calculateBeadArrangementBySize = (
   beadSizeList: number[],
   center: { x: number, y: number }
 ) => {
-  // 通过所要围成圆的半径，和现有珠子尺寸，计算珠子放大后的半径
-  const actualRingRadius = beadSizeList.reduce((sum, size) => sum + size, 0);
-  const sizeRatio =  (2 * Math.PI * (ringRadius - Math.max(...beadSizeList))) / actualRingRadius;
-  const scaledRadiusList = beadSizeList.map((size) => (Math.floor(size * sizeRatio) / 2));
-  const positions = calcPositionsWithBeadSize(scaledRadiusList, 0, ringRadius, center);
+  // 参考CustomDesignRing的calcRingRadius计算方式
+  // 先计算所有珠子的渲染直径总和
+  const totalRenderDiameter = beadSizeList.reduce((sum, size) => sum + size * 1.5, 0); // 按1.5倍计算渲染直径
+  
+  // 基于总渲染直径计算环半径（和CustomDesignRing保持一致）
+  const calculatedRingRadius = totalRenderDiameter / (2 * Math.PI);
+  
+  // 计算缩放比例，使计算出的环半径适应目标ringRadius
+  const targetRingRadius = ringRadius * 0.8; // 使用80%的半径，留出边距
+  const sizeRatio = targetRingRadius / calculatedRingRadius;
+  
+  // 计算缩放后的渲染直径列表
+  const scaledRenderDiameterList = beadSizeList.map((size) => size * 1.5 * sizeRatio);
+  
+  // 使用和CustomDesignRing相同的计算逻辑
+  const positions = calcPositionsWithRenderDiameter(scaledRenderDiameterList, 0, targetRingRadius, center);
   
   return positions;
 };

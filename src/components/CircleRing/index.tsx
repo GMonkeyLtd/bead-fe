@@ -87,7 +87,6 @@ const CircleRing = ({
         const finalImagePaths = dotsBgImagePath.map((originalPath: string) => {
           return processedPaths.get(originalPath) || originalPath;
         });
-
         setDots(finalImagePaths);
         setDownloadStatus("success");
       } catch (error) {
