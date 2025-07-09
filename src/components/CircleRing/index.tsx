@@ -53,7 +53,6 @@ const CircleRing = ({
   >("idle");
   const ringRadius = targetSize / 2;
   const dpr = Taro.getSystemInfoSync().pixelRatio;
-  console.log(dotsBgImageData, 'dotsBgImageData')
 
   const dotsBgImagePath = useMemo(
     () => dotsBgImageData.map((item: any) => item.image_url),
@@ -71,8 +70,6 @@ const CircleRing = ({
   }, [dotsBgImageData, ringRadius, isDifferentSize]);
 
   // 处理图片路径（下载网络图片）
-
-  console.log(beads, 'beads')
 
   useEffect(() => {
     if (!dotsBgImagePath || dotsBgImagePath.length === 0) {
@@ -107,10 +104,8 @@ const CircleRing = ({
     try {
       const ctx = Taro.createCanvasContext(canvasId);
       ctx.clearRect(0, 0, targetSize, targetSize);
-      console.log(dots, beads, 'in canvas')
       dots.forEach((dot: any, index) => {
         const { x, y, radius } = beads[index];  
-        console.log(x, y, radius, 'x, y, radius')
         ctx.drawImage(dot, x - radius, y - radius, radius * 2, radius * 2);
       });
 

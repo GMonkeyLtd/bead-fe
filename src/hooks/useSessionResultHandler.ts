@@ -59,7 +59,6 @@ export const useSessionResultHandler = ({
 
   // 处理生成内容的函数
   const processSessionData = useCallback((data: CreateSessionResponse['data']) => {
-    console.log(data, 'processSessionData')
     // 提取system消息的content
     const systemMessages = data.messages.filter(msg => msg.role === 'system')?.map(msg => msg.content) || [];
 

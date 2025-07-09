@@ -19,7 +19,6 @@ export class CancelToken {
     
     // 如果有关联的请求任务，则取消它
     if (this._requestTask) {
-      console.log('cancel request',reason, this._requestTask)
       this._requestTask.abort()
     }
   }
@@ -287,7 +286,6 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
   
   if (defaultConfig.isMock) {
     const mockData = MockManager.getMockDataByUrl(config.url);
-    console.log(mockData, 'mockData')
     if (mockData) {
       return mockData;
     }

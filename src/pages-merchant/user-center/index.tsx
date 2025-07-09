@@ -27,7 +27,6 @@ export default function UserCenter() {
   const loadUserInfo = async () => {
     try {
       const res = await api.user.getMerchantInfo();
-      console.log(res, "res");
       setUserInfo(res?.data || {});
     } catch (error) {
       showToast({

@@ -26,8 +26,6 @@ const ContactUserDialog: React.FC<ContactUserDialogProps> = ({
     return null;
   }
 
-  console.log(userInfo, "userInfo");
-
   // 格式化电话号码显示
   const formatPhoneNumber = (phone: string) => {
     if (!phone) return '';

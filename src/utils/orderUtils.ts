@@ -16,14 +16,13 @@ export const OrderStatusMap = {
   [OrderStatus.Completed]: "已完成",
   [OrderStatus.Cancelled]: "用户已取消",
   [OrderStatus.MerchantCancel]: "商家已取消",
-  [OrderStatus.MerchantCancelPending]: "商家取消待审核",
+  [OrderStatus.MerchantCancelPending]: "商家取消中",
 };
 
 export const processingOrderStatus = [
   OrderStatus.PendingDispatch,
   OrderStatus.Dispatching,
   OrderStatus.InService,
-  OrderStatus.MerchantCancelPending,
 ];
 
 export const cancelledOrderStatus = [

@@ -478,8 +478,6 @@ const CustomDesignRing = ({
     );
   };
 
-  console.log(dots?.length, createFlag, "dots?.length, createFlag");
-
   return (
     <View className="custom-design-ring-container">
       {/* 顶部内容区域 */}
@@ -648,7 +646,6 @@ const CustomDesignRing = ({
         isDifferentSize
         onChange={(status, canvasImage) => {
           setImageUrl(canvasImage);
-          console.log(status, canvasImage, "onChange");
         }}
         showCanvas
       />

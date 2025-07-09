@@ -14,7 +14,6 @@ export default function Login() {
 
   useEffect(() => {
     const isLogin = MerchantAuthManager.checkLogin();
-    console.log(isLogin, "isLogin");
     if (isLogin) {
       navigateTo({
         url: pageUrls.merchantGrabOrders,

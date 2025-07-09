@@ -52,7 +52,6 @@ const QuickDesign = () => {
   }, []);
 
   const processDesignData = (data) => {
-    console.log(data, "processDesignData");
     const uniqueId = generateUUID();
     const {
       image_urls,
@@ -137,7 +136,6 @@ const QuickDesign = () => {
       }, {
         cancelToken: cancelTokenForImage.current
       });
-      console.log(res, "res");
       if (!res.data?.image_urls?.[0]) {
         throw new Error("生成失败");
       }
@@ -149,7 +147,6 @@ const QuickDesign = () => {
           "&designBackendId=" +
           res.data?.design_id,
       });
-      console.log(res, "res");
     } catch (err) {
       console.error(err, "err");
       Taro.showToast({

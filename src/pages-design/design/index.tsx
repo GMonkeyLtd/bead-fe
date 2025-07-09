@@ -139,7 +139,6 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     if (session_id) {
       apiSession.getSessionDetail(session_id).then((res) => {
-        console.log(res.data, "res.data");
         setSessionId(session_id);
         processResult(res.data);
       });
@@ -245,7 +244,6 @@ const ChatPage: React.FC = () => {
       return;
     }
     const beadDataId = "bead-" + generateUUID();
-    console.log(result?.draft?.beads, beadDataId, "handleEditBead");
     addBeadData({
       image_url: canvasImageUrl,
       bead_list: result?.draft?.beads,
@@ -255,8 +253,6 @@ const ChatPage: React.FC = () => {
       url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
     });
   };
-
-  console.log(result, "result");
 
   const renderKeyboardHide = () => {
     if (!canvasImageUrl || result?.isPolling) {
@@ -371,8 +367,6 @@ const ChatPage: React.FC = () => {
       </View>
     );
   };
-
-  console.log(result?.draft?.beads, canvasImageUrl, "result?.draft?.beads, canvasImageUrl");
 
   return (
     <PageContainer keyboardHeight={keyboardHeight}>

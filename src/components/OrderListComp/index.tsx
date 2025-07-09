@@ -60,7 +60,6 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
   // 根据订单状态获取商家显示文本
   const getMerchantDisplayText = (order: OrderItem): string => {
-    console.log(order, "order");
     if (
       [
         OrderStatus.PendingDispatch,
@@ -79,12 +78,12 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
     return (
       <View className={styles.orderActions}>
-        {order.status === OrderStatus.InService && (
+        {order.status === OrderStatus.InService && order.merchantPhone && (
           <View
             className={`${styles.actionButton} ${styles.contactButton}`}
             onClick={(e) => {
               e.stopPropagation();
-              Taro.makePhoneCall({ phoneNumber: order.merchantPhone || '13800138000' });
+              Taro.makePhoneCall({ phoneNumber: order.merchantPhone });
             }}
           >
             <Image src={phoneIcon} className={styles.actionIcon} />

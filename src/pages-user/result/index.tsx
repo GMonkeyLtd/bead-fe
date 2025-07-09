@@ -1,5 +1,5 @@
 import { View, Image } from "@tarojs/components";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import "./index.scss";
 import AppHeader from "@/components/AppHeader";
@@ -10,7 +10,6 @@ import CrystalButton from "@/components/CrystalButton";
 import {
   CRYSTALS_BG_IMAGE_URL,
   LOGO_IMAGE_URL,
-  LOGO_WITH_BACKGROUND_IMAGE_URL,
   APP_QRCODE_IMAGE_URL,
 } from "@/config";
 import { useDesign } from "@/store/DesignContext";
@@ -39,8 +38,8 @@ const Result = () => {
   const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [orderList, setOrderList] = useState<any[]>([]);
-  const [autoShare, setAutoShare] = useState(false);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
+  const autoShareRef = useRef(false);
 
   const posterData = useMemo(() => {
     return {
@@ -140,15 +139,15 @@ const Result = () => {
 
   // 保存图片到相册
   const saveImage = async (url: string) => {
-    console.log(url, "url");
     if (!url) {
+      autoShareRef.current = true;
       Taro.showToast({
         title: "分享图正在制作中...",
         icon: "none",
       });
-      setAutoShare(true);
       return;
     }
+    console.log('二次保存')
     try {
       Taro.showToast({
         title: "保存中",
@@ -171,6 +170,7 @@ const Result = () => {
       });
     } finally {
       setLoading(false);
+      autoShareRef.current = false;
     }
   };
 
@@ -375,11 +375,10 @@ const Result = () => {
       <PosterGenerator
         data={posterData}
         onGenerated={(url) => {
+          console.log(url, autoShareRef.current, 'url')
           setShareImageUrl(url);
-          console.log(autoShare, "autoShare");
-          if (autoShare) {
+          if (autoShareRef.current) {
             saveImage(url);
-            setAutoShare(false);
           }
         }}
       />

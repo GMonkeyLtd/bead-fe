@@ -22,7 +22,6 @@ const Home = () => {
     AuthManager.login();
 
     apiSession.getLastSession().then((res) => {
-      console.log("getLastSession res: ", res);
       if (res.data?.session_id) {
         setLastSessionId(res.data.session_id);
       }

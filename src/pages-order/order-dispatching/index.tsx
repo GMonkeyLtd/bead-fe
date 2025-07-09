@@ -120,7 +120,6 @@ const OrderDispatching = () => {
           title="夏日睡莲"
           designNumber="0001"
           onConfirm={(budget) => {
-            console.log(budget);
             setShowEditPrice(false);
           }}
         />

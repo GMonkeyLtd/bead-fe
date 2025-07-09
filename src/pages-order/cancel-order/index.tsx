@@ -106,8 +106,6 @@ const CancelOrderPage: React.FC = () => {
 
     try {
       // TODO: 这里后续可以上传图片到服务器并记录取消原因
-      console.log("取消原因:", reason);
-      console.log("上传图片:", images);
       const imageBase64s = await Promise.all(images.map(image => imageToBase64(image)));  
       
       const result = await api.user.cancelOrder(orderInfo.id, imageBase64s as string[], reason);

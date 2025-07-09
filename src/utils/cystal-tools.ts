@@ -98,7 +98,6 @@ export const calcPositionsWithBeadSize = (
     center: { x: number, y: number } 
   ) => {
 
-    console.log(dots, spacing, ringRadius, center, 'dots, spacing, ringRadius, center')
     let currentAngle = 0;
     const positions: Position[] = [];
 
@@ -134,7 +133,6 @@ export const calculateBeadArrangementBySize = (
   const actualRingRadius = beadSizeList.reduce((sum, size) => sum + size, 0);
   const sizeRatio =  (2 * Math.PI * (ringRadius - Math.max(...beadSizeList))) / actualRingRadius;
   const scaledRadiusList = beadSizeList.map((size) => (Math.floor(size * sizeRatio) / 2));
-  console.log(sizeRatio, scaledRadiusList[0], 'scaledRadiusList')
   const positions = calcPositionsWithBeadSize(scaledRadiusList, 0, ringRadius, center);
   
   return positions;

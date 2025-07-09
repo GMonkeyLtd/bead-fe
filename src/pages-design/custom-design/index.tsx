@@ -38,12 +38,10 @@ const CustomDesign = () => {
   }, []);
 
   useEffect(() => {
-    console.log(beadData, beadDataId, "beadDataId");
     if (beadDataId) {
       const _beadData = beadData.find(
         (item) => item.bead_data_id === beadDataId
       );
-      console.log(_beadData, beadDataId, "_beadData");
       setDesignData(_beadData);
     }
   }, [beadDataId, beadData]);

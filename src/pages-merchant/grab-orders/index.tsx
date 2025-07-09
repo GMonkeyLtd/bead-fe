@@ -41,13 +41,11 @@ export default function GrabOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
 
-  console.log(orders, "grab orders");
   const loadOrders = async () => {
     setLoading(true);
     try {
       // 模拟API调用
       api.user.getDispatch().then((res: any) => {
-        console.log(res.data.orders, "res.data.orders");
         const orderList = res.data.orders
           ?.map((item) => {
             return {

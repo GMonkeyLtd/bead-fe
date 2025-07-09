@@ -41,7 +41,6 @@ const ModifyUser = () => {
 
   // 选择头像
   const handleChooseAvatar = async (e) => {
-    console.log(e, "handleChooseAvatar");
     const { avatarUrl: newAvatarUrl } = e.detail;
     try {
       setAvatarUrl(newAvatarUrl);
@@ -53,8 +52,6 @@ const ModifyUser = () => {
       });
     }
   };
-
-  console.log(avatarUrl, "avatarUrl");
 
   // 检查是否有更改
   const hasChanges = () => {
@@ -88,7 +85,6 @@ const ModifyUser = () => {
         const base64 = await imageToBase64(avatarUrl);
         data.avatar_base64 = base64;
       }
-      console.log(data, "data");
       await userApi.updateUser(data);
 
       Taro.showToast({
