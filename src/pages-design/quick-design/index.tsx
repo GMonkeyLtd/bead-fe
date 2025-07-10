@@ -191,8 +191,8 @@ const QuickDesign = () => {
       draft_id: draftId,
       image_url: base64 as string,
     });
-    if (res.data?.DesignId) {
-      pollDesignProgress(sessionId, draftId, res.data?.DesignId);
+    if (res.data?.design_id) {
+      pollDesignProgress(sessionId, draftId, res.data?.design_id);
     }
   }
 

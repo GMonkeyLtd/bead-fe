@@ -357,6 +357,12 @@ const ChatPage: React.FC = () => {
                 className="crystal-gradient-text"
                 style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
                 onClick={() => {
+                  if (result?.draft?.design_id) {
+                    Taro.redirectTo({
+                      url: `${pageUrls.result}?designBackendId=${result?.draft?.design_id}`,
+                    });
+                    return;
+                  }
                   if (!canvasImageUrl) {
                     return;
                   }
