@@ -40,6 +40,10 @@ const Result = () => {
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
   const autoShareRef = useRef(false);
+  const instance = Taro.getCurrentInstance();
+  const params = instance.router?.params;
+  const showBack = params?.showBack;
+  console.log(showBack, "showBack");
 
   const posterData = useMemo(() => {
     return {
@@ -91,8 +95,7 @@ const Result = () => {
 
   const initData = () => {
     // 获取传入的图片URL参数
-    const instance = Taro.getCurrentInstance();
-    const params = instance.router?.params;
+    
     if (params?.designBackendId) {
       const imageUrl = params?.imageUrl || "";
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
@@ -203,7 +206,7 @@ const Result = () => {
         "--bg-image": `url(${imageUrl})`,
       }}
     >
-      <AppHeader isWhite />
+      <AppHeader isWhite showBack={showBack === 'true'} />
       <View
         className="result-content-container"
         style={{
@@ -349,7 +352,7 @@ const Result = () => {
             />
           }
         />
-        <CrystalButton
+        {/* <CrystalButton
           onClick={doCreate}
           isPrimary
           text="制作成品"
@@ -361,7 +364,7 @@ const Result = () => {
               style={{ width: "24px", height: "24px" }}
             />
           }
-        />
+        /> */}
       </View>
       {budgetDialogShow && (
         <BudgetDialog

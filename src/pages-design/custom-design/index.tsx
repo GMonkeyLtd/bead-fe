@@ -62,7 +62,7 @@ const CustomDesign = () => {
     addBeadData({
       image_url: imageUrl,
       bead_list: editedBeads.map((item) => {
-        const _beadData = allBeadList?.find((_item) => _item.id === item.id);
+        const _beadData = allBeadList?.find((_item) => _item.id == item.id);
         return {
           ..._beadData,
           bead_diameter: item.bead_diameter || item.diameter,

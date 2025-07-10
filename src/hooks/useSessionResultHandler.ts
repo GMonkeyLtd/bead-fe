@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import apiSession, { CreateSessionResponse, DesignDraftResponse, BeadItem, MessageItem } from '../utils/api-session';
 
 export interface SessionResult {
@@ -19,7 +19,7 @@ export interface UseSessionResultHandlerParams {
 export const useSessionResultHandler = ({
   sessionData,
   pollingInterval = 2000,
-  maxRetries = 20
+  maxRetries = 2
 }: UseSessionResultHandlerParams) => {
   const [result, setResult] = useState<SessionResult>({
     systemMessages: [],
@@ -30,7 +30,10 @@ export const useSessionResultHandler = ({
     error: null
   });
 
-  const [retryCount, setRetryCount] = useState(0);
+  const retryCountRef = useRef(0);
+  // 图片生成次数
+  const [imgGenerateCount, setImgGenerateCount] = useState(0);
+
 
   // 计算出现频率最高的两个珠子
   const getTopTwoBeads = useCallback((beads: BeadItem[] | any[]): BeadItem[] | null => {
@@ -57,73 +60,30 @@ export const useSessionResultHandler = ({
     return sortedBeads;
   }, []);
 
-  // 处理生成内容的函数
-  const processSessionData = useCallback((data: CreateSessionResponse['data']) => {
-    // 提取system消息的content
-    const systemMessages = data.messages.filter(msg => msg.role === 'system')?.map(msg => msg.content) || [];
-
-    // 提取recommends
-    const recommends = data.recommends || [];
-
-    // 检查latest_draft的progress
-    const latestDraft = data.latest_draft;
-
-    // 计算最高频率的两个珠子
-    const topTwoBeads = latestDraft?.beads ? getTopTwoBeads(latestDraft.beads) : null;
-
-    setResult(prev => ({
-      ...prev,
-      systemMessages,
-      recommends,
-      topTwoBeads,
-      error: null
-    }));
-
-    // 如果progress不为100，开始轮询
-    if (latestDraft && latestDraft.progress !== 100) {
-      startPolling(data.session_id, latestDraft.draft_id);
-    } else if (latestDraft && latestDraft.progress === 100) {
-      // 如果progress已经是100，直接设置draft
-      setResult(prev => ({
-        ...prev,
-        draft: latestDraft,
-        topTwoBeads,
-        isPolling: false
-      }));
-    }
-  }, [getTopTwoBeads]);
-
-  const updateSessionData = useCallback(({ newMessage, newRecommends, sessionId, draftId }: { newMessage: MessageItem, newRecommends: string[], sessionId?: string, draftId?: string }) => {
-    if (sessionId && draftId) {
-      startPolling(sessionId, draftId);
-    } else {
-      setResult(prev => ({ ...prev, systemMessages: [...prev.systemMessages, newMessage.content], recommends: newRecommends }));
-    }
-  }, []);
-
   // 轮询设计稿进度
   const startPolling = useCallback(async (sessionId: string, draftId: string) => {
     setResult(prev => ({ ...prev, isPolling: true, error: null }));
-    setRetryCount(0);
+    retryCountRef.current = 0;
 
     const pollDraft = async () => {
       try {
         const response = await apiSession.getDesignDraft({
           session_id: sessionId,
           draft_id: draftId
-        }) as DesignDraftResponse;
+        }, {showError: false}) as DesignDraftResponse;
 
         if (response.code === 200 && response.data) {
           const draftData = response.data;
           const topTwoBeads = draftData.beads ? getTopTwoBeads(draftData.beads) : null;
 
           if (draftData.progress === 100) {
+            setImgGenerateCount(prev => prev + 1);
             // 设计稿完成
             setResult(prev => ({
               ...prev,
               draft: draftData,
               topTwoBeads,
-              isPolling: false
+              isPolling: false,
             }));
             return true; // 停止轮询
           } else {
@@ -135,14 +95,12 @@ export const useSessionResultHandler = ({
             }));
             return false; // 继续轮询
           }
-        } else {
-          throw new Error(response.message || '获取设计稿失败');
         }
       } catch (error: any) {
         console.error('轮询设计稿出错:', error);
-        setRetryCount(prev => prev + 1);
+        retryCountRef.current += 1;
 
-        if (retryCount >= maxRetries) {
+        if (retryCountRef.current >= maxRetries) {
           setResult(prev => ({
             ...prev,
             isPolling: false,
@@ -164,7 +122,7 @@ export const useSessionResultHandler = ({
     };
 
     poll();
-  }, [pollingInterval, maxRetries, retryCount, getTopTwoBeads]);
+  }, [pollingInterval, maxRetries, getTopTwoBeads]);
 
   // 停止轮询
   const stopPolling = useCallback(() => {
@@ -178,6 +136,54 @@ export const useSessionResultHandler = ({
     }
   }, [sessionData, startPolling]);
 
+    // 处理生成内容的函数
+    const processSessionData = useCallback((data: CreateSessionResponse['data']) => {
+      // 提取system消息的content
+      console.log(data.messages, "data");
+      const systemMessages = data.messages.filter(msg => ['system', 'assistant'].includes(msg.role))?.map(msg => msg.content) || [];
+  
+      // 提取recommends
+      const recommends = data.recommends || [];
+  
+      // 检查latest_draft的progress
+      const latestDraft = data.latest_draft;
+  
+      // 计算最高频率的两个珠子
+      const topTwoBeads = latestDraft?.beads ? getTopTwoBeads(latestDraft.beads) : null;
+  
+      setResult(prev => ({
+        ...prev,
+        systemMessages,
+        recommends,
+        topTwoBeads,
+        error: null
+      }));
+  
+      // 如果progress不为100，开始轮询
+      if (latestDraft && latestDraft.progress !== 100) {
+        setTimeout(() => {
+          startPolling(data.session_id, latestDraft.draft_id);
+        }, 1000);
+      } else if (latestDraft && latestDraft.progress === 100) {
+        setResult(prev => ({
+          ...prev,
+          draft: latestDraft,
+          topTwoBeads,
+          isPolling: false,
+        }));
+      }
+    }, [getTopTwoBeads]);
+  
+    const updateSessionData = useCallback(({ newMessage, newRecommends, sessionId, draftId }: { newMessage: MessageItem, newRecommends: string[], sessionId?: string, draftId?: string }) => {
+      if (sessionId && draftId) {
+        setTimeout(() => {
+          startPolling(sessionId, draftId);
+        }, 1000);
+      } else {
+        setResult(prev => ({ ...prev, systemMessages: [...prev.systemMessages, newMessage.content], recommends: newRecommends }));
+      }
+    }, [startPolling, setResult]);
+
   // 当sessionData改变时处理数据
   useEffect(() => {
     if (sessionData) {
@@ -185,12 +191,18 @@ export const useSessionResultHandler = ({
     }
   }, [sessionData, processSessionData]);
 
+  const resetImgGenerateCount = useCallback(() => {
+    setImgGenerateCount(0);
+  }, []);
+
   return {
     result,
+    imgGenerateCount,
     stopPolling,
     retryPolling,
     topTwoBeads: result.topTwoBeads,
     processSessionData,
-    updateSessionData
+    updateSessionData,
+    resetImgGenerateCount
   };
 }; 

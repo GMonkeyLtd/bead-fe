@@ -38,7 +38,7 @@ const UserCenterPage: React.FC = () => {
 
   const handleItemClick = (item: any) => {
     Taro.navigateTo({
-      url: `${pageUrls.result}?designBackendId=${item.id}`,
+      url: `${pageUrls.result}?designBackendId=${item.id}&showBack=true`,
     });
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Textarea } from "@tarojs/components";
 import { isEmptyMessage } from "../../utils/messageFormatter";
 import "./index.scss";
@@ -24,6 +24,10 @@ import { CancelToken } from "@/utils/request";
 import apiSession from "@/utils/api-session";
 import { useSessionResultHandler } from "@/hooks/useSessionResultHandler";
 import DateTimeDrawer from "@/components/DateTimeDrawer";
+import CrystalButton from "@/components/CrystalButton";
+import RightArrowGolden from "@/assets/icons/right-arrow-golden.svg";
+
+const MAX_IMG_GENERATE_COUNT = 1;
 
 const ChatPage: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
@@ -44,15 +48,19 @@ const ChatPage: React.FC = () => {
   const { addBeadData } = useDesign();
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
 
-  const [sessionData, setSessionData] = useState<any>(null);
   const [sessionId, setSessionId] = useState<string>("");
-  const generateRequestRef = useRef<CancelToken>(null);
-  const generateRequest2Ref = useRef<CancelToken>(null);
 
-  const { result, stopPolling, retryPolling, processSessionData, updateSessionData } =
-    useSessionResultHandler({
-      sessionData: sessionData,
-    });
+  const {
+    result,
+    imgGenerateCount,
+    stopPolling,
+    retryPolling,
+    processSessionData,
+    updateSessionData,
+    resetImgGenerateCount
+  } = useSessionResultHandler({
+    sessionData: null,
+  });
 
   // 键盘适配逻辑
   useEffect(() => {
@@ -126,6 +134,7 @@ const ChatPage: React.FC = () => {
         if (data.session_id) {
           setSessionId(data.session_id);
           processResult(data);
+          resetImgGenerateCount();
         }
       })
       .catch((err) => {
@@ -136,21 +145,25 @@ const ChatPage: React.FC = () => {
       });
   };
 
+  const getSessionDetail = (_sessionId: string) => {
+    apiSession.getSessionDetail(_sessionId).then((res) => {
+      setSessionId(_sessionId);
+      processResult(res.data);
+    });
+  };
+
   useEffect(() => {
     if (session_id) {
-      apiSession.getSessionDetail(session_id).then((res) => {
-        setSessionId(session_id);
-        processResult(res.data);
-      });
+      getSessionDetail(session_id);
       return;
     }
     if (year && month && day && hour && gender && isLunar) {
-    initChat({
-      birth_year: parseInt(year || "0") || 0,
-      birth_month: parseInt(month || "0") || 0,
-      birth_day: parseInt(day || "0") || 0,
-      birth_hour: parseInt(hour || "0") || 0,
-      sex: parseInt(gender || "0"),
+      initChat({
+        birth_year: parseInt(year || "0") || 0,
+        birth_month: parseInt(month || "0") || 0,
+        birth_day: parseInt(day || "0") || 0,
+        birth_hour: parseInt(hour || "0") || 0,
+        sex: parseInt(gender || "0"),
         is_lunar: isLunar === "true" ? true : false,
       });
     }
@@ -368,6 +381,8 @@ const ChatPage: React.FC = () => {
     );
   };
 
+  console.log(imgGenerateCount, "result");
+
   return (
     <PageContainer keyboardHeight={keyboardHeight}>
       <View
@@ -426,46 +441,72 @@ const ChatPage: React.FC = () => {
         {keyboardHeight > 0 ? renderKeyboardShow() : renderKeyboardHide()}
 
         {/* 输入区域 */}
-        <View className="input-container">
-          {result?.recommends?.length > 0 && (
-            <TagList
-              tags={result?.recommends?.map((item) => ({
-                id: item,
-                title: item,
-              }))}
-              onTagSelect={(tag) => {
-                setInputValue((prev) =>
-                  !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
-                );
+        {imgGenerateCount < MAX_IMG_GENERATE_COUNT && (
+          <View className="input-container">
+            {result?.recommends?.length > 0 && (
+              <TagList
+                tags={result?.recommends?.map((item) => ({
+                  id: item,
+                  title: item,
+                }))}
+                onTagSelect={(tag) => {
+                  setInputValue((prev) =>
+                    !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
+                  );
+                }}
+              />
+            )}
+            <View className="input-wrapper">
+              <Textarea
+                className="message-input"
+                value={inputValue}
+                placeholder="输入您的定制需求..."
+                placeholderStyle="color: #00000033;"
+                onInput={(e) => setInputValue(e.detail.value)}
+                onConfirm={handleSend}
+                autoHeight
+                adjustPosition={false}
+                // adjustKeyboardTo="bottom"
+                // onFocus={() => {
+                //   setKeyboardHeight(90);
+                // }}
+                // onBlur={() => {
+                //   setKeyboardHeight(0);
+                // }}
+                showConfirmBar={false}
+              />
+              <Image
+                src={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
+                style={{ width: "26px", height: "26px" }}
+                onClick={handleSend}
+              />
+            </View>
+          </View>
+        )}
+
+        {imgGenerateCount >= MAX_IMG_GENERATE_COUNT && (
+          <View className="design-action-container">
+            <CrystalButton
+              style={{ width: "140px" }}
+              text="更换心愿"
+              onClick={() => {
+                resetImgGenerateCount();
               }}
             />
-          )}
-          <View className="input-wrapper">
-            <Textarea
-              className="message-input"
-              value={inputValue}
-              placeholder="输入您的定制需求..."
-              placeholderStyle="color: #00000033;"
-              onInput={(e) => setInputValue(e.detail.value)}
-              onConfirm={handleSend}
-              autoHeight
-              adjustPosition={false}
-              // adjustKeyboardTo="bottom"
-              // onFocus={() => {
-              //   setKeyboardHeight(90);
-              // }}
-              // onBlur={() => {
-              //   setKeyboardHeight(0);
-              // }}
-              showConfirmBar={false}
-            />
-            <Image
-              src={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
-              style={{ width: "26px", height: "26px" }}
-              onClick={handleSend}
+            <CrystalButton
+              style={{ flex: 1 }}
+              isPrimary
+              icon={
+                <Image
+                  src={RightArrowGolden}
+                  style={{ width: "16px", height: "16px" }}
+                />
+              }
+              onClick={handleNextStep}
+              text="下一步"
             />
           </View>
-        </View>
+        )}
         {/* 用于拼接珠串图片的隐藏Canvas */}
         {result?.draft?.beads && result?.draft?.beads?.length > 0 && (
           <CircleRing
@@ -481,6 +522,7 @@ const ChatPage: React.FC = () => {
         )}
         <DateTimeDrawer
           onPersonalizeCustomize={(data) => {
+            setCanvasImageUrl("");
             initChat({
               birth_year: data.year,
               birth_month: data.month,
