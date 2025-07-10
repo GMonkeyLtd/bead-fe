@@ -105,6 +105,13 @@
     }
   }
 }
+.design-action-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 24px;
+}
 
 .result-container {
   padding: 24px;
