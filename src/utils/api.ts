@@ -1,4 +1,4 @@
-import http, { setBaseURL, setIsMock, CancelToken } from "./request";
+import http, { setBaseURL, setIsMock, CancelToken, BaseResponse } from "./request";
 import Taro from "@tarojs/taro";
 
 // 在应用启动时设置API基础URL
@@ -246,11 +246,99 @@ export const userHistoryApi = {
     }),
 };
 
-// 文件相关API
-export const fileApi = {
-  // 上传文件 - 支持取消
-  upload: (filePath: string, formData?: Record<string, any>, config?: ApiConfig) =>
-    http.upload("/upload", filePath, formData, config?.cancelToken),
+export interface InspirationResult extends BaseResponse {
+  data: {
+    page: number;
+    page_size: number;
+    total_count: number;
+    works: 
+      {
+        work_id: string;
+        title: string;
+        cover_url: string;
+        is_collect: boolean;
+        design_id: number;
+        user: {
+          nike_name: string;
+          avatar_url: string;    
+        };
+        collects_count: number;
+      }[];
+  };
+}
+
+export const inspirationApi = {
+  getInspirationList: (params: {page: number, pageSize: number}, config?: ApiConfig) => {
+    // return http.get<InspirationResult>(
+    //   "/community/home",
+    //   params,
+    //   {
+    //     cancelToken: config?.cancelToken,
+    //     ...config,
+    //   }
+    // );
+    return new Promise((resolve, reject) => {
+      resolve(
+        {
+          "code":200,
+          "message":"success",
+          "data":{
+            "page":1,
+            "page_size":100,
+            "works":[
+              {
+                "work_id":"work000001",
+                "title":"冰雪奇缘",
+                "cover_url":"https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
+                "is_collect":true,
+                "design_id":22,
+                "user":{
+                  "nike_name":"微信用户1",
+                  "avatar_url":"https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",    
+                },
+                "collects_count":100//单位：个
+              },
+              {
+                "work_id":"work000002",
+                "title":"冰雪奇缘2",
+                "design_id":23,
+                "cover_url":"https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
+                "is_collect":false,
+                "user":{
+                  "nike_name":"微信用户2",
+                  "avatar_url":"https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",    
+                },
+                "collects_count":187//单位：个
+              }
+            ],
+            "count":2
+          }
+        }
+      )
+    })
+  },
+  collectInspiration: (params: {work_id: string}, config?: ApiConfig) => {
+    return http.post<{
+      data: {
+        any: [];
+      };
+    }>(`/community/collect`, params, {
+      showLoading: true,
+      cancelToken: config?.cancelToken,
+      ...config,
+    })
+  },
+  cancelCollectInspiration: (params: {work_id: string}, config?: ApiConfig) => {
+    return http.post<{
+      data: {
+        any: [];
+      };
+    }>(`/community/uncollect`, params, {
+      showLoading: true,
+      cancelToken: config?.cancelToken,
+      ...config,
+    })
+  }
 };
 
 
@@ -259,6 +347,6 @@ export default {
   user: userApi,
   generate: generateApi,
   bead: beadsApi,
-  file: fileApi,
   userHistory: userHistoryApi,
+  inspiration: inspirationApi,
 };

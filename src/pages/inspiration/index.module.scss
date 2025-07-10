@@ -1,0 +1,348 @@
+.inspirationContainer {
+  padding: 0 16px;
+  padding-bottom: 100px; // 为底部 TabBar 留出空间
+  min-height: 100vh;
+}
+
+.tabContainer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.tabItem {
+  height: 22px;
+  position: relative;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: "Source Han Serif CN", serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+.tabActive {
+  color: #000000;
+}
+
+.inspirationList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.inspirationItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; // 使用 padding-bottom 创建正方形比例
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.inspirationImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageOverlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px);
+}
+
+.collectButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+
+  &.collected {
+    .heartIcon {
+      color: #ff9421;
+    }
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.heartIcon {
+  font-size: 14px;
+  line-height: 1;
+  color: #d2c5b7;
+}
+
+.collectCount {
+  font-size: 10px;
+  color: #1f1722;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.itemInfo {
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.itemTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f1722;
+  opacity: 0.9;
+  font-family: "Source Han Serif CN", serif;
+  letter-spacing: 0.071em;
+  line-height: 1.437;
+}
+
+.decorativeIcon {
+  width: 15.15px;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    width: 14.97px;
+    height: 1px;
+    background: #1f1722;
+    top: 5px;
+    left: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 6.39px;
+    height: 5px;
+    border: 1px solid #1f1722;
+    border-radius: 50%;
+    top: 0;
+    right: 0;
+  }
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.userAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid #ffffff;
+}
+
+.userName {
+  font-size: 10px;
+  font-weight: 300;
+  color: #1f1722;
+  opacity: 0.9;
+  font-family: "Noto Sans SC", sans-serif;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.collectSection {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.collectCountMain {
+  font-size: 10px;
+  font-weight: 400;
+  color: #1f1722;
+  opacity: 0.9;
+  font-family: "Noto Sans SC", sans-serif;
+  line-height: 1.35;
+}
+
+.serialNumber {
+  font-size: 10px;
+  font-weight: 300;
+  color: rgba(31, 23, 34, 0.5);
+  font-family: "Noto Sans SC", sans-serif;
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+}
+
+// 加载状态样式
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  width: 100%;
+}
+
+.loadingSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #daa520;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 14px;
+  color: #1f1722;
+  opacity: 0.6;
+}
+
+// 错误状态样式
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  width: 100%;
+}
+
+.errorText {
+  font-size: 14px;
+  color: #1f1722;
+  opacity: 0.6;
+  text-align: center;
+}
+
+.retryButton {
+  background: #daa520;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:active {
+    background: #b8941c;
+  }
+}
+
+.retryText {
+  color: white;
+  font-size: 14px;
+}
+
+// 没有更多数据样式
+.noMoreContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 16px;
+}
+
+.noMoreText {
+  font-size: 12px;
+  color: #5d5747;
+  opacity: 0.4;
+  text-align: center;
+}
+
+// 空状态样式
+.emptyContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  min-height: 300px;
+  width: 100%;
+}
+
+.emptyText {
+  font-size: 16px;
+  color: #1f1722;
+  opacity: 0.6;
+  text-align: center;
+}
+
+// 响应式适配
+@media (max-width: 375px) {
+  .inspirationContainer {
+    padding: 0 12px;
+  }
+
+  .inspirationList {
+    gap: 6px;
+    padding-top: 12px;
+  }
+
+  .itemInfo {
+    padding: 0 6px;
+  }
+}
+
+// 大屏幕适配
+@media (min-width: 768px) {
+  .inspirationList {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
