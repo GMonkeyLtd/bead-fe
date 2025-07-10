@@ -43,7 +43,6 @@ const Result = () => {
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
   const showBack = params?.showBack;
-  console.log(showBack, "showBack");
 
   const posterData = useMemo(() => {
     return {

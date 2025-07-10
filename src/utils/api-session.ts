@@ -124,7 +124,12 @@ export default {
   // 获取会话详情
   getSessionDetail: (session_id: string) => {
     return http.get<SessionDetailResponse>(
-      `/user/sessions/${session_id}/history`
+      `/user/sessions/${session_id}/history`,
+      {},
+      {
+        showLoading: true,
+        loadingText: "设计信息查询中...",
+      }
     );
   },
 

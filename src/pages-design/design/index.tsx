@@ -410,7 +410,9 @@ const ChatPage: React.FC = () => {
           <View
             className="reset-design-info-link"
             onClick={() => {
-              setShowDateTimeDrawer(true);
+              Taro.redirectTo({
+                url: pageUrls.home + "?newSession=true",
+              });
             }}
           >
             重置信息

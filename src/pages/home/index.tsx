@@ -1,6 +1,6 @@
 import { View, Text, Swiper, SwiperItem, Image } from "@tarojs/components";
 import { useEffect, useState } from "react";
-import Taro from "@tarojs/taro";
+import Taro, { useDidShow } from "@tarojs/taro";
 import "./index.scss";
 import { SWIPER_DATA } from "@/config/home-content";
 import RightArrow from "@/assets/icons/right-arrow.svg";
@@ -16,11 +16,15 @@ const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
   const [checkFirst, setCheckFirst] = useState(false);
   const [lastSessionId, setLastSessionId] = useState("");
+  const instance = Taro.getCurrentInstance();
+  const { newSession } = instance.router?.params || {};
 
   useEffect(() => {
     AuthManager.clearAuth();
     AuthManager.login();
+  }, []);
 
+  useDidShow(() => {
     apiSession.getLastSession().then((res) => {
       if (res.data?.session_id) {
         setLastSessionId(res.data.session_id);
@@ -31,12 +35,18 @@ const Home = () => {
     }).finally(() => {
       setCheckFirst(true);
     });
-  }, []);
+  })
 
   const startDesign = () => {
     // 打开日期时间选择抽屉
     setShowDateTimeDrawer(true);
   };
+
+  useEffect(() => {
+    if (newSession) {
+      startDesign();
+    }
+  }, [newSession]);
 
   const handleDrawerClose = () => {
     setShowDateTimeDrawer(false);
@@ -153,8 +163,13 @@ const Home = () => {
                 </View>
                 <View className="crystal-action-section">
                   <CrystalButton
+                    style={{
+                      position: 'relative',
+                      bottom: checkFirst ? '0px' : '-500px',
+                      transition: 'bottom 0.8s ease-in-out',
+                    }}
                     onClick={() => {
-                      if (!checkFirst || !lastSessionId) {
+                      if (!lastSessionId) {
                         startDesign();
                       } else {
                         Taro.redirectTo({
