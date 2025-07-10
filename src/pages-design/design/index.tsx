@@ -57,7 +57,7 @@ const ChatPage: React.FC = () => {
     retryPolling,
     processSessionData,
     updateSessionData,
-    resetImgGenerateCount
+    resetImgGenerateCount,
   } = useSessionResultHandler({
     sessionData: null,
   });
@@ -200,21 +200,26 @@ const ChatPage: React.FC = () => {
   };
 
   const handleNextStep = () => {
-    if (!canvasImageUrl) {
+    if (!canvasImageUrl && !result?.draft?.draft_id && !sessionId) {
       return;
     }
-    const beadDataId = "bead-" + generateUUID();
-    addBeadData({
-      image_url: canvasImageUrl,
-      bead_list: result?.draft?.beads?.map((item) => ({
-        ...item,
-        bead_diameter: item.bead_diameter || item.diameter,
-      })),
-      bead_data_id: beadDataId,
-    });
+    // const beadDataId = "bead-" + generateUUID();
+    // addBeadData({
+    //   image_url: canvasImageUrl,
+    //   bead_list: result?.draft?.beads?.map((item) => ({
+    //     ...item,
+    //     bead_diameter: item.bead_diameter || item.diameter,
+    //   })),
+    //   bead_data_id: beadDataId,
+    // });
 
-    Taro.navigateTo({
-      url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
+    // Taro.navigateTo({
+    //   url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
+    // });
+    Taro.redirectTo({
+      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
+        result?.draft?.draft_id
+      }&imageUrl=${encodeURIComponent(canvasImageUrl)}`,
     });
   };
 

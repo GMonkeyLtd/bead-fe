@@ -10,12 +10,12 @@ import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
 import PageContainer from "@/components/PageContainer";
 import { CancelToken } from "@/utils/request";
+import sessionApi from "@/utils/api-session";
 
 const QuickDesign = () => {
-  const [imageUrl, setImageUrl] = useState("");
   const [designing, setDesigning] = useState(true);
   const params = Taro.getCurrentInstance()?.router?.params;
-  const { year, month, day, hour, gender, isLunar, beadDataId } = params || {};
+  const { year, month, day, hour, gender, isLunar, beadDataId, draftId, imageUrl, sessionId } = params || {};
   const cancelTokenForImage = useRef<CancelToken>(null);
   const cancelTokenForInfo = useRef<CancelToken>(null);
 
@@ -31,6 +31,9 @@ const QuickDesign = () => {
   })
 
   useEffect(() => {
+    if (draftId && imageUrl) {
+      quickDesignByDraft(sessionId, draftId, imageUrl);
+    }
     if (beadDataId) {
       const _beadData = beadData.find(
         (item) => item.bead_data_id === beadDataId
@@ -158,6 +161,40 @@ const QuickDesign = () => {
       }, 3000)
     }
   };
+
+  const pollDesignProgress = async (sessionId, draftId, designId) => {
+    const res = await sessionApi.queryDesignProgress({
+      session_id: sessionId,
+      draft_id: draftId,
+      design_id: designId,
+    });
+    if (res.data?.Progress === 100) {
+      processDesignData({
+        image_urls: [res.data?.ImageURL],
+        bracelet_name: res.data?.Info?.Name,
+        recommendation_text: res.data?.Info?.Description,
+        bead_ids_deduplication: res.data?.Info?.RecommendBeads,
+        design_id: res.data?.DesignId,
+      });
+    } else {
+      setTimeout(() => {
+        pollDesignProgress(sessionId, draftId, designId);
+      }, 2000);
+    }
+  }
+
+  const quickDesignByDraft = async (sessionId, draftId, imageUrl) => {
+    const _imageUrl = decodeURIComponent(imageUrl);
+    const base64 = await imageToBase64(_imageUrl, false);
+    const res = await sessionApi.generateDesignByDraftImage({
+      session_id: sessionId,
+      draft_id: draftId,
+      image_url: base64 as string,
+    });
+    if (res.data?.DesignId) {
+      pollDesignProgress(sessionId, draftId, res.data?.DesignId);
+    }
+  }
 
   return (
     <PageContainer>

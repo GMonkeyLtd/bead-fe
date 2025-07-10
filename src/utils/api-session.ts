@@ -80,6 +80,23 @@ export interface DesignDraftResponse extends BaseResponse {
   };
 }
 
+export interface DesignProgressResponse extends BaseResponse {
+  data: {
+    Progress: number;
+    ImageURL: string;
+    DesignId: string;
+    Info: {
+      Name: string;
+      Description: string;
+      Wuxing: string;
+      Wishes: string;
+      Spec: string;
+      RecommendBeads: BeadItem[];
+      Beads: BeadItem[];
+    };
+  };
+}
+
 export default {
   // 创建会话
   createSession: (
@@ -144,11 +161,49 @@ export default {
     config?: ApiConfig
   ) => {
     return http.get<DesignDraftResponse>(
-      `/user/sessions/${params.session_id}/drafts/${params.draft_id}`,
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}`
       // {
       //   cancelToken: config?.cancelToken,
       //   ...config,
       // }
+    );
+  },
+
+  generateDesignByDraftImage: (
+    params: {
+      session_id: string;
+      draft_id: string;
+      image_url: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<{ DesignId: string }>(
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/design`,
+      {
+        base64_image: params.image_url,
+      },
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  },
+
+  queryDesignProgress: (
+    params: {
+      session_id: string;
+      draft_id: string;
+      design_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<DesignProgressResponse>(
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/designs/${params.design_id}`,
+      {},
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
     );
   },
 };
