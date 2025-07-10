@@ -283,23 +283,25 @@ export const userHistoryApi = {
     ),
 };
 
+export interface InspirationWord {
+  work_id: string;
+  title: string;
+  cover_url: string;
+  is_collect: boolean;
+  design_id: number;
+  user: {
+    nike_name: string;
+    avatar_url: string;
+  };
+  collects_count: number;
+}
+
 export interface InspirationResult extends BaseResponse {
   data: {
     page: number;
     page_size: number;
     total_count: number;
-    works: {
-      work_id: string;
-      title: string;
-      cover_url: string;
-      is_collect: boolean;
-      design_id: number;
-      user: {
-        nike_name: string;
-        avatar_url: string;
-      };
-      collects_count: number;
-    }[];
+    works: InspirationWord[];
   };
 }
 
@@ -308,8 +310,8 @@ export const inspirationApi = {
     params: { page: number; pageSize: number } | { work_id: string },
     config?: ApiConfig
   ) => {
-    // return http.get<InspirationResult>(
-    //   "/community/home",
+    // return http.post<InspirationResult>(
+    //   "/user/community/home",
     //   params,
     //   {
     //     cancelToken: config?.cancelToken,
@@ -363,7 +365,7 @@ export const inspirationApi = {
       data: {
         any: [];
       };
-    }>(`/community/collect`, params, {
+    }>(`/user/community/collect`, params, {
       showLoading: true,
       cancelToken: config?.cancelToken,
       ...config,
@@ -377,7 +379,7 @@ export const inspirationApi = {
       data: {
         any: [];
       };
-    }>(`/community/uncollect`, params, {
+    }>(`/user/community/uncollect`, params, {
       showLoading: true,
       cancelToken: config?.cancelToken,
       ...config,
