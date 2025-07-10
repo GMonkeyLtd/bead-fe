@@ -1,4 +1,9 @@
-import http, { setBaseURL, setIsMock, CancelToken, BaseResponse } from "./request";
+import http, {
+  setBaseURL,
+  setIsMock,
+  CancelToken,
+  BaseResponse,
+} from "./request";
 import Taro from "@tarojs/taro";
 
 // 在应用启动时设置API基础URL
@@ -90,11 +95,15 @@ export const userApi = {
     }),
 
   // 获取用户信息
-  getUserInfo: (config?: ApiConfig) => 
-    http.post<User>(`/user/getuserinfo`, {}, {
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
+  getUserInfo: (config?: ApiConfig) =>
+    http.post<User>(
+      `/user/getuserinfo`,
+      {},
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
 
   // 更新用户信息
   updateUser: (data: Partial<User>, config?: ApiConfig) =>
@@ -104,23 +113,27 @@ export const userApi = {
     }),
 
   // 用户退出登录
-  logout: (config?: ApiConfig) => 
-    http.post("/auth/logout", {}, {
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
+  logout: (config?: ApiConfig) =>
+    http.post(
+      "/auth/logout",
+      {},
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
 };
 
 // 生成相关API
 export const generateApi = {
   // 八字查询
   bazi: (params: BaziParams, config?: ApiConfig) =>
-    http.post<BaziResult>("/user/querybazi", params, { 
+    http.post<BaziResult>("/user/querybazi", params, {
       skipAuth: true,
       cancelToken: config?.cancelToken,
       ...config,
     }),
-  
+
   // 快速生成 - 支持取消
   quickGenerate: (params: QuickGenerateParams, config?: ApiConfig) =>
     http.post<QuickGenerateResult>("/user/oneclick", params, {
@@ -128,33 +141,42 @@ export const generateApi = {
       cancelToken: config?.cancelToken,
       ...config,
     }),
-  
+
   // 个性化生成第一步 - 支持取消
-  personalizedGenerate: (params: PersonalizedGenerateParams, config?: ApiConfig) =>
+  personalizedGenerate: (
+    params: PersonalizedGenerateParams,
+    config?: ApiConfig
+  ) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep1",
       params,
-      { 
+      {
         showLoading: false,
         cancelToken: config?.cancelToken,
         ...config,
       }
     ),
-  
+
   // 个性化生成第二步 - 支持取消
-  personalizedGenerate2: (params: PersonalizedGenerate2Params, config?: ApiConfig) =>
+  personalizedGenerate2: (
+    params: PersonalizedGenerate2Params,
+    config?: ApiConfig
+  ) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep2",
       params,
-      { 
+      {
         showLoading: false,
         cancelToken: config?.cancelToken,
         ...config,
       }
     ),
-  
+
   // 通过图片生成 - 支持取消
-  personalizedGenerateByImage: (params: QuickGenerateByImageParams, config?: ApiConfig) =>
+  personalizedGenerateByImage: (
+    params: QuickGenerateByImageParams,
+    config?: ApiConfig
+  ) =>
     http.post<QuickGenerateResult>("/user/personalizationstep3", params, {
       showLoading: false,
       cancelToken: config?.cancelToken,
@@ -186,7 +208,7 @@ export const userHistoryApi = {
         ...config,
       }
     ),
-  
+
   getDesignById: (designId: number, config?: ApiConfig) =>
     http.post<PersonalizedGenerateResult[]>(
       `/user/getdesignitem`,
@@ -199,8 +221,11 @@ export const userHistoryApi = {
         ...config,
       }
     ),
-  
-  createOrder: (params: { design_id: number; price: number }, config?: ApiConfig) =>
+
+  createOrder: (
+    params: { design_id: number; price: number },
+    config?: ApiConfig
+  ) =>
     http.post<{
       data: {
         order_uuid: string;
@@ -211,39 +236,51 @@ export const userHistoryApi = {
       cancelToken: config?.cancelToken,
       ...config,
     }),
-  
+
   getOrderById: (orderId: string | string[], config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/queryorder`, { order_uuids: Array.isArray(orderId) ? orderId : [orderId] }, { 
-      showLoading: true, 
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
-  
+    }>(
+      `/user/queryorder`,
+      { order_uuids: Array.isArray(orderId) ? orderId : [orderId] },
+      {
+        showLoading: true,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
+
   getOrderList: (config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/queryorder`, {}, { 
-      showLoading: true,
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
-  
+    }>(
+      `/user/queryorder`,
+      {},
+      {
+        showLoading: true,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
+
   cancelOrder: (orderId: string, config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/cancelorder`, { order_uuid: orderId }, { 
-      showLoading: true,
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
+    }>(
+      `/user/cancelorder`,
+      { order_uuid: orderId },
+      {
+        showLoading: true,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
 };
 
 export interface InspirationResult extends BaseResponse {
@@ -251,24 +288,26 @@ export interface InspirationResult extends BaseResponse {
     page: number;
     page_size: number;
     total_count: number;
-    works: 
-      {
-        work_id: string;
-        title: string;
-        cover_url: string;
-        is_collect: boolean;
-        design_id: number;
-        user: {
-          nike_name: string;
-          avatar_url: string;    
-        };
-        collects_count: number;
-      }[];
+    works: {
+      work_id: string;
+      title: string;
+      cover_url: string;
+      is_collect: boolean;
+      design_id: number;
+      user: {
+        nike_name: string;
+        avatar_url: string;
+      };
+      collects_count: number;
+    }[];
   };
 }
 
 export const inspirationApi = {
-  getInspirationList: (params: {page: number, pageSize: number}, config?: ApiConfig) => {
+  getInspirationData: (
+    params: { page: number; pageSize: number } | { work_id: string },
+    config?: ApiConfig
+  ) => {
     // return http.get<InspirationResult>(
     //   "/community/home",
     //   params,
@@ -278,46 +317,48 @@ export const inspirationApi = {
     //   }
     // );
     return new Promise((resolve, reject) => {
-      resolve(
-        {
-          "code":200,
-          "message":"success",
-          "data":{
-            "page":1,
-            "page_size":100,
-            "works":[
-              {
-                "work_id":"work000001",
-                "title":"冰雪奇缘",
-                "cover_url":"https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-                "is_collect":true,
-                "design_id":22,
-                "user":{
-                  "nike_name":"微信用户1",
-                  "avatar_url":"https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",    
-                },
-                "collects_count":100//单位：个
+      resolve({
+        code: 200,
+        message: "success",
+        data: {
+          page: 1,
+          page_size: 100,
+          works: [
+            {
+              work_id: "work000001",
+              title: "冰雪奇缘",
+              cover_url:
+                "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
+              is_collect: true,
+              design_id: 22,
+              user: {
+                nike_name: "微信用户1",
+                avatar_url:
+                  "https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",
               },
-              {
-                "work_id":"work000002",
-                "title":"冰雪奇缘2",
-                "design_id":23,
-                "cover_url":"https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-                "is_collect":false,
-                "user":{
-                  "nike_name":"微信用户2",
-                  "avatar_url":"https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",    
-                },
-                "collects_count":187//单位：个
-              }
-            ],
-            "count":2
-          }
-        }
-      )
-    })
+              collects_count: 100, //单位：个
+            },
+            {
+              work_id: "work000002",
+              title: "冰雪奇缘2",
+              design_id: 23,
+              cover_url:
+                "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
+              is_collect: false,
+              user: {
+                nike_name: "微信用户2",
+                avatar_url:
+                  "https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",
+              },
+              collects_count: 187, //单位：个
+            },
+          ],
+          count: 2,
+        },
+      });
+    });
   },
-  collectInspiration: (params: {work_id: string}, config?: ApiConfig) => {
+  collectInspiration: (params: { work_id: string }, config?: ApiConfig) => {
     return http.post<{
       data: {
         any: [];
@@ -326,9 +367,12 @@ export const inspirationApi = {
       showLoading: true,
       cancelToken: config?.cancelToken,
       ...config,
-    })
+    });
   },
-  cancelCollectInspiration: (params: {work_id: string}, config?: ApiConfig) => {
+  cancelCollectInspiration: (
+    params: { work_id: string },
+    config?: ApiConfig
+  ) => {
     return http.post<{
       data: {
         any: [];
@@ -337,10 +381,9 @@ export const inspirationApi = {
       showLoading: true,
       cancelToken: config?.cancelToken,
       ...config,
-    })
-  }
+    });
+  },
 };
-
 
 // 导出所有API
 export default {

@@ -52,7 +52,7 @@ const InspirationPage: React.FC = () => {
     pageSize: 10,
     fetchData: useCallback(async (page: number, pageSize: number) => {
       try {
-        const res = await inspirationApi.getInspirationList({ page, pageSize });
+        const res = await inspirationApi.getInspirationData({ page, pageSize });
         const result = res as InspirationResult;
 
         return {

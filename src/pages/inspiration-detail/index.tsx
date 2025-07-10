@@ -4,7 +4,7 @@ import Taro, { useRouter } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import LazyImage from "@/components/LazyImage";
-import { inspirationApi } from "@/utils/api";
+import { inspirationApi, userHistoryApi } from "@/utils/api";
 
 interface BeadInfo {
   id: string;
@@ -34,61 +34,33 @@ interface InspirationDetail {
 
 const InspirationDetailPage: React.FC = () => {
   const router = useRouter();
-  const { workId } = router.params;
+  const { workId, designId } = router.params || {};
+  const [designData, setDesignData] = useState<any>(null);
   
   const [detail, setDetail] = useState<InspirationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  useEffect(() => {
-    if (workId) {
-      fetchInspirationDetail();
-    }
-  }, [workId]);
-
-  const fetchInspirationDetail = async () => {
+  const getInspirationDetail = async (work_id) => {
     try {
       setLoading(true);
+      // inspirationApi.getInspirationData({ work_id }).then((res) => {
+      //   setDetail(res.data as InspirationDetail);
+      // });
       // 模拟获取详情数据
-      const mockDetail: InspirationDetail = {
-        work_id: workId || "work000001",
-        title: "冰雪奇缘",
-        number: "NO.0024",
-        description: "一段话描述这款手串的，一段话描述这款手串的整体能量和祝福。一段话描述这款手串的，一段话描述这款手串的整体能量和祝福。",
-        cover_url: "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-        images: [
-          "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-          "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-          "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg"
-        ],
-        likes_count: 197,
-        created_at: new Date().toISOString(),
-        user: {
-          user_id: "user123",
-          nike_name: "温酒大人",
-          avatar_url: "https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg"
+      const mockDetail = {
+        "work_id":"work000001",
+        "title":"冰雪奇缘",
+        "cover_url":"https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
+        "is_collect":true,
+        "design_id":22,
+        "user":{
+          "nike_name":"微信用户1",
+          "avatar_url":"https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",    
         },
-        beads: [
-          {
-            id: "bead1",
-            name: "绿莹石",
-            element: "木",
-            effect: "稳定情绪",
-            image: "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-            color: "#90EE90"
-          },
-          {
-            id: "bead2", 
-            name: "绿莹石",
-            element: "木",
-            effect: "稳定情绪",
-            image: "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-            color: "#90EE90"
-          }
-        ]
-      };
-      
-      setDetail(mockDetail);
+        "collects_count":100//单位：个
+      }
+      setDetail(mockDetail as unknown as InspirationDetail);
     } catch (error) {
       console.error('获取灵感详情失败:', error);
       Taro.showToast({
@@ -100,6 +72,27 @@ const InspirationDetailPage: React.FC = () => {
     }
   };
 
+  const getDesignData = async (designId: number) => {
+    try {
+      // const res = await userHistoryApi.getDesignById(designId);
+      const res = await userHistoryApi.getImageHistory()
+      setDesignData(res.data?.[0]);
+    } catch (error) {
+      console.error('获取设计数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (workId) {
+      getInspirationDetail(workId);
+    }
+    if (designId) {
+      getDesignData(designId);
+    }
+  }, [workId, designId]);
+
   const handleImageSwipe = (direction: 'left' | 'right') => {
     if (!detail?.images) return;
     
@@ -110,13 +103,13 @@ const InspirationDetailPage: React.FC = () => {
     }
   };
 
-  const handleUserClick = () => {
-    if (!detail?.user) return;
+  // const handleUserClick = () => {
+  //   if (!detail?.user) return;
     
-    Taro.navigateTo({
-      url: `/pages/user-profile/index?userId=${detail.user.user_id}`
-    });
-  };
+  //   Taro.navigateTo({
+  //     url: `/pages/user-profile/index?userId=${detail.user.user_id}`
+  //   });
+  // };
 
   const handleMakeSameStyle = () => {
     if (!detail) return;
@@ -130,7 +123,7 @@ const InspirationDetailPage: React.FC = () => {
     const date = new Date(timestamp);
     return `发布于${date.getMonth() + 1}月${date.getDate()}日`;
   };
-
+  console.log(loading, 'loading');
   if (loading) {
     return (
       <CrystalContainer showBack={true}>
@@ -157,11 +150,12 @@ const InspirationDetailPage: React.FC = () => {
       <ScrollView className={styles.container} scrollY>
         {/* 主图片区域 */}
         <View className={styles.imageSection}>
-          <LazyImage
+          {/* <LazyImage
             src={detail.images?.[currentImageIndex] || detail.cover_url}
             className={styles.mainImage}
             mode="aspectFill"
-          />
+          /> */}
+          <Image src={detail.cover_url} className={styles.mainImage} mode="aspectFill" />
           
           {/* 图片指示器 */}
           {detail.images && detail.images.length > 1 && (
@@ -273,4 +267,4 @@ const InspirationDetailPage: React.FC = () => {
   );
 };
 
-export default InspirationDetailPage; 
+export default InspirationDetailPage;   
