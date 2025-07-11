@@ -8,6 +8,7 @@ import {
   FONT_URL,
   LOGO_IMAGE_URL,
   LOGO_SLOGAN_IMAGE_URL,
+  APP_QRCODE_IMAGE_URL,
   POSTER_BG_IMAGE_URL,
 } from "@/config";
 import "./index.scss";
@@ -420,7 +421,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
 
       // 绘制右下角二维码/开启定制区域
       if (data.qrCode) {
-        const { path: qrImgPath } = await loadImage(data.qrCode);
+        const { path: qrImgPath } = await loadImage(APP_QRCODE_IMAGE_URL);
         ctx.drawImage(qrImgPath, 362 * dpr, 510 * dpr, 68 * dpr, 68 * dpr);
       }
 
