@@ -20,6 +20,8 @@ export const DEFAULT_WECHAT_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/ima
 export const SELECTED_WECHAT_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wechat-selected.png";
 export const LOGO_WITH_BACKGROUND_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/logo-with-background.png";
 export const LOGO_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/logo-image.png";
+export const APP_QRCODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/app-qrcode.png";
+
 
 
 

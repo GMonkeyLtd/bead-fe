@@ -11,6 +11,7 @@ interface UseInfiniteScrollOptions<T> {
   }>;
   threshold?: number; // 距离底部多少像素时开始加载
   enabled?: boolean; // 是否启用无限滚动
+  scrollRef?: React.RefObject<any>;
 }
 
 interface UseInfiniteScrollResult<T> {
@@ -30,6 +31,7 @@ export function useInfiniteScroll<T = any>({
   fetchData,
   threshold = 100,
   enabled = true,
+  scrollRef,
 }: UseInfiniteScrollOptions<T>): UseInfiniteScrollResult<T> {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
@@ -103,14 +105,13 @@ export function useInfiniteScroll<T = any>({
       throttleTimer = setTimeout(() => {
         // 获取页面滚动信息
         Taro.createSelectorQuery()
-          .selectViewport()
+          .select(scrollRef?.current)
           .scrollOffset()
           .exec((res) => {
             if (res && res[0]) {
               const { scrollTop, scrollHeight } = res[0];
               const systemInfo = Taro.getSystemInfoSync();
               const clientHeight = systemInfo.windowHeight;
-              
               if (scrollHeight - scrollTop - clientHeight < threshold) {
                 loadMore();
               }
@@ -163,7 +164,7 @@ export function useInfiniteScroll<T = any>({
         clearTimeout(throttleTimer);
       }
     };
-  }, [enabled, threshold, loadMore]);
+  }, [enabled, threshold, loadMore, scrollRef]);
 
 
   return {

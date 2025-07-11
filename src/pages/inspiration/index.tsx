@@ -9,7 +9,7 @@ import { View, Text, ScrollView, Image } from "@tarojs/components";
 import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import LazyImage from "@/components/LazyImage";
-import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
+import Taro, { useDidShow, usePullDownRefresh, useReady } from "@tarojs/taro";
 import TabBar from "@/components/TabBar";
 import { inspirationApi, InspirationResult, userApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
@@ -47,10 +47,9 @@ const INSPIRATION_TABS = [
 const InspirationPage: React.FC = () => {
   const [curTab, setCurTab] = useState<"all" | "collect">("all");
   const { height: navBarHeight } = getNavBarHeightAndTop();
-  const [scrollIntoView, setScrollIntoView] = useState<string | null>(null);
-  const [shouldRestoreScroll, setShouldRestoreScroll] = useState(false);
-  const scrollTopRef = useRef(0);
-
+  const scrollRef = useRef(null);
+  const loadMoreRef = useRef(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const {
     data: inspirationList,
     loading,
@@ -58,7 +57,7 @@ const InspirationPage: React.FC = () => {
     hasMore,
     refresh,
     loadMore,
-  } = useInfiniteScroll<InspirationWord>({
+  } = useInfiniteScroll<InspirationItem>({
     initialPage: 1,
     pageSize: 100,
     fetchData: useCallback(async (page: number, pageSize: number) => {
@@ -76,7 +75,6 @@ const InspirationPage: React.FC = () => {
   });
 
   const showData = useMemo(() => {
-    setShouldRestoreScroll(true);
     if (curTab === "all") {
       return inspirationList;
     } else {
@@ -100,9 +98,12 @@ const InspirationPage: React.FC = () => {
     });
   };
 
+  useDidShow(() => {
+    refresh();
+  });
+
   // 处理收藏点击
   const handleCollectClick = (item: InspirationItem, e: any) => {
-    setScrollIntoView(`work_${item.work_id}`);
     e.stopPropagation();
     // TODO: 实现收藏功能
     if (item.is_collect) {
@@ -147,8 +148,6 @@ const InspirationPage: React.FC = () => {
     }
     return count.toString();
   };
-console.log(shouldRestoreScroll, scrollTopRef.current, 'shouldRestoreScroll')
-
 
   return (
     <CrystalContainer showBack={false} showHome={false}>
@@ -178,32 +177,14 @@ console.log(shouldRestoreScroll, scrollTopRef.current, 'shouldRestoreScroll')
             </View>
           ))}
         </View>
-        <ScrollView
-          scrollY
-          scrollWithAnimation
-          scrollTop={shouldRestoreScroll ? scrollTopRef.current : undefined} // 关键：绑定记录的滚动位置
-          onScroll={(e) => {
-            if (shouldRestoreScroll) {
-              setShouldRestoreScroll(false);
-            }
-            console.log(e.detail.scrollTop, 'onScroll')
-            scrollTopRef.current = e.detail.scrollTop;
-          }} // 滚动时更新位置
-          showScrollbar={false}
-          lowerThreshold={100}
-          onScrollToLower={loadMore}
-         
+        <View
           style={{
             height: `calc(100vh - ${navBarHeight + 220}px)`,
             boxSizing: "border-box",
             paddingBottom: "20px",
+            overflowY: "auto",
           }}
-          onTouchStart={() => {
-            // 用户开始触摸时立即重置，确保滚动响应
-            if (shouldRestoreScroll) {
-              setShouldRestoreScroll(false);
-            }
-          }}
+          ref={scrollRef}
         >
           <View className={styles.inspirationList}>
             {showData.map((item, index) => (
@@ -265,14 +246,14 @@ console.log(shouldRestoreScroll, scrollTopRef.current, 'shouldRestoreScroll')
                 </View>
               </View>
             ))}
-          </View>
-          {/* 没有更多数据 */}
-          {!hasMore && showData.length > 0 && (
+            {!hasMore && showData.length > 0 && (
             <View className={styles.noMoreContainer}>
               <Text className={styles.noMoreText}>没有更多了</Text>
             </View>
           )}
-        </ScrollView>
+          </View>
+          {/* 没有更多数据 */}
+        </View>
 
         {/* 加载状态 */}
         {loading && (

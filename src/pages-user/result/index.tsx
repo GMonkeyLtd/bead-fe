@@ -11,6 +11,7 @@ import {
   CRYSTALS_BG_IMAGE_URL,
   LOGO_IMAGE_URL,
   LOGO_WITH_BACKGROUND_IMAGE_URL,
+  APP_QRCODE_IMAGE_URL,
   QR_CODE_IMAGE_URL,
 } from "@/config";
 import { useDesign } from "@/store/DesignContext";
@@ -47,7 +48,6 @@ const Result = () => {
       title: braceletName,
       description: braceletDescription,
       crystals: beadDescriptions,
-      qrCode: QR_CODE_IMAGE_URL,
       mainImage: imageUrl,
     };
   }, [braceletName, braceletDescription, beadDescriptions, imageUrl]);
@@ -291,7 +291,7 @@ const Result = () => {
               </View>
               <View className="bead-share-qrcode">
                 <Image
-                  src={QR_CODE_IMAGE_URL}
+                  src={APP_QRCODE_IMAGE_URL}
                   mode="widthFix"
                   style={{ width: "62px", height: "62px" }}
                 />

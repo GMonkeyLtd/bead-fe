@@ -8,6 +8,7 @@ import {
   FONT_URL,
   LOGO_IMAGE_URL,
   LOGO_SLOGAN_IMAGE_URL,
+  APP_QRCODE_IMAGE_URL,
   POSTER_BG_IMAGE_URL,
 } from "@/config";
 import "./index.scss";
