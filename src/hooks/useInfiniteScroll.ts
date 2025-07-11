@@ -52,7 +52,7 @@ export function useInfiniteScroll<T = any>({
       } else {
         setData(prev => [...prev, ...result.data]);
       }
-      
+      console.log(result, 'result')
       setHasMore(result.hasMore);
       
       if (result.hasMore) {
@@ -164,6 +164,7 @@ export function useInfiniteScroll<T = any>({
       }
     };
   }, [enabled, threshold, loadMore]);
+
 
   return {
     data,

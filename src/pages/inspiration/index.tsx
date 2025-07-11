@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useState, useRef, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 import { View, Text, ScrollView, Image } from "@tarojs/components";
 import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
@@ -41,35 +47,36 @@ const INSPIRATION_TABS = [
 const InspirationPage: React.FC = () => {
   const [curTab, setCurTab] = useState<"all" | "collect">("all");
   const { height: navBarHeight } = getNavBarHeightAndTop();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [scrollTop, setScrollTop] = useState(0);
+  const [scrollIntoView, setScrollIntoView] = useState<string | null>(null);
+  const [shouldRestoreScroll, setShouldRestoreScroll] = useState(false);
+  const scrollTopRef = useRef(0);
 
-  const [hasMore, setHasMore] = useState(true);
-  const [inspirationList, setInspirationList] = useState<InspirationWord[]>([]);
-  const pageData = useRef({
-    page: 1,
+  const {
+    data: inspirationList,
+    loading,
+    error,
+    hasMore,
+    refresh,
+    loadMore,
+  } = useInfiniteScroll<InspirationWord>({
+    initialPage: 1,
     pageSize: 100,
-    total: 0,
+    fetchData: useCallback(async (page: number, pageSize: number) => {
+      const res = await inspirationApi.getInspirationData({
+        page,
+        page_size: pageSize,
+      });
+      return {
+        data: res.data.works,
+        hasMore:
+          res.data.works.length + (page - 1) * pageSize < res.data.total_count,
+        total: res.data.total_count,
+      };
+    }, []),
   });
 
-  const refresh = async () => {
-    const { page, pageSize, total } = pageData.current;
-    setLoading(true);
-    const res = await inspirationApi.getInspirationData({ page, page_size: pageSize })
-      // curTab === "all"
-      //   ? await inspirationApi.getInspirationData({ page, page_size: pageSize })
-        // : await inspirationApi.getCollectInspiration({ page, page_size: pageSize });
-    const result = res as InspirationResult;
-
-    setInspirationList((prev) => [...prev, ...result.data.works]);
-    setHasMore(result.data.works.length + (page - 1) * pageSize < result.data.total_count);
-    pageData.current.page = page + 1;
-    pageData.current.total = result.data.total_count;
-    setLoading(false);
-  };
-
   const showData = useMemo(() => {
+    setShouldRestoreScroll(true);
     if (curTab === "all") {
       return inspirationList;
     } else {
@@ -95,6 +102,7 @@ const InspirationPage: React.FC = () => {
 
   // 处理收藏点击
   const handleCollectClick = (item: InspirationItem, e: any) => {
+    setScrollIntoView(`work_${item.work_id}`);
     e.stopPropagation();
     // TODO: 实现收藏功能
     if (item.is_collect) {
@@ -139,12 +147,7 @@ const InspirationPage: React.FC = () => {
     }
     return count.toString();
   };
-
-  // 生成序列号（模拟）
-  const generateSerialNumber = (index: number) => {
-    const num = String(index + 1).padStart(4, "0");
-    return `NO.${num}`;
-  };
+console.log(shouldRestoreScroll, scrollTopRef.current, 'shouldRestoreScroll')
 
 
   return (
@@ -178,24 +181,34 @@ const InspirationPage: React.FC = () => {
         <ScrollView
           scrollY
           scrollWithAnimation
-          enhanced
-          // scrollTop={scrollTop} // 关键：绑定记录的滚动位置
+          scrollTop={shouldRestoreScroll ? scrollTopRef.current : undefined} // 关键：绑定记录的滚动位置
           onScroll={(e) => {
-            setScrollTop(e.detail.scrollTop);
+            if (shouldRestoreScroll) {
+              setShouldRestoreScroll(false);
+            }
+            console.log(e.detail.scrollTop, 'onScroll')
+            scrollTopRef.current = e.detail.scrollTop;
           }} // 滚动时更新位置
           showScrollbar={false}
           lowerThreshold={100}
-          onScrollToLower={refresh}
+          onScrollToLower={loadMore}
+         
           style={{
             height: `calc(100vh - ${navBarHeight + 220}px)`,
             boxSizing: "border-box",
             paddingBottom: "20px",
           }}
+          onTouchStart={() => {
+            // 用户开始触摸时立即重置，确保滚动响应
+            if (shouldRestoreScroll) {
+              setShouldRestoreScroll(false);
+            }
+          }}
         >
           <View className={styles.inspirationList}>
             {showData.map((item, index) => (
               <View
-                key={item.work_id}
+                key={`work_${item.work_id}`}
                 className={styles.inspirationItem}
                 onClick={() => handleItemClick(item)}
               >
@@ -253,6 +266,12 @@ const InspirationPage: React.FC = () => {
               </View>
             ))}
           </View>
+          {/* 没有更多数据 */}
+          {!hasMore && showData.length > 0 && (
+            <View className={styles.noMoreContainer}>
+              <Text className={styles.noMoreText}>没有更多了</Text>
+            </View>
+          )}
         </ScrollView>
 
         {/* 加载状态 */}
@@ -270,13 +289,6 @@ const InspirationPage: React.FC = () => {
             <View className={styles.retryButton} onClick={refresh}>
               <Text className={styles.retryText}>重试</Text>
             </View>
-          </View>
-        )}
-
-        {/* 没有更多数据 */}
-        {!hasMore && inspirationList.length > 0 && (
-          <View className={styles.noMoreContainer}>
-            <Text className={styles.noMoreText}>没有更多了</Text>
           </View>
         )}
 
