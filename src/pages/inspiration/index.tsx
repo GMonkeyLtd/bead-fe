@@ -47,9 +47,7 @@ const INSPIRATION_TABS = [
 const InspirationPage: React.FC = () => {
   const [curTab, setCurTab] = useState<"all" | "collect">("all");
   const { height: navBarHeight } = getNavBarHeightAndTop();
-  const scrollRef = useRef(null);
-  const loadMoreRef = useRef(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const observerRef = useRef<any>(null);  
   const {
     data: inspirationList,
     loading,
@@ -59,7 +57,7 @@ const InspirationPage: React.FC = () => {
     loadMore,
   } = useInfiniteScroll<InspirationItem>({
     initialPage: 1,
-    pageSize: 100,
+    pageSize: 10,
     fetchData: useCallback(async (page: number, pageSize: number) => {
       const res = await inspirationApi.getInspirationData({
         page,
@@ -102,6 +100,25 @@ const InspirationPage: React.FC = () => {
     refresh();
   });
 
+  useReady(() => {
+    // 创建观察者，阈值设为0.5（50%可见时触发）
+    observerRef.current = Taro.createIntersectionObserver({
+      thresholds: [0.4],
+      observeAll: true // 同时观察多个节点
+    });
+  
+    // 监听类名为 '.target-item' 的所有元素
+    observerRef.current.relativeToViewport().observe('#inspiration-more-tag', (res) => {
+      console.log(res.intersectionRatio, 'res.intersectionRatio') 
+      if (res.intersectionRatio > 0.5) {
+        loadMore();
+        console.log('loadMore');
+      }
+    });
+  });
+  
+  // 组件卸载时销毁
+  useEffect(() => () => observerRef.current?.disconnect(), []);
   // 处理收藏点击
   const handleCollectClick = (item: InspirationItem, e: any) => {
     e.stopPropagation();
@@ -184,7 +201,6 @@ const InspirationPage: React.FC = () => {
             paddingBottom: "20px",
             overflowY: "auto",
           }}
-          ref={scrollRef}
         >
           <View className={styles.inspirationList}>
             {showData.map((item, index) => (
@@ -246,11 +262,11 @@ const InspirationPage: React.FC = () => {
                 </View>
               </View>
             ))}
-            {!hasMore && showData.length > 0 && (
-            <View className={styles.noMoreContainer}>
+            {/* {!hasMore && showData.length > 0 && ( */}
+            <View className={styles.noMoreContainer} id="inspiration-more-tag">
               <Text className={styles.noMoreText}>没有更多了</Text>
             </View>
-          )}
+          {/* )} */}
           </View>
           {/* 没有更多数据 */}
         </View>
