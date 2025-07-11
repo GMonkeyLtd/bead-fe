@@ -112,11 +112,11 @@ const Result = () => {
         design_backend_id,
       } = result;
 
-      setImageUrl(image_urls[0]);
-      setBraceletName(bracelet_name);
-      setBraceletDescription(recommendation_text);
-      setBeadDescriptions(bead_ids_deduplication);
-      setDesignNo(design_backend_id);
+      setImageUrl(image_urls?.[0] || "");
+      setBraceletName(bracelet_name || "");
+      setBraceletDescription(recommendation_text || "");
+      setBeadDescriptions(bead_ids_deduplication || []);
+      setDesignNo(design_backend_id || "");
     }
   };
 

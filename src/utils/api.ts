@@ -290,7 +290,7 @@ export interface InspirationWord {
   is_collect: boolean;
   design_id: number;
   user: {
-    nike_name: string;
+    nick_name: string;
     avatar_url: string;
   };
   collects_count: number;
@@ -307,58 +307,17 @@ export interface InspirationResult extends BaseResponse {
 
 export const inspirationApi = {
   getInspirationData: (
-    params: { page: number; pageSize: number } | { work_id: string },
+    params: { page: number; page_size: number } | { work_id: string },
     config?: ApiConfig
   ) => {
-    // return http.post<InspirationResult>(
-    //   "/user/community/home",
-    //   params,
-    //   {
-    //     cancelToken: config?.cancelToken,
-    //     ...config,
-    //   }
-    // );
-    return new Promise((resolve, reject) => {
-      resolve({
-        code: 200,
-        message: "success",
-        data: {
-          page: 1,
-          page_size: 100,
-          works: [
-            {
-              work_id: "work000001",
-              title: "冰雪奇缘",
-              cover_url:
-                "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-              is_collect: true,
-              design_id: 22,
-              user: {
-                nike_name: "微信用户1",
-                avatar_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",
-              },
-              collects_count: 100, //单位：个
-            },
-            {
-              work_id: "work000002",
-              title: "冰雪奇缘2",
-              design_id: 23,
-              cover_url:
-                "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-              is_collect: false,
-              user: {
-                nike_name: "微信用户2",
-                avatar_url:
-                  "https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",
-              },
-              collects_count: 187, //单位：个
-            },
-          ],
-          count: 2,
-        },
-      });
-    });
+    return http.post<InspirationResult>(
+      "/user/community/home",
+      params,
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
   },
   collectInspiration: (params: { work_id: string }, config?: ApiConfig) => {
     return http.post<{
@@ -381,6 +340,27 @@ export const inspirationApi = {
       };
     }>(`/user/community/uncollect`, params, {
       showLoading: true,
+      cancelToken: config?.cancelToken,
+      ...config,
+    });
+  },
+  getCollectInspiration: (params: { page: number; pageSize: number }, config?: ApiConfig) => {
+    return http.post<InspirationResult>(
+      "/user/community/collections",
+      params,
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  },
+  viewWorkDetail: (params: { work_id: string }, config?: ApiConfig) => {
+    return http.post<{  
+      data: {
+        any: [];
+      };
+    }>(`/user/community/work/view`, params, {
+      showLoading: false,
       cancelToken: config?.cancelToken,
       ...config,
     });

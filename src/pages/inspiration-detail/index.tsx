@@ -9,6 +9,8 @@ import CollectIcon from "@/assets/icons/collect.svg";
 import CollectedIcon from "@/assets/icons/collect-active.svg";
 import CrystalButton from "@/components/CrystalButton";
 import createBeadImage from "@/assets/icons/create-bead.svg";
+import { getNavBarHeightAndTop, getSafeArea } from "@/utils/style-tools";
+import BraceletDetailDialog from "@/components/BraceletDetailDialog";
 
 interface BeadInfo {
   id: string;
@@ -30,7 +32,7 @@ interface InspirationDetail {
   created_at: string;
   user: {
     user_id: string;
-    nike_name: string;
+    nick_name: string;
     avatar_url: string;
   };
   beads: BeadInfo[];
@@ -40,33 +42,19 @@ const InspirationDetailPage: React.FC = () => {
   const router = useRouter();
   const { workId, designId } = router.params || {};
   const [designData, setDesignData] = useState<any>(null);
+  const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
 
   const [detail, setDetail] = useState<InspirationWord | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const { height: navBarHeight } = getNavBarHeightAndTop();
   const getInspirationDetail = async (work_id) => {
     try {
       setLoading(true);
-      // inspirationApi.getInspirationData({ work_id }).then((res) => {
-      //   setDetail(res.data as InspirationDetail);
-      // });
-      // 模拟获取详情数据
-      const mockDetail = {
-        work_id: "work000001",
-        title: "冰雪奇缘",
-        cover_url:
-          "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250709221603.092_0178731c22e870e7ec8e2ae75e6238ff.jpg",
-        is_collect: true,
-        design_id: 22,
-        user: {
-          nike_name: "微信用户1",
-          avatar_url:
-            "https://zhuluoji.cn-sh2.ufileos.com/user-avatar/user2/20250709014825.709_87400c539bf8b66c93d82cbb3bfa85e3.jpg",
-        },
-        collects_count: 100, //单位：个
-      };
-      setDetail(mockDetail as unknown as InspirationWord);
+      inspirationApi.getInspirationData({ work_id }).then((res) => {
+        console.log(res, "res?.data[0]");
+        setDetail(res?.data?.works?.[0] as InspirationDetail);
+      });
     } catch (error) {
       console.error("获取灵感详情失败:", error);
       Taro.showToast({
@@ -80,9 +68,9 @@ const InspirationDetailPage: React.FC = () => {
 
   const getDesignData = async (designId: number) => {
     try {
-      // const res = await userHistoryApi.getDesignById(designId);
-      const res = await userHistoryApi.getImageHistory();
-      setDesignData(res.data?.[0]);
+      const res = await userHistoryApi.getDesignById(designId);
+      console.log(res, "res1111");
+      setDesignData(res.data);
     } catch (error) {
       console.error("获取设计数据失败:", error);
     } finally {
@@ -90,24 +78,31 @@ const InspirationDetailPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
+  const getData = () => {
     if (workId) {
       getInspirationDetail(workId);
     }
     if (designId) {
-      getDesignData(designId);
+      getDesignData(parseInt(designId));
+    }
+  }
+
+  useEffect(() => {
+    getData() 
+    if (workId) {
+      inspirationApi.viewWorkDetail({ work_id: workId })
     }
   }, [workId, designId]);
 
-  const handleImageSwipe = (direction: "left" | "right") => {
-    if (!detail?.images) return;
+  // const handleImageSwipe = (direction: "left" | "right") => {
+  //   if (!detail?.images) return;
 
-    if (direction === "left" && currentImageIndex < detail.images.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
-    } else if (direction === "right" && currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1);
-    }
-  };
+  //   if (direction === "left" && currentImageIndex < detail.images.length - 1) {
+  //     setCurrentImageIndex(currentImageIndex + 1);
+  //   } else if (direction === "right" && currentImageIndex > 0) {
+  //     setCurrentImageIndex(currentImageIndex - 1);
+  //   }
+  // };
 
   // const handleUserClick = () => {
   //   if (!detail?.user) return;
@@ -125,11 +120,49 @@ const InspirationDetailPage: React.FC = () => {
     });
   };
 
+    // 处理收藏点击
+    const handleCollectClick = (e: any) => {
+      e.stopPropagation();
+      if (detail?.is_collect) {
+        inspirationApi
+          .cancelCollectInspiration({ work_id: detail.work_id })
+          .then(() => {
+            Taro.showToast({
+              title: "取消收藏成功",
+              icon: "success",
+            });
+            getData();
+          })
+          .catch((err) => {
+            Taro.showToast({
+              title: "取消收藏失败",
+              icon: "none",
+            });
+          });
+      } else {
+        inspirationApi
+          .collectInspiration({ work_id: detail.work_id })
+          .then(() => {
+            Taro.showToast({
+              title: "收藏成功",
+              icon: "success",
+            });
+            getData();
+          })
+          .catch((err) => {
+            Taro.showToast({
+              title: "收藏失败",
+              icon: "none",
+            });
+          });
+      }
+    };
+
+
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return `发布于${date.getMonth() + 1}月${date.getDate()}日`;
   };
-  console.log(loading, "loading");
   if (loading) {
     return (
       <CrystalContainer showBack={true}>
@@ -151,11 +184,15 @@ const InspirationDetailPage: React.FC = () => {
     );
   }
 
-  console.log(designData, "designData");
-
   return (
     <CrystalContainer showBack={true} showHome={false}>
-      <ScrollView className={styles.container} scrollY>
+      <ScrollView
+        className={styles.container}
+        scrollY
+        style={{
+          height: `calc(100vh - ${navBarHeight + 246}px)`,
+        }}
+      >
         {/* 主图片区域 */}
         <View className={styles.imageSection}>
           <Image
@@ -201,43 +238,19 @@ const InspirationDetailPage: React.FC = () => {
           )} */}
         </View>
 
-        {/* 珠子信息区域 */}
-        <View className={styles.beadSection}>
-          {designData?.WordInfo?.bead_ids_deduplication?.map((bead) => (
-            <View key={bead.id} className={styles.beadCard}>
-              <View className={styles.beadImageContainer}>
-                <Image
-                  src={bead.image_url}
-                  className={styles.beadImage}
-                  mode="aspectFill"
-                />
-              </View>
-              <View className={styles.beadContent}>
-                <Text className={styles.beadName}>
-                  {bead.name}「{bead.wuxing?.split("、")[0]}」
-                </Text>
-                <View className={styles.beadEffect}>
-                  <View className={styles.beadEffectLine} />
-                  <Text className={styles.beadEffectText}>{bead.function}</Text>
-                </View>
-              </View>
-            </View>
-          ))}
-        </View>
-
         {/* 内容区域 */}
         <View className={styles.contentSection}>
           {/* 标题区域 */}
           <View className={styles.titleSection}>
             <View className={styles.titleContainer}>
               <Text className={styles.title}>
-                {designData?.WordInfo?.bracelet_name}
+                {designData?.word_info?.bracelet_name}
               </Text>
               <Text
                 className={styles.workNumber}
-              >{`NO.${designData?.ID}`}</Text>
+              >{`NO.${designData?.id}`}</Text>
             </View>
-            <View className={styles.likeContainer}>
+            <View className={styles.likeContainer} onClick={handleCollectClick}>
               <Image
                 src={detail?.is_collect ? CollectedIcon : CollectIcon}
                 className={styles.collectIcon}
@@ -249,24 +262,55 @@ const InspirationDetailPage: React.FC = () => {
 
           {/* 正文区域 */}
           <View className={styles.descriptionSection}>
-            <Text className={styles.description}>{designData?.WordInfo?.recommendation_text}</Text>
-
+            <Text className={styles.description}>
+              {designData?.word_info?.recommendation_text}
+            </Text>
+            {/* 珠子信息区域 */}
+            <View className={styles.beadSection}>
+              {designData?.word_info?.bead_ids_deduplication
+                ?.slice(0, 4)
+                .map((bead) => (
+                  <View key={bead.id} className={styles.beadCard}>
+                    <View className={styles.beadImageContainer}>
+                      <Image
+                        src={bead.image_url}
+                        className={styles.beadImage}
+                        mode="aspectFill"
+                      />
+                    </View>
+                    <View className={styles.beadContent}>
+                      <Text className={styles.beadName}>
+                        {bead.name}「{bead.wuxing?.split("、")[0]}」
+                      </Text>
+                      <View className={styles.beadEffect}>
+                        <View className={styles.beadEffectLine} />
+                        <Text className={styles.beadEffectText}>
+                          {bead.function}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+            </View>
             {/* 作者和时间 */}
-            <View className={styles.authorTimeSection}>
-              <View className={styles.authorContainer}>
-                <Image
-                  src={detail.user.avatar_url}
-                  className={styles.authorAvatar}
-                  mode="aspectFill"
-                />
-                <Text className={styles.authorName}>
-                  {detail.user.nike_name}
+            <View className={styles.workDetailContainer}>
+              <View className={styles.authorTimeSection}>
+                <View className={styles.authorContainer}>
+                  <Image
+                    src={detail.user.avatar_url}
+                    className={styles.authorAvatar}
+                    mode="aspectFill"
+                  />
+                  <Text className={styles.authorName}>
+                    {detail.user.nick_name}
+                  </Text>
+                </View>
+                <View className={styles.divider} />
+                <Text className={styles.publishTime}>
+                  {formatTime(detail.created_at)}
                 </Text>
               </View>
-              <View className={styles.divider} />
-              <Text className={styles.publishTime}>
-                {formatTime(detail.created_at)}
-              </Text>
+            <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 ></View>
             </View>
           </View>
         </View>
@@ -274,19 +318,35 @@ const InspirationDetailPage: React.FC = () => {
 
       {/* 底部按钮 */}
       <View className={styles.bottomBar}>
-        <View className={styles.separator} />
-        <CrystalButton 
-          onClick={handleMakeSameStyle}
+        {/* <View className={styles.separator} /> */}
+        <CrystalButton
+          onClick={() => {
+            Taro.showToast({
+              title: "敬请期待",
+              icon: "none",
+            });
+          }}
           text="制作同款"
-          icon={<Image
-            src={createBeadImage}
-            mode="widthFix"
-            style={{ width: "24px", height: "24px" }}
-          />}
-          style={{ width: '220px' }}
+          icon={
+            <Image
+              src={createBeadImage}
+              mode="widthFix"
+              style={{ width: "24px", height: "24px" }}
+            />
+          }
+          style={{ width: "220px", margin: "26px 0 46px",  }}
           isPrimary={true}
         />
       </View>
+
+      {braceletDetailDialogShow && designData?.beads_info?.length > 0 && (
+        <BraceletDetailDialog
+          visible={braceletDetailDialogShow}
+          beads={designData?.beads_info}
+          title={designData?.word_info?.bracelet_name}
+          onClose={() => setBraceletDetailDialogShow(false)}
+        />
+      )}
     </CrystalContainer>
   );
 };

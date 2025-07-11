@@ -9,6 +9,7 @@
   align-items: center;
   gap: 16px;
   padding: 16px 0;
+  box-sizing: border-box;
 }
 
 .tabItem {
@@ -24,11 +25,12 @@
 .tabActive {
   color: #000000;
 }
-
 .inspirationList {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .inspirationItem {

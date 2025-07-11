@@ -98,6 +98,7 @@ export function useInfiniteScroll<T = any>({
       if (throttleTimer) {
         clearTimeout(throttleTimer);
       }
+      console.log("handleScroll");
       
       throttleTimer = setTimeout(() => {
         // 获取页面滚动信息

@@ -104,15 +104,18 @@ const QuickDesign = () => {
         cancelToken: cancelTokenForInfo.current
       })
       .then((res) => {
+        console.log(res, "res");
         if (!res?.images_url?.[0]) {
           throw new Error("生成失败");
         }
         processDesignData({ image_urls: res?.images_url });
       })
       .catch((err) => {
+        console.log(err, "err");
         Taro.showToast({
-          title: "生成失败",
+          title: "服务繁忙，请稍后再试",
           icon: "none",
+          duration: 3000
         });
         setTimeout(() => {
           Taro.redirectTo({
@@ -137,7 +140,6 @@ const QuickDesign = () => {
       }, {
         cancelToken: cancelTokenForImage.current
       });
-      console.log(res, "res");
       if (!res.data?.image_urls?.[0]) {
         throw new Error("生成失败");
       }

@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro';
 export const getSafeArea = () => {
   try {
     const systemInfo = Taro.getSystemInfoSync();
+    console.log(systemInfo, "systemInfo");
     return systemInfo.safeArea || { top: 0 };
   } catch (error) {
     console.error('获取安全区域失败', error);

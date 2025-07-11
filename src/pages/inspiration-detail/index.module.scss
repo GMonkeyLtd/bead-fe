@@ -1,7 +1,7 @@
 .container {
   padding: 0;
   height: 100vh;
-  background-color: #f8f9fa;
+  // background-color: #f8f9fa;
   margin-top: 10px;
 }
 
@@ -9,12 +9,15 @@
 .imageSection {
   position: relative;
   width: 100%;
-  height: 393px; // 正方形
+  height: 0;
+  padding-bottom: 100%; // 使用 padding-bottom 创建正方形比例
   overflow: hidden;
-  background: #fff;
 }
 
 .mainImage {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -83,11 +86,11 @@
 // 珠子信息区域样式
 .beadSection {
   display: flex;
+  flex-direction: column;
   justify-content: stretch;
   align-items: stretch;
-  gap: 12px;
-  padding: 12px 12px 0 12px;
-  background: #f8f9fa;
+  gap: 6px;
+  // background: #f8f9fa;
 }
 
 .beadCard {
@@ -124,9 +127,9 @@
 }
 
 .beadName {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
   text-align: center;
   color: #1f1722;
@@ -145,9 +148,9 @@
 }
 
 .beadEffectText {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
   text-align: center;
   color: #1f1722;
@@ -160,7 +163,6 @@
   flex-direction: column;
   gap: 12px;
   padding: 0 24px;
-  background: #f8f9fa;
 }
 .collectIcon {
   width: 16px;
@@ -171,7 +173,6 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  // background: #ece6e0;
   border-radius: 4px;
   margin-top: 20px;
 }
@@ -184,7 +185,7 @@
 }
 
 .title {
-  font-family: 'Source Han Serif CN', serif;
+  font-family: "Source Han Serif CN", serif;
   font-weight: 700;
   font-size: 18px;
   line-height: 1.437;
@@ -193,7 +194,7 @@
 }
 
 .workNumber {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
   font-size: 12px;
   line-height: 1.35;
@@ -218,7 +219,7 @@
 }
 
 .likeCount {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 1.35;
@@ -230,12 +231,10 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: #f8f9fa;
-  margin-bottom: 80px; // 为底部按钮留出空间
 }
 
 .description {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
   font-size: 13px;
   line-height: 1.5;
@@ -266,9 +265,9 @@
 }
 
 .authorName {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.35;
   color: #1f1722;
   opacity: 0.9;
@@ -281,9 +280,9 @@
 }
 
 .publishTime {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.35;
   letter-spacing: 0.09em;
   color: rgba(31, 23, 34, 0.5);
@@ -298,13 +297,12 @@
   right: 0;
   background: white;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 24px;
   z-index: 100;
   padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
   padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
+  border-top: 1px solid #e2dcd6;
 }
 
 .separator {
@@ -313,73 +311,6 @@
   background: #e2dcd6;
 }
 
-.makeButton {
-  display: flex;
-  justify-content: stretch;
-  align-items: stretch;
-  gap: 10px;
-  padding: 4px 13px;
-  width: 220px;
-  height: 46px;
-  background: linear-gradient(180deg, #282724 0%, #000000 100%);
-  border: 1px solid;
-  border-image: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(52, 52, 52, 0.39) 60%, rgba(0, 0, 0, 0.06) 100%) 1;
-  border-radius: 100px;
-  box-shadow: 
-    inset 0px -4px 16px 0px rgba(0, 0, 0, 0.3),
-    inset 0px -2px 6px 0px rgba(255, 255, 255, 0.75);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 24px;
-
-  &:active {
-    transform: scale(0.95);
-  }
-}
-
-.buttonGroup {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: -12px;
-  flex: 1;
-}
-
-.buttonReflection {
-  width: 100%;
-  height: 12px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.74) 0%, rgba(255, 255, 255, 0) 100%);
-  border-radius: 1000px;
-  filter: blur(12.2px);
-}
-
-.buttonContent {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  padding: 0 8px;
-  flex: 1;
-}
-
-.editIcon {
-  font-size: 20px;
-  line-height: 1;
-}
-
-.buttonText {
-  font-family: 'Source Han Serif CN', serif;
-  font-weight: 600;
-  font-size: 15px;
-  line-height: 1.437;
-  letter-spacing: 0.267em;
-  text-align: center;
-  color: #fff0de; // fallback color
-  background: linear-gradient(135deg, #fff0de 0%, #ffe4b5 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
 // 加载和错误状态样式
 .loadingContainer {
@@ -401,8 +332,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loadingText {
@@ -425,20 +360,36 @@
   text-align: center;
 }
 
+.workDetailContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detailActionContainer {
+  color: #1f1722;
+  text-align: justify;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 150%; /* 16.5px */
+}
+
 // 响应式设计
 @media (max-width: 375px) {
   .imageSection {
     height: 375px; // 保持正方形
   }
-  
+
   .title {
     font-size: 16px;
   }
-  
+
   .beadSection {
     gap: 8px;
   }
-  
+
   .beadCard {
     padding: 4px 8px;
   }
