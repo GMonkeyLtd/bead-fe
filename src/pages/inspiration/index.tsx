@@ -57,7 +57,7 @@ const InspirationPage: React.FC = () => {
     loadMore,
   } = useInfiniteScroll<InspirationItem>({
     initialPage: 1,
-    pageSize: 10,
+    pageSize: 100,
     fetchData: useCallback(async (page: number, pageSize: number) => {
       const res = await inspirationApi.getInspirationData({
         page,
