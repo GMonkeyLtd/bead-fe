@@ -75,6 +75,7 @@ export const useSessionResultHandler = ({
         if (response.code === 200 && response.data) {
           const draftData = response.data;
           const topTwoBeads = draftData.beads ? getTopTwoBeads(draftData.beads) : null;
+          console.log(draftData, "draftData");
 
           if (draftData.progress === 100) {
             setImgGenerateCount(prev => prev + 1);

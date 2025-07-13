@@ -62,6 +62,8 @@ const ChatPage: React.FC = () => {
     sessionData: null,
   });
 
+  console.log(result, "result");
+
   // 键盘适配逻辑
   useEffect(() => {
     // 监听键盘弹起
@@ -176,14 +178,14 @@ const ChatPage: React.FC = () => {
   }, [result.systemMessages?.length]);
 
   // 发送消息
-  const handleSend = async () => {
-    if (isEmptyMessage(inputValue) || isLoading) return;
+  const handleSend = async (tagValue?: string) => {
+    if (isEmptyMessage(inputValue) && !tagValue || isLoading) return;
     setIsLoading(true);
     setInputValue("");
     apiSession
       .chat({
         session_id: sessionId,
-        message: inputValue,
+        message: inputValue || tagValue || "",
       })
       .then((res) => {
         processChatResult(res.data);
@@ -311,7 +313,7 @@ const ChatPage: React.FC = () => {
                           {item.name + ":"}
                         </View>
                         <View className="result-text-content-description">
-                          {item.funcs[0]}
+                          {item.funcs?.[0] || ''}
                         </View>
                       </View>
                     ))}
@@ -421,6 +423,7 @@ const ChatPage: React.FC = () => {
           <View
             className="reset-design-info-link"
             onClick={() => {
+              console.log("reset");
               Taro.redirectTo({
                 url: pageUrls.home + "?newSession=true",
               });
@@ -463,9 +466,10 @@ const ChatPage: React.FC = () => {
                   title: item,
                 }))}
                 onTagSelect={(tag) => {
-                  setInputValue((prev) =>
-                    !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
-                  );
+                  handleSend(tag.title);
+                  // setInputValue((prev) =>
+                  //   !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
+                  // );
                 }}
               />
             )}
