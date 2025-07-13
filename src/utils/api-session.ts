@@ -198,7 +198,7 @@ export default {
     config?: ApiConfig
   ) => {
     return http.get<DesignProgressResponse>(
-      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/designs/${params.design_id}`,
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/design`,
       {},
       {
         cancelToken: config?.cancelToken,

@@ -62,8 +62,6 @@ const ChatPage: React.FC = () => {
     sessionData: null,
   });
 
-  console.log(result, "result");
-
   // 键盘适配逻辑
   useEffect(() => {
     // 监听键盘弹起
@@ -206,6 +204,22 @@ const ChatPage: React.FC = () => {
     if (!canvasImageUrl && !result?.draft?.draft_id && !sessionId) {
       return;
     }
+      console.log(result?.design, "result?.design");
+      if (result?.design?.ID) {
+        Taro.redirectTo({
+          url: `${pageUrls.result}?designBackendId=${result?.design?.ID}`,
+        });
+        return;
+      }
+      if (!canvasImageUrl) {
+        return;
+      }
+      Taro.redirectTo({
+        url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
+          result?.draft?.draft_id
+        }&imageUrl=${encodeURIComponent(canvasImageUrl)}`,
+      });
+
     // const beadDataId = "bead-" + generateUUID();
     // addBeadData({
     //   image_url: canvasImageUrl,
@@ -219,11 +233,6 @@ const ChatPage: React.FC = () => {
     // Taro.navigateTo({
     //   url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
     // });
-    Taro.redirectTo({
-      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
-        result?.draft?.draft_id
-      }&imageUrl=${encodeURIComponent(canvasImageUrl)}`,
-    });
   };
 
   const renderHistoryController = () => {
@@ -359,23 +368,7 @@ const ChatPage: React.FC = () => {
               <View
                 className="crystal-gradient-text"
                 style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
-                onClick={() => {
-                  if (result?.draft?.design_id) {
-                    Taro.redirectTo({
-                      url: `${pageUrls.result}?designBackendId=${result?.draft?.design_id}`,
-                    });
-                    return;
-                  }
-                  if (!canvasImageUrl) {
-                    return;
-                  }
-                  Taro.redirectTo({
-                    url:
-                      pageUrls.result +
-                      "?imageUrl=" +
-                      encodeURIComponent(canvasImageUrl as string),
-                  });
-                }}
+                onClick={handleNextStep}
               >
                 查看结果
               </View>
@@ -394,8 +387,6 @@ const ChatPage: React.FC = () => {
       </View>
     );
   };
-
-  console.log(imgGenerateCount, "result");
 
   return (
     <PageContainer keyboardHeight={keyboardHeight}>

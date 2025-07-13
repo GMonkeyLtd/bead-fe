@@ -18,6 +18,7 @@ const QuickDesign = () => {
   const { year, month, day, hour, gender, isLunar, beadDataId, draftId, imageUrl, sessionId } = params || {};
   const cancelTokenForImage = useRef<CancelToken>(null);
   const cancelTokenForInfo = useRef<CancelToken>(null);
+  const cancelPollDesignProgress = useRef<CancelToken>(null);
 
   const { addDesignData, beadData } = useDesign();
 
@@ -27,6 +28,10 @@ const QuickDesign = () => {
     }
     if (cancelTokenForInfo.current) {
       cancelTokenForInfo.current.cancel('page hide')
+    }
+    console.log(cancelPollDesignProgress.current, "cancelPollDesignProgress.current");
+    if (cancelPollDesignProgress.current) {
+      cancelPollDesignProgress.current.cancel('page hide')
     }
   })
 
@@ -106,7 +111,6 @@ const QuickDesign = () => {
         cancelToken: cancelTokenForInfo.current
       })
       .then((res) => {
-        console.log(res, "res");
         if (!res?.images_url?.[0]) {
           throw new Error("生成失败");
         }
@@ -166,19 +170,26 @@ const QuickDesign = () => {
   };
 
   const pollDesignProgress = async (sessionId, draftId, designId) => {
+    cancelPollDesignProgress.current = CancelToken.create();
     const res = await sessionApi.queryDesignProgress({
       session_id: sessionId,
       draft_id: draftId,
       design_id: designId,
+    }, {
+      cancelToken: cancelPollDesignProgress.current
     });
-    if (res.data?.Progress === 100) {
-      processDesignData({
-        image_urls: [res.data?.ImageURL],
-        bracelet_name: res.data?.Info?.Name,
-        recommendation_text: res.data?.Info?.Description,
-        bead_ids_deduplication: res.data?.Info?.RecommendBeads,
-        design_id: res.data?.DesignId,
+    console.log(res, "res");
+    if (res.data?.progress === 100) {
+      Taro.redirectTo({
+        url: `${pageUrls.result}?designBackendId=${res.data?.design_id}`,
       });
+      // processDesignData({
+      //   image_urls: [res.data?.image_url],
+      //   bracelet_name: res.data?.Info?.Name,
+      //   recommendation_text: res.data?.Info?.Description,
+      //   bead_ids_deduplication: res.data?.Info?.RecommendBeads,
+      //   design_id: res.data?.DesignId,
+      // });
     } else {
       setTimeout(() => {
         pollDesignProgress(sessionId, draftId, designId);
@@ -187,6 +198,8 @@ const QuickDesign = () => {
   }
 
   const quickDesignByDraft = async (sessionId, draftId, imageUrl) => {
+    // pollDesignProgress(sessionId, draftId, null);
+    
     const _imageUrl = decodeURIComponent(imageUrl);
     const base64 = await imageToBase64(_imageUrl, false);
     const res = await sessionApi.generateDesignByDraftImage({

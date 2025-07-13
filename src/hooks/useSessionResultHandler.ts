@@ -8,6 +8,7 @@ export interface SessionResult {
   topTwoBeads: BeadItem[] | null;
   isPolling: boolean;
   error: string | null;
+  design: DesignDraftResponse['data'] | null;
 }
 
 export interface UseSessionResultHandlerParams {
@@ -27,7 +28,8 @@ export const useSessionResultHandler = ({
     draft: null,
     topTwoBeads: null,
     isPolling: false,
-    error: null
+    error: null,
+    design: null
   });
 
   const retryCountRef = useRef(0);
@@ -70,12 +72,11 @@ export const useSessionResultHandler = ({
         const response = await apiSession.getDesignDraft({
           session_id: sessionId,
           draft_id: draftId
-        }, {showError: false}) as DesignDraftResponse;
+        }, { showError: false }) as DesignDraftResponse;
 
         if (response.code === 200 && response.data) {
           const draftData = response.data;
           const topTwoBeads = draftData.beads ? getTopTwoBeads(draftData.beads) : null;
-          console.log(draftData, "draftData");
 
           if (draftData.progress === 100) {
             setImgGenerateCount(prev => prev + 1);
@@ -137,53 +138,54 @@ export const useSessionResultHandler = ({
     }
   }, [sessionData, startPolling]);
 
-    // 处理生成内容的函数
-    const processSessionData = useCallback((data: CreateSessionResponse['data']) => {
-      // 提取system消息的content
-      console.log(data.messages, "data");
-      const systemMessages = data.messages.filter(msg => ['system', 'assistant'].includes(msg.role))?.map(msg => msg.content) || [];
-  
-      // 提取recommends
-      const recommends = data.recommends || [];
-  
-      // 检查latest_draft的progress
-      const latestDraft = data.latest_draft;
-  
-      // 计算最高频率的两个珠子
-      const topTwoBeads = latestDraft?.beads ? getTopTwoBeads(latestDraft.beads) : null;
-  
+  // 处理生成内容的函数
+  const processSessionData = useCallback((data: CreateSessionResponse['data']) => {
+    // 提取system消息的content
+    const systemMessages = data.messages.filter(msg => ['system', 'assistant'].includes(msg.role))?.map(msg => msg.content) || [];
+
+    // 提取recommends
+    const recommends = data.recommends || [];
+
+    // 检查latest_draft的progress
+    const latestDraft = data.latest_draft;
+    const latestDesign = data.latest_design;
+
+    // 计算最高频率的两个珠子
+    const topTwoBeads = latestDraft?.beads ? getTopTwoBeads(latestDraft.beads) : null;
+
+    setResult(prev => ({
+      ...prev,
+      systemMessages,
+      recommends,
+      topTwoBeads,
+      error: null,
+      design: latestDesign
+    }));
+
+    // 如果progress不为100，开始轮询
+    if (latestDraft && latestDraft.progress !== 100) {
+      setTimeout(() => {
+        startPolling(data.session_id, latestDraft.draft_id);
+      }, 1000);
+    } else if (latestDraft && latestDraft.progress === 100) {
       setResult(prev => ({
         ...prev,
-        systemMessages,
-        recommends,
+        draft: latestDraft,
         topTwoBeads,
-        error: null
+        isPolling: false,
       }));
-  
-      // 如果progress不为100，开始轮询
-      if (latestDraft && latestDraft.progress !== 100) {
-        setTimeout(() => {
-          startPolling(data.session_id, latestDraft.draft_id);
-        }, 1000);
-      } else if (latestDraft && latestDraft.progress === 100) {
-        setResult(prev => ({
-          ...prev,
-          draft: latestDraft,
-          topTwoBeads,
-          isPolling: false,
-        }));
-      }
-    }, [getTopTwoBeads]);
-  
-    const updateSessionData = useCallback(({ newMessage, newRecommends, sessionId, draftId }: { newMessage: MessageItem, newRecommends: string[], sessionId?: string, draftId?: string }) => {
-      if (sessionId && draftId) {
-        setTimeout(() => {
-          startPolling(sessionId, draftId);
-        }, 1000);
-      } else {
-        setResult(prev => ({ ...prev, systemMessages: [...prev.systemMessages, newMessage.content], recommends: newRecommends }));
-      }
-    }, [startPolling, setResult]);
+    }
+  }, [getTopTwoBeads]);
+
+  const updateSessionData = useCallback(({ newMessage, newRecommends, sessionId, draftId }: { newMessage: MessageItem, newRecommends: string[], sessionId?: string, draftId?: string }) => {
+    if (sessionId && draftId) {
+      setTimeout(() => {
+        startPolling(sessionId, draftId);
+      }, 1000);
+    } else {
+      setResult(prev => ({ ...prev, systemMessages: [...prev.systemMessages, newMessage.content], recommends: newRecommends }));
+    }
+  }, [startPolling, setResult]);
 
   // 当sessionData改变时处理数据
   useEffect(() => {
