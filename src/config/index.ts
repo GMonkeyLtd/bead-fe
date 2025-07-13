@@ -25,5 +25,4 @@ export const APP_QRCODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-
 
 
 
-
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
