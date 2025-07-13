@@ -1,0 +1,396 @@
+.container {
+  padding: 0;
+  height: 100vh;
+  // background-color: #f8f9fa;
+  margin-top: 10px;
+}
+
+// 图片区域样式
+.imageSection {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; // 使用 padding-bottom 创建正方形比例
+  overflow: hidden;
+}
+
+.mainImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageIndicator {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 12px;
+  border-radius: 20px;
+}
+
+.indicatorDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+
+  &.active {
+    background: white;
+    transform: scale(1.2);
+  }
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+
+  &:active {
+    transform: translateY(-50%) scale(0.9);
+  }
+
+  &.prevButton {
+    left: 16px;
+  }
+
+  &.nextButton {
+    right: 16px;
+  }
+}
+
+.navButtonText {
+  font-size: 24px;
+  color: #333;
+  font-weight: bold;
+  line-height: 1;
+}
+
+// 珠子信息区域样式
+.beadSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  gap: 6px;
+  // background: #f8f9fa;
+}
+
+.beadCard {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #efebe8;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.beadImageContainer {
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
+  gap: 10px;
+  padding: 0 2px;
+  width: 19px;
+  height: 19px;
+}
+
+.beadImage {
+  width: 15px;
+  height: 15px;
+}
+
+.beadContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.beadName {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  color: #1f1722;
+}
+
+.beadEffect {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.beadEffectLine {
+  width: 1px;
+  height: 12px;
+  background: #e2dcd6;
+}
+
+.beadEffectText {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+  color: #1f1722;
+  opacity: 0.6;
+}
+
+// 内容区域样式
+.contentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 24px;
+}
+.collectIcon {
+  width: 16px;
+  height: 16px;
+}
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  margin-top: 20px;
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 192.5px;
+}
+
+.title {
+  font-family: "Source Han Serif CN", serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.437;
+  letter-spacing: 0.06em;
+  color: #000000;
+}
+
+.workNumber {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+  color: rgba(31, 23, 34, 0.5);
+  opacity: 0.9;
+}
+
+.likeContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  border-radius: 27px;
+}
+
+.starIcon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  color: #ff9421;
+}
+
+.likeCount {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #1f1722;
+  opacity: 0.9;
+}
+
+.descriptionSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.description {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: justify;
+  color: #1f1722;
+}
+
+.authorTimeSection {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.authorContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.authorAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid #ffffff;
+}
+
+.authorName {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #1f1722;
+  opacity: 0.9;
+}
+
+.divider {
+  width: 1px;
+  height: 12px;
+  background: #e2dcd6;
+}
+
+.publishTime {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.35;
+  letter-spacing: 0.09em;
+  color: rgba(31, 23, 34, 0.5);
+  opacity: 0.9;
+}
+
+// 底部按钮样式
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+  padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
+  border-top: 1px solid #e2dcd6;
+}
+
+.separator {
+  width: 100%;
+  height: 1px;
+  background: #e2dcd6;
+}
+
+
+// 加载和错误状态样式
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 16px;
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #daa520;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 14px;
+  color: #666;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 16px;
+}
+
+.errorText {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+}
+
+.workDetailContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detailActionContainer {
+  color: #1f1722;
+  text-align: justify;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 150%; /* 16.5px */
+}
+
+// 响应式设计
+@media (max-width: 375px) {
+  .imageSection {
+    height: 375px; // 保持正方形
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .beadSection {
+    gap: 8px;
+  }
+
+  .beadCard {
+    padding: 4px 8px;
+  }
+}

@@ -165,8 +165,9 @@ const ChatPage: React.FC = () => {
   }, [messages]);
 
   // 发送消息
-  const handleSend = async () => {
-    if (isEmptyMessage(inputValue) || isLoading) return;
+  const handleSend = async (tag) => {
+    const content = inputValue || tag;
+    if (isEmptyMessage(content) || isLoading) return;
     setIsLoading(true);
     setInputValue("");
     try {
