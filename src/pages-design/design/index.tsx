@@ -186,7 +186,7 @@ const ChatPage: React.FC = () => {
     apiSession
       .chat({
         session_id: sessionId,
-        message: inputValue || tagValue || "",
+        message: content,
       })
       .then((res) => {
         processChatResult(res.data);
