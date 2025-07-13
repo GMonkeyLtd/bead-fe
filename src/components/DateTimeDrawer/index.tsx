@@ -135,7 +135,7 @@ const DateTimeDrawer = ({
     const yearIndex = yearList.findIndex((year) => year === 2000);
     const monthIndex = currentMonth - 1;
     const dayIndex = currentDay - 1;
-    const hourIndex = currentHour;
+    const hourIndex = -1;
 
     setSelectedIndexes([yearIndex, monthIndex, dayIndex, hourIndex]);
   }, []);

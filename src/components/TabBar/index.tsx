@@ -13,6 +13,8 @@ import orderListIcon from "@/assets/icons/orders.svg";
 import orderListActiveIcon from "@/assets/icons/orders-active.svg";
 import userIcon from "@/assets/icons/user-center.svg";
 import userActiveIcon from "@/assets/icons/user-center-active.svg";
+import InspirationIcon from "@/assets/icons/inspiration.svg";
+import InspirationActiveIcon from "@/assets/icons/inspiration-active.svg";
 
 interface TabBarItem {
   key: string;
@@ -34,6 +36,13 @@ const TAB_BAR_ITEMS = [
     iconActive: HomeActiveIcon,
     text: "首页",
     path: pageUrls.home,
+  },
+  {
+    key: "inspiration",
+    icon: InspirationIcon,
+    iconActive: InspirationActiveIcon,
+    text: "灵感",
+    path: pageUrls.inspiration,
   },
   {
     key: "user",

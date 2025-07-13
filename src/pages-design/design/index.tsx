@@ -178,8 +178,9 @@ const ChatPage: React.FC = () => {
   }, [result.systemMessages?.length]);
 
   // 发送消息
-  const handleSend = async (tagValue?: string) => {
-    if (isEmptyMessage(inputValue) && !tagValue || isLoading) return;
+  const handleSend = async (tag) => {
+    const content = inputValue || tag;
+    if (isEmptyMessage(content) || isLoading) return;
     setIsLoading(true);
     setInputValue("");
     apiSession

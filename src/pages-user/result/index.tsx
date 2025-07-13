@@ -10,7 +10,9 @@ import CrystalButton from "@/components/CrystalButton";
 import {
   CRYSTALS_BG_IMAGE_URL,
   LOGO_IMAGE_URL,
+  LOGO_WITH_BACKGROUND_IMAGE_URL,
   APP_QRCODE_IMAGE_URL,
+  QR_CODE_IMAGE_URL,
 } from "@/config";
 import { useDesign } from "@/store/DesignContext";
 import createBeadImage from "@/assets/icons/create-bead.svg";
@@ -113,11 +115,11 @@ const Result = () => {
         design_backend_id,
       } = result;
 
-      setImageUrl(image_urls[0]);
-      setBraceletName(bracelet_name);
-      setBraceletDescription(recommendation_text);
-      setBeadDescriptions(bead_ids_deduplication);
-      setDesignNo(design_backend_id);
+      setImageUrl(image_urls?.[0] || "");
+      setBraceletName(bracelet_name || "");
+      setBraceletDescription(recommendation_text || "");
+      setBeadDescriptions(bead_ids_deduplication || []);
+      setDesignNo(design_backend_id || "");
     }
   };
 

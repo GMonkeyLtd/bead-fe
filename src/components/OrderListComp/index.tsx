@@ -83,7 +83,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
             className={`${styles.actionButton} ${styles.contactButton}`}
             onClick={(e) => {
               e.stopPropagation();
-              Taro.makePhoneCall({ phoneNumber: order.merchantPhone });
+              order.merchantPhone && Taro.makePhoneCall({ phoneNumber: order.merchantPhone });
             }}
           >
             <Image src={phoneIcon} className={styles.actionIcon} />

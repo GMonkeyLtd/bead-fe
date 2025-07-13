@@ -1,4 +1,9 @@
-import http, { setBaseURL, setIsMock, CancelToken } from "./request";
+import http, {
+  setBaseURL,
+  setIsMock,
+  CancelToken,
+  BaseResponse,
+} from "./request";
 import Taro from "@tarojs/taro";
 
 // 在应用启动时设置API基础URL
@@ -90,11 +95,15 @@ export const userApi = {
     }),
 
   // 获取用户信息
-  getUserInfo: (config?: ApiConfig) => 
-    http.post<User>(`/user/getuserinfo`, {}, {
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
+  getUserInfo: (config?: ApiConfig) =>
+    http.post<User>(
+      `/user/getuserinfo`,
+      {},
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
 
   // 更新用户信息
   updateUser: (data: Partial<User>, config?: ApiConfig) =>
@@ -104,23 +113,27 @@ export const userApi = {
     }),
 
   // 用户退出登录
-  logout: (config?: ApiConfig) => 
-    http.post("/auth/logout", {}, {
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
+  logout: (config?: ApiConfig) =>
+    http.post(
+      "/auth/logout",
+      {},
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
 };
 
 // 生成相关API
 export const generateApi = {
   // 八字查询
   bazi: (params: BaziParams, config?: ApiConfig) =>
-    http.post<BaziResult>("/user/querybazi", params, { 
+    http.post<BaziResult>("/user/querybazi", params, {
       skipAuth: true,
       cancelToken: config?.cancelToken,
       ...config,
     }),
-  
+
   // 快速生成 - 支持取消
   quickGenerate: (params: QuickGenerateParams, config?: ApiConfig) =>
     http.post<QuickGenerateResult>("/user/oneclick", params, {
@@ -128,33 +141,42 @@ export const generateApi = {
       cancelToken: config?.cancelToken,
       ...config,
     }),
-  
+
   // 个性化生成第一步 - 支持取消
-  personalizedGenerate: (params: PersonalizedGenerateParams, config?: ApiConfig) =>
+  personalizedGenerate: (
+    params: PersonalizedGenerateParams,
+    config?: ApiConfig
+  ) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep1",
       params,
-      { 
+      {
         showLoading: false,
         cancelToken: config?.cancelToken,
         ...config,
       }
     ),
-  
+
   // 个性化生成第二步 - 支持取消
-  personalizedGenerate2: (params: PersonalizedGenerate2Params, config?: ApiConfig) =>
+  personalizedGenerate2: (
+    params: PersonalizedGenerate2Params,
+    config?: ApiConfig
+  ) =>
     http.post<PersonalizedGenerateResult[]>(
       "/user/personalizationstep2",
       params,
-      { 
+      {
         showLoading: false,
         cancelToken: config?.cancelToken,
         ...config,
       }
     ),
-  
+
   // 通过图片生成 - 支持取消
-  personalizedGenerateByImage: (params: QuickGenerateByImageParams, config?: ApiConfig) =>
+  personalizedGenerateByImage: (
+    params: QuickGenerateByImageParams,
+    config?: ApiConfig
+  ) =>
     http.post<QuickGenerateResult>("/user/personalizationstep3", params, {
       showLoading: false,
       cancelToken: config?.cancelToken,
@@ -186,7 +208,7 @@ export const userHistoryApi = {
         ...config,
       }
     ),
-  
+
   getDesignById: (designId: number, config?: ApiConfig) =>
     http.post<PersonalizedGenerateResult[]>(
       `/user/getdesignitem`,
@@ -199,8 +221,11 @@ export const userHistoryApi = {
         ...config,
       }
     ),
-  
-  createOrder: (params: { design_id: number; price: number }, config?: ApiConfig) =>
+
+  createOrder: (
+    params: { design_id: number; price: number },
+    config?: ApiConfig
+  ) =>
     http.post<{
       data: {
         order_uuid: string;
@@ -211,39 +236,135 @@ export const userHistoryApi = {
       cancelToken: config?.cancelToken,
       ...config,
     }),
-  
+
   getOrderById: (orderId: string | string[], config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/queryorder`, { order_uuids: Array.isArray(orderId) ? orderId : [orderId] }, { 
-      showLoading: true, 
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
-  
+    }>(
+      `/user/queryorder`,
+      { order_uuids: Array.isArray(orderId) ? orderId : [orderId] },
+      {
+        showLoading: true,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
+
   getOrderList: (config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/queryorder`, {}, { 
-      showLoading: true,
-      cancelToken: config?.cancelToken,
-      ...config,
-    }),
-  
+    }>(
+      `/user/queryorder`,
+      {},
+      {
+        showLoading: true,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
+
   cancelOrder: (orderId: string, config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
-    }>(`/user/cancelorder`, { order_uuid: orderId }, { 
+    }>(
+      `/user/cancelorder`,
+      { order_uuid: orderId },
+      {
+        showLoading: true,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
+};
+
+export interface InspirationWord {
+  work_id: string;
+  title: string;
+  cover_url: string;
+  is_collect: boolean;
+  design_id: number;
+  user: {
+    nick_name: string;
+    avatar_url: string;
+  };
+  collects_count: number;
+}
+
+export interface InspirationResult extends BaseResponse {
+  data: {
+    page: number;
+    page_size: number;
+    total_count: number;
+    works: InspirationWord[];
+  };
+}
+
+export const inspirationApi = {
+  getInspirationData: (
+    params: { page: number; page_size: number } | { work_id: string },
+    config?: ApiConfig
+  ) => {
+    return http.post<InspirationResult>(
+      "/user/community/home",
+      params,
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  },
+  collectInspiration: (params: { work_id: string }, config?: ApiConfig) => {
+    return http.post<{
+      data: {
+        any: [];
+      };
+    }>(`/user/community/collect`, params, {
       showLoading: true,
       cancelToken: config?.cancelToken,
       ...config,
-    }),
+    });
+  },
+  cancelCollectInspiration: (
+    params: { work_id: string },
+    config?: ApiConfig
+  ) => {
+    return http.post<{
+      data: {
+        any: [];
+      };
+    }>(`/user/community/uncollect`, params, {
+      showLoading: true,
+      cancelToken: config?.cancelToken,
+      ...config,
+    });
+  },
+  getCollectInspiration: (params: { page: number; pageSize: number }, config?: ApiConfig) => {
+    return http.post<InspirationResult>(
+      "/user/community/collections",
+      params,
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  },
+  viewWorkDetail: (params: { work_id: string }, config?: ApiConfig) => {
+    return http.post<{  
+      data: {
+        any: [];
+      };
+    }>(`/user/community/work/view`, params, {
+      showLoading: false,
+      cancelToken: config?.cancelToken,
+      ...config,
+    });
+  },
 };
 
 // 文件相关API
@@ -258,6 +379,6 @@ export default {
   user: userApi,
   generate: generateApi,
   bead: beadsApi,
-  file: fileApi,
   userHistory: userHistoryApi,
+  inspiration: inspirationApi,
 };

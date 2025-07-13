@@ -4,6 +4,12 @@ import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
 
+export interface BaseResponse {
+  code: number;
+  message: string;
+  data: any;
+}
+
 // 取消令牌类
 export class CancelToken {
   private _isCancelled: boolean = false

@@ -1,6 +1,8 @@
 export default defineAppConfig({
   pages: [
-    'pages/home/index'
+    'pages/home/index',
+    'pages/inspiration/index',
+    'pages/inspiration-detail/index',
   ],
   subPackages: [
     {

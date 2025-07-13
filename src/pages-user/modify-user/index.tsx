@@ -3,7 +3,7 @@ import { View, Text, Input, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import PageContainer from "@/components/PageContainer";
 import CrystalButton from "@/components/CrystalButton";
-import { userApi, fileApi } from "@/utils/api";
+import { userApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 import modifyUserStyle from "./index.module.scss";
 import { goBack } from "@/utils/common";
