@@ -366,8 +366,8 @@ const CustomDesignRing = ({
       return;
     }
     const newDots = [...dots];
-    const nextIndex = (selectedBeadIndex + 1) % newDots.length;
     newDots.splice(selectedBeadIndex, 1);
+    const nextIndex = selectedBeadIndex % newDots.length;
     updateBeads(newDots);
     setSelectedBeadIndex(nextIndex);
   };
@@ -661,7 +661,6 @@ const CustomDesignRing = ({
         isDifferentSize
         fileType="jpg"
         onChange={(status, canvasImage) => {
-          console.log("CircleRing onChange:", status, canvasImage);
           setImageUrl(canvasImage);
         }}
       />

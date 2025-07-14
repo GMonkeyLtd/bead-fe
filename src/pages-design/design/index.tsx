@@ -296,7 +296,9 @@ const ChatPage: React.FC = () => {
     return (
       <View className="result-container">
         <View className="result-title">
-          <View className="result-title-text">定制方案</View>
+          <View className="result-title-text">
+            {`定制方案${result?.draft?.wuxing?.length? `「喜${result?.draft?.wuxing?.join('')}」` : ''}`}
+          </View>
           {result?.draft?.beads && result?.draft?.beads?.length > 0 && (
             <View className="diy-adjust" onClick={handleEditBead}>
               DIY调整

@@ -104,7 +104,6 @@ const CircleRing = ({
     try {
       const ctx = Taro.createCanvasContext(canvasId);
       ctx.clearRect(0, 0, targetSize, targetSize);
-      console.log(dots, beads, 'dots')
       
       dots.forEach((dot: any, index) => {
         const { x, y, radius, angle } = beads[index];

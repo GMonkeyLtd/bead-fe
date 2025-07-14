@@ -141,7 +141,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
             style={{ background: index % 2 === 0 ? "" : "#E6DED133" }}
           >
             <Text className="cell-name">{bead.name}</Text>
-            <Text className="cell-size">{bead.size}</Text>
+            <Text className="cell-size">{`${bead.size}mm`}</Text>
             <Text className="cell-quantity">x{bead.quantity}</Text>
           </View>
         ))}
