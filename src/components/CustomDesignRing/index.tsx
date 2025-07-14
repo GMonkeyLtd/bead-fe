@@ -230,6 +230,7 @@ const CustomDesignRing = ({
     isProcessingRef.current = true;
     setBeadStatus("processing");
     setImageUrl("");
+    console.log(_beads, 'processBeads')
 
     try {
       // 分批处理，避免长时间阻塞
@@ -239,6 +240,7 @@ const CustomDesignRing = ({
       requestAnimationFrameId.current = requestAnimationFrame(() => {
         try {
           const positions = computeBeadPositions(beadsWithImageData, spacing);
+          console.log(positions, 'positions') 
           setDots(positions);
           setBeadStatus("success");
         } catch (error) {
@@ -588,12 +590,15 @@ const CustomDesignRing = ({
         bead_diameter: size,
       });
     } else {
+      console.log(selectedBeadIndex, size, dots[selectedBeadIndex], 'selectedBeadIndex')
       newDots[selectedBeadIndex] = {
         ...bead,
         render_diameter: size * renderRatio,
         bead_diameter: size,
       };
+      console.log(newDots[selectedBeadIndex], 'newDots[selectedBeadIndex]')
     }
+    console.log(newDots, 'newDots')
     updateBeads(newDots);
   }, [dots, selectedBeadIndex, renderRatio, updateBeads]);
 

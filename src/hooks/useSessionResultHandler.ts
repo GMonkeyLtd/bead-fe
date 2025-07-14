@@ -196,7 +196,7 @@ export const useSessionResultHandler = ({
   }, [sessionData, processSessionData]);
 
   const resetImgGenerateCount = useCallback(() => {
-    setResult(prev => ({ ...prev, recommends: [] }));
+    // setResult(prev => ({ ...prev, recommends: [] }));
     setImgGenerateCount(0);
   }, []);
 
