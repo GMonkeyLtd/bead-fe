@@ -518,6 +518,15 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
             width: canvasWidth * scaleRatio,
           }}
           mode="widthFix"
+          onClick={() => {
+            // 保存图片到相册
+            Taro.saveImageToPhotosAlbum({
+              filePath: canvasImageUrl,
+              success: () => {
+                Taro.showToast({ title: "保存成功" });
+              },
+            });
+          }}
         />
       )}
     </View>

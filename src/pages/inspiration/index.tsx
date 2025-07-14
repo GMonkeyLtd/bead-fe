@@ -49,7 +49,6 @@ const INSPIRATION_TABS = [
 const InspirationPage: React.FC = () => {
   const [curTab, setCurTab] = useState<"all" | "collect">("all");
   const { height: navBarHeight } = getNavBarHeightAndTop();
-  const intervalsRef = useRef<any>([]);
   const {
     data: inspirationList,
     loading,
@@ -61,7 +60,7 @@ const InspirationPage: React.FC = () => {
   } = useInfiniteScroll<InspirationItem>({
     listKey: 'inspirationList',
     initialPage: 1,
-    pageSize: 10,
+    pageSize: 100,
     fetchData: useCallback(async (page: number, pageSize: number) => {
       const res = await inspirationApi.getInspirationData({
         page,
@@ -93,7 +92,7 @@ const InspirationPage: React.FC = () => {
   } = useInfiniteScroll<InspirationItem>({
     listKey: 'collectInspirationList',
     initialPage: 1,
-    pageSize: 10,
+    pageSize: 100,
     fetchData: useCallback(async (page: number, pageSize: number) => {
       const res = await inspirationApi.getCollectInspiration({
         page,
@@ -210,51 +209,116 @@ const InspirationPage: React.FC = () => {
   };
 
 
-  // 调试函数 - 检查元素状态
-  const checkElementStatus = (curTab: string) => {
-    Taro.createSelectorQuery()
-      .select(curTab === "all" ? "#inspiration-more-tag" : "#collect-more-tag")
-      .boundingClientRect()
-      .exec((res) => {
-        if (res && res[0]) {
-          const rect = res[0];
-          try {
-            // 使用新的 getWindowInfo API 替代已废弃的 getSystemInfoSync
-            const windowInfo = Taro.getWindowInfo();
-            if (rect.top < windowInfo.windowHeight && rect.bottom > 0) {
-              if (curTab === "all") {
-                hasMore && loadMore()
-              } else {
-                collectHasMore && collectLoadMore()
+  // 使用 IntersectionObserver 监听元素进入视口
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const fallbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const setupScrollListener = useCallback(() => {
+    // 清理现有的观察器和定时器
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+    if (fallbackIntervalRef.current) {
+      clearInterval(fallbackIntervalRef.current);
+      fallbackIntervalRef.current = null;
+    }
+
+    const targetId = curTab === "all" ? "inspiration-more-tag" : "collect-more-tag";
+    
+    // 优先使用 IntersectionObserver
+    if (typeof IntersectionObserver !== 'undefined') {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              if (curTab === "all" && hasMore) {
+                loadMore();
+              } else if (curTab === "collect" && collectHasMore) {
+                collectLoadMore();
               }
             }
-          } catch (error) {
-            console.warn('Failed to get window info:', error);
-            // 降级使用固定的视口高度
-            const fallbackHeight = 667; // iPhone SE 的高度作为默认值
-            if (rect.top < fallbackHeight && rect.bottom > 0) {
-              if (curTab === "all") {
-                hasMore && loadMore()
-              } else {
-                collectHasMore && collectLoadMore()
+          });
+        },
+        {
+          root: null, // 相对于视口
+          rootMargin: '100px', // 提前100px开始加载
+          threshold: 0.1, // 10%的元素可见时触发
+        }
+      );
+
+      // 查找目标元素并开始观察
+      Taro.createSelectorQuery()
+        .select(`#${targetId}`)
+        .node()
+        .exec((res) => {
+          if (res && res[0] && res[0].node && observerRef.current) {
+            observerRef.current.observe(res[0].node);
+          } else {
+            // 如果获取节点失败，使用降级方案
+            console.warn('Failed to get target node, using fallback method');
+            useFallbackMethod(targetId);
+          }
+        });
+    } else {
+      // 降级到定时器方案
+      console.warn('IntersectionObserver not supported, using fallback method');
+      useFallbackMethod(targetId);
+    }
+  }, [curTab, hasMore, collectHasMore, loadMore, collectLoadMore]);
+
+  // 降级方案：使用定时器轮询
+  const useFallbackMethod = useCallback((targetId: string) => {
+    const checkElementStatus = () => {
+      Taro.createSelectorQuery()
+        .select(`#${targetId}`)
+        .boundingClientRect()
+        .exec((res) => {
+          if (res && res[0]) {
+            const rect = res[0];
+            try {
+              const windowInfo = Taro.getWindowInfo();
+              if (rect.top < windowInfo.windowHeight && rect.bottom > 0) {
+                if (curTab === "all" && hasMore) {
+                  loadMore();
+                } else if (curTab === "collect" && collectHasMore) {
+                  collectLoadMore();
+                }
+              }
+            } catch (error) {
+              console.warn('Failed to get window info:', error);
+              const fallbackHeight = 667;
+              if (rect.top < fallbackHeight && rect.bottom > 0) {
+                if (curTab === "all" && hasMore) {
+                  loadMore();
+                } else if (curTab === "collect" && collectHasMore) {
+                  collectLoadMore();
+                }
               }
             }
           }
-        } 
-      });
-  };
-
-  useEffect(() => {
-
-    const interval = setInterval(() => {
-      checkElementStatus(curTab)
-    }, 200);
-    intervalsRef.current.push(interval);
-    return () => {
-      intervalsRef.current.forEach((interval: any) => clearInterval(interval));
-      intervalsRef.current = [];
+        });
     };
-  }, [curTab, hasMore, collectHasMore])
+
+    fallbackIntervalRef.current = setInterval(checkElementStatus, 500); // 降级方案使用较低频率
+  }, [curTab, hasMore, collectHasMore, loadMore, collectLoadMore]);
+
+  // 设置滚动监听
+  useEffect(() => {
+    setupScrollListener();
+    
+    return () => {
+      // 清理观察器和定时器
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+      if (fallbackIntervalRef.current) {
+        clearInterval(fallbackIntervalRef.current);
+        fallbackIntervalRef.current = null;
+      }
+    };
+  }, [setupScrollListener])
 
   return (
     <CrystalContainer showBack={false} showHome={false}>

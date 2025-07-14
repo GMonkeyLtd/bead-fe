@@ -187,7 +187,7 @@ export const generateApi = {
 export const beadsApi = {
   getBeadList: (config?: ApiConfig) =>
     http.get<PersonalizedGenerateResult[]>(
-      "/user/beadlist",
+      "/user/beads",
       {},
       {
         showLoading: false,

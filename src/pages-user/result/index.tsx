@@ -385,6 +385,7 @@ const Result = () => {
             saveImage(url);
           }
         }}
+        // showPoster={true}
       />
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog

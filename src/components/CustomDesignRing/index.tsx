@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Canvas, View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { ImageCacheManager } from "@/utils/image-cache";
@@ -31,6 +31,20 @@ const SIZE_MAP = {
   10: 48,
   12: 56,
 };
+
+// 防抖函数
+const debounce = (func: Function, wait: number) => {
+  let timeout: any;
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
 /**
  * CustomCircleRing 组件
  * @param beads 珠子数组，每个珠子包含 image（图片地址）和 radius（半径，px）
@@ -63,12 +77,33 @@ const CustomDesignRing = ({
     "idle" | "processing" | "success" | "error"
   >("idle");
 
-
   const [curWuxing, setCurWuxing] = useState<string>("");
   const [predictedLength, setPredictedLength] = useState<number>(0);
   const [canvasSize, setCanvasSize] = useState<number>(0);
   const [imageUrl, setImageUrl] = useState<string>("");
   const [createFlag, setCreateFlag] = useState<boolean>(false);
+
+  // 性能优化：使用ref缓存计算结果和Canvas上下文
+  const canvasContextRef = useRef<any>(null);
+  const imageProcessCacheRef = useRef<Map<string, string>>(new Map());
+  const positionCacheRef = useRef<Map<string, Position[]>>(new Map());
+  const isProcessingRef = useRef<boolean>(false);
+  const requestAnimationFrameId = useRef<number>(0);
+
+  // 获取Canvas上下文，并缓存
+  const getCanvasContext = useCallback(() => {
+    if (!canvasContextRef.current) {
+      canvasContextRef.current = Taro.createCanvasContext(canvasId);
+    }
+    return canvasContextRef.current;
+  }, [canvasId]);
+
+  // 清理Canvas上下文缓存
+  const clearCanvasContext = useCallback(() => {
+    if (canvasContextRef.current) {
+      canvasContextRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -82,22 +117,34 @@ const CustomDesignRing = ({
       const fallbackSize = 300;
       setCanvasSize(!size ? fallbackSize : size);
     }
-  }, []);
+  }, [size]);
 
+  // 优化：使用稳定的引用避免不必要的重新计算
   const allWuxing = useMemo(
     () => Object.keys(beadTypeMap),
-    [JSON.stringify(beadTypeMap)]
+    [beadTypeMap]
   );
 
   useEffect(() => {
-    setCurWuxing(Object.keys(beadTypeMap)[0]);
+    if (allWuxing.length > 0) {
+      setCurWuxing(allWuxing[0]);
+    }
   }, [allWuxing]);
 
+  // 优化：防抖计算手围长度
+  const debouncedCalculatePredictedLength = useMemo(
+    () => debounce((dots: any[]) => {
+      if (dots.length > 0) {
+        const predictLength = computeBraceletLength(dots, 'bead_diameter');
+        setPredictedLength(predictLength);
+      }
+    }, 100),
+    []
+  );
+
   useEffect(() => {
-    if (!dots.length) return;
-    const predictLength = computeBraceletLength(dots, 'bead_diameter');
-    setPredictedLength(predictLength);
-  }, [dots]);
+    debouncedCalculatePredictedLength(dots);
+  }, [dots, debouncedCalculatePredictedLength]);
 
   useEffect(() => {
     if (imageUrl && createFlag) {
@@ -112,37 +159,111 @@ const CustomDesignRing = ({
         }))
       );
     }
-  }, [imageUrl]);
+  }, [imageUrl, createFlag, dots, onOk]);
 
-  const processImages = async (_beads: Bead[]) => {
-    const processedPaths = await ImageCacheManager.processImagePaths(
-      _beads.map((item: Bead) => item.image_url)
-    );
+  // 优化：图片处理缓存
+  const processImages = useCallback(async (_beads: Bead[]) => {
+    const cacheKey = _beads.map(item => item.image_url).join(',');
+    
+    if (imageProcessCacheRef.current.has(cacheKey)) {
+      const cachedData = imageProcessCacheRef.current.get(cacheKey);
+      return JSON.parse(cachedData || '[]');
+    }
 
-    const beadsWithImageData = _beads.map((bead: Bead) => {
-      return {
-        ...bead,
-        imageData: processedPaths.get(bead.image_url) || bead.image_url,
-      };
-    });
+    try {
+      const processedPaths = await ImageCacheManager.processImagePaths(
+        _beads.map((item: Bead) => item.image_url)
+      );
 
-    return beadsWithImageData;
-  };
+      const beadsWithImageData = _beads.map((bead: Bead) => {
+        return {
+          ...bead,
+          imageData: processedPaths.get(bead.image_url) || bead.image_url,
+        };
+      });
 
-  const computeBeadPositions = (beads: Bead[], spacing: number) => {
+      // 缓存结果
+      imageProcessCacheRef.current.set(cacheKey, JSON.stringify(beadsWithImageData));
+      
+      // 限制缓存大小，避免内存泄漏
+      if (imageProcessCacheRef.current.size > 50) {
+        const firstKey = imageProcessCacheRef.current.keys().next().value;
+        imageProcessCacheRef.current.delete(firstKey);
+      }
+
+      return beadsWithImageData;
+    } catch (error) {
+      console.error('图片处理失败:', error);
+      throw error;
+    }
+  }, []);
+
+  // 优化：位置计算缓存
+  const computeBeadPositions = useCallback((beads: Bead[], spacing: number) => {
+    const cacheKey = `${JSON.stringify(beads.map(b => ({d: b.render_diameter, id: b.id})))}_${spacing}_${canvasSize}`;
+    
+    if (positionCacheRef.current.has(cacheKey)) {
+      return positionCacheRef.current.get(cacheKey)!;
+    }
+
     const ringRadius = calcRingRadius(beads, spacing);
     const calculatedPositions = calcPositions(beads, spacing, ringRadius);
-    return calculatedPositions;
-  };
+    
+    // 缓存结果
+    positionCacheRef.current.set(cacheKey, calculatedPositions);
+    
+    // 限制缓存大小
+    if (positionCacheRef.current.size > 20) {
+      const firstKey = positionCacheRef.current.keys().next().value;
+      positionCacheRef.current.delete(firstKey);
+    }
 
-  const processBeads = async (_beads: Bead[]) => {
+    return calculatedPositions;
+  }, [canvasSize]);
+
+  // 优化：异步处理珠子，避免阻塞UI
+  const processBeads = useCallback(async (_beads: Bead[]) => {
+    if (isProcessingRef.current) {
+      return; // 避免重复处理
+    }
+
+    isProcessingRef.current = true;
     setBeadStatus("processing");
     setImageUrl("");
-    const beadsWithImageData = await processImages(_beads);
-    const positions = computeBeadPositions(beadsWithImageData, spacing);
-    setDots(positions);
-    setBeadStatus("success");
-  };
+
+    try {
+      // 分批处理，避免长时间阻塞
+      const beadsWithImageData = await processImages(_beads);
+      
+      // 使用 requestAnimationFrame 确保UI响应
+      requestAnimationFrameId.current = requestAnimationFrame(() => {
+        try {
+          const positions = computeBeadPositions(beadsWithImageData, spacing);
+          setDots(positions);
+          setBeadStatus("success");
+        } catch (error) {
+          console.error("位置计算失败:", error);
+          setBeadStatus("error");
+        } finally {
+          isProcessingRef.current = false;
+        }
+      });
+    } catch (error) {
+      console.error("❌ 珠子处理过程出错:", error);
+      setBeadStatus("error");
+      isProcessingRef.current = false;
+    }
+  }, [processImages, computeBeadPositions, spacing]);
+
+  // 优化：使用稳定的key避免不必要的重新处理
+  const beadsKey = useMemo(() => {
+    return JSON.stringify(beads.map(b => ({ 
+      id: b.id, 
+      image_url: b.image_url, 
+      render_diameter: b.render_diameter, 
+      bead_diameter: b.bead_diameter 
+    })));
+  }, [beads]);
 
   useEffect(() => {
     if (!beads || beads.length === 0 || !canvasSize) {
@@ -156,118 +277,191 @@ const CustomDesignRing = ({
       console.error("❌ 珠子处理过程出错:", error);
       setBeadStatus("error");
     }
-  }, [JSON.stringify(beads), canvasSize]);
+
+    // 清理函数
+    return () => {
+      if (requestAnimationFrameId.current) {
+        cancelAnimationFrame(requestAnimationFrameId.current);
+      }
+      isProcessingRef.current = false;
+    };
+  }, [beadsKey, canvasSize, processBeads]);
 
   // 动态计算圆环半径
   function calcRingRadius(beads: any[], spacing: number) {
     if (!beads.length) return 0;
-    const totalArcLen = beads.reduce(
-      (sum, b) => sum + b.render_diameter + spacing,
-      0
-    );
-    return totalArcLen / (2 * Math.PI);
+    
+    // 计算所有珠子的总直径和总间距
+    const totalBeadDiameter = beads.reduce((sum, b) => sum + b.render_diameter, 0);
+    const totalSpacing = beads.length * spacing; // n个珠子需要n个间距
+    const totalArcLen = totalBeadDiameter + totalSpacing;
+    
+    // 基础圆环半径
+    const baseRadius = totalArcLen / (2 * Math.PI);
+    
+    // 确保最小半径，避免珠子过度拥挤
+    const maxBeadRadius = Math.max(...beads.map(b => b.render_diameter / 2));
+    const minRingRadius = maxBeadRadius * 2; // 至少是最大珠子直径的1倍
+    
+    // 限制最大半径，避免在小画布上显示过大
+    const maxRingRadius = canvasSize * 0.4; // 不超过画布的40%
+    
+    return Math.max(minRingRadius, Math.min(maxRingRadius, baseRadius));
   }
 
-  // 计算每个珠子的圆心坐标
+  // 计算每个珠子的圆心坐标 - 优化版本，避免角度累积误差
   function calcPositions(
     dots: any[],
     spacing: number,
     ringRadius: number
   ): Position[] {
-    let currentAngle = 0;
+    if (!dots.length) return [];
+    
     const positions: Position[] = [];
-    // 圆心坐标
     const center = canvasSize / 2;
 
+    // 首先计算所有相邻珠子之间的角度
+    const angles: number[] = [];
+    let totalAngle = 0;
+    
     for (let i = 0; i < dots.length; i++) {
       const j = (i + 1) % dots.length;
       const r1 = dots[i].render_diameter / 2;
       const r2 = dots[j].render_diameter / 2;
       const L = r1 + r2 + spacing;
-      // 计算相邻小圆的中心角 theta_ij
-      const theta = 2 * Math.asin(L / (2 * ringRadius));
+      
+      // 确保不会出现无效的计算
+      const sinValue = Math.min(1, L / (2 * ringRadius));
+      const theta = 2 * Math.asin(sinValue);
+      
+      if (!isFinite(theta) || theta <= 0) {
+        // 如果计算出现问题，使用均匀分布作为备用方案
+        console.warn('角度计算异常，使用均匀分布');
+        const uniformAngle = (2 * Math.PI) / dots.length;
+        for (let k = 0; k < dots.length; k++) {
+          positions.push({
+            ...dots[k],
+            radius: dots[k].render_diameter / 2,
+            x: center + ringRadius * Math.cos(k * uniformAngle),
+            y: center + ringRadius * Math.sin(k * uniformAngle),
+            angle: k * uniformAngle,
+          });
+        }
+        return positions;
+      }
+      
+      angles.push(theta);
+      totalAngle += theta;
+    }
 
-      // 记录当前小圆的位置
+    // 如果总角度不等于2π，进行比例调整以避免重叠或间隙
+    const targetAngle = 2 * Math.PI;
+    const angleRatio = targetAngle / totalAngle;
+    
+    // 重新分布角度，确保总和为2π
+    const adjustedAngles = angles.map(angle => angle * angleRatio);
+    
+    // 根据调整后的角度计算位置
+    let currentAngle = 0;
+    for (let i = 0; i < dots.length; i++) {
+      const radius = dots[i].render_diameter / 2;
+      
       positions.push({
         ...dots[i],
-        radius: r1,
+        radius: radius,
         x: center + ringRadius * Math.cos(currentAngle),
         y: center + ringRadius * Math.sin(currentAngle),
         angle: currentAngle,
       });
 
       // 更新角度
-      currentAngle += theta;
+      currentAngle += adjustedAngles[i];
     }
+    
     return positions;
   }
 
-  const drawCanvas = async (dotList: any[], selectedBeadIndex: number) => {
-    if (!dotList.length) return;
+  // 优化：防抖Canvas绘制
+  const debouncedDrawCanvas = useMemo(
+    () => debounce(async (dotList: any[], selectedBeadIndex: number) => {
+      if (!dotList.length) return;
 
-    const ctx = Taro.createCanvasContext(canvasId);
-    ctx.clearRect(0, 0, canvasSize, canvasSize);
+      const ctx = getCanvasContext();
+      if (!ctx) return;
 
-    dotList.forEach((item, index) => {
-      if (index === selectedBeadIndex) {
-        return;
+      try {
+        ctx.clearRect(0, 0, canvasSize, canvasSize);
+
+        // 批量绘制非选中的珠子
+        const normalBeads = dotList.filter((_, index) => index !== selectedBeadIndex);
+        const selectedBead = selectedBeadIndex !== -1 ? dotList[selectedBeadIndex] : null;
+
+        // 绘制普通珠子
+        normalBeads.forEach((item, originalIndex) => {
+          const actualIndex = dotList.indexOf(item);
+          const { x, y, radius, imageData, angle } = item;
+          
+          // 保存当前Canvas状态
+          ctx.save();
+          
+          // 移动到珠子中心
+          ctx.translate(x, y);
+          
+          // 旋转珠子，使孔线指向圆心
+          ctx.rotate(angle + Math.PI / 2);
+          
+          // 绘制珠子（以珠子中心为原点）
+          ctx.drawImage(imageData, -radius, -radius, radius * 2, radius * 2);
+          
+          // 恢复Canvas状态
+          ctx.restore();
+          
+          // 如果有选中珠子且当前珠子不是选中的，添加半透明遮罩
+          if (selectedBeadIndex !== -1 && actualIndex !== selectedBeadIndex) {
+            ctx.beginPath();
+            ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
+            ctx.setFillStyle("rgba(245, 241, 237, 0.6)");
+            ctx.fill();
+          }
+        });
+
+        // 绘制选中的珠子（在最后绘制确保在最上层）
+        if (selectedBead) {
+          const { x, y, radius, imageData, angle } = selectedBead;
+          
+          // 保存当前Canvas状态
+          ctx.save();
+          
+          // 移动到珠子中心
+          ctx.translate(x, y);
+          
+          // 旋转珠子，使孔线指向圆心
+          ctx.rotate(angle + Math.PI / 2);
+          
+          // 绘制珠子（以珠子中心为原点）
+          ctx.drawImage(imageData, -radius, -radius, radius * 2, radius * 2);
+          
+          // 恢复Canvas状态
+          ctx.restore();
+          
+          // 绘制选中边框
+          ctx.beginPath();
+          ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
+          ctx.setStrokeStyle("#ffffff");
+          ctx.setLineWidth(4);
+          ctx.stroke();
+        }
+
+        ctx.draw();
+      } catch (error) {
+        console.error('Canvas绘制失败:', error);
       }
-      const { x, y, radius, imageData, angle } = item;
-      
-      // 保存当前Canvas状态
-      ctx.save();
-      
-      // 移动到珠子中心
-      ctx.translate(x, y);
-      
-      // 旋转珠子，使孔线指向圆心
-      ctx.rotate(angle + Math.PI / 2);
-      
-      // 绘制珠子（以珠子中心为原点）
-      ctx.drawImage(imageData, -radius, -radius, radius * 2, radius * 2);
-      
-      // 恢复Canvas状态
-      ctx.restore();
-      
-      if (selectedBeadIndex !== -1 && index !== selectedBeadIndex) {
-        ctx.beginPath();
-        ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
-        ctx.setFillStyle("rgba(245, 241, 237, 0.6)");
-        ctx.fill();
-      }
-    });
-
-    if (selectedBeadIndex !== -1) {
-      // 如果是选中的珠子，绘制白色边框
-      const { x, y, radius, imageData, angle } = dotList[selectedBeadIndex];
-      
-      // 保存当前Canvas状态
-      ctx.save();
-      
-      // 移动到珠子中心
-      ctx.translate(x, y);
-      
-      // 旋转珠子，使孔线指向圆心
-      ctx.rotate(angle + Math.PI / 2);
-      
-      // 绘制珠子（以珠子中心为原点）
-      ctx.drawImage(imageData, -radius, -radius, radius * 2, radius * 2);
-      
-      // 恢复Canvas状态
-      ctx.restore();
-      
-      ctx.beginPath();
-      ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
-      ctx.setStrokeStyle("#ffffff");
-      ctx.setLineWidth(4);
-      ctx.stroke();
-    }
-
-    ctx.draw();
-  };
+    }, 50),
+    [getCanvasContext, canvasSize]
+  );
 
   // 处理Canvas点击事件
-  const handleCanvasClick = (e: any) => {
+  const handleCanvasClick = useCallback((e: any) => {
     if (!dots.length) return;
 
     // 获取Canvas元素的位置信息
@@ -293,10 +487,10 @@ const CustomDesignRing = ({
         clickX = e.clientX - rect.left;
         clickY = e.clientY - rect.top;
       }
-      const newDots = [...dots];
+
       // 检查点击是否在某个珠子内
-      for (let i = 0; i < newDots.length; i++) {
-        const dot = newDots[i];
+      for (let i = 0; i < dots.length; i++) {
+        const dot = dots[i];
         const distance = Math.sqrt(
           Math.pow(clickX - dot.x, 2) + Math.pow(clickY - dot.y, 2)
         );
@@ -307,28 +501,34 @@ const CustomDesignRing = ({
           break;
         }
       }
-      setDots(newDots);
     });
     query.exec();
-  };
+  }, [dots, canvasId]);
 
-  const onWuxingChange = (wuxing: string) => {
+  const onWuxingChange = useCallback((wuxing: string) => {
     setCurWuxing(wuxing);
-  };
+  }, []);
 
   useEffect(() => {
     if (beadStatus === "success") {
-      drawCanvas(dots, selectedBeadIndex);
+      debouncedDrawCanvas(dots, selectedBeadIndex);
     }
-    // eslint-disable-next-line
-  }, [beadStatus, dots, selectedBeadIndex]);
+  }, [beadStatus, dots, selectedBeadIndex, debouncedDrawCanvas]);
 
-  const updateBeads = (newDots: any[]) => {
-    processBeads(newDots);
-    setImageUrl("");
-  };
+  // 优化：防抖更新珠子
+  const debouncedUpdateBeads = useMemo(
+    () => debounce((newDots: any[]) => {
+      processBeads(newDots);
+      setImageUrl("");
+    }, 100),
+    [processBeads]
+  );
 
-  const onClockwiseMove = () => {
+  const updateBeads = useCallback((newDots: any[]) => {
+    debouncedUpdateBeads(newDots);
+  }, [debouncedUpdateBeads]);
+
+  const onClockwiseMove = useCallback(() => {
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要移动的珠子",
@@ -344,9 +544,9 @@ const CustomDesignRing = ({
     newDots[nextIndex] = selectedBead;
     updateBeads(newDots);
     setSelectedBeadIndex(nextIndex);
-  };
+  }, [selectedBeadIndex, dots, updateBeads]);
 
-  const onCounterclockwiseMove = () => {
+  const onCounterclockwiseMove = useCallback(() => {
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要移动的珠子",
@@ -362,9 +562,9 @@ const CustomDesignRing = ({
     newDots[nextIndex] = selectedBead;
     updateBeads(newDots);
     setSelectedBeadIndex(nextIndex);
-  };
+  }, [selectedBeadIndex, dots, updateBeads]);
 
-  const onDelete = () => {
+  const onDelete = useCallback(() => {
     if (selectedBeadIndex === -1) {
       Taro.showToast({
         title: "请先选择要删除的珠子",
@@ -374,12 +574,12 @@ const CustomDesignRing = ({
     }
     const newDots = [...dots];
     newDots.splice(selectedBeadIndex, 1);
-    const nextIndex = selectedBeadIndex % newDots.length;
+    const nextIndex = Math.min(selectedBeadIndex, newDots.length - 1);
     updateBeads(newDots);
-    setSelectedBeadIndex(nextIndex);
-  };
+    setSelectedBeadIndex(newDots.length > 0 ? nextIndex : -1);
+  }, [selectedBeadIndex, dots, updateBeads]);
 
-  const handleBeadClick = (bead: any, size: number) => {
+  const handleBeadClick = useCallback((bead: any, size: number) => {
     const newDots = [...dots];
     if (selectedBeadIndex === -1) {
       newDots.push({
@@ -395,7 +595,20 @@ const CustomDesignRing = ({
       };
     }
     updateBeads(newDots);
-  };
+  }, [dots, selectedBeadIndex, renderRatio, updateBeads]);
+
+  // 清理资源
+  useEffect(() => {
+    return () => {
+      clearCanvasContext();
+      if (requestAnimationFrameId.current) {
+        cancelAnimationFrame(requestAnimationFrameId.current);
+      }
+      // 清理缓存
+      imageProcessCacheRef.current.clear();
+      positionCacheRef.current.clear();
+    };
+  }, [clearCanvasContext]);
 
   const renderBeads = () => {
     const typeBeads = beadTypeMap[curWuxing];

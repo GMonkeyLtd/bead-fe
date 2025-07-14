@@ -36,7 +36,7 @@ const QuickDesign = () => {
   })
 
   useEffect(() => {
-    if (draftId && imageUrl) {
+    if (sessionId && draftId && imageUrl) {
       quickDesignByDraft(sessionId, draftId, imageUrl);
     }
     if (beadDataId) {

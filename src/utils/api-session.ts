@@ -189,6 +189,26 @@ export default {
     );
   },
 
+  cloneDraft: (
+    params: {
+      session_id: string;
+      draft_id: string;
+      beads: BeadItem[];
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<{ draft: DesignDraftResponse }>(
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/clone`,
+      {
+        Beads: params.beads,
+      },
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  },
+
   queryDesignProgress: (
     params: {
       session_id: string;

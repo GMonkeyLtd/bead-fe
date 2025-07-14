@@ -7,6 +7,7 @@ import { useDesign } from "@/store/DesignContext";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
 import { CircleRing } from "@/components/CircleRing";
+import apiSession from "@/utils/api-session";
 
 const CustomDesign = () => {
   const [designData, setDesignData] = useState<any[]>([]);
@@ -23,15 +24,13 @@ const CustomDesign = () => {
       setAllBeadList(resData);
       setBeadTypeMap(
         resData.reduce((acc, item) => {
-          const wuxingList = (item.wuxing || "  ").split("、");
-          wuxingList.forEach((wuxingValue) => {
-            wuxingValue = wuxingValue.trim()[0];
+          (item.wuxing || []).map((wuxingValue) => {
             if (acc[wuxingValue]) {
               acc[wuxingValue].push(item);
             } else {
               acc[wuxingValue] = [item];
             }
-          });
+          })
           return acc;
         }, {})
       );
@@ -51,32 +50,33 @@ const CustomDesign = () => {
     if (!imageUrl || !designData?.session_id || !designData?.draft_id) {
       return;
     }
-    console.log("editedBeads", editedBeads);
-    // Taro.saveImageToPhotosAlbum({
-    //   filePath: imageUrl,
-      
-    //   success: () => {
-    //     Taro.showToast({ title: "保存成功", icon: "success" });
-    //   },
-    // });
-    const beadDataId = "bead-" + generateUUID();
-    addBeadData({
-      image_url: imageUrl,
-      bead_list: editedBeads.map((item) => {
-        const _beadData = allBeadList?.find((_item) => _item.id == item.id);
-        return {
-          ..._beadData,
-          bead_diameter: item.bead_diameter || item.diameter,
-        };
-      }),
-      bead_data_id: beadDataId,
-    });
+    const beads = editedBeads.map((item) => {
+      const _beadData = allBeadList?.find((_item) => _item.id == item.id);
+      return {
+        ..._beadData,
+        bead_diameter: item.bead_diameter || item.diameter,
+      };
+    })
 
-    Taro.redirectTo({
-      url: `${pageUrls.quickDesign}?sessionId=${designData?.session_id}&draftId=${
-        designData?.draft_id
-      }&imageUrl=${encodeURIComponent(imageUrl)}`,
-    });
+    apiSession.cloneDraft({
+      session_id: designData?.session_id,
+      draft_id: designData?.draft_id,
+      beads,
+    }).then((res) => {
+      const { draft_id, session_id } = res.data || {};
+
+      Taro.redirectTo({
+        url: `${pageUrls.quickDesign}?sessionId=${session_id}&draftId=${
+          draft_id
+        }&imageUrl=${encodeURIComponent(imageUrl)}`,
+      });
+    }).catch((err) => {
+      Taro.showToast({
+        title: "定制失败:" + JSON.stringify(err),
+        icon: "error",
+      });
+    })
+
   };
 
   return (
