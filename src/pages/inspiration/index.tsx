@@ -218,13 +218,26 @@ const InspirationPage: React.FC = () => {
       .exec((res) => {
         if (res && res[0]) {
           const rect = res[0];
-          const systemInfo = Taro.getSystemInfoSync();
-          
-          if (rect.top < systemInfo.windowHeight && rect.bottom > 0) {
-            if (curTab === "all") {
-              loadMore()
-            } else {
-              collectLoadMore()
+          try {
+            // 使用新的 getWindowInfo API 替代已废弃的 getSystemInfoSync
+            const windowInfo = Taro.getWindowInfo();
+            if (rect.top < windowInfo.windowHeight && rect.bottom > 0) {
+              if (curTab === "all") {
+                hasMore && loadMore()
+              } else {
+                collectHasMore && collectLoadMore()
+              }
+            }
+          } catch (error) {
+            console.warn('Failed to get window info:', error);
+            // 降级使用固定的视口高度
+            const fallbackHeight = 667; // iPhone SE 的高度作为默认值
+            if (rect.top < fallbackHeight && rect.bottom > 0) {
+              if (curTab === "all") {
+                hasMore && loadMore()
+              } else {
+                collectHasMore && collectLoadMore()
+              }
             }
           }
         } 
@@ -232,6 +245,7 @@ const InspirationPage: React.FC = () => {
   };
 
   useEffect(() => {
+
     const interval = setInterval(() => {
       checkElementStatus(curTab)
     }, 200);
@@ -240,7 +254,7 @@ const InspirationPage: React.FC = () => {
       intervalsRef.current.forEach((interval: any) => clearInterval(interval));
       intervalsRef.current = [];
     };
-  }, [curTab])
+  }, [curTab, hasMore, collectHasMore])
 
   return (
     <CrystalContainer showBack={false} showHome={false}>

@@ -47,6 +47,8 @@ export function useInfiniteScroll<T = any>({
   const [page, setPage] = useState(initialPage);
   const observerRef = useRef<any>(null);
   const isLoadingRef = useRef(false);
+  const pageRef = useRef(initialPage); // 添加pageRef来同步跟踪当前页码
+  console.log(page, 'page', listKey)
 
   // 加载数据
   const loadData = useCallback(async (pageNum: number, isRefresh = false) => {
@@ -67,7 +69,9 @@ export function useInfiniteScroll<T = any>({
       setHasMore(result.hasMore);
       
       if (result.hasMore) {
-        setPage(pageNum + 1);
+        const nextPage = pageNum + 1;
+        setPage(nextPage);
+        pageRef.current = nextPage; // 同步更新pageRef
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败');
@@ -75,18 +79,20 @@ export function useInfiniteScroll<T = any>({
       setLoading(false);
       isLoadingRef.current = false;
     }
-  }, [fetchData, pageSize, hasMore]);
+  }, [fetchData, pageSize]); // 移除hasMore依赖，避免不必要的重新创建
 
   // 加载更多
   const loadMore = useCallback(() => {
+    console.log(pageRef.current, 'loadMore', listKey) // 使用pageRef.current来打印当前页码
     if (!isLoadingRef.current && hasMore && enabled) {
-      loadData(page);
+      loadData(pageRef.current); // 使用pageRef.current确保使用最新页码
     }
-  }, [page, hasMore, enabled, loadData]);
+  }, [hasMore, enabled, loadData]);
 
   // 刷新数据
   const refresh = useCallback(() => {
     setPage(initialPage);
+    pageRef.current = initialPage; // 同步重置pageRef
     setHasMore(true);
     loadData(initialPage, true);
   }, [initialPage, loadData]);
@@ -95,6 +101,7 @@ export function useInfiniteScroll<T = any>({
   const resetData = useCallback(() => {
     setData([]);
     setPage(initialPage);
+    pageRef.current = initialPage; // 同步重置pageRef
     setHasMore(true);
     setError(null);
   }, [initialPage]);
@@ -103,11 +110,12 @@ export function useInfiniteScroll<T = any>({
     const resData = await queryItem(item);
 
       if (resData) {
-        const newData = data.map((item) => {
-          if (item.work_id === resData.work_id) {
+        const newData = data.map((dataItem) => {
+          // 使用类型断言或者检查属性是否存在
+          if ((dataItem as any).work_id === (resData as any).work_id) {
             return resData;
           }
-          return item;
+          return dataItem;
         })
         setData(newData);
       }
@@ -116,53 +124,52 @@ export function useInfiniteScroll<T = any>({
   );
 
   // 使用 Intersection Observer 监听指定元素
-  useEffect(() => {
-    console.log(selector, enabled, 'selector')
-    if (!enabled || !selector) return;
-    console.log(selector, 'selector')
+  // useEffect(() => {
+  //   if (!enabled || !selector) return;
+  //   console.log(selector, 'selector')
 
-    // 清理之前的观察器
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-      observerRef.current = null;
-    }
+  //   // 清理之前的观察器
+  //   if (observerRef.current) {
+  //     observerRef.current.disconnect();
+  //     observerRef.current = null;
+  //   }
 
-    // 创建新的 Intersection Observer
-    const observer = Taro.createIntersectionObserver({}, {
-      thresholds: [0.1], // 当10%的元素可见时触发
-    });
+  //   // 创建新的 Intersection Observer
+  //   const observer = Taro.createIntersectionObserver({}, {
+  //     thresholds: [0.1], // 当10%的元素可见时触发
+  //   });
 
-    console.log(selector, 'selector')
-    observer.observe(selector, (res) => {
-      console.log('Intersection Observer triggered:', res);
+  //   console.log(selector, 'selector')
+  //   observer.observe(selector, (res) => {
+  //     console.log('Intersection Observer triggered:', res);
       
-      // 当目标元素进入视口时触发加载更多
-      if ((res.intersectionRatio ?? 0) > 0 && !isLoadingRef.current && hasMore) {
-        console.log('Loading more data...');
-        loadMore();
-      }
-    });
+  //     // 当目标元素进入视口时触发加载更多
+  //     if ((res.intersectionRatio ?? 0) > 0 && !isLoadingRef.current && hasMore) {
+  //       console.log('Loading more data...');
+  //       loadMore();
+  //     }
+  //   });
 
-    observerRef.current = observer;
+  //   observerRef.current = observer;
 
-    // 清理函数
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-        observerRef.current = null;
-      }
-    };
-  }, [enabled, selector, rootMargin, hasMore, loadMore]);
+  //   // 清理函数
+  //   return () => {
+  //     if (observerRef.current) {
+  //       observerRef.current.disconnect();
+  //       observerRef.current = null;
+  //     }
+  //   };
+  // }, [enabled, selector, rootMargin, hasMore, loadMore]);
 
   // 组件卸载时清理观察器
-  useEffect(() => {
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-        observerRef.current = null;
-      }
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     if (observerRef.current) {
+  //       observerRef.current.disconnect();
+  //       observerRef.current = null;
+  //     }
+  //   };
+  // }, []);
 
   return {
     data,

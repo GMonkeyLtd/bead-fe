@@ -88,13 +88,13 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
   const [canvasImageUrl, setCanvasImageUrl] = useState("");
 
   // 画布尺寸
-  const systemInfo = Taro.getSystemInfoSync();
-  const dpr = systemInfo.pixelRatio;
+  const windowInfo = Taro.getWindowInfo();
+  const dpr = windowInfo.pixelRatio || 2; // 使用默认值2作为备用
   const canvasWidth = 566 * dpr;
   const canvasHeight = 754 * dpr;
 
   // 计算缩放比例
-  const scaleRatio = (systemInfo.screenWidth - 20) / canvasWidth;
+  const scaleRatio = (windowInfo.screenWidth - 20) / canvasWidth;
 
   // 预加载字体
   const loadFonts = async () => {

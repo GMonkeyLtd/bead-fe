@@ -56,7 +56,7 @@ const CustomDesignRing = ({
   renderRatio?: number;
   onOk?: (imageUrl: string, editedBeads: Bead[]) => void;
 }) => {
-  const dpr = Taro.getSystemInfoSync().pixelRatio;
+  const dpr = Taro.getWindowInfo().pixelRatio || 2;
   const [dots, setDots] = useState<any[]>([]);
   const [selectedBeadIndex, setSelectedBeadIndex] = useState<number>(-1);
   const [beadStatus, setBeadStatus] = useState<
@@ -71,10 +71,17 @@ const CustomDesignRing = ({
   const [createFlag, setCreateFlag] = useState<boolean>(false);
 
   useEffect(() => {
-    const systemInfo = Taro.getSystemInfoSync();
-    const { height: safeHeight } = systemInfo.safeArea || { height: 0 };
-    const predictSize = safeHeight / 2 - 16 - 45;
-    setCanvasSize(!size && predictSize ? predictSize : size);
+    try {
+      const windowInfo = Taro.getWindowInfo();
+      const { height: safeHeight } = windowInfo.safeArea || { height: 0 };
+      const predictSize = safeHeight / 2 - 16 - 45;
+      setCanvasSize(!size && predictSize ? predictSize : size);
+    } catch (error) {
+      console.warn('Failed to get window info:', error);
+      // 降级使用固定尺寸
+      const fallbackSize = 300;
+      setCanvasSize(!size ? fallbackSize : size);
+    }
   }, []);
 
   const allWuxing = useMemo(
