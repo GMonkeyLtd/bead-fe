@@ -104,9 +104,26 @@ const CircleRing = ({
     try {
       const ctx = Taro.createCanvasContext(canvasId);
       ctx.clearRect(0, 0, targetSize, targetSize);
+      console.log(dots, beads, 'dots')
+      
       dots.forEach((dot: any, index) => {
-        const { x, y, radius } = beads[index];  
-        ctx.drawImage(dot, x - radius, y - radius, radius * 2, radius * 2);
+        const { x, y, radius, angle } = beads[index];
+        
+        // 保存当前Canvas状态
+        ctx.save();
+        
+        // 移动到珠子中心
+        ctx.translate(x, y);
+        
+        // 旋转珠子，使孔线指向圆心
+        // angle是珠子在圆环上的角度，需要旋转90度使孔线指向圆心
+        ctx.rotate(angle + Math.PI / 2);
+        
+        // 绘制珠子（以珠子中心为原点）
+        ctx.drawImage(dot, -radius, -radius, radius * 2, radius * 2);
+        
+        // 恢复Canvas状态
+        ctx.restore();
       });
 
       ctx.draw(true, () => {
@@ -117,7 +134,7 @@ const CircleRing = ({
           destHeight: targetSize * dpr,
           destWidth: targetSize * dpr,
           quality: 1,
-          fileType,
+          fileType: fileType as keyof Taro.canvasToTempFilePath.FileType,
           success: (res) => {
             onChange("success", res.tempFilePath);
             // 保存图片到相册

@@ -204,10 +204,9 @@ const ChatPage: React.FC = () => {
     if (!canvasImageUrl && !result?.draft?.draft_id && !sessionId) {
       return;
     }
-      console.log(result?.design, "result?.design");
-      if (result?.design?.ID) {
+      if (result?.design?.design_id) {
         Taro.redirectTo({
-          url: `${pageUrls.result}?designBackendId=${result?.design?.ID}`,
+          url: `${pageUrls.result}?designBackendId=${result?.design?.design_id}`,
         });
         return;
       }
@@ -278,6 +277,8 @@ const ChatPage: React.FC = () => {
       image_url: canvasImageUrl,
       bead_list: result?.draft?.beads,
       bead_data_id: beadDataId,
+      draft_id: result?.draft?.draft_id,
+      session_id: sessionId,
     });
     Taro.navigateTo({
       url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
@@ -323,7 +324,7 @@ const ChatPage: React.FC = () => {
                           {item.name + ":"}
                         </View>
                         <View className="result-text-content-description">
-                          {item.funcs?.[0] || ''}
+                          {item.func_summary || ''}
                         </View>
                       </View>
                     ))}

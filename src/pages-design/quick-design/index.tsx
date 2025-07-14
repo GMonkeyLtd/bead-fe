@@ -176,7 +176,8 @@ const QuickDesign = () => {
       draft_id: draftId,
       design_id: designId,
     }, {
-      cancelToken: cancelPollDesignProgress.current
+      cancelToken: cancelPollDesignProgress.current,
+      showLoading: false,
     });
     console.log(res, "res");
     if (res.data?.progress === 100) {

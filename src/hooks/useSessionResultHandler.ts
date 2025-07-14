@@ -145,6 +145,7 @@ export const useSessionResultHandler = ({
 
     // 提取recommends
     const recommends = data.recommends || [];
+    console.log(data, 'data')
 
     // 检查latest_draft的progress
     const latestDraft = data.latest_draft;

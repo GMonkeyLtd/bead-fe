@@ -116,7 +116,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
     } else {
       acc.push({  
         name: item?.name,
-        size: item?.size,
+        size: item?.bead_diameter,
         quantity: item?.quantity || 1,
       });
     }

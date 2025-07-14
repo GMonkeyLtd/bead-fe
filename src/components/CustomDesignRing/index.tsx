@@ -205,8 +205,23 @@ const CustomDesignRing = ({
       if (index === selectedBeadIndex) {
         return;
       }
-      const { x, y, radius, imageData } = item;
-      ctx.drawImage(imageData, x - radius, y - radius, radius * 2, radius * 2);
+      const { x, y, radius, imageData, angle } = item;
+      
+      // 保存当前Canvas状态
+      ctx.save();
+      
+      // 移动到珠子中心
+      ctx.translate(x, y);
+      
+      // 旋转珠子，使孔线指向圆心
+      ctx.rotate(angle + Math.PI / 2);
+      
+      // 绘制珠子（以珠子中心为原点）
+      ctx.drawImage(imageData, -radius, -radius, radius * 2, radius * 2);
+      
+      // 恢复Canvas状态
+      ctx.restore();
+      
       if (selectedBeadIndex !== -1 && index !== selectedBeadIndex) {
         ctx.beginPath();
         ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
@@ -217,8 +232,23 @@ const CustomDesignRing = ({
 
     if (selectedBeadIndex !== -1) {
       // 如果是选中的珠子，绘制白色边框
-      const { x, y, radius, imageData } = dotList[selectedBeadIndex];
-      ctx.drawImage(imageData, x - radius, y - radius, radius * 2, radius * 2);
+      const { x, y, radius, imageData, angle } = dotList[selectedBeadIndex];
+      
+      // 保存当前Canvas状态
+      ctx.save();
+      
+      // 移动到珠子中心
+      ctx.translate(x, y);
+      
+      // 旋转珠子，使孔线指向圆心
+      ctx.rotate(angle + Math.PI / 2);
+      
+      // 绘制珠子（以珠子中心为原点）
+      ctx.drawImage(imageData, -radius, -radius, radius * 2, radius * 2);
+      
+      // 恢复Canvas状态
+      ctx.restore();
+      
       ctx.beginPath();
       ctx.arc(x, y, radius + 2, 0, 2 * Math.PI);
       ctx.setStrokeStyle("#ffffff");

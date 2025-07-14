@@ -15,6 +15,7 @@ const CustomDesign = () => {
   const { beadData, addBeadData } = useDesign();
 
   const { beadDataId } = Taro.getCurrentInstance()?.router?.params || {};
+  console.log(designData, 'designData')
 
   useEffect(() => {
     beadsApi.getBeadList().then((res) => {
@@ -47,7 +48,7 @@ const CustomDesign = () => {
   }, [beadDataId, beadData]);
 
   const onCreate = (imageUrl: string, editedBeads: any[]) => {
-    if (!imageUrl) {
+    if (!imageUrl || !designData?.session_id || !designData?.draft_id) {
       return;
     }
     console.log("editedBeads", editedBeads);
@@ -72,7 +73,9 @@ const CustomDesign = () => {
     });
 
     Taro.redirectTo({
-      url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
+      url: `${pageUrls.quickDesign}?sessionId=${designData?.session_id}&draftId=${
+        designData?.draft_id
+      }&imageUrl=${encodeURIComponent(imageUrl)}`,
     });
   };
 
