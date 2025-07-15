@@ -49,7 +49,6 @@ const CustomDesign = () => {
     if (!imageUrl || !designData?.session_id || !designData?.draft_id) {
       return;
     }
-    console.log(editedBeads, allBeadList,'editedBeads')
     const beads = editedBeads.map((item) => {
       const _beadData = allBeadList?.find((_item) => _item.id == item.id);
       return {
@@ -58,7 +57,6 @@ const CustomDesign = () => {
         bead_id: item.id,
       };
     })
-    console.log(beads, 'beads')
 
     apiSession.cloneDraft({
       session_id: designData?.session_id,
