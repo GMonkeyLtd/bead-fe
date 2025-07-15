@@ -21,8 +21,8 @@ export const SELECTED_WECHAT_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/im
 export const LOGO_WITH_BACKGROUND_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/logo-with-background.png";
 export const LOGO_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/logo-image.png";
 export const APP_QRCODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/app-qrcode.png";
-
-
+export const GENERATING_MP4_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/designing.mp4";
+export const DESIGN_PLACEHOLDER_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/design-placeholder.png";
 
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";

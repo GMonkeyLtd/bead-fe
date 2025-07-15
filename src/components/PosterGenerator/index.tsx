@@ -232,6 +232,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
     src: string
   ): Promise<{ path: string; width: number; height: number }> => {
     return new Promise((resolve, reject) => {
+      console.log(src, 'src')
       Taro.getImageInfo({
         src,
         success: (res) => {
@@ -297,6 +298,7 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       const { path: mainImgPath, width: mainImgWidth, height: mainImgHeight } = await loadImage(
         data.mainImage
       );
+      console.log(mainImgWidth, mainImgHeight, 'mainImgHeight')
       drawRoundedRect({
         ctx,
         x: 98 * dpr,
@@ -309,15 +311,32 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       ctx.drawImage(
         mainImgPath,
         0,
-        0,
+        80,
         mainImgWidth,
-        mainImgHeight,
+        mainImgHeight - 160,
         98 * dpr,
         38 * dpr,
         370 * dpr,
-        370 * dpr
+        300 * dpr
       );
       ctx.restore();
+
+       // 设计编号
+       console.log(data.designNo, 'data.designNo')
+       if (data.designNo) {
+         drawText({
+           ctx,
+           text: `设计编号：${data.designNo}`,
+           x: 125 * dpr,
+           y: 58 * dpr,
+           maxWidth: 300 * dpr,
+           lineHeight: 12 * dpr,
+           fontSize: 12 * dpr,
+           fontWeight: 300,
+           color: "rgba(0, 0, 0, 0.6)",
+         });
+       }
+
 
       // 绘制渐变边框
       const gradient = ctx.createLinearGradient(0, 370, 0, 0);
@@ -348,16 +367,16 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         textBaseline: "top",
         fontFamily: getFontFamily(true),
       });
-      ctx.fillText(data.title, 135 * dpr, 360 * dpr);
+      ctx.fillText(data.title, 125 * dpr, 370 * dpr);
 
       // 绘制描述文字（如果需要）
       if (data.description) {
         drawText({
           ctx,
           text: data.description,
-          x: 135 * dpr,
-          y: 446 * dpr,
-          maxWidth: 300 * dpr,
+          x: 125 * dpr,
+          y: 426 * dpr,
+          maxWidth: 320 * dpr,
           lineHeight: 20 * dpr,
           fontSize: 14 * dpr,
           fontWeight: 300,
@@ -370,27 +389,32 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       // ctx.fill();
 
       // 绘制水晶信息
-      let crystalX = 138 * dpr,
+      let crystalX = 128 * dpr,
         crystalY = 516 * dpr;
       let crystalImgPath: any[] = [];
-      if (data.crystals?.[0]) {
-        const res = await Taro.downloadFile({
-          url: data.crystals[0].image_url || "",
-        });
-        console.log(res, 'res')
-        crystalImgPath[0] = res.tempFilePath;
+      try {
+        if (data.crystals?.[0]) {
+          const res = await Taro.downloadFile({
+            url: data.crystals[0].image_url || "",
+          });
+          console.log(res, 'res')
+          crystalImgPath[0] = res.tempFilePath;
+        }
+        if (data.crystals?.[1]) {
+          const res = await Taro.downloadFile({
+            url: data.crystals[1].image_url || "",
+          });
+          crystalImgPath[1] = res.tempFilePath;
+        }
+      } catch (error) {
+        console.log(error, '加载珠子图出错')
       }
-      if (data.crystals?.[1]) {
-        const res = await Taro.downloadFile({
-          url: data.crystals[1].image_url || "",
-        });
-        crystalImgPath[1] = res.tempFilePath;
-      }
+      
       crystalImgPath.forEach(async (_, index) => {
         // 绘制水晶圆形图标
-        crystalImgPath[index]?.path &&
+        crystalImgPath[index] &&
           ctx.drawImage(
-            crystalImgPath[index]?.path,
+            crystalImgPath[index],
             crystalX,
             crystalY,
             16 * dpr,

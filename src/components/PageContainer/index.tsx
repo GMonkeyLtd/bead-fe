@@ -8,12 +8,18 @@ const PageContainer = ({
   keyboardHeight = 0,
   headerContent = "",
   showHeader = true,
+  style = {},
+  showBack = true,
+  showHome = true,
 }: {
   children: React.ReactNode;
   isWhite?: boolean;
   keyboardHeight?: number;
   headerContent?: React.ReactNode;
   showHeader?: boolean;
+  style?: React.CSSProperties;
+  showBack?: boolean;
+  showHome?: boolean;
 }) => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
 
@@ -22,9 +28,17 @@ const PageContainer = ({
       className={`crystal-common-container `}
       style={{
         height: `calc(100vh - ${keyboardHeight}px)`,
+        ...style,
       }}
     >
-      {showHeader && <AppHeader isWhite={isWhite} headerContent={headerContent} />}
+      {showHeader && (
+        <AppHeader
+          isWhite={isWhite}
+          headerContent={headerContent}
+          showBack={showBack}
+          showHome={showHome}
+        />
+      )}
       <View
         className="page-children-container"
         style={{

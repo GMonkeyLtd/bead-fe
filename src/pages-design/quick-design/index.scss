@@ -12,7 +12,107 @@
       width: 136px;
       height: 136px;
     }
+
+    .loading-container {
+      position: relative;
+      width: 136px;
+      height: 136px;
+      border-radius: 8px;
+      overflow: hidden;
+      animation: container-enter 0.6s ease-out;
+      background: linear-gradient(135deg, #f5f2f0 0%, #e8e2dd 100%);
+    }
+
+    .loading-placeholder {
+      transition: opacity 0.8s ease-in-out;
+      opacity: 1;
+      animation: pulse-loading 1.5s ease-in-out infinite;
+      z-index: 2;
+      
+      &.fade-out {
+        opacity: 0;
+        animation: none;
+        transition: opacity 0.8s ease-in-out;
+      }
+    }
+
+    .loading-video {
+      width: 136px;
+      height: 136px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: none;
+      outline: none;
+      background: transparent;
+      box-shadow: none;
+      position: absolute;
+      transition: opacity 0.8s ease-in-out, transform 0.3s ease-in-out;
+      z-index: 1;
+      
+      &.fade-in {
+        opacity: 1 !important;
+        z-index: 3;
+        transform: scale(1);
+      }
+
+      // 确保video元素完全填充容器
+      video {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border: none !important;
+        outline: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border-radius: 8px !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+      }
+
+      // 针对不同平台的video容器
+      ::v-deep video {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border: none !important;
+        outline: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border-radius: 8px !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+      }
+
+      // 小程序平台特定样式
+      /* #ifdef MP-WEIXIN */
+      .taro-video-container {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+      }
+      /* #endif */
+
+      // H5平台特定样式
+      /* #ifdef H5 */
+      .taro-video-container {
+        width: 136px !important;
+        height: 136px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+      }
+      /* #endif */
+    }
     .quick-design-loading-title {
+      font-family: "GlobalFont", Serif;
       font-weight: 400;
       font-size: 22px;
       line-height: 54px;
@@ -22,6 +122,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding-left: 24px;
 
       .quick-design-loading-title-dot {
         display: flex;
@@ -34,15 +135,94 @@
         animation: dot-animation 1.5s infinite;
       }
     }
-    .quick-design-loading-content {
-      width: 60%;
-      font-weight: 300;
-      font-size: 12px;
-      line-height: 135%;
-      letter-spacing: 1px;
-      text-align: center;
-      color: #1f1722;
+  }
+}
+
+.quick-design-loading-content {
+  width: 60%;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 135%;
+  letter-spacing: 1px;
+  text-align: center;
+  color: #1f1722;
+  animation: fade-in 0.5s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  
+
+  .quick-design-loading-content-link {
+    color: #1f1722;
+    font-weight: 400;
+  }
+}
+
+// 全局Video样式优化
+.loading-video {
+  &,
+  video {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    &::-webkit-media-controls {
+      display: none !important;
     }
+
+    &::-webkit-media-controls-panel {
+      display: none !important;
+    }
+
+    &::-webkit-media-controls-play-button {
+      display: none !important;
+    }
+
+    &::-webkit-media-controls-start-playback-button {
+      display: none !important;
+    }
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes container-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulse-loading {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.01);
+    filter: brightness(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1);
   }
 }
 

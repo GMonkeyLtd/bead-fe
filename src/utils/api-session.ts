@@ -82,17 +82,17 @@ export interface DesignDraftResponse extends BaseResponse {
 
 export interface DesignProgressResponse extends BaseResponse {
   data: {
-    Progress: number;
-    ImageURL: string;
-    DesignId: string;
-    Info: {
-      Name: string;
-      Description: string;
-      Wuxing: string;
-      Wishes: string;
-      Spec: string;
-      RecommendBeads: BeadItem[];
-      Beads: BeadItem[];
+    progress: number;
+    image_url: string;
+    design_id: string;
+    info: {
+      name: string;
+      description: string;
+      wuxing: string;
+      wishes: string;
+      spec: string;
+      recommend_beads: BeadItem[];
+      beads: BeadItem[];
     };
   };
 }

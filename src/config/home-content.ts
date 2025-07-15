@@ -7,7 +7,7 @@ export const SWIPER_DATA = [
       subtitle: "CRYSTAL",
       description: "探索未来，掌握命运",
       backgroundImage:
-        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/home-page.png",
+        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/home-page-bg.png",
     },
     // {
     //   id: 2,

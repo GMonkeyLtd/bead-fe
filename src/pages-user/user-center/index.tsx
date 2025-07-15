@@ -10,6 +10,7 @@ import TabBar from "@/components/TabBar";
 import { userHistoryApi, userApi } from "@/utils/api";
 import MyWorkIcon from "@/assets/icons/my-work.svg";
 import { pageUrls } from "@/config/page-urls";
+import { DESIGN_PLACEHOLDER_IMAGE_URL } from "@/config";
 
 const UserCenterPage: React.FC = () => {
   const [showIncomeCard, setShowIncomeCard] = useState(false);
@@ -25,7 +26,7 @@ const UserCenterPage: React.FC = () => {
         return {
           id: item.ID,
           name: item.WordInfo.bracelet_name,
-          image: item.ImageURL,
+          image: item.ImageURL || DESIGN_PLACEHOLDER_IMAGE_URL,
         };
       });
       setImageHistory(history);

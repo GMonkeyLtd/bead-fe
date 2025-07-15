@@ -132,7 +132,6 @@ const requestInterceptor = async (config: RequestConfig) => {
       throw new Error('认证失败，请重试');
     }
   }
-  console.log(config.url, config.merchantBaseUrl, 'config.url')
   return {
     ...config,
     header: headers,
@@ -211,7 +210,7 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
     config.cancelToken?.throwIfCancelled()
 
     // 显示加载提示
-    if (config.showLoading !== false) {
+    if (finalConfig.showLoading) {
       Taro.showLoading({
         title: config.loadingText || defaultConfig.loadingText,
         mask: true,

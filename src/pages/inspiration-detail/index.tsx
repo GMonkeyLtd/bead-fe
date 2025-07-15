@@ -69,7 +69,6 @@ const InspirationDetailPage: React.FC = () => {
   const getDesignData = async (designId: number) => {
     try {
       const res = await userHistoryApi.getDesignById(designId);
-      console.log(res, "res1111");
       setDesignData(res.data);
     } catch (error) {
       console.error("获取设计数据失败:", error);

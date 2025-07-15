@@ -90,6 +90,7 @@ const ChatPage: React.FC = () => {
   };
 
   const processChatResult = (resData: any) => {
+    console.log(resData, "resData");
     updateSessionData({
       newMessage: {
         role: resData.role,
@@ -119,16 +120,21 @@ const ChatPage: React.FC = () => {
     is_lunar: boolean;
   }) => {
     apiSession
-      .createSession({
-        birth_info: {
-          birth_year,
-          birth_month,
-          birth_day,
-          birth_hour,
-          is_lunar,
-          sex,
+      .createSession(
+        {
+          birth_info: {
+            birth_year,
+            birth_month,
+            birth_day,
+            birth_hour,
+            is_lunar,
+            sex,
+          },
         },
-      })
+        {
+          showLoading: false,
+        }
+      )
       .then((res) => {
         const data = res.data || {};
         if (data.session_id) {
@@ -185,7 +191,12 @@ const ChatPage: React.FC = () => {
       .chat({
         session_id: sessionId,
         message: content,
-      })
+      },
+      {
+        showLoading: true,
+        loadingText: "正在设计中～",
+      }
+    )
       .then((res) => {
         processChatResult(res.data);
       })
@@ -204,20 +215,20 @@ const ChatPage: React.FC = () => {
     if (!canvasImageUrl && !result?.draft?.draft_id && !sessionId) {
       return;
     }
-      if (result?.design?.design_id) {
-        Taro.redirectTo({
-          url: `${pageUrls.result}?designBackendId=${result?.design?.design_id}`,
-        });
-        return;
-      }
-      if (!canvasImageUrl) {
-        return;
-      }
+    if (result?.design?.design_id) {
       Taro.redirectTo({
-        url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
-          result?.draft?.draft_id
-        }&imageUrl=${encodeURIComponent(canvasImageUrl)}`,
+        url: `${pageUrls.result}?designBackendId=${result?.design?.design_id}`,
       });
+      return;
+    }
+    if (!canvasImageUrl) {
+      return;
+    }
+    Taro.redirectTo({
+      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
+        result?.draft?.draft_id
+      }&imageUrl=${encodeURIComponent(canvasImageUrl)}`,
+    });
 
     // const beadDataId = "bead-" + generateUUID();
     // addBeadData({
@@ -285,7 +296,7 @@ const ChatPage: React.FC = () => {
     });
   };
 
-  console.log(result, canvasImageUrl, 'result')
+  console.log(result, canvasImageUrl, "result");
 
   const renderKeyboardHide = () => {
     if (!canvasImageUrl || result?.isPolling) {
@@ -299,7 +310,11 @@ const ChatPage: React.FC = () => {
       <View className="result-container">
         <View className="result-title">
           <View className="result-title-text">
-            {`定制方案${result?.draft?.wuxing?.length? `「喜${result?.draft?.wuxing?.join('')}」` : ''}`}
+            {`定制方案${
+              result?.draft?.wuxing?.length
+                ? `「喜${result?.draft?.wuxing?.join("")}」`
+                : ""
+            }`}
           </View>
           {result?.draft?.beads && result?.draft?.beads?.length > 0 && (
             <View className="diy-adjust" onClick={handleEditBead}>
@@ -328,7 +343,7 @@ const ChatPage: React.FC = () => {
                           {item.name + ":"}
                         </View>
                         <View className="result-text-content-description">
-                          {item.func_summary || ''}
+                          {item.func_summary || ""}
                         </View>
                       </View>
                     ))}
@@ -504,6 +519,7 @@ const ChatPage: React.FC = () => {
               style={{ width: "140px" }}
               text="更换心愿"
               onClick={() => {
+                // handleSend("更换心愿");
                 resetImgGenerateCount();
               }}
             />

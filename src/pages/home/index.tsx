@@ -22,6 +22,11 @@ const Home = () => {
   useEffect(() => {
     AuthManager.clearAuth();
     AuthManager.login();
+    Taro.showShareMenu({
+      withShareTicket: true, // 支持获取群聊信息
+      showShareItems: ['shareAppMessage', 'shareTimeline'] // 同时开启好友和朋友圈分享
+    });
+    
   }, []);
 
   useDidShow(() => {
