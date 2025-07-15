@@ -163,7 +163,10 @@ const CustomDesignRing = ({
 
   // 优化：图片处理缓存
   const processImages = useCallback(async (_beads: Bead[]) => {
-    const cacheKey = _beads.map(item => item.image_url).join(',');
+    // 缓存 key 需要包含所有会影响结果的属性
+    const cacheKey = _beads.map(item => 
+      `${item.image_url}_${item.render_diameter}_${item.bead_diameter}_${item.id}`
+    ).join(',');
     
     if (imageProcessCacheRef.current.has(cacheKey)) {
       const cachedData = imageProcessCacheRef.current.get(cacheKey);

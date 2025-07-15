@@ -4,6 +4,19 @@ import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
 
+// const domain = 'https://api.gmonkey.top'
+const domain = 'https://test.qianjunye.com'
+// 默认配置
+const defaultConfig = {
+  baseURL: domain + '/api/v1', // 在这里设置你的API基础URL
+  timeout: 600000,
+  showLoading: false,
+  loadingText: '加载中...',
+  showError: true,
+  isMock: false,
+  merchantBaseUrl: domain + '/api/v1'
+}
+
 export interface BaseResponse {
   code: number;
   message: string;
@@ -82,17 +95,6 @@ export interface ApiResponse<T = any> {
   message: string
   data: T
   success: boolean
-}
-
-// 默认配置
-const defaultConfig = {
-  baseURL: 'https://test.qianjunye.com:443/api/v1', // 在这里设置你的API基础URL
-  timeout: 600000,
-  showLoading: false,
-  loadingText: '加载中...',
-  showError: true,
-  isMock: false,
-  merchantBaseUrl: 'https://test.qianjunye.com/api/v1'
 }
 const checkMerchant = url => url.includes('/merchant')
 

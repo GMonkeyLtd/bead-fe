@@ -16,7 +16,7 @@ const CustomDesign = () => {
   const { beadData, addBeadData } = useDesign();
 
   const { beadDataId } = Taro.getCurrentInstance()?.router?.params || {};
-  console.log(designData, 'designData')
+  console.log(beadTypeMap, 'beadTypeMap')
 
   useEffect(() => {
     beadsApi.getBeadList().then((res) => {

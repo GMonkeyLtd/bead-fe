@@ -81,7 +81,7 @@ const ModifyUser = () => {
       if (nickName) {
         data.nick_name = nickName.trim();
       }
-      if (avatarUrl) {
+      if (avatarUrl !== originalAvatarUrl) {
         const base64 = await imageToBase64(avatarUrl);
         data.avatar_base64 = base64;
       }

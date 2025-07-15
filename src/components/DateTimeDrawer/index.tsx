@@ -103,7 +103,7 @@ const DateTimeDrawer = ({
     // 初始化年份（当前年到过去100年）
     const yearList: number[] = [];
     for (let i = currentYear; i >= currentYear - 100; i--) {
-      yearList.push(i);
+      yearList.unshift(i);
     }
     setYears(yearList);
 

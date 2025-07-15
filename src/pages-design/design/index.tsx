@@ -285,6 +285,8 @@ const ChatPage: React.FC = () => {
     });
   };
 
+  console.log(result, canvasImageUrl, 'result')
+
   const renderKeyboardHide = () => {
     if (!canvasImageUrl || result?.isPolling) {
       return (

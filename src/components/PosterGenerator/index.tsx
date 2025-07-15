@@ -374,10 +374,17 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
         crystalY = 516 * dpr;
       let crystalImgPath: any[] = [];
       if (data.crystals?.[0]) {
-        crystalImgPath[0] = await loadImage(data.crystals[0].image_url || "");
+        const res = await Taro.downloadFile({
+          url: data.crystals[0].image_url || "",
+        });
+        console.log(res, 'res')
+        crystalImgPath[0] = res.tempFilePath;
       }
       if (data.crystals?.[1]) {
-        crystalImgPath[1] = await loadImage(data.crystals[1].image_url || "");
+        const res = await Taro.downloadFile({
+          url: data.crystals[1].image_url || "",
+        });
+        crystalImgPath[1] = res.tempFilePath;
       }
       crystalImgPath.forEach(async (_, index) => {
         // 绘制水晶圆形图标

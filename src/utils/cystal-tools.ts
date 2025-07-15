@@ -235,5 +235,5 @@ export const computeBraceletLength = (beads: Bead[], key: string = 'radius') => 
   const averageRadius = allLength / (2 * dotsLength.length);
   // 手围 = （围成圆的半径 - 珠子的平均半径）* 2 * PI
   const predictLength = (ringRadius - averageRadius) * 2 * Math.PI;
-  return Math.floor(predictLength / 10);
+  return Math.ceil(predictLength / 10);
 };
