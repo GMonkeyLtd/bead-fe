@@ -55,6 +55,7 @@ const CircleRing = ({
   const ringRadius = targetSize / 2;
   const dpr = Taro.getSystemInfoSync().pixelRatio;
 
+  console.log(dotsBgImageData, 'dotsBgImageData')
   const dotsBgImagePath = useMemo(
     () => dotsBgImageData.map((item: any) => item.image_url),
     [dotsBgImageData]

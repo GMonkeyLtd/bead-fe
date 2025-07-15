@@ -16,7 +16,6 @@ const CustomDesign = () => {
   const { beadData, addBeadData } = useDesign();
 
   const { beadDataId } = Taro.getCurrentInstance()?.router?.params || {};
-  console.log(beadTypeMap, 'beadTypeMap')
 
   useEffect(() => {
     beadsApi.getBeadList().then((res) => {
@@ -50,13 +49,16 @@ const CustomDesign = () => {
     if (!imageUrl || !designData?.session_id || !designData?.draft_id) {
       return;
     }
+    console.log(editedBeads, allBeadList,'editedBeads')
     const beads = editedBeads.map((item) => {
       const _beadData = allBeadList?.find((_item) => _item.id == item.id);
       return {
         ..._beadData,
-        bead_diameter: item.bead_diameter || item.diameter,
+        diameter: item.bead_diameter || item.diameter,
+        bead_id: item.id,
       };
     })
+    console.log(beads, 'beads')
 
     apiSession.cloneDraft({
       session_id: designData?.session_id,

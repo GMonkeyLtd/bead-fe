@@ -29,18 +29,18 @@ const Home = () => {
     
   }, []);
 
-  useDidShow(() => {
-    apiSession.getLastSession().then((res) => {
-      if (res.data?.session_id) {
-        setLastSessionId(res.data.session_id);
-      }
-    }).catch((e) => {
-      setLastSessionId("");
-      console.error("getLastSession error: ", e);
-    }).finally(() => {
-      setCheckFirst(true);
-    });
-  })
+  // useDidShow(() => {
+  //   apiSession.getLastSession().then((res) => {
+  //     if (res.data?.session_id) {
+  //       setLastSessionId(res.data.session_id);
+  //     }
+  //   }).catch((e) => {
+  //     setLastSessionId("");
+  //     console.error("getLastSession error: ", e);
+  //   }).finally(() => {
+  //     setCheckFirst(true);
+  //   });
+  // })
 
   const startDesign = () => {
     // 打开日期时间选择抽屉
@@ -169,9 +169,9 @@ const Home = () => {
                 <View className="crystal-action-section">
                   <CrystalButton
                     style={{
-                      position: 'relative',
-                      bottom: checkFirst ? '0px' : '-500px',
-                      transition: 'bottom 0.8s ease-in-out',
+                      // position: 'relative',
+                      // bottom: checkFirst ? '0px' : '-500px',
+                      // transition: 'bottom 0.8s ease-in-out',
                     }}
                     onClick={() => {
                       if (!lastSessionId) {
