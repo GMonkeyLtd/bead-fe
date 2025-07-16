@@ -224,19 +224,11 @@ const DateTimeDrawer = ({
     const year = years[selectedIndexes[0]];
     const month = months[selectedIndexes[1]];
     const day = days[selectedIndexes[2]];
-
-    let solarDate;
-    if (dateType === "农历") {
-      const lunar = Lunar.fromYmd(year, month, day);
-      solarDate = lunar.getSolar();
-    } else {
-      solarDate = Solar.fromYmd(year, month, day);
-    }
-
+    console.log(year, month, day, dateType, 'year, month, day')
     return {
-      year: solarDate.getYear(),
-      month: solarDate.getMonth(),
-      day: solarDate.getDay(),
+      year: year,
+      month: month,
+      day: day,
       hour: hours[selectedIndexes[3]] === -1 ? 0 : hours[selectedIndexes[3]],
       gender: gender === "男" ? 1 : 0,
       isLunar: dateType === "农历",
