@@ -4,8 +4,8 @@ import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
 
-// const domain = 'https://api.gmonkey.top'
-const domain = 'https://test.qianjunye.com'
+const domain = 'https://api.gmonkey.top'
+// const domain = 'https://test.qianjunye.com'
 // 默认配置
 const defaultConfig = {
   baseURL: domain + '/api/v1', // 在这里设置你的API基础URL
