@@ -421,7 +421,7 @@ const InspirationPage: React.FC = () => {
           </View>
           {/* {!hasMore && showData.length > 0 && ( */}
           <View className={styles.noMoreContainer} id={curTab === "all" ? "inspiration-more-tag" : "collect-more-tag"}>
-            <Text className={styles.noMoreText}>没有更多了</Text>
+            <Text className={styles.noMoreText}>{curTab === "collect" && showData?.length ===0 ? "暂无收藏设计" : "暂时就这些啦～记得常来看看新内容哦"}</Text>
           </View>
           {/* 没有更多数据 */}
         </View>

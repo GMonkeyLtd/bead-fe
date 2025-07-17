@@ -262,3 +262,4 @@ export const useSessionResultHandler = ({
     resetImgGenerateCount,
   };
 };
+
