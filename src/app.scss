@@ -13,7 +13,14 @@
   font-style: normal;
   font-display: swap;
 }
-
+@font-face {  
+  font-family: "Source Han Serif CN";
+  src: url("https://zhuluoji.cn-sh2.ufileos.com/resources/Source-Han-Serif-SC-zip.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 body {
   font-family: "Source Han Serif CN", "PingFang SC", "Microsoft YaHei",
     sans-serif;

@@ -1,0 +1,27 @@
+.assistantAvatarContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  .assistantAvatar {
+    width: 36px;
+    height: 36px;
+  }
+  .assistantName {
+    font-family: "Source Han Serif CN";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  }
+}
+
+.chatContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+}

@@ -6,6 +6,12 @@ export default defineAppConfig({
   ],
   subPackages: [
     {
+      root: 'pages-chat',
+      pages: [
+        'chat-design/index',
+      ]
+    },
+    {
       root: 'pages-design',
       pages: [
         'quick-design/index',

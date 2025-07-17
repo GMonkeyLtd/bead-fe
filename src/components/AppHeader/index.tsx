@@ -16,7 +16,8 @@ const AppHeader = ({
   showHome = true,
   onBack,
   style = {},
-  headerContent = "",
+  headerContent,
+  extraContent = "",
 }: {
   isWhite?: boolean;
   showBack?: boolean;
@@ -24,6 +25,7 @@ const AppHeader = ({
   onBack?: () => void;
   style?: React.CSSProperties;
   headerContent?: React.ReactNode;
+  extraContent?: React.ReactNode;
 }) => {
   const {
     height: navBarHeight,
@@ -129,8 +131,13 @@ const AppHeader = ({
             />
           </View>
         )}
+        {extraContent && (
+          <View style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            {extraContent}
+          </View>
+        )}
       </View>
-      {headerContent ? (
+      {headerContent !== undefined ? (
         <View style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
           {headerContent}
         </View>

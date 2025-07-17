@@ -18,4 +18,5 @@ export const pageUrls = {
   webview: '/pages-common/webview/index',
   inspiration: '/pages/inspiration/index',
   inspirationDetail: '/pages/inspiration-detail/index',
+  chatDesign: '/pages-chat/chat-design/index',
 }

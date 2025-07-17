@@ -7,6 +7,7 @@ const PageContainer = ({
   isWhite = false,
   keyboardHeight = 0,
   headerContent = "",
+  headerExtraContent = "",
   showHeader = true,
   style = {},
   showBack = true,
@@ -16,6 +17,7 @@ const PageContainer = ({
   isWhite?: boolean;
   keyboardHeight?: number;
   headerContent?: React.ReactNode;
+  headerExtraContent?: React.ReactNode;
   showHeader?: boolean;
   style?: React.CSSProperties;
   showBack?: boolean;
@@ -37,6 +39,7 @@ const PageContainer = ({
           headerContent={headerContent}
           showBack={showBack}
           showHome={showHome}
+          extraContent={headerExtraContent}
         />
       )}
       <View
