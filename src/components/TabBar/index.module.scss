@@ -46,13 +46,14 @@
     .tabText {
       font-family: 'Source Han Serif CN', serif;
       font-weight: 500;
-      font-size: 22px;
       line-height: 1.437;
       text-align: center;
       transition: color 0.2s ease;
+      font-size: 12px !important;
 
       &.active {
         color: #1F1722;
+        font-weight: 600;
       }
 
       &.inactive {

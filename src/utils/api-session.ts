@@ -44,6 +44,13 @@ export interface CreateSessionResponse extends BaseResponse {
   };
 }
 
+export interface ChatMessageItem {
+  message_id: string;
+  role: "assistant" | "user";
+  content: string;
+  created_at: string;
+}
+
 export interface ChatResponse extends BaseResponse {
   data: {
     session_id: string;
@@ -224,6 +231,33 @@ export default {
         cancelToken: config?.cancelToken,
         ...config,
       }
+    );
+  },
+
+  getChatHistory: (
+    params: {
+      session_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/sessions/${params.session_id}/history`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
+    );
+  },
+
+  getSessionList: (
+    params: {
+      page: number;
+      page_size: number;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/sessions?limit=${params.page_size}&offset=${params.page}`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
     );
   },
 };

@@ -56,17 +56,18 @@
   line-height: 1.437;
   letter-spacing: 6px; /* 40% 字间距 */
   text-align: center;
+  color: #1f1722;
 
   /* 钻石渐变文字效果，匹配Figma设计 */
   &:not(.primary) {
-  background: radial-gradient(
-    ellipse at 31.28% 83.62%,
-    #c5996b 0%,
-    #131921 80%
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  // background: radial-gradient(
+  //   ellipse at 31.28% 83.62%,
+  //   #c5996b 0%,
+  //   #131921 80%
+  // );
+  // background-clip: text;
+  // -webkit-background-clip: text;
+  // -webkit-text-fill-color: transparent;
 }
 
   /* 文字阴影 */

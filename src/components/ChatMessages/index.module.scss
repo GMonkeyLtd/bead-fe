@@ -1,0 +1,39 @@
+.chatMessagesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.assistantMessageContainer {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+
+  .assistantMessageBubble {
+    display: flex;
+    padding: 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+    border-radius: 2px 20px 20px 20px;
+    background: #FBF7F5;
+    box-shadow: 0px 2px 20px 0px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.userMessageContainer {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+
+  .userMessageBubble {
+    display: flex;
+    padding: 12px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    border-radius: 20px 2px 20px 20px;
+    background: #ecc984;
+  }
+}

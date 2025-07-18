@@ -132,13 +132,28 @@ const AppHeader = ({
           </View>
         )}
         {extraContent && (
-          <View style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <View
+            style={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             {extraContent}
           </View>
         )}
       </View>
       {headerContent !== undefined ? (
-        <View style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontFamily: "Source Han Serif CN",
+          }}
+        >
           {headerContent}
         </View>
       ) : (

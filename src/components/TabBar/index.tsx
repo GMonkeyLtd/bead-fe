@@ -116,14 +116,14 @@ const TabBar: React.FC<TabBarProps> = ({ onTabChange, isMerchant = false }) => {
               src={isActive ? item.iconActive : item.icon}
               className={styles.tabIcon}
             />
-            <Text
+            <View
               className={`${styles.tabText} ${
                 isActive ? styles.active : styles.inactive
               }`}
               style={isMerchant && isActive ? { color: "#FF8800" } : {}}
             >
               {item.text}
-            </Text>
+            </View>
           </View>
         );
       })}
