@@ -21,19 +21,23 @@ export interface BeadItem {
   color: string;
   wuxing: string;
   english: string;
-  bead_diameter: number;
+  diameter: number;
   funcs: string[];
+  func_summary: string;
 }
 
 export interface BraceletDraft {
   session_id: string;
-      draft_id: string;
-      user_id: number;
-      progress: number;
-      wuxing: string[];
-      size: number;
-      beads: BeadItem[];
-      created_at: string;
+  draft_id: string;
+  user_id: number;
+  progress: number;
+  wuxing: string[];
+  size: number;
+  beads: BeadItem[];
+  created_at: string;
+  name: string;
+  description: string;
+  design_id?: string;
 }
 
 export interface CreateSessionResponse extends BaseResponse {
@@ -52,6 +56,7 @@ export interface ChatMessageItem {
   content: string;
   created_at: string;
   draft_id?: string;
+  draft_index?: number;
 }
 
 export interface ChatResponse extends BaseResponse {

@@ -259,7 +259,7 @@ const Result = () => {
         "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
       }}
     >
-      <AppHeader isWhite showBack={showBack === 'true'} />
+      <AppHeader isWhite showBack={showBack === 'false'} />
       <View
         className="result-content-container"
         style={{

@@ -29,18 +29,18 @@ const Home = () => {
     
   }, []);
 
-  // useDidShow(() => {
-  //   apiSession.getLastSession().then((res) => {
-  //     if (res.data?.session_id) {
-  //       setLastSessionId(res.data.session_id);
-  //     }
-  //   }).catch((e) => {
-  //     setLastSessionId("");
-  //     console.error("getLastSession error: ", e);
-  //   }).finally(() => {
-  //     setCheckFirst(true);
-  //   });
-  // })
+  useDidShow(() => {
+    apiSession.getLastSession().then((res) => {
+      if (res.data?.session_id) {
+        setLastSessionId(res.data.session_id);
+      }
+    }).catch((e) => {
+      setLastSessionId("");
+      console.error("getLastSession error: ", e);
+    }).finally(() => {
+      setCheckFirst(true);
+    });
+  })
 
   const startDesign = () => {
     // 打开日期时间选择抽屉
@@ -178,7 +178,7 @@ const Home = () => {
                         startDesign();
                       } else {
                         Taro.redirectTo({
-                          url: pageUrls.design + '?session_id=' + lastSessionId,
+                          url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
                         });
                       }
                     }}

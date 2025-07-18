@@ -1,0 +1,437 @@
+{
+    "code": 200,
+    "message": "ok",
+    "data": {
+        "ID": 957,
+        "CreatedAt": "2025-07-18T14:47:35+08:00",
+        "UpdatedAt": "2025-07-18T14:47:35+08:00",
+        "DeletedAt": null,
+        "session_id": "1981c4626b8e0cac1a1834b13b8",
+        "draft_id": "1981c49cadee802d0724015a690",
+        "user_id": 2,
+        "status": 3,
+        "progress": 100,
+        "wuxing": [
+            "木",
+            "火"
+        ],
+        "wishes": null,
+        "spec": {
+            "wrist_size": 20,
+            "diameter": 10,
+            "count": 18
+        },
+        "name": "丁火焕彩",
+        "description": "丁火遇木火，能量焕彩，带来生机与活力，运势更旺。",
+        "beads": [
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 28,
+                "name": "红胶花",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%83%B6%E8%8A%B1.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "平心静气",
+                    "增添自信",
+                    "改善精神"
+                ],
+                "func_summary": "静心增自信",
+                "diameter": 10
+            },
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 28,
+                "name": "红胶花",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%83%B6%E8%8A%B1.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "平心静气",
+                    "增添自信",
+                    "改善精神"
+                ],
+                "func_summary": "静心增自信",
+                "diameter": 10
+            },
+            {
+                "bead_id": 28,
+                "name": "红胶花",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%83%B6%E8%8A%B1.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "平心静气",
+                    "增添自信",
+                    "改善精神"
+                ],
+                "func_summary": "静心增自信",
+                "diameter": 10
+            },
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 28,
+                "name": "红胶花",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%83%B6%E8%8A%B1.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "平心静气",
+                    "增添自信",
+                    "改善精神"
+                ],
+                "func_summary": "静心增自信",
+                "diameter": 10
+            },
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 36,
+                "name": "浅绿莹石",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E6%B5%85%E7%BB%BF%E8%8E%B9%E7%9F%B3.png",
+                "color": [
+                    "绿"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "木"
+                ],
+                "funcs": [
+                    "缓解焦虑",
+                    "提升专注力"
+                ],
+                "func_summary": "缓焦促成长",
+                "diameter": 10
+            },
+            {
+                "bead_id": 28,
+                "name": "红胶花",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%83%B6%E8%8A%B1.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "平心静气",
+                    "增添自信",
+                    "改善精神"
+                ],
+                "func_summary": "静心增自信",
+                "diameter": 10
+            },
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 28,
+                "name": "红胶花",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%83%B6%E8%8A%B1.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "平心静气",
+                    "增添自信",
+                    "改善精神"
+                ],
+                "func_summary": "静心增自信",
+                "diameter": 10
+            },
+            {
+                "bead_id": 27,
+                "name": "红虎眼",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%99%8E%E7%9C%BC.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "避邪招财",
+                    "激发勇气",
+                    "减轻压力"
+                ],
+                "func_summary": "辟邪招财运",
+                "diameter": 10
+            },
+            {
+                "bead_id": 28,
+                "name": "红胶花",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E7%BA%A2%E8%83%B6%E8%8A%B1.webp",
+                "color": [
+                    "红"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "火"
+                ],
+                "funcs": [
+                    "平心静气",
+                    "增添自信",
+                    "改善精神"
+                ],
+                "func_summary": "静心增自信",
+                "diameter": 10
+            },
+            {
+                "bead_id": 36,
+                "name": "浅绿莹石",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E6%B5%85%E7%BB%BF%E8%8E%B9%E7%9F%B3.png",
+                "color": [
+                    "绿"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "木"
+                ],
+                "funcs": [
+                    "缓解焦虑",
+                    "提升专注力"
+                ],
+                "func_summary": "缓焦促成长",
+                "diameter": 10
+            },
+            {
+                "bead_id": 1,
+                "name": "柠檬黄晶",
+                "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads0710/%E6%9F%A0%E6%AA%AC%E9%BB%84%E6%99%B6.webp",
+                "color": [
+                    "黄"
+                ],
+                "rgb": null,
+                "wuxing": [
+                    "土"
+                ],
+                "funcs": [
+                    "聚财",
+                    "调节内分泌",
+                    "增强自信"
+                ],
+                "func_summary": "聚财旺运",
+                "diameter": 12
+            }
+        ],
+        "style": {
+            "id": 7,
+            "name": "风格7",
+            "base_prompt": "This crystal bracelet is designed for those who are weak and prefer wood and fire elements. It is composed of three main colors to create a harmonious visual effect. It not only aligns with the five-element energy but also highlights the fluidity and warmth of the crystals:\nThe main string bead is a light green crystal (belonging to the element of wood), with a faint green hue and a translucent texture. Under the light, the subtle internal patterns can be seen, resembling the vitality of spring grass. It serves as the base and runs through the entire bracelet. Against a white background, it emits a fresh luster, providing a solid foundation of the wood element for those who are weak and enhancing their growth power.\nEvery two light green crystals are interspersed with one soft orange crystal (belonging to the element of fire). The warm, translucent texture is like the warm rays of the sun, creating a natural color transition with the light green. This not only strengthens the warm energy of the fire element but also makes the overall color scheme more vibrant and lively, helping to promote a strong fire energy and adding growth power to the wood element.\nAt the symmetrical positions of the bracelet, each is decorated with a light brown crystal for balance (belonging to the element of earth, indirectly generating metal but more beneficial for the stability of the wood element). It has a smooth and translucent texture, forming a gentle connection with the light green and orange. This not only enriches the color layers but also stabilizes the wood and fire energy through the inclusive nature of earth, avoiding floatiness and making the overall combination more stable and warm.\nAfter polishing, the smooth surface of the crystals reflects a soft luster under uniform light. The translucent quality becomes clearer against the white background. The simple arrangement conforms to the modern elegant style and allows the five-element energy and visual beauty to blend together, providing just the right nourishment for those who are weak and prefer wood and fire elements.",
+            "sence_prompt": "This photo shows a delicate crystal bracelet. The bracelet is coiled on a smooth light grey surface. The background features yellow crystals in various sizes and shapes,adding depth to the scene. On the right, a large white satin lies flat, adding elegance. The overall composition is simple and serene, focusing on the delicate details and soft tones of the bracelet.",
+            "xiyong": [
+                "火",
+                "木"
+            ],
+            "beads_composes": [
+                {
+                    "funcs": [
+                        "情绪疗愈",
+                        "爱情桃花"
+                    ],
+                    "beads": [
+                        "浅绿莹石",
+                        "绿莹石",
+                        "粉草莓晶"
+                    ]
+                },
+                {
+                    "funcs": [
+                        "情绪疗愈",
+                        "事业财运",
+                        "人际和谐"
+                    ],
+                    "beads": [
+                        "红虎眼",
+                        "红胶花",
+                        "浅绿莹石"
+                    ]
+                },
+                {
+                    "funcs": [
+                        "人际和谐",
+                        "健康平安",
+                        "情绪疗愈",
+                        "爱情桃花"
+                    ],
+                    "beads": [
+                        "淡紫薰衣草",
+                        "星光马粉",
+                        "巴西紫水晶",
+                        "白阿塞"
+                    ]
+                }
+            ]
+        }
+    }
+}

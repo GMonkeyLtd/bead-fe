@@ -25,6 +25,9 @@ export const GENERATING_MP4_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/ima
 export const DESIGN_PLACEHOLDER_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/design-placeholder.png";
 export const BRACELET_BG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bracelet-bc-image.png";
 
+export const BRACELET_CARD_TEXTURE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bracelet-card-texture.png";
+export const CRYSTAL_CARD_GRADIENT_BG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/crystal-card-gradient-bg.png";
+
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 
 export const SERVICE_DOC_PDF_URL = "https://zhuluoji.cn-sh2.ufileos.com/resources/%E7%92%9E%E5%85%89%E9%9B%86%E6%9C%8D%E5%8A%A1%E6%9D%A1%E6%AC%BE%20(1).pdf";

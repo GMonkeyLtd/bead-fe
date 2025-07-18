@@ -44,34 +44,16 @@
     &:active {
       transform: translateY(1px);
     }
-    box-shadow: 0px -4px 16px 0px #0000004d inset,
-      0px -2px 6px 0px #ffffffbf inset;
   }
 }
 
 .figma-button-text {
   font-family: "Source Han Serif CN", serif;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 15px;
-  line-height: 1.437;
-  letter-spacing: 6px; /* 40% 字间距 */
+  letter-spacing: 2px; /* 40% 字间距 */
   text-align: center;
   color: #1f1722;
-
-  /* 钻石渐变文字效果，匹配Figma设计 */
-  &:not(.primary) {
-  // background: radial-gradient(
-  //   ellipse at 31.28% 83.62%,
-  //   #c5996b 0%,
-  //   #131921 80%
-  // );
-  // background-clip: text;
-  // -webkit-background-clip: text;
-  // -webkit-text-fill-color: transparent;
-}
-
-  /* 文字阴影 */
-  text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.46);
 
   &.primary {
     color: #FFE5BA;
