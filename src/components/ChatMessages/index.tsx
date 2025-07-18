@@ -1,13 +1,16 @@
-import { ScrollView, View } from "@tarojs/components";
+import { ScrollView, View, Image } from "@tarojs/components";
 import styles from "./index.module.scss";
-import { ChatMessageItem } from "@/utils/api-session";
+import apiSession, { BraceletDraft, ChatMessageItem } from "@/utils/api-session";
 import ChatLoading from "../ChatLoading";
+import { BraceletDraftCard } from "../BraceletDraftCard";
 
 export default function ChatMessages({
+  sessionId,
   messages,
   isChatting,
   maxHeight,
 }: {
+  sessionId: string;
   messages: ChatMessageItem[];
   isChatting: boolean;
   maxHeight?: string;
@@ -23,7 +26,10 @@ export default function ChatMessages({
       <View className={styles.chatMessagesContainer}>
         {messages.map((message) => {
           return message.role === "assistant" ? (
-            <AssistantMessage key={message.message_id} message={message} />
+            <View key={message.message_id}>
+              <AssistantMessage message={message} />
+              {message.draft_id && <BraceletDraftCard sessionId={sessionId} draftId={message.draft_id} />}
+            </View>
           ) : (
             <UserMessage key={message.message_id} message={message} />
           );
@@ -53,3 +59,5 @@ export const UserMessage = ({ message }: { message: ChatMessageItem }) => {
     </View>
   );
 };
+
+

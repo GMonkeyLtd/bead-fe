@@ -16,6 +16,7 @@ import sendSvg from "@/assets/icons/send.svg";
 import { isEmptyMessage } from "@/utils/messageFormatter";
 import activeSendSvg from "@/assets/icons/active-send.svg";
 import TagList from "@/components/TagList";
+import { BRACELET_BG_IMAGE_URL } from "@/config";
 
 const INPUT_HEIGHT = 58 + 24;
 
@@ -25,6 +26,7 @@ const ChatDesign = () => {
   const { height: navBarHeight, top: navBarTop } = getNavBarHeightAndTop();
   const [inputValue, setInputValue] = useState("");
   const [recommendTags, setRecommendTags] = useState<string[]>([]);
+  const [sessionId, setSessionId] = useState("19812bcc605b911e7980e89570b");
   console.log(chatMessages, "chatMessages");
   const safeArea = getSafeArea();
   console.log(safeArea, "safeArea");
@@ -35,15 +37,22 @@ const ChatDesign = () => {
   }, [navBarHeight, navBarTop]);
 
   useEffect(() => {
-    // apiSession.getSessionList({ page: 1, page_size: 10 }).then((res) => {
-    //   console.log(res);
-    // });
-    apiSession
-      .getChatHistory({ session_id: "19812bcc605b911e7980e89570b" })
-      .then((res) => {
-        setChatMessages(res.data.messages || []);
-      });
+    apiSession.getSessionList({ page: 1, page_size: 10 }).then((res) => {
+      console.log(res.data.sessions);
+      setSessionId(res.data.sessions[0].session_id);
+    });
   }, []);
+
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+    apiSession
+    .getChatHistory({ session_id: sessionId })
+    .then((res) => {
+      setChatMessages(res.data.messages || []);
+    });
+  }, [sessionId]);
 
   const renderAssistant = () => {
     return (
@@ -69,7 +78,9 @@ const ChatDesign = () => {
           messages={chatMessages}
           isChatting={isDesigning}
           maxHeight={`calc(100% - ${spareHeight}px)`}
+          sessionId={sessionId}
         />
+        
         <View className={styles.inputContainer}>
           {recommendTags?.length > 0 && (
             <TagList

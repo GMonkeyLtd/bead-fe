@@ -4,17 +4,40 @@ import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
 
-// const domain = 'https://api.gmonkey.top'
-const domain = 'https://test.qianjunye.com'
+const domain = 'https://api.gmonkey.top'
+// const domain = 'https://test.qianjunye.com'
+
+// 判断是否为开发环境
+const isDevelopment = process.env.NODE_ENV === 'development'
+
+// 根据环境构建API基础URL
+const getBaseURL = () => {
+  const basePath = isDevelopment ? '/test_api/v1' : '/api/v1'
+  const fullURL = domain + basePath
+  if (isDevelopment) {
+    console.log('开发环境 - API基础URL:', fullURL)
+  }
+  return fullURL
+}
+
+const getMerchantBaseURL = () => {
+  const basePath = isDevelopment ? '/test_api/v1' : '/api/v1'
+  const fullURL = domain + basePath
+  if (isDevelopment) {
+    console.log('开发环境 - 商户API基础URL:', fullURL)
+  }
+  return fullURL
+}
+
 // 默认配置
 const defaultConfig = {
-  baseURL: domain + '/api/v1', // 在这里设置你的API基础URL
+  baseURL: getBaseURL(), // 根据环境动态设置API基础URL
   timeout: 600000,
   showLoading: false,
   loadingText: '加载中...',
   showError: true,
   isMock: false,
-  merchantBaseUrl: domain + '/api/v1'
+  merchantBaseUrl: getMerchantBaseURL()
 }
 
 export interface BaseResponse {
@@ -437,6 +460,12 @@ export const setBaseURL = (baseURL: string) => {
 
 export const setMerchantBaseURL = (url: string) => {
   defaultConfig.merchantBaseUrl = url
+}
+
+// 重新计算基础URL（根据环境）
+export const recalculateBaseURLs = () => {
+  defaultConfig.baseURL = getBaseURL()
+  defaultConfig.merchantBaseUrl = getMerchantBaseURL()
 }
 
 export const setIsMock = (isMock: boolean) => {

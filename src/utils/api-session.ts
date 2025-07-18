@@ -25,13 +25,8 @@ export interface BeadItem {
   funcs: string[];
 }
 
-export interface CreateSessionResponse extends BaseResponse {
-  data: {
-    session_id: string;
-    messages: MessageItem[];
-    recommends: string[];
-    latest_draft: {
-      session_id: string;
+export interface BraceletDraft {
+  session_id: string;
       draft_id: string;
       user_id: number;
       progress: number;
@@ -39,7 +34,14 @@ export interface CreateSessionResponse extends BaseResponse {
       size: number;
       beads: BeadItem[];
       created_at: string;
-    };
+}
+
+export interface CreateSessionResponse extends BaseResponse {
+  data: {
+    session_id: string;
+    messages: MessageItem[];
+    recommends: string[];
+    latest_draft: BraceletDraft;
     created_at: string;
   };
 }
@@ -49,6 +51,7 @@ export interface ChatMessageItem {
   role: "assistant" | "user";
   content: string;
   created_at: string;
+  draft_id?: string;
 }
 
 export interface ChatResponse extends BaseResponse {

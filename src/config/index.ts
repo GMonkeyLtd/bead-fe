@@ -23,7 +23,7 @@ export const LOGO_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-fronte
 export const APP_QRCODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/app-qrcode.png";
 export const GENERATING_MP4_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/designing.mp4";
 export const DESIGN_PLACEHOLDER_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/design-placeholder.png";
-
+export const BRACELET_BG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bracelet-bc-image.png";
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 
