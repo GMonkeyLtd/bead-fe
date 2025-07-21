@@ -35,7 +35,7 @@
     background-color: #fcf8f7;
     border-radius: 4px 4px 18px 18px;
     border: 1px solid rgba(255, 255, 255, 0.5);
-    padding: 36px 24px 20px;
+    padding: 24px 24px 20px;
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -73,7 +73,7 @@
   .braceletName {
     color: #1f1722;
     font-family: "Source Han Serif CN";
-    font-size: 20px;
+    font-size: 18px;
     font-style: normal;
     font-weight: 600;
     line-height: normal;
@@ -83,12 +83,12 @@
   .braceletBeads {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
   }
 
   .braceletBead {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px;
   }
 
@@ -97,24 +97,27 @@
     height: 16px;
   }
 
+  .braceletBeadInfoContainer {
+    display: flex;
+    flex-direction: column;
+  }
+
   .braceletBeadName {
     color: #1f1722;
-    text-align: center;
     font-family: "PingFang SC";
     font-size: 12px;
     font-style: normal;
     font-weight: 400;
-    line-height: normal;
+    line-height: 16px;
   }
 
   .braceletBeadFunc {
     color: rgba(31, 23, 34, 0.6);
-    text-align: center;
     font-family: "PingFang SC";
     font-size: 12px;
     font-style: normal;
     font-weight: 300;
-    line-height: normal;
+    line-height: 16px;
   }
 
   .braceletBgImageContainer {
@@ -143,5 +146,25 @@
     align-items: center;
     z-index: 1;
     padding-top: 20px;
+  }
+
+   // 响应式调整
+    
+   @media (min-width: 400px) {
+    .braceletDraftCardContentContainer {
+      padding: 36px 24px 20px;
+    }
+    .braceletBead {
+      gap: 12px;
+    }
+    .braceletBeadInfoContainer {
+      flex-direction: row;
+      gap: 8px
+    }
+    .braceletName {
+      font-size: 20px;
+    }
+
+
   }
 }

@@ -339,8 +339,8 @@ const InspirationPage: React.FC = () => {
                     width: "100%",
                     height: "12px",
                     position: "absolute",
-                    bottom: "0px",
-                    right: "0px",
+                    bottom: "-6px",
+                    left: "12px",
                   }}
                 />
               )}

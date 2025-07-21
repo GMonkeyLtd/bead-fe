@@ -44,7 +44,8 @@ const CircleRing = ({
   fileType = "png",
   onChange = (
     status: "idle" | "downloading" | "success" | "error",
-    canvasImage: string
+    canvasImage: string,
+    dotsBgImageData: any[]
   ) => {},
 }) => {
   if (!dotsBgImageData || dotsBgImageData.length === 0) {
@@ -52,41 +53,37 @@ const CircleRing = ({
   }
 
   // 使用优化的hook
-  const {
-    generateCircleRing,
-    getResult,
-    canvasProps
-  } = useCircleRingCanvas({
+  const { generateCircleRing, getResult, canvasProps } = useCircleRingCanvas({
     targetSize,
     isDifferentSize,
     fileType: fileType as "png" | "jpg" | "jpeg",
-    canvasId
+    canvasId,
   });
 
   // 当dotsBgImageData变化时，生成新的手串
   useEffect(() => {
     if (dotsBgImageData && dotsBgImageData.length > 0) {
       const result = getResult(dotsBgImageData);
-      
+
       // 检查是否已经有结果，避免重复生成
       if (result.status === "idle") {
-        onChange("downloading", "");
-        
+        onChange("downloading", "", dotsBgImageData);
+
         generateCircleRing(dotsBgImageData)
           .then((imageUrl) => {
             if (imageUrl) {
-              onChange("success", imageUrl);
+              onChange("success", imageUrl, dotsBgImageData);
             }
           })
           .catch((error) => {
             console.error("生成手串失败:", error);
-            onChange("error", "");
+            onChange("error", "", dotsBgImageData);
           });
       } else if (result.status === "success" && result.imageUrl) {
         // 如果已经有结果，直接调用onChange
-        onChange("success", result.imageUrl);
+        onChange("success", result.imageUrl, dotsBgImageData);
       } else if (result.status === "error") {
-        onChange("error", "");
+        onChange("error", "", dotsBgImageData);
       }
     }
   }, [dotsBgImageData, generateCircleRing, getResult, onChange]);
@@ -159,10 +156,11 @@ export const CircleRingImage = ({
           height: `${backendSize}px`,
           position: "absolute",
           borderRadius: "100%",
-          boxShadow: "0px 0px 18px 0px rgba(79, 42, 6, 0.02), 0px 40px 16px 0px rgba(79, 42, 6, 0.02), 0px 12px 14px 0px rgba(79, 42, 6, 0.02), 0px 3px 6px 0px rgba(217, 205, 199, 0.07)"
+          boxShadow:
+            "0px 0px 18px 0px rgba(79, 42, 6, 0.02), 0px 40px 16px 0px rgba(79, 42, 6, 0.02), 0px 12px 14px 0px rgba(79, 42, 6, 0.02), 0px 3px 6px 0px rgba(217, 205, 199, 0.07)",
         }}
       />
-      {imageUrl && (
+      {imageUrl ? (
         <Image
           src={imageUrl}
           style={{
@@ -174,6 +172,15 @@ export const CircleRingImage = ({
           }}
           className={rotate ? "circle-image-rotate" : ""}
           onLoad={handleImageLoad}
+        />
+      ) : (
+        <View
+          className="image-loading-skeleton"
+          style={{
+            width: `${backendSize}px`,
+            height: `${backendSize}px`,
+            position: "absolute",
+          }}
         />
       )}
     </View>

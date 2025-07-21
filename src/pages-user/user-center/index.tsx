@@ -140,7 +140,7 @@ const UserCenterPage: React.FC = () => {
                 height: "12px",
                 position: "absolute",
                 bottom: "12px",
-                right: "20px",
+                left: "50px",
               }}
             />
             我的作品

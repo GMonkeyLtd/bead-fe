@@ -1,21 +1,23 @@
 import Taro from "@tarojs/taro";
-import CustomDesignRing from "@/components/CustomDesignRing";
-import { useEffect, useState } from "react";
+import CustomDesignRing, { CustomDesignRingRef } from "@/components/CustomDesignRing";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { beadsApi } from "@/utils/api";
 import PageContainer from "@/components/PageContainer";
 import { useDesign } from "@/store/DesignContext";
-import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
-import { CircleRing } from "@/components/CircleRing";
 import apiSession from "@/utils/api-session";
 
 const CustomDesign = () => {
-  const [designData, setDesignData] = useState<any[]>([]);
+  const [designData, setDesignData] = useState<any>(null);
   const [beadTypeMap, setBeadTypeMap] = useState<any>({});
   const [allBeadList, setAllBeadList] = useState<any[]>([]);
   const { beadData, addBeadData } = useDesign();
 
+  const [customResult, setCustomResult] = useState<any>({});
   const { beadDataId } = Taro.getCurrentInstance()?.router?.params || {};
+
+  // 使用ref获取子组件状态
+  const customDesignRef = useRef<CustomDesignRingRef>(null);
 
   useEffect(() => {
     beadsApi.getBeadList().then((res) => {
@@ -23,7 +25,7 @@ const CustomDesign = () => {
       setAllBeadList(resData);
       setBeadTypeMap(
         resData.reduce((acc, item) => {
-          (item.wuxing || []).map((wuxingValue) => {
+          (item.wuxing || []).forEach((wuxingValue) => {
             if (acc[wuxingValue]) {
               acc[wuxingValue].push(item);
             } else {
@@ -45,7 +47,33 @@ const CustomDesign = () => {
     }
   }, [beadDataId, beadData]);
 
-  const onCreate = (imageUrl: string, editedBeads: any[]) => {
+  const checkDeadsDataChanged = (_oldBeads: any[], _newBeads: any[]) => {
+    if (!_oldBeads || !_newBeads || _oldBeads?.length !== _newBeads?.length) {
+      return true;
+    }
+    const oldBeads = _oldBeads?.map((item) => {
+      const diameter = item.bead_diameter || item.diameter;
+      return {
+        id: item.id || item.bead_id,
+        bead_diameter: diameter,
+      };
+    });
+    const newBeads = _newBeads?.map((item) => {
+      return {
+        id: item.id,
+        bead_diameter: item.bead_diameter,
+      };
+    });
+    return JSON.stringify(oldBeads) !== JSON.stringify(newBeads);
+  }
+
+  const backToChatDesign = (session_id: string) => {
+    Taro.redirectTo({
+      url: `${pageUrls.chatDesign}?session_id=${session_id}`,
+    });
+  }
+
+  const onCreate = (imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
     if (!imageUrl || !designData?.session_id || !designData?.draft_id) {
       return;
     }
@@ -63,7 +91,11 @@ const CustomDesign = () => {
       draft_id: designData?.draft_id,
       beads,
     }).then((res) => {
-      const { draft_id, session_id } = res.data || {};
+      const { draft_id, session_id } = res?.data || {};
+      if (isSaveAndBack) {
+        backToChatDesign(session_id);
+        return;
+      }
 
       Taro.redirectTo({
         url: `${pageUrls.quickDesign}?sessionId=${session_id}&draftId=${
@@ -79,9 +111,50 @@ const CustomDesign = () => {
 
   };
 
+  const onSaveAndBack = (image_url: string | undefined, beads: any[]) => {
+    if (!image_url) {
+      return;
+    }
+    onCreate(image_url, beads, true);
+  }
+
+  const handleBack = () => {
+    const { image_url, beads } = getCustomDesignState();
+    if (!checkDeadsDataChanged(designData?.bead_list || [], beads || [])) {
+      backToChatDesign(designData?.session_id);
+      return;
+    }
+    Taro.showActionSheet({
+      itemList: ['保存并返回', '直接返回'],
+      success: function (res) {
+        if (res.tapIndex === 0) {
+          onSaveAndBack(image_url, beads);
+        } else {
+          Taro.navigateBack();
+        }
+      },
+      fail: function (res) {
+        console.log(res.errMsg)
+      }
+    })
+  }
+
+  // 在需要获取状态时调用ref方法
+  const getCustomDesignState = useCallback(() => {
+    if (customDesignRef.current) {
+      const state = customDesignRef.current.getState();
+      return {
+        image_url: state.imageUrl,
+        beads: state.beads,
+      }
+    }
+    return {};
+  }, []);
+
   return (
-    <PageContainer>
+    <PageContainer onBack={handleBack}>
       <CustomDesignRing
+        ref={customDesignRef}
         beads={designData?.bead_list?.map((item) => {
           const diameter = item.bead_diameter || item.diameter;
           return {
@@ -93,6 +166,8 @@ const CustomDesign = () => {
         })}
         size={300}
         beadTypeMap={beadTypeMap}
+        // 移除onChange回调
+        // onChange={onChange}
         onOk={onCreate}
         renderRatio={3}
       />

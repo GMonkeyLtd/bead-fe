@@ -39,7 +39,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   // 使用useRef存储结果，避免循环渲染
   const resultsRef = useRef<Map<string, CircleRingResult>>(new Map());
   const processingQueueRef = useRef<Set<string>>(new Set());
-  const dpr = Taro.getSystemInfoSync().pixelRatio;
+  const dpr = Taro.getWindowInfo().pixelRatio || 2;
   const ringRadius = targetSize / 2;
 
   // 生成唯一的结果ID

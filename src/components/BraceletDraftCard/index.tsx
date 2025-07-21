@@ -105,7 +105,7 @@ export const BraceletDraftCard = ({
       draft_id: draft?.draft_id,
       session_id: sessionId,
     });
-    Taro.navigateTo({
+    Taro.redirectTo({
       url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
     });
   }
@@ -143,9 +143,11 @@ export const BraceletDraftCard = ({
                   mode="widthFix"
                   className={styles.braceletBeadImage}
                 />
-                <View className={styles.braceletBeadName}>{bead.name}</View>
-                <View className={styles.braceletBeadFunc}>
-                  {bead.func_summary}
+                <View className={styles.braceletBeadInfoContainer}>
+                  <View className={styles.braceletBeadName}>{bead.name}</View>
+                  <View className={styles.braceletBeadFunc}>
+                    {bead.func_summary}
+                  </View>
                 </View>
               </View>
             ))}
@@ -168,7 +170,7 @@ export const BraceletDraftCard = ({
             onClick={() => {
               viewDraftDesign();
             }}
-            text="渲染效果图"
+            text="查询效果"
             isPrimary
             icon={
               <Image
