@@ -296,8 +296,6 @@ const ChatPage: React.FC = () => {
     });
   };
 
-  console.log(result, canvasImageUrl, "result");
-
   const renderKeyboardHide = () => {
     if (!canvasImageUrl || result?.isPolling) {
       return (
@@ -409,7 +407,7 @@ const ChatPage: React.FC = () => {
   };
 
   return (
-    <PageContainer keyboardHeight={keyboardHeight}>
+    <PageContainer onKeyboardHeightChange={setKeyboardHeight}>
       <View
         style={{
           height: "100%",

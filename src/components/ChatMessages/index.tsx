@@ -48,7 +48,6 @@ export default forwardRef<
     const [scrollTop, setScrollTop] = useState(0);
 
       const scrollToBottom = () => {
-    console.log("scrollToBottom");
     // 使用 setTimeout 确保 DOM 更新完成后再设置 scrollIntoView
     setTimeout(() => {
       setScrollAnchor("scrollViewbottomAnchor");
@@ -93,7 +92,6 @@ export default forwardRef<
       return () => clearTimeout(timer);
     }
   }, [scrollAnchor]);
-    console.log(scrollAnchor, "scrollAnchor");
 
     return (
       <ScrollView
@@ -135,7 +133,7 @@ export default forwardRef<
           );
         })}
         {isChatting && (
-          <View className={styles.chatMessageItemContainer} id="design-message-loading">
+          <View className={styles.chatMessageItemContainer}>
             <ChatLoading
               text="正在设计新方案..."
             />

@@ -104,9 +104,24 @@ const Home = () => {
     gender: number;
     isLunar: boolean;
   }) => {
+    // Taro.redirectTo({
+    //   url:
+    //     pageUrls.design + '?year=' +
+    //     year +
+    //     "&month=" +
+    //     month +
+    //     "&day=" +
+    //     day +
+    //     "&hour=" +
+    //     hour +
+    //     "&gender=" +
+    //     gender +
+    //     "&isLunar=" +
+    //     isLunar,
+    // });
+
     Taro.redirectTo({
-      url:
-        pageUrls.design + '?year=' +
+      url: pageUrls.chatDesign + '?year=' +
         year +
         "&month=" +
         month +

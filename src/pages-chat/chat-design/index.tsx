@@ -1,12 +1,12 @@
 import Taro from "@tarojs/taro";
 import { View, Text, Image, Textarea, Canvas } from "@tarojs/components";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import PageContainer from "@/components/PageContainer";
 import apiSession, { ChatMessageItem } from "@/utils/api-session";
 import styles from "./index.module.scss";
 import assistantAvatar from "@/assets/assistant-avatar.svg";
 import ChatMessages from "@/components/ChatMessages";
-import { getNavBarHeightAndTop, getSafeArea, getSafeAreaInfo } from "@/utils/style-tools";
+import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import sendSvg from "@/assets/icons/send.svg";
 import { isEmptyMessage } from "@/utils/messageFormatter";
 import activeSendSvg from "@/assets/icons/active-send.svg";
@@ -19,20 +19,16 @@ const INPUT_RECOMMEND_HEIGHT = 90 + 24;
 
 const ChatDesign = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
-  const { session_id } = params || {};
+  const { session_id, year, month, day, hour, gender, isLunar } = params || {};
 
   const [isDesigning, setIsDesigning] = useState(false);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessageItem[]>([]);
   const { height: navBarHeight, top: navBarTop } = getNavBarHeightAndTop();
   const [inputValue, setInputValue] = useState("");
   const [recommendTags, setRecommendTags] = useState<string[]>([]);
   const [sessionId, setSessionId] = useState(session_id || "");
-  console.log(chatMessages, "chatMessages");
-  const safeArea = getSafeArea();
-  console.log(safeArea, "safeArea");
   const chatMessagesRef = useRef<ChatMessagesRef>(null);
-  const { bottomHeight } = getSafeAreaInfo();
+  const draftCounterRef = useRef(1);
 
   const {
     getResult: getBraceletImage,
@@ -46,51 +42,92 @@ const ChatDesign = () => {
     canvasId: "chat-design-canvas",
   });
 
-  console.log(keyboardHeight, "sessionId");
-
   const spareHeight = useMemo(() => {
     const inputHeight = recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
-    return inputHeight + bottomHeight;
-  }, [navBarHeight, navBarTop, recommendTags]);
-console.log(spareHeight, "spareHeight");
+    return inputHeight;
+  }, [recommendTags]);
+
+  const initChat = ({
+    birth_year,
+    birth_month,
+    birth_day,
+    birth_hour,
+    sex,
+    is_lunar,
+  }: {
+    birth_year: number;
+    birth_month: number;
+    birth_day: number;
+    birth_hour: number;
+    sex: number;
+    is_lunar: boolean;
+  }) => {
+    setIsDesigning(true);
+
+    apiSession
+      .createSession(
+        {
+          birth_info: {
+            birth_year,
+            birth_month,
+            birth_day,
+            birth_hour,
+            is_lunar,
+            sex,
+          },
+        },
+        {
+          showLoading: false,
+        }
+      )
+      .then((res) => {
+        const data = res.data || {};
+        if (data.session_id) {
+          setSessionId(data.session_id);
+        }
+      })
+      .catch((err) => {
+        Taro.showToast({
+          title: "获取会话失败:" + JSON.stringify(err),
+          icon: "none",
+        });
+      })
+      .finally(() => {
+        setIsDesigning(false);
+      });
+  };
 
   useEffect(() => {
-    // 监听键盘弹起
-    const onKeyboardHeightChange = (res) => {
-      setKeyboardHeight(res.height);
-    };
+    if (sessionId) {
+      apiSession.getChatHistory({ session_id: sessionId }).then((res) => {
+        const messages = res.data.messages || [];
+        messages.forEach((message) => {
+          if (message.draft_id) {
+            message.draft_index = draftCounterRef.current;
+            draftCounterRef.current++;
+          }
+        });
+        setChatMessages(messages);
+      });
+    }
 
-    // 小程序键盘事件监听
-    Taro.onKeyboardHeightChange &&
-      Taro.onKeyboardHeightChange(onKeyboardHeightChange);
-    apiSession.getSessionList({ page: 1, page_size: 10 }).then((res) => {
-      console.log(res.data.sessions);
-      // setSessionId(res.data.sessions[0].session_id);
-    });
-    return () => {
-      // 清理监听器
-      Taro.offKeyboardHeightChange &&
-        Taro.offKeyboardHeightChange(onKeyboardHeightChange);
-      document.documentElement.style.removeProperty("--keyboard-height");
-    };
-  }, []);
+  }, [sessionId]);
 
   useEffect(() => {
-    if (!sessionId) {
+    if (sessionId) {
       return;
     }
-    apiSession.getChatHistory({ session_id: sessionId }).then((res) => {
-      const messages = res.data.messages || [];
-      let draftImageIndex = 1;
-      messages.forEach((message) => {
-        if (message.draft_id) {
-          message.draft_index = draftImageIndex;
-          draftImageIndex++;
-        }
+    if (year && month && day && hour && gender && isLunar) {
+      initChat({
+        birth_year: parseInt(year || "0") || 0,
+        birth_month: parseInt(month || "0") || 0,
+        birth_day: parseInt(day || "0") || 0,
+        birth_hour: parseInt(hour || "0") || 0,
+        sex: parseInt(gender || "0"),
+        is_lunar: isLunar === "true" ? true : false,
       });
-      setChatMessages(messages);
-    });
-  }, [sessionId]);
+    }
+  }, [year, month, day, hour, gender, isLunar]);
 
   const renderAssistant = () => {
     return (
@@ -122,6 +159,10 @@ console.log(spareHeight, "spareHeight");
       )
         .then((res) => {
           console.log(res.data, "res.data");
+          if (res.data.draft_id) {
+            res.data.draft_index = draftCounterRef.current;
+            draftCounterRef.current++;
+          }
           setChatMessages((prev) => [...prev, res.data]);
           if (res.data.recommends?.length > 0) {
             setRecommendTags(res.data.recommends);
@@ -138,13 +179,19 @@ console.log(spareHeight, "spareHeight");
         });
     };
 
+  const handleKeyboardHeightChange = useCallback((height: number) => {
+    if (height > 0) {
+      chatMessagesRef.current?.scrollToBottom();
+    }
+  }, []);
+
 
   return (
     <PageContainer
       headerContent={isDesigning ? "正在设计新方案..." : null}
       headerExtraContent={isDesigning ? null : renderAssistant()}
       showHome={false}
-      keyboardHeight={keyboardHeight}
+      onKeyboardHeightChange={handleKeyboardHeightChange}
     >
       <View className={styles.chatContainer}>
         <ChatMessages
