@@ -1,10 +1,12 @@
 import { ScrollView, View, Image } from "@tarojs/components";
-import {
+import React, {
   forwardRef,
   useImperativeHandle,
   useRef,
   useEffect,
   useState,
+  useCallback,
+  useMemo,
 } from "react";
 import styles from "./index.module.scss";
 import apiSession, {
@@ -19,6 +21,51 @@ export interface ChatMessagesRef {
   scrollToBottom: () => void;
   scrollToIndex: (index: number) => void;
 }
+
+// 消息项组件 - 使用 React.memo 优化渲染性能
+const MessageItem = React.memo(({
+  message,
+  sessionId,
+  generateBraceletImage,
+  draftCounterRef,
+}: {
+  message: ChatMessageItem;
+  sessionId: string;
+  generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
+  draftCounterRef: React.MutableRefObject<number>;
+}) => {
+  let draftIndex;
+  if (message.draft_id) {
+    draftIndex = draftCounterRef.current;
+    draftCounterRef.current++;
+  }
+
+  return message.role === "assistant" ? (
+    <View
+      key={message.message_id}
+      className={styles.chatMessageItemContainer}
+      id={`message-${message.message_id}`}
+    >
+      <AssistantMessage message={message} />
+      {message.draft_id && (
+        <BraceletDraftCard
+          sessionId={sessionId}
+          draftId={message.draft_id}
+          draftIndex={draftIndex}
+          generateBraceletImage={generateBraceletImage}
+        />
+      )}
+    </View>
+  ) : (
+    <View
+      key={message.message_id}
+      className={styles.chatMessageItemContainer}
+      id={`message-${message.message_id}`}
+    >
+      <UserMessage message={message} />
+    </View>
+  );
+});
 
 export default forwardRef<
   ChatMessagesRef,
@@ -45,10 +92,22 @@ export default forwardRef<
     const [scrollAnchor, setScrollAnchor] = useState<string>("");
     const scrollViewRef = useRef<any>(null);
     const draftCounterRef = useRef(1);
-
     const [scrollTop, setScrollTop] = useState(0);
 
-    const scrollToBottom = () => {
+    // 使用 useMemo 缓存消息列表，避免不必要的重新渲染
+    const messageItems = useMemo(() => {
+      return messages.map((message) => (
+        <MessageItem
+          key={message.message_id}
+          message={message}
+          sessionId={sessionId}
+          generateBraceletImage={generateBraceletImage}
+          draftCounterRef={draftCounterRef}
+        />
+      ));
+    }, [messages, sessionId, generateBraceletImage]);
+
+    const scrollToBottom = useCallback(() => {
       // 使用 setTimeout 确保 DOM 更新完成后再设置 scrollIntoView
       setTimeout(() => {
         setScrollAnchor("scrollViewbottomAnchor");
@@ -57,17 +116,19 @@ export default forwardRef<
           setScrollTop(9999);
         }, 200);
       }, 100);
-    };
+    }, []);
+
+    const scrollToIndex = useCallback((index: number) => {
+      if (messages[index]) {
+        setTimeout(() => {
+          setScrollAnchor(`message-${messages[index].message_id}`);
+        }, 100);
+      }
+    }, [messages]);
 
     useImperativeHandle(ref, () => ({
       scrollToBottom,
-      scrollToIndex: (index: number) => {
-        if (messages[index]) {
-          setTimeout(() => {
-            setScrollAnchor(`message-${messages[index].message_id}`);
-          }, 100);
-        }
-      },
+      scrollToIndex,
     }));
 
     // 监听消息变化，自动滚动到底部
@@ -75,14 +136,14 @@ export default forwardRef<
       if (autoScrollToBottom && messages.length > 0) {
         scrollToBottom();
       }
-    }, [messages.length, autoScrollToBottom]);
+    }, [messages.length, autoScrollToBottom, scrollToBottom]);
 
     // 监听聊天状态变化，当开始聊天时滚动到底部
     useEffect(() => {
       if (isChatting) {
         scrollToBottom();
       }
-    }, [isChatting]);
+    }, [isChatting, scrollToBottom]);
 
     // 监听 scrollAnchor 变化，滚动完成后清除
     useEffect(() => {
@@ -106,38 +167,7 @@ export default forwardRef<
         className={styles.chatMessagesContainer}
         scrollIntoView={scrollAnchor}
       >
-        {messages.map((message) => {
-          let draftIndex;
-          if (message.draft_id) {
-            draftIndex = draftCounterRef.current;
-            draftCounterRef.current++;
-          }
-          return message.role === "assistant" ? (
-            <View
-              key={message.message_id}
-              className={styles.chatMessageItemContainer}
-              id={`message-${message.message_id}`}
-            >
-              <AssistantMessage message={message} />
-              {message.draft_id && (
-                <BraceletDraftCard
-                  sessionId={sessionId}
-                  draftId={message.draft_id}
-                  draftIndex={draftIndex}
-                  generateBraceletImage={generateBraceletImage}
-                />
-              )}
-            </View>
-          ) : (
-            <View
-              key={message.message_id}
-              className={styles.chatMessageItemContainer}
-              id={`message-${message.message_id}`}
-            >
-              <UserMessage message={message} />
-            </View>
-          );
-        })}
+        {messageItems}
         {isChatting && (
           <View className={styles.chatMessageItemContainer}>
             <ChatLoading text="正在设计新方案..." />
@@ -152,7 +182,8 @@ export default forwardRef<
   }
 );
 
-export const AssistantMessage = ({ message }: { message: ChatMessageItem }) => {
+// 使用 React.memo 优化消息组件渲染
+export const AssistantMessage = React.memo(({ message }: { message: ChatMessageItem }) => {
   return (
     <View className={styles.assistantMessageContainer}>
       <View className={styles.assistantMessageBubble}>
@@ -160,9 +191,9 @@ export const AssistantMessage = ({ message }: { message: ChatMessageItem }) => {
       </View>
     </View>
   );
-};
+});
 
-export const UserMessage = ({ message }: { message: ChatMessageItem }) => {
+export const UserMessage = React.memo(({ message }: { message: ChatMessageItem }) => {
   return (
     <View className={styles.userMessageContainer}>
       <View className={styles.userMessageBubble}>
@@ -170,4 +201,4 @@ export const UserMessage = ({ message }: { message: ChatMessageItem }) => {
       </View>
     </View>
   );
-};
+});

@@ -84,11 +84,13 @@ const AppHeader = ({
                 onBack();
               } else {
                 if (Taro.getCurrentPages().length === 1) {
-                  Taro.navigateTo({
+                  Taro.redirectTo({
                     url: pageUrls.home,
                   });
                 } else {
-                  Taro.navigateBack();
+                  Taro.redirectTo({
+                    url: pageUrls.home,
+                  });
                 }
               }
             }}
@@ -120,7 +122,7 @@ const AppHeader = ({
               justifyContent: "center",
             }}
             onClick={() => {
-              Taro.navigateTo({
+              Taro.redirectTo({
                 url: pageUrls.home,
               });
             }}
