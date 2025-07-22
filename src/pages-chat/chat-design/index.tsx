@@ -12,6 +12,7 @@ import activeSendSvg from "@/assets/icons/active-send.svg";
 import TagList from "@/components/TagList";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { ChatMessagesRef } from "@/components/ChatMessages";
+import { pageUrls } from "@/config/page-urls";
 
 const INPUT_HEIGHT = 58 + 24;
 const INPUT_RECOMMEND_HEIGHT = 90 + 24;
@@ -147,6 +148,15 @@ const ChatDesign = () => {
           className={styles.assistantAvatar}
         />
         <Text className={styles.assistantName}>梨莉莉</Text>
+        <View
+          className={styles.assistantName}
+          onClick={() => {
+            Taro.redirectTo({
+            url: pageUrls.home + "?newSession=true",
+          })}}
+        >
+          重置信息
+        </View>
       </View>
     );
   };
