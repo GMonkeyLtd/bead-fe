@@ -47,7 +47,6 @@ export const BraceletDraftCard = ({
     apiSession
       .getDesignDraft({ session_id: sessionId, draft_id: draftId })
       .then((res) => {
-        console.log(res.data, "draft");
         setDraft(res.data);
       });
   }, [sessionId, draftId, draftData]);

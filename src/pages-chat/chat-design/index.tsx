@@ -1,4 +1,4 @@
-import Taro, { useDidShow } from "@tarojs/taro";
+import Taro from "@tarojs/taro";
 import { View, Text, Image, Textarea, Canvas } from "@tarojs/components";
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import PageContainer from "@/components/PageContainer";
@@ -6,7 +6,6 @@ import apiSession, { ChatMessageItem } from "@/utils/api-session";
 import styles from "./index.module.scss";
 import { ASSISTANT_AVATAR_IMAGE_URL } from "@/config";
 import ChatMessages from "@/components/ChatMessages";
-import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import sendSvg from "@/assets/icons/send.svg";
 import { isEmptyMessage, splitMessage } from "@/utils/messageFormatter";
 import activeSendSvg from "@/assets/icons/active-send.svg";
@@ -28,17 +27,13 @@ const ChatDesign = () => {
   const [sessionId, setSessionId] = useState(session_id || "");
   const chatMessagesRef = useRef<ChatMessagesRef>(null);
 
-  const {
-    getResult: getBraceletImage,
-    canvasProps,
-    generateCircleRing: generateBraceletImage,
-    clearAllResults: clearAllBraceletImages,
-  } = useCircleRingCanvas({
-    targetSize: 1024,
-    isDifferentSize: true,
-    fileType: "png",
-    canvasId: "chat-design-canvas",
-  });
+  const { canvasProps, generateCircleRing: generateBraceletImage } =
+    useCircleRingCanvas({
+      targetSize: 1024,
+      isDifferentSize: true,
+      fileType: "png",
+      canvasId: "chat-design-canvas",
+    });
 
   const spareHeight = useMemo(() => {
     const inputHeight =
@@ -103,7 +98,22 @@ const ChatDesign = () => {
         (message, index) => !(message.role == "user" && index === 0)
       );
       const splitMessages = splitMessage(messagesWithoutUserInfo);
-      setChatMessages(splitMessages);
+      let draftIndex = 1;
+      const newMessages = splitMessages.map((message) => {
+        if (message.draft_id) {
+          message.draft_index = draftIndex;
+          draftIndex++;
+        }
+        return message;
+      });
+      setChatMessages(newMessages);
+      // 获取newMessages中最后一个role为assistant的message
+      const lastAssistantMessage = newMessages.findLast(
+        (message) => message.role === "assistant"
+      );
+      if (lastAssistantMessage?.recommends?.length > 0) {
+        setRecommendTags(lastAssistantMessage.recommends);
+      }
     });
   };
 
@@ -141,7 +151,6 @@ const ChatDesign = () => {
     );
   };
 
-  
   // 发送消息
   const handleSend = async (tag) => {
     const content = inputValue || tag;
@@ -165,9 +174,19 @@ const ChatDesign = () => {
       })
       .then((res) => {
         setChatMessages((prev) => {
+          let draftIndex = 1;
           // 检查content是否包含换行符，如果包含则拆分成多个消息
           const splitMessages = splitMessage(res.data);
-          return [...prev, ...splitMessages];
+          const newMessages = [...prev, ...splitMessages].map(
+            (message, index) => {
+              if (message.draft_id) {
+                message.draft_index = draftIndex;
+                draftIndex++;
+              }
+              return message;
+            }
+          );
+          return newMessages;
         });
         if (res.data.recommends?.length > 0) {
           setRecommendTags(res.data.recommends);

@@ -16,6 +16,7 @@ import apiSession, {
 import ChatLoading from "../ChatLoading";
 import { BraceletDraftCard } from "../BraceletDraftCard";
 import { DotImageData } from "@/hooks/useCircleRingCanvas";
+import { usePageScroll } from "@tarojs/taro";
 
 export interface ChatMessagesRef {
   scrollToBottom: () => void;
@@ -27,19 +28,11 @@ const MessageItem = React.memo(({
   message,
   sessionId,
   generateBraceletImage,
-  draftCounterRef,
 }: {
   message: ChatMessageItem;
   sessionId: string;
   generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
-  draftCounterRef: React.MutableRefObject<number>;
 }) => {
-  let draftIndex;
-  if (message.draft_id) {
-    draftIndex = draftCounterRef.current;
-    draftCounterRef.current++;
-  }
-
   return message.role === "assistant" ? (
     <View
       key={message.message_id}
@@ -51,7 +44,7 @@ const MessageItem = React.memo(({
         <BraceletDraftCard
           sessionId={sessionId}
           draftId={message.draft_id}
-          draftIndex={draftIndex}
+          draftIndex={message.draft_index}
           generateBraceletImage={generateBraceletImage}
         />
       )}
@@ -91,7 +84,6 @@ export default forwardRef<
   ) => {
     const [scrollAnchor, setScrollAnchor] = useState<string>("");
     const scrollViewRef = useRef<any>(null);
-    const draftCounterRef = useRef(1);
     const [scrollTop, setScrollTop] = useState(0);
 
     // 使用 useMemo 缓存消息列表，避免不必要的重新渲染
@@ -102,7 +94,6 @@ export default forwardRef<
           message={message}
           sessionId={sessionId}
           generateBraceletImage={generateBraceletImage}
-          draftCounterRef={draftCounterRef}
         />
       ));
     }, [messages, sessionId, generateBraceletImage]);
