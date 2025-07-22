@@ -8,7 +8,7 @@ import { ASSISTANT_AVATAR_IMAGE_URL } from "@/config";
 import ChatMessages from "@/components/ChatMessages";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import sendSvg from "@/assets/icons/send.svg";
-import { isEmptyMessage } from "@/utils/messageFormatter";
+import { isEmptyMessage, splitMessage } from "@/utils/messageFormatter";
 import activeSendSvg from "@/assets/icons/active-send.svg";
 import TagList from "@/components/TagList";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
@@ -23,12 +23,10 @@ const ChatDesign = () => {
 
   const [isDesigning, setIsDesigning] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessageItem[]>([]);
-  const { height: navBarHeight, top: navBarTop } = getNavBarHeightAndTop();
   const [inputValue, setInputValue] = useState("");
   const [recommendTags, setRecommendTags] = useState<string[]>([]);
   const [sessionId, setSessionId] = useState(session_id || "");
   const chatMessagesRef = useRef<ChatMessagesRef>(null);
-  const draftCounterRef = useRef(1);
 
   const {
     getResult: getBraceletImage,
@@ -43,7 +41,8 @@ const ChatDesign = () => {
   });
 
   const spareHeight = useMemo(() => {
-    const inputHeight = recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
+    const inputHeight =
+      recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
     return inputHeight;
   }, [recommendTags]);
 
@@ -100,23 +99,18 @@ const ChatDesign = () => {
   const querySessionHistory = (session_id: string) => {
     apiSession.getChatHistory({ session_id }).then((res) => {
       const messages = res.data.messages || [];
-      const messagesWithoutUserInfo = messages.filter((message, index) => !(message.role == "user" && index === 0));
-      messagesWithoutUserInfo.forEach((message) => {
-        if (message.draft_id) {
-          message.draft_index = draftCounterRef.current;
-          draftCounterRef.current++;
-        }
-      });
-      setChatMessages(messagesWithoutUserInfo);
+      const messagesWithoutUserInfo = messages.filter(
+        (message, index) => !(message.role == "user" && index === 0)
+      );
+      const splitMessages = splitMessage(messagesWithoutUserInfo);
+      setChatMessages(splitMessages);
     });
-  }
+  };
 
   useEffect(() => {
-    console.log('useEffect', sessionId);
     if (sessionId) {
       querySessionHistory(sessionId);
     }
-
   }, [sessionId]);
 
   useEffect(() => {
@@ -138,84 +132,63 @@ const ChatDesign = () => {
   const renderAssistant = () => {
     return (
       <View className={styles.assistantAvatarContainer}>
-        <Image src={ASSISTANT_AVATAR_IMAGE_URL} className={styles.assistantAvatar} />
+        <Image
+          src={ASSISTANT_AVATAR_IMAGE_URL}
+          className={styles.assistantAvatar}
+        />
         <Text className={styles.assistantName}>梨莉莉</Text>
       </View>
     );
   };
 
-    // 发送消息
-    const handleSend = async (tag) => {
-      const content = inputValue || tag;
-      if (isEmptyMessage(content) || isDesigning) return;
-      setChatMessages((prev) => [...prev, {
+  
+  // 发送消息
+  const handleSend = async (tag) => {
+    const content = inputValue || tag;
+    if (isEmptyMessage(content) || isDesigning) return;
+    setChatMessages((prev) => [
+      ...prev,
+      {
         message_id: Date.now().toString(),
         role: "user",
         content,
         created_at: new Date().toISOString(),
-      }]);
-      chatMessagesRef.current?.scrollToBottom();
-      setIsDesigning(true);
-      setInputValue("");
-      apiSession
-        .chat({
-          session_id: sessionId,
-          message: content,
-        }
-      )
-        .then((res) => {
-          if (res.data.draft_id) {
-            res.data.draft_index = draftCounterRef.current;
-            draftCounterRef.current++;
-          }
-          setChatMessages((prev) => {
-            // 检查content是否包含换行符，如果包含则拆分成多个消息
-            if (res.data.content?.includes('\n')) {
-              const contentParts = res.data.content.split('\n').filter(part => part.trim());
-              const splitMessages = contentParts.map((part, index) => {
-                const isLastMessage = index === contentParts.length - 1;
-                return {
-                  session_id: res.data.session_id,
-                  message_id: `${res.data.message_id}_${index}`,
-                  role: res.data.role,
-                  content: part.trim(),
-                  created_at: new Date().toISOString(),
-                  // 只有最后一个消息包含draft信息
-                  ...(isLastMessage && {
-                    draft_id: (res.data as any).draft_id,
-                    draft_index: (res.data as any).draft_index,
-                    recommends: res.data.recommends,
-                  }),
-                };
-              });
-              return [...prev, ...splitMessages];
-            } else {
-              // 如果没有换行符，按原来的逻辑处理
-              const newMessages = Array.isArray(res.data) ? res.data : [res.data];
-              return [...prev, ...newMessages];
-            }
-          });
-          if (res.data.recommends?.length > 0) {
-            setRecommendTags(res.data.recommends);
-          }
-        })
-        .catch((err) => {
-          Taro.showToast({
-            title: "定制失败:" + JSON.stringify(err),
-            icon: "none",
-          });
-        })
-        .finally(() => {
-          setIsDesigning(false);
+      },
+    ]);
+    chatMessagesRef.current?.scrollToBottom();
+    setIsDesigning(true);
+    setInputValue("");
+    apiSession
+      .chat({
+        session_id: sessionId,
+        message: content,
+      })
+      .then((res) => {
+        setChatMessages((prev) => {
+          // 检查content是否包含换行符，如果包含则拆分成多个消息
+          const splitMessages = splitMessage(res.data);
+          return [...prev, ...splitMessages];
         });
-    };
+        if (res.data.recommends?.length > 0) {
+          setRecommendTags(res.data.recommends);
+        }
+      })
+      .catch((err) => {
+        Taro.showToast({
+          title: "定制失败:" + JSON.stringify(err),
+          icon: "none",
+        });
+      })
+      .finally(() => {
+        setIsDesigning(false);
+      });
+  };
 
   const handleKeyboardHeightChange = useCallback((height: number) => {
     if (height > 0) {
       chatMessagesRef.current?.scrollToBottom();
     }
   }, []);
-
 
   return (
     <PageContainer

@@ -1,3 +1,4 @@
+import { DesignDraftResponse } from './api-session';
 import { ApiConfig } from "./api";
 import http, { setBaseURL, setIsMock, CancelToken } from "./request";
 
@@ -6,6 +7,9 @@ export interface MessageItem {
   role: "user" | "assistant";
   content: string;
   created_at: string;
+  draft_id?: string;
+  draft_index?: number;
+  recommends?: string[];
 }
 
 export interface BaseResponse {

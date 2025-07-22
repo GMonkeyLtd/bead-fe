@@ -42,21 +42,22 @@ export default forwardRef<
     },
     ref
   ) => {
-    const [scrollAnchor, setScrollAnchor] = useState<string>('');
+    const [scrollAnchor, setScrollAnchor] = useState<string>("");
     const scrollViewRef = useRef<any>(null);
+    const draftCounterRef = useRef(1);
 
     const [scrollTop, setScrollTop] = useState(0);
 
-      const scrollToBottom = () => {
-    // 使用 setTimeout 确保 DOM 更新完成后再设置 scrollIntoView
-    setTimeout(() => {
-      setScrollAnchor("scrollViewbottomAnchor");
-      // 备用方案：如果 scrollIntoView 不工作，使用 scrollTop
+    const scrollToBottom = () => {
+      // 使用 setTimeout 确保 DOM 更新完成后再设置 scrollIntoView
       setTimeout(() => {
-        setScrollTop(9999);
-      }, 200);
-    }, 100);
-  };
+        setScrollAnchor("scrollViewbottomAnchor");
+        // 备用方案：如果 scrollIntoView 不工作，使用 scrollTop
+        setTimeout(() => {
+          setScrollTop(9999);
+        }, 200);
+      }, 100);
+    };
 
     useImperativeHandle(ref, () => ({
       scrollToBottom,
@@ -69,29 +70,29 @@ export default forwardRef<
       },
     }));
 
-      // 监听消息变化，自动滚动到底部
-  useEffect(() => {
-    if (autoScrollToBottom && messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [messages.length, autoScrollToBottom]);
+    // 监听消息变化，自动滚动到底部
+    useEffect(() => {
+      if (autoScrollToBottom && messages.length > 0) {
+        scrollToBottom();
+      }
+    }, [messages.length, autoScrollToBottom]);
 
-  // 监听聊天状态变化，当开始聊天时滚动到底部
-  useEffect(() => {
-    if (isChatting) {
-      scrollToBottom();
-    }
-  }, [isChatting]);
+    // 监听聊天状态变化，当开始聊天时滚动到底部
+    useEffect(() => {
+      if (isChatting) {
+        scrollToBottom();
+      }
+    }, [isChatting]);
 
-  // 监听 scrollAnchor 变化，滚动完成后清除
-  useEffect(() => {
-    if (scrollAnchor) {
-      const timer = setTimeout(() => {
-        setScrollAnchor('');
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [scrollAnchor]);
+    // 监听 scrollAnchor 变化，滚动完成后清除
+    useEffect(() => {
+      if (scrollAnchor) {
+        const timer = setTimeout(() => {
+          setScrollAnchor("");
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }, [scrollAnchor]);
 
     return (
       <ScrollView
@@ -106,6 +107,11 @@ export default forwardRef<
         scrollIntoView={scrollAnchor}
       >
         {messages.map((message) => {
+          let draftIndex;
+          if (message.draft_id) {
+            draftIndex = draftCounterRef.current;
+            draftCounterRef.current++;
+          }
           return message.role === "assistant" ? (
             <View
               key={message.message_id}
@@ -117,7 +123,7 @@ export default forwardRef<
                 <BraceletDraftCard
                   sessionId={sessionId}
                   draftId={message.draft_id}
-                  draftIndex={message.draft_index}
+                  draftIndex={draftIndex}
                   generateBraceletImage={generateBraceletImage}
                 />
               )}
@@ -134,12 +140,13 @@ export default forwardRef<
         })}
         {isChatting && (
           <View className={styles.chatMessageItemContainer}>
-            <ChatLoading
-              text="正在设计新方案..."
-            />
+            <ChatLoading text="正在设计新方案..." />
           </View>
         )}
-        <View id="scrollViewbottomAnchor" style={{ height: '1px', width: '100%' }} />
+        <View
+          id="scrollViewbottomAnchor"
+          style={{ height: "1px", width: "100%" }}
+        />
       </ScrollView>
     );
   }

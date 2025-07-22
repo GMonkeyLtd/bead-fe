@@ -139,7 +139,7 @@
 
   .braceletDraftCardFooter {
     width: 100%;
-    gap: 24px;
+    gap: 12px;
     border-top: 1px solid #e8e8e8;
     display: flex;
     justify-content: space-between;
@@ -164,7 +164,9 @@
     .braceletName {
       font-size: 20px;
     }
-
+    .braceletDraftCardFooter {
+      gap: 24px;
+    }
 
   }
 }
