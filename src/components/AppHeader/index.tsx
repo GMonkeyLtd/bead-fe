@@ -88,9 +88,7 @@ const AppHeader = ({
                     url: pageUrls.home,
                   });
                 } else {
-                  Taro.redirectTo({
-                    url: pageUrls.home,
-                  });
+                  Taro.navigateBack();
                 }
               }
             }}

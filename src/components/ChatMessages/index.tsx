@@ -16,7 +16,7 @@ import apiSession, {
 import ChatLoading from "../ChatLoading";
 import { BraceletDraftCard } from "../BraceletDraftCard";
 import { DotImageData } from "@/hooks/useCircleRingCanvas";
-import { usePageScroll } from "@tarojs/taro";
+import { LoadingDots } from "../ChatLoading";
 
 export interface ChatMessagesRef {
   scrollToBottom: () => void;
@@ -28,16 +28,23 @@ const MessageItem = React.memo(({
   message,
   sessionId,
   generateBraceletImage,
+  animationDelay = 0,
 }: {
   message: ChatMessageItem;
   sessionId: string;
   generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
+  animationDelay?: number;
 }) => {
+  const messageStyle = {
+    animationDelay: `${animationDelay}ms`,
+  };
+
   return message.role === "assistant" ? (
     <View
       key={message.message_id}
       className={styles.chatMessageItemContainer}
       id={`message-${message.message_id}`}
+      style={messageStyle}
     >
       <AssistantMessage message={message} />
       {message.draft_id && (
@@ -54,6 +61,7 @@ const MessageItem = React.memo(({
       key={message.message_id}
       className={styles.chatMessageItemContainer}
       id={`message-${message.message_id}`}
+      style={messageStyle}
     >
       <UserMessage message={message} />
     </View>
@@ -69,6 +77,7 @@ export default forwardRef<
     maxHeight?: string;
     generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
     autoScrollToBottom?: boolean;
+    hasMoreMessages?: boolean;
   }
 >(
   (
@@ -79,6 +88,7 @@ export default forwardRef<
       maxHeight,
       generateBraceletImage,
       autoScrollToBottom = true,
+      hasMoreMessages = false,
     },
     ref
   ) => {
@@ -86,17 +96,28 @@ export default forwardRef<
     const scrollViewRef = useRef<any>(null);
     const [scrollTop, setScrollTop] = useState(0);
 
+
+
     // 使用 useMemo 缓存消息列表，避免不必要的重新渲染
     const messageItems = useMemo(() => {
-      return messages.map((message) => (
-        <MessageItem
-          key={message.message_id}
-          message={message}
-          sessionId={sessionId}
-          generateBraceletImage={generateBraceletImage}
-        />
-      ));
-    }, [messages, sessionId, generateBraceletImage]);
+      return messages.map((message, index) => {
+        // 为新消息添加递增的动画延迟，让消息依次出现
+        // 只有最近的消息才添加延迟，避免历史消息重复动画
+        const isRecentMessage = index >= messages.length - 3;
+        const animationDelay = hasMoreMessages && isRecentMessage ? 
+          (messages.length - 1 - index) * 100 : 0;
+        
+        return (
+          <MessageItem
+            key={message.message_id}
+            message={message}
+            sessionId={sessionId}
+            generateBraceletImage={generateBraceletImage}
+            animationDelay={animationDelay}
+          />
+        );
+      });
+    }, [messages, sessionId, generateBraceletImage, hasMoreMessages]);
 
     const scrollToBottom = useCallback(() => {
       // 使用 setTimeout 确保 DOM 更新完成后再设置 scrollIntoView
@@ -159,6 +180,9 @@ export default forwardRef<
         scrollIntoView={scrollAnchor}
       >
         {messageItems}
+        {hasMoreMessages && (
+          <LoadingDots />
+        )}
         {isChatting && (
           <View className={styles.chatMessageItemContainer}>
             <ChatLoading text="正在设计新方案..." />

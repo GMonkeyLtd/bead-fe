@@ -351,9 +351,9 @@ const InspirationPage: React.FC = () => {
         </View>
         <View
           style={{
-            height: `calc(100vh - ${navBarHeight + 220}px)`,
+            height: `calc(100vh - ${navBarHeight + 120}px)`,
             boxSizing: "border-box",
-            paddingBottom: "20px",
+            paddingBottom: "140px",
             overflowY: "auto",
           }}
         >

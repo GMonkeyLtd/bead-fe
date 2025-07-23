@@ -28,6 +28,7 @@ export const BRACELET_BG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images
 export const BRACELET_CARD_TEXTURE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bracelet-card-texture.png";
 export const CRYSTAL_CARD_GRADIENT_BG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/crystal-card-gradient-bg.png";
 export const ASSISTANT_AVATAR_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/assistant-avatar.png";
+export const HOME_BG_VIDEO_URL = "https://zhuluoji.cn-sh2.ufileos.com/resources/home-vidio.mp4";
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 

@@ -19,14 +19,15 @@ const INPUT_RECOMMEND_HEIGHT = 90 + 24;
 
 const ChatDesign = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
-  const { session_id, year, month, day, hour, gender, isLunar } = params || {};
 
   const [isDesigning, setIsDesigning] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessageItem[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [recommendTags, setRecommendTags] = useState<string[]>([]);
-  const [sessionId, setSessionId] = useState(session_id || "");
+  const [sessionId, setSessionId] = useState("");
   const chatMessagesRef = useRef<ChatMessagesRef>(null);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const draftIndexRef = useRef(1);
 
   const { canvasProps, generateCircleRing: generateBraceletImage } =
     useCircleRingCanvas({
@@ -41,6 +42,58 @@ const ChatDesign = () => {
       recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
     return inputHeight;
   }, [recommendTags]);
+
+  // 依次显示消息的函数
+  const showMessagesSequentially = useCallback(
+    (messages: ChatMessageItem[], recommends?: string[]) => {
+      if (messages.length === 0) return;
+
+      setHasMoreMessages(true);
+      let currentIndex = 0;
+      let waitTime = 3000;
+
+      const showNextMessage = () => {
+        console.log('showNextMessage', messages, currentIndex);
+        if (currentIndex < messages.length) {
+          setChatMessages((prev) => {
+            const newMessages = [...prev];
+            newMessages.push(messages[currentIndex]);
+            console.log('newMessages', currentIndex, newMessages, messages[currentIndex]);
+            return newMessages;
+          });
+
+          // 滚动到底部
+          setTimeout(() => {
+            chatMessagesRef.current?.scrollToBottom();
+          }, 100);
+
+          if (messages[currentIndex].content?.length > 30) {
+            waitTime = 3000;
+          } else {
+            waitTime = 2000;
+          }
+          
+          // 2秒后显示下一条消息
+          if (currentIndex + 1 < messages.length) {
+            setTimeout(() => {
+              currentIndex++;
+              showNextMessage();
+            }, waitTime);
+          } else {
+            // 所有消息显示完毕
+            // 显示推荐标签
+            if (recommends && recommends.length > 0) {
+              setRecommendTags(recommends);
+            }
+            setHasMoreMessages(false);
+          }
+        }
+      };
+
+      showNextMessage();
+    },
+    []
+  );
 
   const initChat = ({
     birth_year,
@@ -79,6 +132,7 @@ const ChatDesign = () => {
         const data = res.data || {};
         if (data.session_id) {
           setSessionId(data.session_id);
+          querySessionHistory(data.session_id, true);
         }
       })
       .catch((err) => {
@@ -92,41 +146,46 @@ const ChatDesign = () => {
       });
   };
 
-  const querySessionHistory = (session_id: string) => {
+  const querySessionHistory = (session_id: string, isFirst = false) => {
+    draftIndexRef.current = 1;
     apiSession.getChatHistory({ session_id }).then((res) => {
       const messages = res.data.messages || [];
       const messagesWithoutUserInfo = messages.filter(
         (message, index) => !(message.role == "user" && index === 0)
       );
       const splitMessages = splitMessage(messagesWithoutUserInfo);
-      let draftIndex = 1;
       const newMessages = splitMessages.map((message) => {
         if (message.draft_id) {
-          message.draft_index = draftIndex;
-          draftIndex++;
+          message.draft_index = draftIndexRef.current;
+          draftIndexRef.current++;
         }
         return message;
       });
-      setChatMessages(newMessages);
       // 获取newMessages中最后一个role为assistant的message
-      const lastAssistantMessage = newMessages.findLast(
-        (message) => message.role === "assistant"
-      );
-      if (lastAssistantMessage?.recommends?.length > 0) {
-        setRecommendTags(lastAssistantMessage.recommends);
+      const lastAssistantMessage = newMessages
+      .slice()
+      .reverse()
+      .find((message) => message.role === "assistant");
+      if (!isFirst) {
+        if (lastAssistantMessage?.recommends && lastAssistantMessage.recommends.length > 0) {
+          setChatMessages(newMessages);
+          setRecommendTags(lastAssistantMessage.recommends);
+        }
+      } else {
+        console.log('newMessages', newMessages);
+        showMessagesSequentially(
+          newMessages,
+          lastAssistantMessage?.recommends || []
+        );
       }
     });
   };
 
   useEffect(() => {
-    if (sessionId) {
-      querySessionHistory(sessionId);
-    }
-  }, [sessionId]);
-
-  useEffect(() => {
-    if (sessionId) {
-      return;
+    const { year, month, day, hour, gender, isLunar, session_id } = params || {};
+    if (session_id) {
+      setSessionId(session_id);
+      querySessionHistory(session_id);
     }
     if (year && month && day && hour && gender && isLunar) {
       initChat({
@@ -138,7 +197,7 @@ const ChatDesign = () => {
         is_lunar: isLunar === "true" ? true : false,
       });
     }
-  }, [year, month, day, hour, gender, isLunar]);
+  }, [params]);
 
   const renderAssistant = () => {
     return (
@@ -152,8 +211,9 @@ const ChatDesign = () => {
           className={styles.assistantName}
           onClick={() => {
             Taro.redirectTo({
-            url: pageUrls.home + "?newSession=true",
-          })}}
+              url: pageUrls.home + "?newSession=true",
+            });
+          }}
         >
           重置信息
         </View>
@@ -183,24 +243,17 @@ const ChatDesign = () => {
         message: content,
       })
       .then((res) => {
-        setChatMessages((prev) => {
-          let draftIndex = 1;
-          // 检查content是否包含换行符，如果包含则拆分成多个消息
-          const splitMessages = splitMessage(res.data);
-          const newMessages = [...prev, ...splitMessages].map(
-            (message, index) => {
-              if (message.draft_id) {
-                message.draft_index = draftIndex;
-                draftIndex++;
-              }
-              return message;
-            }
-          );
-          return newMessages;
+        // 处理返回的消息，按照2秒一条的速度依次显示
+        const splitMessages = splitMessage(res.data);
+        const processedMessages = splitMessages.map((message) => {
+          if (message.draft_id) {
+            message.draft_index = draftIndexRef.current;
+            draftIndexRef.current++;
+          }
+          return message;
         });
-        if (res.data.recommends?.length > 0) {
-          setRecommendTags(res.data.recommends);
-        }
+        // 使用依次显示函数
+        showMessagesSequentially(processedMessages, res.data.recommends);
       })
       .catch((err) => {
         Taro.showToast({
@@ -230,10 +283,14 @@ const ChatDesign = () => {
         <ChatMessages
           ref={chatMessagesRef}
           messages={chatMessages}
+          hasMoreMessages={hasMoreMessages}
           isChatting={isDesigning}
           maxHeight={`calc(100% - ${spareHeight}px)`}
           sessionId={sessionId}
-          generateBraceletImage={generateBraceletImage}
+          generateBraceletImage={async (beads) => {
+            const result = await generateBraceletImage(beads);
+            return result || "";
+          }}
         />
 
         {/* <BraceletDraftCard
@@ -289,9 +346,7 @@ const ChatDesign = () => {
           id={canvasProps.id}
           height={canvasProps.height}
           width={canvasProps.width}
-          style={{
-            ...canvasProps.style,
-          }}
+          style={canvasProps.style as any}
         />
       </View>
     </PageContainer>
