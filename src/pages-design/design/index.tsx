@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Textarea } from "@tarojs/components";
 import { isEmptyMessage } from "../../utils/messageFormatter";
 import "./index.scss";
@@ -6,7 +6,6 @@ import Taro, { useDidHide } from "@tarojs/taro";
 import { Image } from "@tarojs/components";
 import sendSvg from "@/assets/icons/send.svg";
 import activeSendSvg from "@/assets/icons/active-send.svg";
-import api, { PersonalizedGenerateResult } from "@/utils/api";
 import CircleRing, { CircleRingImage } from "@/components/CircleRing";
 import TagList from "@/components/TagList";
 import lastChat from "@/assets/icons/last-chat.svg";
@@ -19,49 +18,46 @@ import { useDesign } from "@/store/DesignContext";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
 import PageContainer from "@/components/PageContainer";
-import editBead from "@/assets/icons/edit-bead.svg";
-import { CancelToken } from "@/utils/request";
+import apiSession from "@/utils/api-session";
+import { useSessionResultHandler } from "@/hooks/useSessionResultHandler";
+import DateTimeDrawer from "@/components/DateTimeDrawer";
+import CrystalButton from "@/components/CrystalButton";
+import RightArrowGolden from "@/assets/icons/right-arrow-golden.svg";
 
-const TAGS = [
-  { id: "1", title: "升值加薪" },
-  { id: "2", title: "身体健康" },
-  { id: "3", title: "发偏财" },
-  { id: "8", title: "学业进步" },
-  { id: "4", title: "家庭和睦" },
-  { id: "5", title: "事业成功" },
-  { id: "9", title: "人际关系" },
-  { id: "10", title: "健康长寿" },
-  { id: "11", title: "桃花运" },
-  { id: "12", title: "考试顺利" },
-  { id: "13", title: "财运亨通" },
-  { id: "14", title: "爱情甜蜜" },
-  { id: "15", title: "家庭和睦" },
-];
+const MAX_IMG_GENERATE_COUNT = 1;
 
 const ChatPage: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<string[]>([]);
-  const [beadName, setBeadName] = useState<string>("");
+  const [messages, setMessages] = useState<string[]>([
+    "你好，我是你的私人疗愈师，你可以叫我莉莉。",
+  ]);
   const [canvasImageUrl, setCanvasImageUrl] = useState<string>("");
   const [canvasImageStatus, setCanvasImageStatus] = useState<
     "idle" | "downloading" | "success" | "error"
   >("idle");
-  const [beadDescriptions, setBeadDescriptions] = useState<
-    { image_url: string; description: string }[]
-  >([]);
-  const [beadImageData, setBeadImageData] = useState<
-    PersonalizedGenerateResult[]
-  >([]);
+
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
 
   const params = Taro.getCurrentInstance()?.router?.params;
-  const { year, month, day, hour, gender, isLunar } = params || {};
+  const { year, month, day, hour, gender, isLunar, session_id } = params || {};
   const { addBeadData } = useDesign();
+  const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
 
-  const generateRequestRef = useRef<CancelToken>(null);
-  const generateRequest2Ref = useRef<CancelToken>(null);
+  const [sessionId, setSessionId] = useState<string>("");
+
+  const {
+    result,
+    imgGenerateCount,
+    stopPolling,
+    retryPolling,
+    processSessionData,
+    updateSessionData,
+    resetImgGenerateCount,
+  } = useSessionResultHandler({
+    sessionData: null,
+  });
 
   // 键盘适配逻辑
   useEffect(() => {
@@ -83,86 +79,104 @@ const ChatPage: React.FC = () => {
   }, []);
 
   useDidHide(() => {
-    generateRequestRef.current?.cancel("page hide");
-    generateRequest2Ref.current?.cancel("page hide");
+    stopPolling();
   });
 
-  const processResult = (res: any) => {
-    const resData = res.data || {};
-    setBeadImageData(resData.recommendations as PersonalizedGenerateResult[]);
-    setBeadName(resData.bracelet_name);
-    setBeadDescriptions(
-      resData.crystal_ids_deduplication.slice(0, 2).map((item) => {
-        const recommendation = resData.recommendations.find(
-          (recommendation) => recommendation.id === item.id
-        );
-        return {
-          image_url: recommendation?.image_url || "",
-          description: item.function,
-          name: recommendation?.name || "",
-        };
-      })
-    );
-    setMessages((prev) => [...prev, resData.recommendation_text]);
+  const processResult = (resData: any) => {
+    processSessionData(resData);
   };
 
-  const initGenerate = async (
-    year,
-    month,
-    day,
-    hour,
-    gender,
-    isLunar: boolean
-  ) => {
-    setIsLoading(true);
-    try {
-      generateRequestRef.current = CancelToken.create();
-      const res: any = await api.generate.personalizedGenerate({
-        birth_year: parseInt(year || "0"),
-        birth_month: parseInt(month || "0"),
-        birth_day: parseInt(day || "0"),
-        birth_hour: parseInt(hour || "0"),
-        is_lunar: isLunar,
-        sex: parseInt(gender || "0"),
+  const processChatResult = (resData: any) => {
+    console.log(resData, "resData");
+    updateSessionData({
+      newMessage: {
+        role: resData.role,
+        content: resData.content,
+        created_at: resData.created_at,
+        message_id: resData.message_id,
+      },
+      newRecommends: resData.recommends || [],
+      sessionId: sessionId,
+      draftId: resData.draft_id,
+    });
+  };
+
+  const initChat = ({
+    birth_year,
+    birth_month,
+    birth_day,
+    birth_hour,
+    sex,
+    is_lunar,
+  }: {
+    birth_year: number;
+    birth_month: number;
+    birth_day: number;
+    birth_hour: number;
+    sex: number;
+    is_lunar: boolean;
+  }) => {
+    apiSession
+      .createSession(
+        {
+          birth_info: {
+            birth_year,
+            birth_month,
+            birth_day,
+            birth_hour,
+            is_lunar,
+            sex,
+          },
         },
         {
-          cancelToken: generateRequestRef.current,
+          showLoading: false,
         }
-      );
-      processResult(res);
-    } catch (err) {
-      Taro.showToast({
-        title: "生成失败:" + JSON.stringify(err),
-        icon: "none",
+      )
+      .then((res) => {
+        const data = res.data || {};
+        if (data.session_id) {
+          setSessionId(data.session_id);
+          processResult(data);
+          resetImgGenerateCount();
+        }
+      })
+      .catch((err) => {
+        Taro.showToast({
+          title: "获取会话失败:" + JSON.stringify(err),
+          icon: "none",
+        });
       });
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+  };
+
+  const getSessionDetail = (_sessionId: string) => {
+    apiSession.getSessionDetail(_sessionId).then((res) => {
+      setSessionId(_sessionId);
+      processResult(res.data);
+    });
   };
 
   useEffect(() => {
-    initGenerate(
-      year,
-      month,
-      day,
-      hour,
-      gender,
-      isLunar === "true" ? true : false
-    );
-
-    // 检查图片URL
-
-    // 按照Figma设计稿的文本格式
-    setMessages((prev) => [
-      ...prev,
-      "你好，我是你的私人疗愈师。你可以叫我莉莉，下面是我给你设计的一款水晶手串。\n\n你最近有什么心愿嘛？",
-    ]);
-  }, []);
+    if (session_id) {
+      getSessionDetail(session_id);
+      return;
+    }
+    if (year && month && day && hour && gender && isLunar) {
+      initChat({
+        birth_year: parseInt(year || "0") || 0,
+        birth_month: parseInt(month || "0") || 0,
+        birth_day: parseInt(day || "0") || 0,
+        birth_hour: parseInt(hour || "0") || 0,
+        sex: parseInt(gender || "0"),
+        is_lunar: isLunar === "true" ? true : false,
+      });
+    }
+  }, [session_id]);
 
   useEffect(() => {
-    setMessageIndex(messages.length - 1);
-  }, [messages]);
+    if (result.systemMessages?.length > 0) {
+      setMessageIndex(result.systemMessages.length - 1);
+    }
+  }, [result.systemMessages?.length]);
 
   // 发送消息
   const handleSend = async (tag) => {
@@ -170,42 +184,62 @@ const ChatPage: React.FC = () => {
     if (isEmptyMessage(content) || isLoading) return;
     setIsLoading(true);
     setInputValue("");
-    try {
-      generateRequest2Ref.current = CancelToken.create();
-      const res: any = await api.generate.personalizedGenerate2({
-        ids: beadImageData.map((item) => item.id),
-        context: inputValue,
-      }, {
-        cancelToken: generateRequest2Ref.current,
+    apiSession
+      .chat({
+        session_id: sessionId,
+        message: content,
+      },
+      {
+        showLoading: true,
+        loadingText: "正在设计中～",
+      }
+    )
+      .then((res) => {
+        processChatResult(res.data);
+      })
+      .catch((err) => {
+        Taro.showToast({
+          title: "定制失败:" + JSON.stringify(err),
+          icon: "none",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-      processResult(res);
-    } catch (error) {
-      Taro.showToast({
-        title: "生成失败:" + error.message,
-        icon: "none",
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleNextStep = () => {
+    if (!canvasImageUrl && !result?.draft?.draft_id && !sessionId) {
+      return;
+    }
+    if (result?.design?.design_id) {
+      Taro.redirectTo({
+        url: `${pageUrls.result}?designBackendId=${result?.design?.design_id}`,
+      });
+      return;
+    }
     if (!canvasImageUrl) {
       return;
     }
-    const beadDataId = "bead-" + generateUUID();
-    addBeadData({
-      image_url: canvasImageUrl,
-      bead_list: beadImageData.map((item) => ({
-        ...item,
-        bead_diameter: item.bead_diameter,
-      })),
-      bead_data_id: beadDataId,
+    Taro.redirectTo({
+      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
+        result?.draft?.draft_id
+      }&imageUrl=${encodeURIComponent(canvasImageUrl)}`,
     });
 
-    Taro.navigateTo({
-      url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
-    });
+    // const beadDataId = "bead-" + generateUUID();
+    // addBeadData({
+    //   image_url: canvasImageUrl,
+    //   bead_list: result?.draft?.beads?.map((item) => ({
+    //     ...item,
+    //     bead_diameter: item.bead_diameter || item.diameter,
+    //   })),
+    //   bead_data_id: beadDataId,
+    // });
+
+    // Taro.navigateTo({
+    //   url: pageUrls.quickDesign + "?beadDataId=" + beadDataId,
+    // });
   };
 
   const renderHistoryController = () => {
@@ -227,11 +261,14 @@ const ChatPage: React.FC = () => {
           style={{
             width: "22px",
             height: "22px",
-            opacity: messageIndex === messages.length - 1 ? 0.2 : 1,
+            opacity:
+              messageIndex === result?.systemMessages?.length - 1 ? 0.2 : 1,
           }}
           onClick={() => {
             setMessageIndex((prev) =>
-              prev < messages.length - 1 ? prev + 1 : messages.length - 1
+              prev < result?.systemMessages?.length - 1
+                ? prev + 1
+                : result?.systemMessages?.length - 1
             );
           }}
         />
@@ -240,11 +277,16 @@ const ChatPage: React.FC = () => {
   };
 
   const handleEditBead = () => {
+    if (!result?.draft?.beads || result?.draft?.beads?.length === 0) {
+      return;
+    }
     const beadDataId = "bead-" + generateUUID();
     addBeadData({
       image_url: canvasImageUrl,
-      bead_list: beadImageData,
+      bead_list: result?.draft?.beads,
       bead_data_id: beadDataId,
+      draft_id: result?.draft?.draft_id,
+      session_id: sessionId,
     });
     Taro.navigateTo({
       url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
@@ -252,7 +294,7 @@ const ChatPage: React.FC = () => {
   };
 
   const renderKeyboardHide = () => {
-    if (isLoading || !beadImageData.length || !canvasImageUrl) {
+    if (!canvasImageUrl || result?.isPolling) {
       return (
         <View className="result-container">
           <SkeletonCard />
@@ -262,26 +304,27 @@ const ChatPage: React.FC = () => {
     return (
       <View className="result-container">
         <View className="result-title">
-          <View className="result-title-text">定制方案</View>
-          {/* <Image
-            src={editBead}
-            style={{ width: "20px", height: "20px" }}
-            onClick={() => {
-              handleEditBead();
-            }}
-          /> */}
-          <View className="diy-adjust" onClick={handleEditBead}>
-            DIY调整
+          <View className="result-title-text">
+            {`定制方案${
+              result?.draft?.wuxing?.length
+                ? `「喜${result?.draft?.wuxing?.join("")}」`
+                : ""
+            }`}
           </View>
+          {result?.draft?.beads && result?.draft?.beads?.length > 0 && (
+            <View className="diy-adjust" onClick={handleEditBead}>
+              DIY调整
+            </View>
+          )}
         </View>
         <View className="result-card">
           <View className="result-content">
             <View className="result-left">
               <View className="result-text">
-                <View className="result-text-title">{beadName}</View>
+                <View className="result-text-title">{result?.draft?.name}</View>
                 <View className="result-text-content-container">
-                  {beadDescriptions.length > 0 &&
-                    beadDescriptions.map((item, index) => (
+                  {(result?.topTwoBeads || [])?.length > 0 &&
+                    result?.topTwoBeads?.map((item, index) => (
                       <View className="result-text-content" key={index}>
                         <Image
                           src={item.image_url}
@@ -295,7 +338,7 @@ const ChatPage: React.FC = () => {
                           {item.name + ":"}
                         </View>
                         <View className="result-text-content-description">
-                          {item.description}
+                          {item.func_summary || ""}
                         </View>
                       </View>
                     ))}
@@ -340,17 +383,7 @@ const ChatPage: React.FC = () => {
               <View
                 className="crystal-gradient-text"
                 style={canvasImageUrl ? { opacity: 1 } : { opacity: 0.5 }}
-                onClick={() => {
-                  if (!canvasImageUrl) {
-                    return;
-                  }
-                  Taro.redirectTo({
-                    url:
-                      pageUrls.result +
-                      "?imageUrl=" +
-                      encodeURIComponent(canvasImageUrl as string),
-                  });
-                }}
+                onClick={handleNextStep}
               >
                 查看结果
               </View>
@@ -371,7 +404,7 @@ const ChatPage: React.FC = () => {
   };
 
   return (
-    <PageContainer keyboardHeight={keyboardHeight}>
+    <PageContainer onKeyboardHeightChange={setKeyboardHeight}>
       <View
         style={{
           height: "100%",
@@ -394,6 +427,17 @@ const ChatPage: React.FC = () => {
             className="assistant-image"
             mode="aspectFill"
           />
+          <View
+            className="reset-design-info-link"
+            onClick={() => {
+              console.log("reset");
+              Taro.redirectTo({
+                url: pageUrls.home + "?newSession=true",
+              });
+            }}
+          >
+            重置信息
+          </View>
 
           <View className="message-container">
             <View className="message-header">
@@ -406,11 +450,10 @@ const ChatPage: React.FC = () => {
             {/* 助手欢迎消息 - 按照Figma设计样式，包含三角形指示器 */}
             <View className="message-wrapper">
               <ChatCardList
-                chatContents={messages}
+                chatContents={result?.systemMessages}
                 messageIndex={messageIndex}
                 maxHeight={keyboardHeight > 0 ? 70 : 96}
                 onChange={(index) => {
-                  console.log(index);
                   setMessageIndex(index);
                 }}
               />
@@ -421,51 +464,104 @@ const ChatPage: React.FC = () => {
         {keyboardHeight > 0 ? renderKeyboardShow() : renderKeyboardHide()}
 
         {/* 输入区域 */}
-        <View className="input-container">
-          <TagList
-            tags={TAGS}
-            onTagSelect={(tag) => {
-              setInputValue((prev) =>
-                !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
-              );
-            }}
-          />
-          <View className="input-wrapper">
-            <Textarea
-              className="message-input"
-              value={inputValue}
-              placeholder="输入您的定制需求..."
-              placeholderStyle="color: #00000033;"
-              onInput={(e) => setInputValue(e.detail.value)}
-              onConfirm={handleSend}
-              autoHeight
-              adjustPosition={false}
-              // adjustKeyboardTo="bottom"
-              // onFocus={() => {
-              //   setKeyboardHeight(90);
-              // }}
-              // onBlur={() => {
-              //   setKeyboardHeight(0);
-              // }}
-              showConfirmBar={false}
+        {imgGenerateCount < MAX_IMG_GENERATE_COUNT && (
+          <View className="input-container">
+            {result?.recommends?.length > 0 && (
+              <TagList
+                tags={result?.recommends?.map((item) => ({
+                  id: item,
+                  title: item,
+                }))}
+                onTagSelect={(tag) => {
+                  handleSend(tag.title);
+                  // setInputValue((prev) =>
+                  //   !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
+                  // );
+                }}
+              />
+            )}
+            <View className="input-wrapper">
+              <Textarea
+                className="message-input"
+                value={inputValue}
+                placeholder="输入您的定制需求..."
+                placeholderStyle="color: #00000033;"
+                onInput={(e) => setInputValue(e.detail.value)}
+                onConfirm={handleSend}
+                autoHeight
+                adjustPosition={false}
+                // adjustKeyboardTo="bottom"
+                // onFocus={() => {
+                //   setKeyboardHeight(90);
+                // }}
+                // onBlur={() => {
+                //   setKeyboardHeight(0);
+                // }}
+                showConfirmBar={false}
+              />
+              <Image
+                src={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
+                style={{ width: "26px", height: "26px" }}
+                onClick={handleSend}
+              />
+            </View>
+          </View>
+        )}
+
+        {imgGenerateCount >= MAX_IMG_GENERATE_COUNT && (
+          <View className="design-action-container">
+            <CrystalButton
+              style={{ width: "140px" }}
+              text="更换心愿"
+              onClick={() => {
+                // handleSend("更换心愿");
+                resetImgGenerateCount();
+              }}
             />
-            <Image
-              src={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
-              style={{ width: "26px", height: "26px" }}
-              onClick={handleSend}
+            <CrystalButton
+              style={{ flex: 1 }}
+              isPrimary
+              icon={
+                <Image
+                  src={RightArrowGolden}
+                  style={{ width: "16px", height: "16px" }}
+                />
+              }
+              onClick={handleNextStep}
+              text="下一步"
             />
           </View>
-        </View>
+        )}
         {/* 用于拼接珠串图片的隐藏Canvas */}
-        <CircleRing
-          dotsBgImageData={beadImageData}
-          targetSize={1024}
-          canvasId="circle-ring-canvas"
-          onChange={(status, canvasImage) => {
-            setCanvasImageUrl(canvasImage);
-            setCanvasImageStatus(status);
+        {result?.draft?.beads && result?.draft?.beads?.length > 0 && (
+          <CircleRing
+            dotsBgImageData={result?.draft?.beads || []}
+            targetSize={1024}
+            canvasId="circle-ring-canvas"
+            onChange={(status, canvasImage) => {
+              setCanvasImageUrl(canvasImage);
+              setCanvasImageStatus(status);
+            }}
+            showCanvas={false}
+          />
+        )}
+        <DateTimeDrawer
+          onPersonalizeCustomize={(data) => {
+            setCanvasImageUrl("");
+            initChat({
+              birth_year: data.year,
+              birth_month: data.month,
+              birth_day: data.day,
+              birth_hour: data.hour,
+              sex: data.gender,
+              is_lunar: data.isLunar,
+            });
+            setShowDateTimeDrawer(false);
           }}
-          showCanvas={false}
+          visible={showDateTimeDrawer}
+          onClose={() => {
+            setShowDateTimeDrawer(false);
+          }}
         />
       </View>
     </PageContainer>

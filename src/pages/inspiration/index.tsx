@@ -11,7 +11,9 @@ import CrystalContainer from "@/components/CrystalContainer";
 import LazyImage from "@/components/LazyImage";
 import Taro, { useDidShow, usePullDownRefresh, useReady } from "@tarojs/taro";
 import TabBar from "@/components/TabBar";
-import { inspirationApi, InspirationResult, userApi } from "@/utils/api";
+import {
+    inspirationApi,
+} from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import RightArrowIcon from "@/assets/icons/right-arrow.svg";
@@ -27,7 +29,7 @@ interface InspirationItem {
   is_collect: boolean;
   design_id: number;
   user: {
-    nike_name: string;
+    nick_name: string;
     avatar_url: string;
   };
   collects_count: number;
@@ -47,7 +49,6 @@ const INSPIRATION_TABS = [
 const InspirationPage: React.FC = () => {
   const [curTab, setCurTab] = useState<"all" | "collect">("all");
   const { height: navBarHeight } = getNavBarHeightAndTop();
-  const observerRef = useRef<any>(null);  
   const {
     data: inspirationList,
     loading,
@@ -55,7 +56,9 @@ const InspirationPage: React.FC = () => {
     hasMore,
     refresh,
     loadMore,
+    updateItem,
   } = useInfiniteScroll<InspirationItem>({
+    listKey: 'inspirationList',
     initialPage: 1,
     pageSize: 100,
     fetchData: useCallback(async (page: number, pageSize: number) => {
@@ -70,24 +73,73 @@ const InspirationPage: React.FC = () => {
         total: res.data.total_count,
       };
     }, []),
+    queryItem: useCallback(async (item: InspirationItem) => {
+      const res = await inspirationApi.getInspirationData({
+        work_id: item.work_id,
+      });
+      return res.data.works?.[0] || null;
+    }, []),
+    selector: '#inspiration-more-tag',
+  });
+  const {
+    data: collectInspirationList,
+    loading: collectLoading,
+    error: collectError,
+    hasMore: collectHasMore,
+    refresh: collectRefresh,
+    loadMore: collectLoadMore,
+    updateItem: collectUpdateItem,
+  } = useInfiniteScroll<InspirationItem>({
+    listKey: 'collectInspirationList',
+    initialPage: 1,
+    pageSize: 100,
+    fetchData: useCallback(async (page: number, pageSize: number) => {
+      const res = await inspirationApi.getCollectInspiration({
+        page,
+        pageSize: pageSize,
+      });
+      return {
+        data: res.data.works,
+        hasMore:
+          res.data.works.length + (page - 1) * pageSize < res.data.total_count,
+        total: res.data.total_count,
+      };
+    }, []),
+    queryItem: useCallback(async (item: InspirationItem) => {
+      const res = await inspirationApi.getInspirationData({
+        work_id: item.work_id,
+      });
+      return res.data.works?.[0] || null;
+    }, []),
+    selector: '#inspiration-more-tag', // 添加 selector 参数
   });
 
   const showData = useMemo(() => {
     if (curTab === "all") {
       return inspirationList;
     } else {
-      return inspirationList.filter((item) => item.is_collect);
+      return collectInspirationList;
     }
-  }, [curTab, inspirationList]);
+  }, [curTab, collectInspirationList, inspirationList]);
 
   // 页面显示时刷新数据
   usePullDownRefresh(() => {
-    refresh();
+    if (curTab === "all") {
+      refresh();
+    } else {
+      collectRefresh();
+    }
   });
 
+  // tab 切换时加载对应数据
   useEffect(() => {
-    refresh();
-  }, []);
+    if (curTab === "collect") {
+      // 如果是收藏列表且数据为空，则加载数据
+      if (collectInspirationList.length === 0) {
+        collectRefresh();
+      }
+    }
+  }, [curTab, collectInspirationList.length, collectRefresh]);
 
   // 处理图片点击
   const handleItemClick = (item: InspirationItem) => {
@@ -97,28 +149,14 @@ const InspirationPage: React.FC = () => {
   };
 
   useDidShow(() => {
-    refresh();
+    if (curTab === "all") {
+      refresh();
+    } else {
+      collectRefresh();
+    }
   });
 
-  useReady(() => {
-    // 创建观察者，阈值设为0.5（50%可见时触发）
-    observerRef.current = Taro.createIntersectionObserver({
-      thresholds: [0.4],
-      observeAll: true // 同时观察多个节点
-    });
-  
-    // 监听类名为 '.target-item' 的所有元素
-    observerRef.current.relativeToViewport().observe('#inspiration-more-tag', (res) => {
-      console.log(res.intersectionRatio, 'res.intersectionRatio') 
-      if (res.intersectionRatio > 0.5) {
-        loadMore();
-        console.log('loadMore');
-      }
-    });
-  });
-  
-  // 组件卸载时销毁
-  useEffect(() => () => observerRef.current?.disconnect(), []);
+
   // 处理收藏点击
   const handleCollectClick = (item: InspirationItem, e: any) => {
     e.stopPropagation();
@@ -131,7 +169,9 @@ const InspirationPage: React.FC = () => {
             title: "取消收藏成功",
             icon: "success",
           });
-          refresh();
+          // 同时更新两个列表中的数据
+          updateItem(item);
+          collectUpdateItem(item);
         })
         .catch((err) => {
           Taro.showToast({
@@ -147,7 +187,9 @@ const InspirationPage: React.FC = () => {
             title: "收藏成功",
             icon: "success",
           });
-          refresh();
+          // 同时更新两个列表中的数据
+          updateItem(item);
+          collectUpdateItem(item);
         })
         .catch((err) => {
           Taro.showToast({
@@ -165,6 +207,118 @@ const InspirationPage: React.FC = () => {
     }
     return count.toString();
   };
+
+
+  // 使用 IntersectionObserver 监听元素进入视口
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const fallbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const setupScrollListener = useCallback(() => {
+    // 清理现有的观察器和定时器
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+    if (fallbackIntervalRef.current) {
+      clearInterval(fallbackIntervalRef.current);
+      fallbackIntervalRef.current = null;
+    }
+
+    const targetId = curTab === "all" ? "inspiration-more-tag" : "collect-more-tag";
+    
+    // 优先使用 IntersectionObserver
+    if (typeof IntersectionObserver !== 'undefined') {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              if (curTab === "all" && hasMore) {
+                loadMore();
+              } else if (curTab === "collect" && collectHasMore) {
+                collectLoadMore();
+              }
+            }
+          });
+        },
+        {
+          root: null, // 相对于视口
+          rootMargin: '100px', // 提前100px开始加载
+          threshold: 0.1, // 10%的元素可见时触发
+        }
+      );
+
+      // 查找目标元素并开始观察
+      Taro.createSelectorQuery()
+        .select(`#${targetId}`)
+        .node()
+        .exec((res) => {
+          if (res && res[0] && res[0].node && observerRef.current) {
+            observerRef.current.observe(res[0].node);
+          } else {
+            // 如果获取节点失败，使用降级方案
+            console.warn('Failed to get target node, using fallback method');
+            useFallbackMethod(targetId);
+          }
+        });
+    } else {
+      // 降级到定时器方案
+      console.warn('IntersectionObserver not supported, using fallback method');
+      useFallbackMethod(targetId);
+    }
+  }, [curTab, hasMore, collectHasMore, loadMore, collectLoadMore]);
+
+  // 降级方案：使用定时器轮询
+  const useFallbackMethod = useCallback((targetId: string) => {
+    const checkElementStatus = () => {
+      Taro.createSelectorQuery()
+        .select(`#${targetId}`)
+        .boundingClientRect()
+        .exec((res) => {
+          if (res && res[0]) {
+            const rect = res[0];
+            try {
+              const windowInfo = Taro.getWindowInfo();
+              if (rect.top < windowInfo.windowHeight && rect.bottom > 0) {
+                if (curTab === "all" && hasMore) {
+                  loadMore();
+                } else if (curTab === "collect" && collectHasMore) {
+                  collectLoadMore();
+                }
+              }
+            } catch (error) {
+              console.warn('Failed to get window info:', error);
+              const fallbackHeight = 667;
+              if (rect.top < fallbackHeight && rect.bottom > 0) {
+                if (curTab === "all" && hasMore) {
+                  loadMore();
+                } else if (curTab === "collect" && collectHasMore) {
+                  collectLoadMore();
+                }
+              }
+            }
+          }
+        });
+    };
+
+    fallbackIntervalRef.current = setInterval(checkElementStatus, 500); // 降级方案使用较低频率
+  }, [curTab, hasMore, collectHasMore, loadMore, collectLoadMore]);
+
+  // 设置滚动监听
+  useEffect(() => {
+    setupScrollListener();
+    
+    return () => {
+      // 清理观察器和定时器
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+      if (fallbackIntervalRef.current) {
+        clearInterval(fallbackIntervalRef.current);
+        fallbackIntervalRef.current = null;
+      }
+    };
+  }, [setupScrollListener])
 
   return (
     <CrystalContainer showBack={false} showHome={false}>
@@ -185,20 +339,21 @@ const InspirationPage: React.FC = () => {
                     width: "100%",
                     height: "12px",
                     position: "absolute",
-                    bottom: "0px",
-                    right: "0px",
+                    bottom: "-6px",
+                    left: "12px",
                   }}
                 />
               )}
               <Text className={styles.tabLabel}>{tab.label}</Text>
             </View>
           ))}
+
         </View>
         <View
           style={{
-            height: `calc(100vh - ${navBarHeight + 220}px)`,
+            height: `calc(100vh - ${navBarHeight + 120}px)`,
             boxSizing: "border-box",
-            paddingBottom: "20px",
+            paddingBottom: "140px",
             overflowY: "auto",
           }}
         >
@@ -262,17 +417,17 @@ const InspirationPage: React.FC = () => {
                 </View>
               </View>
             ))}
-            {/* {!hasMore && showData.length > 0 && ( */}
-            <View className={styles.noMoreContainer} id="inspiration-more-tag">
-              <Text className={styles.noMoreText}>没有更多了</Text>
-            </View>
-          {/* )} */}
+            {/* )} */}
+          </View>
+          {/* {!hasMore && showData.length > 0 && ( */}
+          <View className={styles.noMoreContainer} id={curTab === "all" ? "inspiration-more-tag" : "collect-more-tag"}>
+            <Text className={styles.noMoreText}>{curTab === "collect" && showData?.length ===0 ? "暂无收藏设计" : "暂时就这些啦～记得常来看看新内容哦"}</Text>
           </View>
           {/* 没有更多数据 */}
         </View>
 
         {/* 加载状态 */}
-        {loading && (
+        {(curTab === "all" ? loading : collectLoading) && (
           <View className={styles.loadingContainer}>
             <View className={styles.loadingSpinner} />
             <Text className={styles.loadingText}>加载中...</Text>
@@ -280,19 +435,21 @@ const InspirationPage: React.FC = () => {
         )}
 
         {/* 错误状态 */}
-        {error && (
+        {(curTab === "all" ? error : collectError) && (
           <View className={styles.errorContainer}>
-            <Text className={styles.errorText}>{error}</Text>
-            <View className={styles.retryButton} onClick={refresh}>
+            <Text className={styles.errorText}>{curTab === "all" ? error : collectError}</Text>
+            <View className={styles.retryButton} onClick={curTab === "all" ? refresh : collectRefresh}>
               <Text className={styles.retryText}>重试</Text>
             </View>
           </View>
         )}
 
         {/* 空状态 */}
-        {!loading && inspirationList.length === 0 && (
+        {!(curTab === "all" ? loading : collectLoading) && showData.length === 0 && (
           <View className={styles.emptyContainer}>
-            <Text className={styles.emptyText}>暂无灵感作品</Text>
+            <Text className={styles.emptyText}>
+              {curTab === "all" ? "暂无灵感作品" : "暂无收藏作品"}
+            </Text>
           </View>
         )}
       </View>

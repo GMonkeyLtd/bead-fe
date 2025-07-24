@@ -37,7 +37,6 @@ const BeadOrderDialogDemo: React.FC = () => {
   };
 
   const handleConfirm = () => {
-    console.log('立即抢单');
     // 这里可以添加抢单逻辑
     setVisible(false);
   };

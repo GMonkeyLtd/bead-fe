@@ -13,6 +13,7 @@ import {
   LOGO_WITH_BACKGROUND_IMAGE_URL,
   APP_QRCODE_IMAGE_URL,
   QR_CODE_IMAGE_URL,
+  DESIGN_PLACEHOLDER_IMAGE_URL,
 } from "@/config";
 import { useDesign } from "@/store/DesignContext";
 import createBeadImage from "@/assets/icons/create-bead.svg";
@@ -42,15 +43,20 @@ const Result = () => {
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
   const autoShareRef = useRef(false);
+  const instance = Taro.getCurrentInstance();
+  const params = instance.router?.params;
+  const showBack = params?.showBack;
 
   const posterData = useMemo(() => {
     return {
       title: braceletName,
       description: braceletDescription,
       crystals: beadDescriptions,
+      qrCode: APP_QRCODE_IMAGE_URL,
       mainImage: imageUrl,
+      designNo: designNo,
     };
-  }, [braceletName, braceletDescription, beadDescriptions, imageUrl]);
+  }, [braceletName, braceletDescription, beadDescriptions, imageUrl, designNo]);
 
   const getOrderData = (orderUuid: string[]) => {
     api.userHistory.getOrderById(orderUuid).then((res) => {
@@ -92,8 +98,7 @@ const Result = () => {
 
   const initData = () => {
     // 获取传入的图片URL参数
-    const instance = Taro.getCurrentInstance();
-    const params = instance.router?.params;
+    
     if (params?.designBackendId) {
       const imageUrl = params?.imageUrl || "";
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
@@ -140,16 +145,57 @@ const Result = () => {
 
   // 保存图片到相册
   const saveImage = async (url: string) => {
-    console.log(url, "url");
     if (!url) {
+      autoShareRef.current = true;
       Taro.showToast({
         title: "分享图正在制作中...",
         icon: "none",
       });
-      autoShareRef.current = true;
       return;
     }
+    
     try {
+      // 检查相册权限
+      const authSetting = await Taro.getSetting();
+      const writePhotosAlbumAuth = authSetting.authSetting['scope.writePhotosAlbum'];
+      
+      if (writePhotosAlbumAuth === false) {
+        // 权限被拒绝，引导用户到设置页面
+        const res = await Taro.showModal({
+          title: '提示',
+          content: '需要相册权限才能保存图片，请在设置中开启权限',
+          confirmText: '去设置',
+          cancelText: '取消'
+        });
+        
+        if (res.confirm) {
+          await Taro.openSetting();
+        }
+        return;
+      }
+      
+      if (writePhotosAlbumAuth === undefined) {
+        // 首次申请权限
+        try {
+          await Taro.authorize({
+            scope: 'scope.writePhotosAlbum'
+          });
+        } catch (authError) {
+          // 用户拒绝了权限
+          const res = await Taro.showModal({
+            title: '提示',
+            content: '需要相册权限才能保存图片，请在设置中开启权限',
+            confirmText: '去设置',
+            cancelText: '取消'
+          });
+          
+          if (res.confirm) {
+            await Taro.openSetting();
+          }
+          return;
+        }
+      }
+      
       Taro.showToast({
         title: "保存中",
         icon: "loading",
@@ -165,13 +211,22 @@ const Result = () => {
       });
     } catch (error) {
       console.error("保存图片失败:", error);
-      Taro.showToast({
-        title: "保存失败",
-        icon: "error",
-      });
+      
+      // 检查是否是用户取消操作
+      const errorMessage = typeof error === 'object' && error !== null && 'errMsg' in error 
+        ? (error as { errMsg: string }).errMsg 
+        : '';
+      
+      // 如果不是用户取消操作，则显示报错
+      if (!errorMessage.includes('cancel')) {
+        Taro.showToast({
+          title: "保存失败",
+          icon: "error",
+        });
+      }
     } finally {
-      autoShareRef.current = false;
       setLoading(false);
+      autoShareRef.current = false;
     }
   };
 
@@ -201,10 +256,10 @@ const Result = () => {
       style={{
         height: "100vh",
         paddingTop: `-${navBarTop}px`,
-        "--bg-image": `url(${imageUrl})`,
+        "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
       }}
     >
-      <AppHeader isWhite />
+      <AppHeader isWhite showBack={showBack === 'false'} />
       <View
         className="result-content-container"
         style={{
@@ -350,7 +405,7 @@ const Result = () => {
             />
           }
         />
-        <CrystalButton
+        {/* <CrystalButton
           onClick={doCreate}
           isPrimary
           text="制作成品"
@@ -362,7 +417,7 @@ const Result = () => {
               style={{ width: "24px", height: "24px" }}
             />
           }
-        />
+        /> */}
       </View>
       {budgetDialogShow && (
         <BudgetDialog
@@ -376,11 +431,13 @@ const Result = () => {
       <PosterGenerator
         data={posterData}
         onGenerated={(url) => {
+          console.log(url, autoShareRef.current, 'url')
           setShareImageUrl(url);
           if (autoShareRef.current) {
             saveImage(url);
           }
         }}
+        showPoster={true}
       />
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog

@@ -7,6 +7,7 @@ export enum OrderStatus {
   Completed = '3', // 已完成
   Cancelled = '4', // 用户取消
   MerchantCancel = '5', // 商家取消
+  MerchantCancelPending = '6', // 商家取消待审核
 }
 export const OrderStatusMap = {
   [OrderStatus.PendingDispatch]: "待派单",
@@ -15,6 +16,7 @@ export const OrderStatusMap = {
   [OrderStatus.Completed]: "已完成",
   [OrderStatus.Cancelled]: "用户已取消",
   [OrderStatus.MerchantCancel]: "商家已取消",
+  [OrderStatus.MerchantCancelPending]: "商家取消中",
 };
 
 export const processingOrderStatus = [

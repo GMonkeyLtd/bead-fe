@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { View, Text, Button, Input } from "@tarojs/components";
-import Taro, { showToast, showModal } from "@tarojs/taro";
+import Taro, { showToast, showModal, useDidHide } from "@tarojs/taro";
 import api, { RechargeParams, WxPayParams } from "@/utils/api-merchant";
 import "./index.scss";
 
@@ -39,12 +39,15 @@ export default function RechargeDialog({
   };
 
   useEffect(() => {
-    console.log('useEffect');
     
     return () => {
       stopPolling();
     }
   }, [])
+
+  useDidHide(() => {
+    stopPolling();
+  })
 
   // 将 early return 移动到所有 hooks 调用之后
   if (!visible) return null;
@@ -78,7 +81,6 @@ export default function RechargeDialog({
   const queryPaymentStatus = async (tradeId: string): Promise<boolean> => {
     try {
       const res = await api.user.queryPaymentStatus(tradeId);
-      console.log("查询订单结果:", res);
 
       // 根据实际 API 返回结构调整数据获取方式，使用类型断言
       const status = res?.data?.trade_status as PaymentStatus;
@@ -158,7 +160,6 @@ export default function RechargeDialog({
       // 调用充值接口
       const rechargeParams: RechargeParams = { amount };
       const result = await api.user.recharge(rechargeParams);
-      console.log(result, 'recharge result')
       
       // 调用微信支付
       await handleWxPay(result.data);

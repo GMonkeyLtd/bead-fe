@@ -181,12 +181,16 @@
 .contactDialogFooter {
   position: absolute;
   bottom: 20px;
-  left: 20px;
-  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .contactDialogReturnBtn {
-  width: 100%;
+  width: 120px;
   height: 34px;
   background-color: #ffffff;
   border: 1px solid #232323;
@@ -198,15 +202,20 @@
   padding: 6px 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+}
 
-  &:hover {
-    background-color: #fbcc8e;
-  }
-
-  &:active {
-    background-color: #fbcc8e;
-    transform: translateY(1px);
-  }
+.contactDialogCallBtn {
+  width: 120px;
+  height: 34px;
+  background-color: #fbcc8e;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .contactDialogReturnText {

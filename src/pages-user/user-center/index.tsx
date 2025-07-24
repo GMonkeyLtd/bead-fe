@@ -10,6 +10,7 @@ import TabBar from "@/components/TabBar";
 import { userHistoryApi, userApi } from "@/utils/api";
 import MyWorkIcon from "@/assets/icons/my-work.svg";
 import { pageUrls } from "@/config/page-urls";
+import { DESIGN_PLACEHOLDER_IMAGE_URL } from "@/config";
 
 const UserCenterPage: React.FC = () => {
   const [showIncomeCard, setShowIncomeCard] = useState(false);
@@ -25,7 +26,7 @@ const UserCenterPage: React.FC = () => {
         return {
           id: item.ID,
           name: item.WordInfo.bracelet_name,
-          image: item.ImageURL,
+          image: item.ImageURL || DESIGN_PLACEHOLDER_IMAGE_URL,
         };
       });
       setImageHistory(history);
@@ -38,7 +39,7 @@ const UserCenterPage: React.FC = () => {
 
   const handleItemClick = (item: any) => {
     Taro.navigateTo({
-      url: `${pageUrls.result}?designBackendId=${item.id}`,
+      url: `${pageUrls.result}?designBackendId=${item.id}&showBack=true`,
     });
   };
 
@@ -58,7 +59,7 @@ const UserCenterPage: React.FC = () => {
               "微信用户" + Math.random().toString(36).substring(2, 15)
             }
             userSlogan="璞光集，好运气"
-            avatar="https://zhuluoji.cn-sh2.ufileos.com/images-frontend/default-avatar.png" // 替换为实际头像URL
+            avatar={userInfo?.avatar_url || "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/default-avatar.png"} // 替换为实际头像URL
             showAction={userInfo?.is_merchant}
             onActionClick={() => {
               Taro.redirectTo({
@@ -112,7 +113,7 @@ const UserCenterPage: React.FC = () => {
                 className={`${styles.featureCard} ${styles.profileCard}`}
                 onClick={() => {
                   Taro.navigateTo({
-                    url: pageUrls.contactPreference,
+                    url: pageUrls.modifyUser,
                   });
                 }}
               >
@@ -139,7 +140,7 @@ const UserCenterPage: React.FC = () => {
                 height: "12px",
                 position: "absolute",
                 bottom: "12px",
-                right: "20px",
+                left: "50px",
               }}
             />
             我的作品

@@ -17,11 +17,37 @@
   will-change: transform;
 }
 
+$loading-animate: skeleton-avatar-loading 800ms infinite
+  cubic-bezier(0.1, 0.7, 1, 0.1);
+
+$gradient-bg: linear-gradient(
+    290deg,
+    rgba(214, 131, 58, 0) 20%,
+    rgba(214, 131, 58, 0.07) 40%,
+    rgba(214, 131, 58, 0) 80%
+  );
+
+.image-loading-skeleton {
+  border-radius: 50%;
+  background: $gradient-bg;
+  background-size: 400% 100%;
+  animation: $loading-animate;
+}
+
 @keyframes rotate {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes skeleton-avatar-loading {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
   }
 }

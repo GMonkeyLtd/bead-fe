@@ -22,7 +22,6 @@ const OrderListDemo: React.FC = () => {
           createTime: item.created_at,
         }
       })
-      console.log('orders', _orders);
       setOrders(_orders);
     });
   }

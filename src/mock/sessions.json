@@ -1,0 +1,447 @@
+{
+    "code": 200,
+    "message": "ok",
+    "data": {
+        "session_id": "197edd270608cd3e786886982eb",
+        "messages": [
+            {
+                "role": "system",
+                "content": "请问你有什么心愿么？",
+                "created_at": "2025-07-09T14:14:40.992451605+08:00"
+            }
+        ],
+        "recommends": [
+            "升职加薪",
+            "招财进宝",
+            "创业成功",
+            "增强事业运",
+            "增强自信"
+        ],
+        "latest_draft": {
+            "session_id": "197edd270608cd3e786886982eb",
+            "draft_id": "197edd27062ce527013422f1d4a",
+            "user_id": 2,
+            "status": 3,
+            "progress": 100,
+            "wuxing": [
+                "金",
+                "水",
+                "木"
+            ],
+            "wishes": null,
+            "size": 20,
+            "name": "",
+            "description": "",
+            "beads": [
+                {
+                    "bead_id": 7,
+                    "name": "玻璃球3",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%8E%BB%E7%92%83%E7%90%833.png",
+                    "color": [
+                        "白色",
+                        "紫色",
+                        "黄色",
+                        "蓝色",
+                        "粉色",
+                        "绿色"
+                    ],
+                    "rgb": [
+                        207,
+                        214,
+                        201
+                    ],
+                    "wuxing": [
+                        "金",
+                        "木",
+                        "水",
+                        "火",
+                        "土"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 9,
+                    "name": "玻璃球6",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%8E%BB%E7%92%83%E7%90%836.png",
+                    "color": [
+                        "蓝色"
+                    ],
+                    "rgb": [
+                        236,
+                        243,
+                        244
+                    ],
+                    "wuxing": [
+                        "金",
+                        "木",
+                        "水",
+                        "火",
+                        "土"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 6,
+                    "name": "玻璃球2",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%8E%BB%E7%92%83%E7%90%832.png",
+                    "color": [
+                        "白色"
+                    ],
+                    "rgb": [
+                        39,
+                        38,
+                        38
+                    ],
+                    "wuxing": [
+                        "金",
+                        "木",
+                        "土"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 13,
+                    "name": "蛋白石",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%9B%8B%E7%99%BD%E7%9F%B3.png",
+                    "color": [
+                        "浅绿色"
+                    ],
+                    "rgb": [
+                        179,
+                        217,
+                        219
+                    ],
+                    "wuxing": [
+                        "金",
+                        "水"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 14,
+                    "name": "粉水晶",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%B2%89%E6%B0%B4%E6%99%B6.png",
+                    "color": [
+                        "粉色"
+                    ],
+                    "rgb": [
+                        232,
+                        204,
+                        207
+                    ],
+                    "wuxing": [
+                        "火",
+                        "土",
+                        "水",
+                        "金"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 1,
+                    "name": "白水晶1",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%99%BD%E6%B0%B4%E6%99%B61.png",
+                    "color": [
+                        "白色"
+                    ],
+                    "rgb": [
+                        184,
+                        174,
+                        174
+                    ],
+                    "wuxing": [
+                        "金"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 2,
+                    "name": "白水晶2",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%99%BD%E6%B0%B4%E6%99%B62.png",
+                    "color": [
+                        "白色"
+                    ],
+                    "rgb": [
+                        225,
+                        224,
+                        229
+                    ],
+                    "wuxing": [
+                        "金"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 3,
+                    "name": "白松石",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%99%BD%E6%9D%BE%E7%9F%B3.png",
+                    "color": [
+                        "白色"
+                    ],
+                    "rgb": [
+                        211,
+                        212,
+                        203
+                    ],
+                    "wuxing": [
+                        "金"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 5,
+                    "name": "玻璃球",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%8E%BB%E7%92%83%E7%90%83.png",
+                    "color": [
+                        "白色",
+                        "蓝色"
+                    ],
+                    "rgb": [
+                        244,
+                        245,
+                        245
+                    ],
+                    "wuxing": [
+                        "金",
+                        "火",
+                        "土"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 8,
+                    "name": "玻璃球5",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%8E%BB%E7%92%83%E7%90%835.png",
+                    "color": [
+                        "粉色"
+                    ],
+                    "rgb": [
+                        224,
+                        160,
+                        184
+                    ],
+                    "wuxing": [
+                        "金"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 11,
+                    "name": "草莓晶1",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%8D%89%E8%8E%93%E6%99%B61.png",
+                    "color": [
+                        "红色"
+                    ],
+                    "rgb": [
+                        183,
+                        92,
+                        74
+                    ],
+                    "wuxing": [
+                        "火",
+                        "金",
+                        "土"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 12,
+                    "name": "草莓水晶",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%8D%89%E8%8E%93%E6%B0%B4%E6%99%B6.png",
+                    "color": [
+                        "红色"
+                    ],
+                    "rgb": [
+                        123,
+                        30,
+                        39
+                    ],
+                    "wuxing": [
+                        "火",
+                        "木"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 17,
+                    "name": "粉水晶5",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%B2%89%E6%B0%B4%E6%99%B65.png",
+                    "color": [
+                        "红色"
+                    ],
+                    "rgb": [
+                        154,
+                        77,
+                        84
+                    ],
+                    "wuxing": [
+                        "火",
+                        "土",
+                        "水"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 4,
+                    "name": "冰飘南红",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E5%86%B0%E9%A3%98%E5%8D%97%E7%BA%A2.png",
+                    "color": [
+                        "橙色",
+                        "红色"
+                    ],
+                    "rgb": [
+                        211,
+                        125,
+                        89
+                    ],
+                    "wuxing": [
+                        "火"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 10,
+                    "name": "玻璃球7",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%8E%BB%E7%92%83%E7%90%837.png",
+                    "color": [
+                        "浅蓝色"
+                    ],
+                    "rgb": [
+                        152,
+                        184,
+                        210
+                    ],
+                    "wuxing": [
+                        "土"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 15,
+                    "name": "粉水晶1",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%B2%89%E6%B0%B4%E6%99%B61.png",
+                    "color": [
+                        "粉红色"
+                    ],
+                    "rgb": [
+                        239,
+                        194,
+                        194
+                    ],
+                    "wuxing": [
+                        "火"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 16,
+                    "name": "粉水晶4",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%B2%89%E6%B0%B4%E6%99%B64.png",
+                    "color": [
+                        "粉色"
+                    ],
+                    "rgb": [
+                        235,
+                        200,
+                        206
+                    ],
+                    "wuxing": [
+                        "火"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                },
+                {
+                    "bead_id": 18,
+                    "name": "粉水晶6",
+                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E7%B2%89%E6%B0%B4%E6%99%B66.png",
+                    "color": [
+                        "粉色"
+                    ],
+                    "rgb": [
+                        220,
+                        166,
+                        169
+                    ],
+                    "wuxing": [
+                        "火",
+                        "土"
+                    ],
+                    "funcs": [
+                        "美观装饰",
+                        "提升正能量"
+                    ],
+                    "diameter": 10
+                }
+            ]
+        },
+        "created_at": "2025-07-09T14:14:40.993+08:00"
+    }
+}

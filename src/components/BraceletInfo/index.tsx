@@ -110,13 +110,13 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
 }) => {
 
   const beadsData = (beads || [])?.reduce((acc: any[], item: any) => {
-    const existingBead = acc.find(bead => bead.name === item?.name);
+    const existingBead = acc.find(bead => bead.name === item?.name && bead.size === item?.bead_diameter);
     if (existingBead) {
       existingBead.quantity += item?.quantity || 1;
     } else {
       acc.push({  
         name: item?.name,
-        size: item?.size,
+        size: item?.bead_diameter,
         quantity: item?.quantity || 1,
       });
     }
@@ -141,7 +141,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
             style={{ background: index % 2 === 0 ? "" : "#E6DED133" }}
           >
             <Text className="cell-name">{bead.name}</Text>
-            <Text className="cell-size">{bead.size}</Text>
+            <Text className="cell-size">{`${bead.size}mm`}</Text>
             <Text className="cell-quantity">x{bead.quantity}</Text>
           </View>
         ))}

@@ -1,28 +1,58 @@
 import { View, Text, Swiper, SwiperItem, Image } from "@tarojs/components";
 import { useEffect, useState } from "react";
-import Taro from "@tarojs/taro";
+import Taro, { useDidShow } from "@tarojs/taro";
 import "./index.scss";
 import { SWIPER_DATA } from "@/config/home-content";
-import RightArrow from "@/assets/icons/right-arrow.svg";
+import RightArrowWhite from "@/assets/icons/right-arrow-white.svg";
 import DateTimeDrawer from "@/components/DateTimeDrawer";
 import CrystalButton from "@/components/CrystalButton";
 import AppHeader from "@/components/AppHeader";
+import BackgroundMedia from "@/components/BackgroundMedia";
 import { AuthManager } from "@/utils/auth";
 import { pageUrls } from "@/config/page-urls";
-import TabBar from "@/components/TabBar";
+import TabBar, { TabBarTheme } from "@/components/TabBar";
+import apiSession from "@/utils/api-session";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
+  const [checkFirst, setCheckFirst] = useState(false);
+  const [lastSessionId, setLastSessionId] = useState("");
+  const instance = Taro.getCurrentInstance();
+  const { newSession } = instance.router?.params || {};
 
   useEffect(() => {
     AuthManager.clearAuth();
     AuthManager.login();
+    Taro.showShareMenu({
+      withShareTicket: true, // 支持获取群聊信息
+      showShareItems: ['shareAppMessage', 'shareTimeline'] // 同时开启好友和朋友圈分享
+    });
+    
   }, []);
+
+  useDidShow(() => {
+    apiSession.getLastSession().then((res) => {
+      if (res.data?.session_id) {
+        setLastSessionId(res.data.session_id);
+      }
+    }).catch((e) => {
+      setLastSessionId("");
+      console.error("getLastSession error: ", e);
+    }).finally(() => {
+      setCheckFirst(true);
+    });
+  })
 
   const startDesign = () => {
     // 打开日期时间选择抽屉
     setShowDateTimeDrawer(true);
   };
+
+  useEffect(() => {
+    if (newSession) {
+      startDesign();
+    }
+  }, [newSession]);
 
   const handleDrawerClose = () => {
     setShowDateTimeDrawer(false);
@@ -75,9 +105,24 @@ const Home = () => {
     gender: number;
     isLunar: boolean;
   }) => {
+    // Taro.redirectTo({
+    //   url:
+    //     pageUrls.design + '?year=' +
+    //     year +
+    //     "&month=" +
+    //     month +
+    //     "&day=" +
+    //     day +
+    //     "&hour=" +
+    //     hour +
+    //     "&gender=" +
+    //     gender +
+    //     "&isLunar=" +
+    //     isLunar,
+    // });
+
     Taro.redirectTo({
-      url:
-        pageUrls.design + '?year=' +
+      url: pageUrls.chatDesign + '?year=' +
         year +
         "&month=" +
         month +
@@ -118,16 +163,16 @@ const Home = () => {
       >
         {SWIPER_DATA.map((item) => (
           <SwiperItem key={item.id}>
-            <View
-              className="banner-item"
-              style={{
-                backgroundImage: `url(${item.backgroundImage})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-              }}
-            >
-              <View className="home-swiper-content">
+            <View className="banner-item">
+              {/* 背景媒体组件 */}
+              <BackgroundMedia
+                type={item.type}
+                imageUrl={item.backgroundImage}
+                videoUrl={item.backgroundVideo}
+                className="banner-background"
+              />
+              
+              <View className="home-content">
                 <View className="crystal-title-section">
                   <View className="crystal-title-frame">
                     <Text className="crystal-subtitle-up">{item.subtitle}</Text>
@@ -139,12 +184,30 @@ const Home = () => {
                 </View>
                 <View className="crystal-action-section">
                   <CrystalButton
-                    onClick={startDesign}
+                    style={{
+                      borderRadius: 70,
+                      border: "1.1px solid rgba(255, 255, 255, 0.20)",
+                      background: "rgba(0, 0, 0, 0.30)",
+                      backdropFilter: "blur(4px)",
+                      boxShadow: 'none'
+                    }}
+                    textStyle={{
+                      color: "#fff",
+                    }}
+                    onClick={() => {
+                      if (!lastSessionId) {
+                        startDesign();
+                      } else {
+                        Taro.redirectTo({
+                          url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
+                        });
+                      }
+                    }}
                     text="开启定制"
                     icon={
                       <Image
-                        src={RightArrow}
-                        style={{ width: "10px", height: "10px" }}
+                        src={RightArrowWhite}
+                        style={{ width: "16px", height: "10px" }}
                       />
                     }
                   />
@@ -154,7 +217,7 @@ const Home = () => {
           </SwiperItem>
         ))}
       </Swiper>
-      <TabBar />
+      <TabBar theme={TabBarTheme.DARK} />
       <DateTimeDrawer
         onQuickCustomize={handleQuickCustomize}
         onPersonalizeCustomize={handlePersonalizeCustomize}

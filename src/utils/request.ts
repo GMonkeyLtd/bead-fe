@@ -4,6 +4,42 @@ import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
 
+const domain = 'https://api.gmonkey.top'
+// const domain = 'https://test.qianjunye.com'
+
+// 判断是否为开发环境
+const isDevelopment = process.env.NODE_ENV === 'development'
+
+// 根据环境构建API基础URL
+const getBaseURL = () => {
+  const basePath = isDevelopment ? '/test_api/v1' : '/api/v1'
+  const fullURL = domain + basePath
+  if (isDevelopment) {
+    console.log('开发环境 - API基础URL:', fullURL)
+  }
+  return fullURL
+}
+
+const getMerchantBaseURL = () => {
+  const basePath = isDevelopment ? '/test_api/v1' : '/api/v1'
+  const fullURL = domain + basePath
+  if (isDevelopment) {
+    console.log('开发环境 - 商户API基础URL:', fullURL)
+  }
+  return fullURL
+}
+
+// 默认配置
+const defaultConfig = {
+  baseURL: getBaseURL(), // 根据环境动态设置API基础URL
+  timeout: 600000,
+  showLoading: false,
+  loadingText: '加载中...',
+  showError: true,
+  isMock: false,
+  merchantBaseUrl: getMerchantBaseURL()
+}
+
 export interface BaseResponse {
   code: number;
   message: string;
@@ -25,7 +61,6 @@ export class CancelToken {
     
     // 如果有关联的请求任务，则取消它
     if (this._requestTask) {
-      console.log('cancel request',reason, this._requestTask)
       this._requestTask.abort()
     }
   }
@@ -84,17 +119,6 @@ export interface ApiResponse<T = any> {
   data: T
   success: boolean
 }
-
-// 默认配置
-const defaultConfig = {
-  baseURL: 'https://test.qianjunye.com:443/api/v1', // 在这里设置你的API基础URL
-  timeout: 600000,
-  showLoading: false,
-  loadingText: '加载中...',
-  showError: true,
-  isMock: false,
-  merchantBaseUrl: 'https://test.qianjunye.com/api/v1'
-}
 const checkMerchant = url => url.includes('/merchant')
 
 // 请求拦截器 - 在发送请求前的处理
@@ -131,7 +155,6 @@ const requestInterceptor = async (config: RequestConfig) => {
       throw new Error('认证失败，请重试');
     }
   }
-  console.log(config.url, config.merchantBaseUrl, 'config.url')
   return {
     ...config,
     header: headers,
@@ -210,7 +233,7 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
     config.cancelToken?.throwIfCancelled()
 
     // 显示加载提示
-    if (config.showLoading !== false) {
+    if (finalConfig.showLoading) {
       Taro.showLoading({
         title: config.loadingText || defaultConfig.loadingText,
         mask: true,
@@ -293,7 +316,6 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
   
   if (defaultConfig.isMock) {
     const mockData = MockManager.getMockDataByUrl(config.url);
-    console.log(mockData, 'mockData')
     if (mockData) {
       return mockData;
     }
@@ -438,6 +460,12 @@ export const setBaseURL = (baseURL: string) => {
 
 export const setMerchantBaseURL = (url: string) => {
   defaultConfig.merchantBaseUrl = url
+}
+
+// 重新计算基础URL（根据环境）
+export const recalculateBaseURLs = () => {
+  defaultConfig.baseURL = getBaseURL()
+  defaultConfig.merchantBaseUrl = getMerchantBaseURL()
 }
 
 export const setIsMock = (isMock: boolean) => {

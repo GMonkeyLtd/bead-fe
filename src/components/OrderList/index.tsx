@@ -12,6 +12,7 @@ import BeadOrderDialog from "@/components/BeadOrderDialog";
 import ContactUserDialog from "@/components/ContactUserDialog";
 import phoneIcon from "@/assets/icons/phone.svg";
 import api from "@/utils/api-merchant";
+import { pageUrls } from "@/config/page-urls";
 
 export interface Order {
   id: string;
@@ -54,7 +55,7 @@ export default function OrderList({
   emptyText = "暂无订单",
   className = "",
   isGrab = false,
-  style
+  style,
 }: OrderListProps) {
   const [detailData, setDetailData] = useState<Order | null>(null);
   const [contactDialogVisible, setContactDialogVisible] = useState(false);
@@ -86,25 +87,11 @@ export default function OrderList({
     });
   };
 
-  const handleCancelOrder = async (order: Order) => {
-    const res = await showModal({
-      title: "确认取消",
-      content: `确定要取消订单 ${order.orderNo} 吗？`,
-      confirmText: "确认取消",
-      cancelText: "取消",
+  const handleCancelOrder = (order: Order) => {
+    // 跳转到取消订单页面，传递订单信息
+    Taro.navigateTo({
+      url: `${pageUrls.cancelOrder}?orderId=${order.id}&orderNo=${order.orderNo}&price=${order.price}`,
     });
-
-    if (res.confirm) {
-      api.user.cancelOrder(order.id).then((res: any) => {
-        if (res.code === 200) {
-          showToast({
-            title: "取消订单成功",
-            icon: "success",
-          });
-          onRefresh?.();
-        }
-      });
-    }
   };
 
   const handleCompleteOrder = async (order: Order) => {
@@ -142,7 +129,6 @@ export default function OrderList({
   };
 
   const handleOrderDetail = (order: Order) => {
-    console.log(order, "order");
     const beadsData = order?.braceletInfo?.beads_info?.reduce(
       (acc: any[], item: any) => {
         const existingBead = acc.find((bead) => bead.name === item?.name);
@@ -181,7 +167,10 @@ export default function OrderList({
       return (
         <View className={styles.orderActions}>
           <View className={styles.actionButtons}>
-            <View className={styles.callBtn} onClick={() => handleCallUser(order)}>
+            <View
+              className={styles.callBtn}
+              onClick={() => handleCallUser(order)}
+            >
               <Image src={phoneIcon} className={styles.phoneIcon} />
               联系用户
             </View>
@@ -204,101 +193,106 @@ export default function OrderList({
   };
 
   return (
-    <ScrollView
-      className={`${styles.orderListContainer} ${className}`}
-      scrollY
-      refresherEnabled={!!onRefresh}
-      refresherTriggered={loading}
-      onRefresherRefresh={onRefresh}
-      style={style}
-    >
-      {orders.length === 0 || loading ? (
-        <View className={styles.emptyState}>
-          <Text className={styles.emptyText}>
-            {loading ? "加载中..." : emptyText}
-          </Text>
-        </View>
-      ) : (
-        orders.map((order) => (
-          <View key={order.id} className={styles.orderCard}>
-            <View className={styles.orderHeader}>
-              <View className={styles.orderStatus}>
-                <StatusBadge
-                  type={getStatusBadgeType(order.status)}
-                  text={formatOrderStatus(order.status)}
-                />
-                <Text className={styles.orderNo}>订单号：{order.orderNo}</Text>
-              </View>
-              <View
-                className={styles.detailBtn}
-                onClick={() => handleOrderDetail(order)}
-              >
-                明细
-              </View>
-            </View>
-
-            <View className={styles.orderContent}>
-              <View className={styles.orderInfo}>
-                <Image
-                  className={styles.orderImage}
-                  src={order.image}
-                  mode="aspectFill"
-                  lazyLoad
-                  showMenuByLongpress={false}
-                />
-                <View className={styles.orderDetails}>
-                  <Text className={styles.orderDesc}>
-                    {order.userInfo?.nick_name || "微信用户"}
+    <View>
+      <ScrollView
+        className={`${styles.orderListContainer} ${className}`}
+        scrollY
+        refresherEnabled={!!onRefresh}
+        refresherTriggered={loading}
+        onRefresherRefresh={onRefresh}
+        style={style}
+      >
+        {orders.length === 0 || loading ? (
+          <View className={styles.emptyState}>
+            <Text className={styles.emptyText}>
+              {loading ? "加载中..." : emptyText}
+            </Text>
+          </View>
+        ) : (
+          orders.map((order) => (
+            <View key={order.id} className={styles.orderCard}>
+              <View className={styles.orderHeader}>
+                <View className={styles.orderStatus}>
+                  <StatusBadge
+                    type={getStatusBadgeType(order.status)}
+                    text={formatOrderStatus(order.status)}
+                  />
+                  <Text className={styles.orderNo}>
+                    订单号：{order.orderNo}
                   </Text>
-                  <Text className={styles.orderTime}>{order.createTime}</Text>
+                </View>
+                <View
+                  className={styles.detailBtn}
+                  onClick={() => handleOrderDetail(order)}
+                >
+                  明细
                 </View>
               </View>
-              <Text className={styles.orderPrice}>¥{order.price.toFixed(2)}</Text>
-            </View>
 
-            {showActions &&
-              isGrab &&
-              order.status === OrderStatus.InService && (
-                <View className={styles.orderDivider}></View>
+              <View className={styles.orderContent}>
+                <View className={styles.orderInfo}>
+                  <Image
+                    className={styles.orderImage}
+                    src={order.image}
+                    mode="aspectFill"
+                    lazyLoad
+                    showMenuByLongpress={false}
+                  />
+                  <View className={styles.orderDetails}>
+                    <Text className={styles.orderDesc}>
+                      {order.userInfo?.nick_name || "微信用户"}
+                    </Text>
+                    <Text className={styles.orderTime}>{order.createTime}</Text>
+                  </View>
+                </View>
+                <Text className={styles.orderPrice}>
+                  ¥{order.price.toFixed(2)}
+                </Text>
+              </View>
+
+              {showActions &&
+                isGrab &&
+                order.status === OrderStatus.InService && (
+                  <View className={styles.orderDivider}></View>
+                )}
+
+              {renderActionButtons(order)}
+              {detailData && (
+                <BeadOrderDialog
+                  visible
+                  orderNumber={detailData.orderNo}
+                  productName={
+                    detailData.braceletInfo?.word_info?.bracelet_name || ""
+                  }
+                  productCode={detailData.braceletInfo?.design_id || ""}
+                  totalQuantity={
+                    detailData.braceletInfo?.word_info?.bracelet_name || ""
+                  }
+                  budget={detailData.price.toString()}
+                  productImage={detailData.braceletInfo?.image_url || ""}
+                  materials={(detailData.beadsData || []).map((item: any) => {
+                    return {
+                      name: item.name,
+                      spec: item.size,
+                      quantity: item.quantity,
+                    };
+                  })}
+                  onClose={handleClose}
+                  onConfirm={console.log}
+                />
               )}
-
-            {renderActionButtons(order)}
-            {detailData && (
-              <BeadOrderDialog
-                visible
-                orderNumber={detailData.orderNo}
-                productName={
-                  detailData.braceletInfo?.word_info?.bracelet_name || ""
-                }
-                productCode={detailData.braceletInfo?.design_id || ""}
-                totalQuantity={
-                  detailData.braceletInfo?.word_info?.bracelet_name || ""
-                }
-                budget={detailData.price.toString()}
-                productImage={detailData.braceletInfo?.image_url || ""}
-                materials={(detailData.beadsData || []).map((item: any) => {
-                  return {
-                    name: item.name,
-                    spec: item.size,
-                    quantity: item.quantity,
-                  };
-                })}
-                onClose={handleClose}
-                onConfirm={console.log}
-              />
-            )}
-
-            {/* 联系用户弹窗 */}
-            {contactDialogVisible && currentUserInfo && (
-              <ContactUserDialog
-                visible={contactDialogVisible}
-                userInfo={currentUserInfo}
-                onClose={handleCloseContactDialog}
-              />
-            )}
-          </View>
-        ))
+            </View>
+          ))
+        )}
+      </ScrollView>
+      {/* 联系用户弹窗 */}
+      {contactDialogVisible && currentUserInfo && (
+        <ContactUserDialog
+          visible={contactDialogVisible}
+          userInfo={currentUserInfo}
+          onClose={handleCloseContactDialog}
+        />
       )}
-    </ScrollView>
+    </View>
   );
 }

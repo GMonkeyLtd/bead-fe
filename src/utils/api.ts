@@ -6,11 +6,6 @@ import http, {
 } from "./request";
 import Taro from "@tarojs/taro";
 
-// 在应用启动时设置API基础URL
-// setBaseURL("http://gmonkey.ai:8088/api/v1");
-// setBaseURL("https://test.qianjunye.com:443/api/v1");
-// setBaseURL("http://192.168.189.246:8088/api/v1");
-
 // setIsMock(true)
 // 定义用户相关的数据类型
 export interface User {
@@ -187,7 +182,7 @@ export const generateApi = {
 export const beadsApi = {
   getBeadList: (config?: ApiConfig) =>
     http.get<PersonalizedGenerateResult[]>(
-      "/user/beadlist",
+      "/user/beads",
       {},
       {
         showLoading: false,
@@ -365,6 +360,13 @@ export const inspirationApi = {
       ...config,
     });
   },
+};
+
+// 文件相关API
+export const fileApi = {
+  // 上传文件 - 支持取消
+  upload: (filePath: string, formData?: Record<string, any>, config?: ApiConfig) =>
+    http.upload("/upload", filePath, formData, config?.cancelToken),
 };
 
 // 导出所有API

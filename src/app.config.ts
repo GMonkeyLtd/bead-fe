@@ -6,6 +6,12 @@ export default defineAppConfig({
   ],
   subPackages: [
     {
+      root: 'pages-chat',
+      pages: [
+        'chat-design/index',
+      ]
+    },
+    {
       root: 'pages-design',
       pages: [
         'quick-design/index',
@@ -19,6 +25,7 @@ export default defineAppConfig({
         'user-center/index',
         'result/index',
         'contact-preference/index',
+        'modify-user/index',
       ]
     },
     {
@@ -27,6 +34,7 @@ export default defineAppConfig({
         'order-detail/index',
         'order-list/index',
         'order-dispatching/index',
+        'cancel-order/index',
       ]
     },
     {
@@ -37,6 +45,12 @@ export default defineAppConfig({
         'order-management/index',
         'user-center/index',
       ]
+    },
+    {
+      root: 'pages-common',
+      pages: [
+        'webview/index',
+      ]
     }
   ],
   window: {
@@ -45,7 +59,7 @@ export default defineAppConfig({
     navigationBarTitleText: '璞光纪',
     navigationBarTextStyle: 'black',
     backgroundColor: '#F4F1EE',
-    enablePullDownRefresh: true
+    enablePullDownRefresh: false
   },
 
 })

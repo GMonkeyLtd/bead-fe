@@ -29,7 +29,6 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  height: 100%;
   box-sizing: border-box;
 }
 
@@ -122,7 +121,7 @@
 
 .itemTitle {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1f1722;
   opacity: 0.9;
   font-family: "Source Han Serif CN", serif;
@@ -302,7 +301,7 @@
 }
 
 .noMoreText {
-  font-size: 12px;
+  font-size: 14px;
   color: #5d5747;
   opacity: 0.4;
   text-align: center;

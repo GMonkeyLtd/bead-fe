@@ -1,10 +1,5 @@
 import http, { setMerchantBaseURL } from "./request";
 
-// 在应用启动时设置API基础URL
-// setBaseURL("http://gmonkey.ai:8088/api/v1");
-// setMerchantBaseURL("http://106.75.254.80:8181/api/v1");
-// setBaseURL("http://192.168.189.246:8088/api/v1");
-
 // setIsMock(true)
 
 // 定义用户相关的数据类型
@@ -128,8 +123,8 @@ export const userApi = {
   grabOrder: (orderId: string) => {
     return http.post("/merchant/graborder", { order_uuid: orderId });
   },
-  cancelOrder: (orderId: string) => {
-    return http.post("/merchant/cancelorder", { order_uuid: orderId });
+  cancelOrder: (orderId: string, imagesBase64: string[], reason: string) => {
+    return http.post("/merchant/cancelorder", { order_uuid: orderId, images_base64: imagesBase64, reason: reason });
   },
   completeOrder: (orderId: string) => {
     return http.post("/merchant/finishorder", { order_uuid: orderId });

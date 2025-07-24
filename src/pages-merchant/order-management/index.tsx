@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { View, Text } from "@tarojs/components";
-import Taro, { showToast } from "@tarojs/taro";
+import Taro, { showToast, useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import "./index.scss";
 import MerchantHeader from "@/components/MerchantHeader";
 import OrderList from "@/components/OrderList";
@@ -28,7 +28,6 @@ export default function OrderManagement() {
   const [loading, setLoading] = useState(false);
 
   const tab = Taro.getCurrentInstance().router?.params?.tab;
-  console.log(tab, "tab");
 
   useEffect(() => {
     const index = tab ? Number(tab) : 0;
@@ -41,7 +40,6 @@ export default function OrderManagement() {
     try {
       // 模拟API调用
       api.user.getOrderList().then((res: any) => {
-        console.log(res.data.orders, "res.data.orders");
         const orderList = res.data.orders?.map((item) => {
           return {
             id: item.order_uuid,
@@ -68,15 +66,18 @@ export default function OrderManagement() {
     }
   };
 
-  useEffect(() => {
+  useDidShow(() => {
     loadOrders();
-  }, []);
+  }); 
+
+  usePullDownRefresh(() => {
+    loadOrders();
+  });
 
   const currentOrders = useMemo(() => {
-    console.log(orders, activeTab, "useMemo orders, activeTab");
     if (activeTab === "进行中") {
       return orders.filter(
-        (item) => (item.status as OrderStatus) === OrderStatus.InService
+        (item) => [OrderStatus.InService, OrderStatus.MerchantCancelPending].includes(item.status as OrderStatus)
       );
     } else if (activeTab === "已完成") {
       return orders.filter(
@@ -90,8 +91,6 @@ export default function OrderManagement() {
       );
     }
   }, [orders, activeTab]);
-
-  console.log(currentOrders, "currentOrders");
 
   return (
     <View className="order-management-container">

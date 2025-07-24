@@ -3,8 +3,13 @@ import { Canvas, View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./index.scss";
 import { ImageCacheManager } from "@/utils/image-cache";
-import { calculateBeadArrangement } from "@/utils/cystal-tools";
+import {
+  calculateBeadArrangement,
+  calculateBeadArrangementBySize,
+} from "@/utils/cystal-tools";
 import { BASE_IMAGE_URL } from "@/config";
+import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
+
 /**
  * 水晶手链组件 - 动态计算珠子数量
  *
@@ -34,142 +39,73 @@ const CircleRing = ({
   dotsBgImageData,
   canvasId = "circle-canvas",
   showCanvas = false,
+  // 是否区分珠子尺寸
+  isDifferentSize = false,
+  fileType = "png",
   onChange = (
     status: "idle" | "downloading" | "success" | "error",
-    canvasImage: string
+    canvasImage: string,
+    dotsBgImageData: any[]
   ) => {},
 }) => {
-  const [dots, setDots] = useState<any[]>([]);
-  const [downloadStatus, setDownloadStatus] = useState<
-    "idle" | "downloading" | "success" | "error"
-  >("idle");
-  const ringRadius = targetSize / 2;
-  const dpr = Taro.getSystemInfoSync().pixelRatio;
-
-  const dotsBgImagePath = useMemo(
-    () => dotsBgImageData.map((item: any) => item.image_url),
-    [dotsBgImageData]
-  );
-
-  const beads = calculateBeadArrangement(ringRadius, dotsBgImagePath.length);
-
-  // 处理图片路径（下载网络图片）
-  useEffect(() => {
-    if (!dotsBgImagePath || dotsBgImagePath.length === 0) {
-      setDownloadStatus("success");
-      return;
-    }
-
-    const processImages = async () => {
-      setDownloadStatus("downloading");
-      try {
-        const processedPaths = await ImageCacheManager.processImagePaths(
-          dotsBgImagePath
-        );
-
-        const finalImagePaths = dotsBgImagePath.map((originalPath: string) => {
-          return processedPaths.get(originalPath) || originalPath;
-        });
-
-        setDots(finalImagePaths);
-        setDownloadStatus("success");
-      } catch (error) {
-        console.error("❌ 图片处理过程出错:", error);
-        setDownloadStatus("error");
-      }
-    };
-
-    processImages();
-  }, [dotsBgImagePath, ringRadius]);
-
-  // 绘制Canvas内容
-  const drawCanvas = async() => {
-    try {
-     
-      const ctx = Taro.createCanvasContext(canvasId);
-      ctx.clearRect(0, 0, targetSize, targetSize);
-
-      dots.forEach((dot: any, index) => {
-        const { x, y, radius } = beads.beads[index];
-        ctx.drawImage(dot, x - radius, y - radius, radius * 2, radius * 2);
-      });
-
-      ctx.draw(true, () => {
-        Taro.canvasToTempFilePath({
-          x: 0,
-          y: 0,
-          canvasId: canvasId,
-          destHeight: targetSize * dpr,
-          destWidth: targetSize * dpr,
-          quality: 1,
-          success: (res) => {
-            onChange("success", res.tempFilePath);
-            // 保存图片到相册
-            // Taro.saveImageToPhotosAlbum({
-            //   filePath: res.tempFilePath,
-            //   success: () => {
-            //     console.log("保存图片到相册成功");
-            //   },
-            // });
-            console.log("生成临时文件成功", res.tempFilePath);
-          },
-          fail: (err) => {
-            console.error("生成临时文件失败:", err);
-            Taro.showToast({ title: "生成图片失败", icon: "none" });
-          },
-        });
-      });
-    } catch (error) {
-      console.log("❌ Canvas API 不可用，使用备用方案", error);
-    }
-  };
-
-  const drawPlaceHolder = () => {
-    try {
-      const ctx = Taro.createCanvasContext(canvasId + "placeholder");
-      ctx.clearRect(0, 0, targetSize, targetSize);
-      ctx.setFillStyle("rgba(232, 217, 187, 0.8)");
-      beads.beads.forEach(({ x, y, radius }: any) => {
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, 2 * Math.PI);
-        ctx.fill();
-      });
-      ctx.draw();
-    } catch (error) {
-      console.log("❌ Canvas API 不可用，使用备用方案", error);
-    }
-  };
-
-  useEffect(() => {
-    if (dots.length > 0 && downloadStatus === "success") {
-      setTimeout(drawCanvas, 100);
-    } else {
-      drawPlaceHolder();
-    }
-  }, [dots, downloadStatus]);
-
-  if (downloadStatus === "success") {
-    return (
-      <Canvas
-          canvasId={canvasId}
-          id={canvasId}
-          height={`${targetSize * dpr}px`}
-          width={`${targetSize * dpr}px`} 
-          // className={rotate ? "circle-canvas-rotate" : ""}
-          style={{
-            width: `${targetSize}px`,
-            height: `${targetSize}px`,
-            visibility: showCanvas ? "visible" : "hidden",
-            position: "absolute",
-            top: `-999999px`,
-            left: `-999999px`,
-            zIndex: -100,
-            transition: "display 0.3s ease-in-out",
-          }}
-        />
-    )
+  if (!dotsBgImageData || dotsBgImageData.length === 0) {
+    return null;
   }
-  return null;
+
+  // 使用优化的hook
+  const { generateCircleRing, getResult, canvasProps } = useCircleRingCanvas({
+    targetSize,
+    isDifferentSize,
+    fileType: fileType as "png" | "jpg" | "jpeg",
+    canvasId,
+  });
+
+  // 当dotsBgImageData变化时，生成新的手串
+  useEffect(() => {
+    if (dotsBgImageData && dotsBgImageData.length > 0) {
+      const result = getResult(dotsBgImageData);
+
+      // 检查是否已经有结果，避免重复生成
+      if (result.status === "idle") {
+        onChange("downloading", "", dotsBgImageData);
+
+        generateCircleRing(dotsBgImageData)
+          .then((imageUrl) => {
+            if (imageUrl) {
+              onChange("success", imageUrl, dotsBgImageData);
+            }
+          })
+          .catch((error) => {
+            console.error("生成手串失败:", error);
+            onChange("error", "", dotsBgImageData);
+          });
+      } else if (result.status === "success" && result.imageUrl) {
+        // 如果已经有结果，直接调用onChange
+        onChange("success", result.imageUrl, dotsBgImageData);
+      } else if (result.status === "error") {
+        onChange("error", "", dotsBgImageData);
+      }
+    }
+  }, [dotsBgImageData, generateCircleRing, getResult, onChange]);
+
+  // 渲染Canvas（隐藏的，用于绘制）
+  return (
+    <Canvas
+      canvasId={canvasProps.canvasId}
+      id={canvasProps.id}
+      height={canvasProps.height}
+      width={canvasProps.width}
+      style={{
+        width: `${targetSize}px`,
+        height: `${targetSize}px`,
+        visibility: "hidden",
+        position: "absolute" as const,
+        top: "-999999px",
+        left: "-999999px",
+        zIndex: -100,
+      }}
+    />
+  );
 };
 
 export default React.memo(CircleRing);
@@ -181,6 +117,26 @@ export const CircleRingImage = ({
   backgroundImage = BASE_IMAGE_URL,
   rotate = false,
 }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageOpacity, setImageOpacity] = useState(0);
+
+  // 当imageUrl变化时，重置状态
+  useEffect(() => {
+    if (imageUrl) {
+      setImageLoaded(false);
+      setImageOpacity(0);
+    }
+  }, [imageUrl]);
+
+  // 图片加载完成后的处理
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    // 延迟一点时间后开始淡入动画
+    setTimeout(() => {
+      setImageOpacity(1);
+    }, 100);
+  };
+
   return (
     <View
       style={{
@@ -199,18 +155,34 @@ export const CircleRingImage = ({
           width: `${backendSize}px`,
           height: `${backendSize}px`,
           position: "absolute",
+          borderRadius: "100%",
+          boxShadow:
+            "0px 0px 18px 0px rgba(79, 42, 6, 0.02), 0px 40px 16px 0px rgba(79, 42, 6, 0.02), 0px 12px 14px 0px rgba(79, 42, 6, 0.02), 0px 3px 6px 0px rgba(217, 205, 199, 0.07)",
         }}
       />
-      <Image
-        src={imageUrl}
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          position: "absolute",
-          transition: "opacity 0.3s ease-in-out",
-        }}
-        className={rotate ? "circle-image-rotate" : ""}
-      />
+      {imageUrl ? (
+        <Image
+          src={imageUrl}
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            position: "absolute",
+            opacity: imageOpacity,
+            transition: "opacity 0.8s ease-in-out",
+          }}
+          className={rotate ? "circle-image-rotate" : ""}
+          onLoad={handleImageLoad}
+        />
+      ) : (
+        <View
+          className="image-loading-skeleton"
+          style={{
+            width: `${backendSize}px`,
+            height: `${backendSize}px`,
+            position: "absolute",
+          }}
+        />
+      )}
     </View>
-  )
-}
+  );
+};

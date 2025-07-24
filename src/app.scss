@@ -13,7 +13,14 @@
   font-style: normal;
   font-display: swap;
 }
-
+@font-face {  
+  font-family: "Source Han Serif CN";
+  src: url("https://zhuluoji.cn-sh2.ufileos.com/resources/resources_SourceHanSerifCN-Medium%20-zip.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 body {
   font-family: "Source Han Serif CN", "PingFang SC", "Microsoft YaHei",
     sans-serif;
@@ -49,7 +56,7 @@ body {
   display: flex;
   flex-direction: column;
   background: linear-gradient(#f5f1edb2, #f5f1edb2),
-    url(https://zhuluoji.cn-sh2.ufileos.com/images-frontend/background-texture.png)
+    url(https://zhuluoji.cn-sh2.ufileos.com/images-frontend/background-texture-opacity.png)
       repeat;
 
   // 确保容器不会溢出

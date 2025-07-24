@@ -4,7 +4,7 @@ import loginMock from '../mock/login.json'
 import personalizationstep1Mock from '../mock/personalizationstep1.json'
 import personalizationstep3Mock from '../mock/personalizationstep3.json'
 import queryorderMock from '../mock/queryorder.json'
-
+import sessionsMock from '../mock/sessions.json'
 // Mock数据映射表
 const mockDataMap: Record<string, any> = {
   beadlist: beadlistMock,
@@ -12,6 +12,7 @@ const mockDataMap: Record<string, any> = {
   personalizationstep1: personalizationstep1Mock,
   personalizationstep3: personalizationstep3Mock,
   queryorder: queryorderMock,
+  sessions: sessionsMock,
 }
 
 /**
@@ -67,6 +68,7 @@ export class MockManager {
    * @returns Mock数据或null
    */
   static getMockDataByUrl(url: string): any {
+    console.log('getMockDataByUrl', url)
     const urlArr = url?.split('/')
     const key = urlArr?.length > 0 ? urlArr[urlArr.length - 1] : ''
     const mockData = this.getMockData(key.replace('?', ''))

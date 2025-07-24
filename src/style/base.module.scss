@@ -1,0 +1,7 @@
+.hiddenFromWindow {
+    visibility: hidden;
+    position: absolute;
+    top: -999999px;
+    left: -999999px;
+    z-index: -100;
+}

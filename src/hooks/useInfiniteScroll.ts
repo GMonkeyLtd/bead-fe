@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Taro from '@tarojs/taro';
 
 interface UseInfiniteScrollOptions<T> {
+  listKey: string;
   initialPage?: number;
   pageSize?: number;
   fetchData: (page: number, pageSize: number) => Promise<{
@@ -11,7 +12,9 @@ interface UseInfiniteScrollOptions<T> {
   }>;
   threshold?: number; // 距离底部多少像素时开始加载
   enabled?: boolean; // 是否启用无限滚动
-  scrollRef?: React.RefObject<any>;
+  queryItem: (item: T) => Promise<T>;
+  selector?: string; // 监听的触发元素选择器
+  rootMargin?: string; // 触发区域的边距，如 '50px' 表示提前50px触发
 }
 
 interface UseInfiniteScrollResult<T> {
@@ -23,26 +26,35 @@ interface UseInfiniteScrollResult<T> {
   loadMore: () => void;
   refresh: () => void;
   resetData: () => void;
+  updateItem: (item: T) => void;
 }
 
 export function useInfiniteScroll<T = any>({
+  listKey,
   initialPage = 1,
   pageSize = 10,
   fetchData,
   threshold = 100,
   enabled = true,
-  scrollRef,
+  selector,
+  rootMargin = '50px',
+  queryItem,
 }: UseInfiniteScrollOptions<T>): UseInfiniteScrollResult<T> {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(initialPage);
+  const observerRef = useRef<any>(null);
+  const isLoadingRef = useRef(false);
+  const pageRef = useRef(initialPage); // 添加pageRef来同步跟踪当前页码
+  console.log(page, 'page', listKey)
 
   // 加载数据
   const loadData = useCallback(async (pageNum: number, isRefresh = false) => {
-    if (loading || (!hasMore && !isRefresh)) return;
+    if (isLoadingRef.current || (!hasMore && !isRefresh)) return;
 
+    isLoadingRef.current = true;
     setLoading(true);
     setError(null);
 
@@ -54,29 +66,33 @@ export function useInfiniteScroll<T = any>({
       } else {
         setData(prev => [...prev, ...result.data]);
       }
-      console.log(result, 'result')
       setHasMore(result.hasMore);
       
       if (result.hasMore) {
-        setPage(pageNum + 1);
+        const nextPage = pageNum + 1;
+        setPage(nextPage);
+        pageRef.current = nextPage; // 同步更新pageRef
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败');
     } finally {
       setLoading(false);
+      isLoadingRef.current = false;
     }
-  }, [fetchData, pageSize, loading, hasMore]);
+  }, [fetchData, pageSize]); // 移除hasMore依赖，避免不必要的重新创建
 
   // 加载更多
   const loadMore = useCallback(() => {
-    if (!loading && hasMore && enabled) {
-      loadData(page);
+    console.log(pageRef.current, 'loadMore', listKey) // 使用pageRef.current来打印当前页码
+    if (!isLoadingRef.current && hasMore && enabled) {
+      loadData(pageRef.current); // 使用pageRef.current确保使用最新页码
     }
-  }, [page, loading, hasMore, enabled, loadData]);
+  }, [hasMore, enabled, loadData]);
 
   // 刷新数据
   const refresh = useCallback(() => {
     setPage(initialPage);
+    pageRef.current = initialPage; // 同步重置pageRef
     setHasMore(true);
     loadData(initialPage, true);
   }, [initialPage, loadData]);
@@ -85,87 +101,75 @@ export function useInfiniteScroll<T = any>({
   const resetData = useCallback(() => {
     setData([]);
     setPage(initialPage);
+    pageRef.current = initialPage; // 同步重置pageRef
     setHasMore(true);
     setError(null);
   }, [initialPage]);
 
-  // 监听滚动事件
-  useEffect(() => {
-    if (!enabled) return;
+  const updateItem = useCallback(async(item: T) => {
+    const resData = await queryItem(item);
 
-    let throttleTimer: NodeJS.Timeout;
-    
-    const handleScroll = () => {
-      // 防抖处理
-      if (throttleTimer) {
-        clearTimeout(throttleTimer);
-      }
-      console.log("handleScroll");
-      
-      throttleTimer = setTimeout(() => {
-        // 获取页面滚动信息
-        Taro.createSelectorQuery()
-          .select(scrollRef?.current)
-          .scrollOffset()
-          .exec((res) => {
-            if (res && res[0]) {
-              const { scrollTop, scrollHeight } = res[0];
-              const systemInfo = Taro.getSystemInfoSync();
-              const clientHeight = systemInfo.windowHeight;
-              if (scrollHeight - scrollTop - clientHeight < threshold) {
-                loadMore();
-              }
-            }
-          });
-      }, 100);
-    };
-
-    // 在小程序中使用 onPageScroll
-    if (process.env.TARO_ENV === 'weapp') {
-      const pages = Taro.getCurrentPages();
-      const currentPage = pages[pages.length - 1];
-      
-      if (currentPage) {
-        const originalOnPageScroll = currentPage.onPageScroll;
-        currentPage.onPageScroll = (e) => {
-          if (originalOnPageScroll) {
-            originalOnPageScroll(e);
+      if (resData) {
+        const newData = data.map((dataItem) => {
+          // 使用类型断言或者检查属性是否存在
+          if ((dataItem as any).work_id === (resData as any).work_id) {
+            return resData;
           }
-          handleScroll();
-        };
+          return dataItem;
+        })
+        setData(newData);
       }
-    } else {
-      // 在 H5 等其他环境中使用 window scroll 事件
-      const handleH5Scroll = () => {
-        if (throttleTimer) {
-          clearTimeout(throttleTimer);
-        }
-        
-        throttleTimer = setTimeout(() => {
-          const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-          
-          if (scrollHeight - scrollTop - clientHeight < threshold) {
-            loadMore();
-          }
-        }, 100);
-      };
+    },
+    [data, queryItem]
+  );
+
+  // 使用 Intersection Observer 监听指定元素
+  // useEffect(() => {
+  //   if (!enabled || !selector) return;
+  //   console.log(selector, 'selector')
+
+  //   // 清理之前的观察器
+  //   if (observerRef.current) {
+  //     observerRef.current.disconnect();
+  //     observerRef.current = null;
+  //   }
+
+  //   // 创建新的 Intersection Observer
+  //   const observer = Taro.createIntersectionObserver({}, {
+  //     thresholds: [0.1], // 当10%的元素可见时触发
+  //   });
+
+  //   console.log(selector, 'selector')
+  //   observer.observe(selector, (res) => {
+  //     console.log('Intersection Observer triggered:', res);
       
-      window.addEventListener('scroll', handleH5Scroll);
-      return () => {
-        window.removeEventListener('scroll', handleH5Scroll);
-        if (throttleTimer) {
-          clearTimeout(throttleTimer);
-        }
-      };
-    }
+  //     // 当目标元素进入视口时触发加载更多
+  //     if ((res.intersectionRatio ?? 0) > 0 && !isLoadingRef.current && hasMore) {
+  //       console.log('Loading more data...');
+  //       loadMore();
+  //     }
+  //   });
 
-    return () => {
-      if (throttleTimer) {
-        clearTimeout(throttleTimer);
-      }
-    };
-  }, [enabled, threshold, loadMore, scrollRef]);
+  //   observerRef.current = observer;
 
+  //   // 清理函数
+  //   return () => {
+  //     if (observerRef.current) {
+  //       observerRef.current.disconnect();
+  //       observerRef.current = null;
+  //     }
+  //   };
+  // }, [enabled, selector, rootMargin, hasMore, loadMore]);
+
+  // 组件卸载时清理观察器
+  // useEffect(() => {
+  //   return () => {
+  //     if (observerRef.current) {
+  //       observerRef.current.disconnect();
+  //       observerRef.current = null;
+  //     }
+  //   };
+  // }, []);
 
   return {
     data,
@@ -176,5 +180,6 @@ export function useInfiniteScroll<T = any>({
     loadMore,
     refresh,
     resetData,
+    updateItem,
   };
 } 
