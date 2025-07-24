@@ -69,7 +69,6 @@
     }
     .result-content-card {
       width: 100%;
-      height: 520px;
       display: flex;
       flex-direction: column;
       border-radius: 10px;
@@ -164,7 +163,7 @@
           width: 100%;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 16px;
+          margin-bottom: 8px;
         }
         .bracelet-length-info-container {
           display: flex;
@@ -179,46 +178,64 @@
           justify-content: center;
           align-items: flex-end;
           gap: 8px;
-          
+
           .bracelet-length-info-count {
-            font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: "PingFang SC", -apple-system, BlinkMacSystemFont,
+              "Segoe UI", Roboto, sans-serif;
             font-weight: 500;
             font-size: 18px;
             line-height: 1em;
             text-align: bottom;
-            color: #1F1722;
+            color: #1f1722;
           }
           .bracelet-length-info-unit {
-            font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: "PingFang SC", -apple-system, BlinkMacSystemFont,
+              "Segoe UI", Roboto, sans-serif;
             font-weight: 300;
             font-size: 12px;
             line-height: 1em;
             text-align: bottom;
-            color: #1F1722;
+            color: #1f1722;
           }
-
         }
         .bracelet-length-info-size-container {
           display: flex;
           gap: 4px;
           align-items: center;
 
-          font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont,
+            "Segoe UI", Roboto, sans-serif;
           font-weight: 300;
           font-size: 12px;
           line-height: 1.2em;
           text-align: center;
-          color: #1F1722;
+          color: #1f1722;
           opacity: 0.9;
         }
 
-        .result-content-card-text-content {
+        .result-content-center-container {
+          display: flex;
+          height: 164px;
+          align-items: flex-start;
+          padding-bottom: 12px 24px;
+          gap: 32px;
+        }
+
+        .result-content-center-text {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .result-content-bracelet-description {
+          color: #1f1722;
+          text-align: justify;
+          font-family: "Noto Sans SC";
           font-size: 12px;
-          height: 36px;
+          font-style: normal;
           font-weight: 300;
-          margin-bottom: 24px;
-          position: relative;
-          overflow: hidden;
+          line-height: 135%; /* 14.85px */
 
           // &::after {
           //   content: "...";
@@ -227,12 +244,39 @@
           //   right: 0;
           // }
         }
+        .result-content-wear-tips {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .result-content-wear-tips-title-container {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .result-content-wear-tips-title {
+          color: #1f1722;
+          text-align: justify;
+          font-family: "Noto Sans SC";
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 135%; /* 14.85px */
+          letter-spacing: 1px;
+        }
       }
     }
     .bead-description-container {
       display: flex;
       justify-content: space-between;
       padding: 0 24px;
+    }
+
+    .result-content-wuxing-display-container {
+      width: 64;
+      flex: 0;
     }
 
     .bead-description-list {
@@ -250,7 +294,7 @@
       }
 
       .bead-description {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 300;
         line-height: 100%;
         padding-left: 24px;
@@ -265,7 +309,7 @@
 
       .bead-share-qrcode-text {
         font-weight: 300;
-        font-size: 11px;
+        font-size: 12px;
         line-height: 100%;
         letter-spacing: 1px;
       }

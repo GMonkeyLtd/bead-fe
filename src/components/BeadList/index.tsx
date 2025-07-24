@@ -1,11 +1,11 @@
 import { View, Image, Text } from "@tarojs/components";
 import styles from "./index.module.scss";
 
-const BeadList = ({ beads }) => {
+const BeadList = ({ beads, cardStyle }) => {
   return (
     <View className={styles.beadSection}>
       {beads?.map((bead) => (
-        <View key={bead.id} className={styles.beadCard}>
+        <View key={bead.id} className={styles.beadCard} style={cardStyle}>
           <View className={styles.beadImageContainer}>
             <Image
               src={bead.image_url}

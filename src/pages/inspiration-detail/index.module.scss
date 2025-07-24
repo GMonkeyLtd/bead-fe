@@ -12,6 +12,7 @@
   height: 0;
   padding-bottom: 100%; // 使用 padding-bottom 创建正方形比例
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .mainImage {
