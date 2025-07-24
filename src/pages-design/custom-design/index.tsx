@@ -86,16 +86,21 @@ const CustomDesign = () => {
       };
     })
 
+    if (isSaveAndBack) {
+      apiSession.saveDraft({
+        session_id: designData?.session_id,
+        beads,
+      }).then((res) => {
+        backToChatDesign(designData?.session_id);
+      })
+      return;
+    }
     apiSession.cloneDraft({
       session_id: designData?.session_id,
       draft_id: designData?.draft_id,
       beads,
     }).then((res) => {
       const { draft_id, session_id } = res?.data || {};
-      if (isSaveAndBack) {
-        backToChatDesign(session_id);
-        return;
-      }
 
       Taro.redirectTo({
         url: `${pageUrls.quickDesign}?sessionId=${session_id}&draftId=${

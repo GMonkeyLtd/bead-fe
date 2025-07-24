@@ -59,7 +59,7 @@ export default defineAppConfig({
     navigationBarTitleText: '璞光纪',
     navigationBarTextStyle: 'black',
     backgroundColor: '#F4F1EE',
-    enablePullDownRefresh: true
+    enablePullDownRefresh: false
   },
 
 })

@@ -53,12 +53,10 @@ const ChatDesign = () => {
       let waitTime = 3000;
 
       const showNextMessage = () => {
-        console.log('showNextMessage', messages, currentIndex);
         if (currentIndex < messages.length) {
           setChatMessages((prev) => {
             const newMessages = [...prev];
             newMessages.push(messages[currentIndex]);
-            console.log('newMessages', currentIndex, newMessages, messages[currentIndex]);
             return newMessages;
           });
 
@@ -167,12 +165,11 @@ const ChatDesign = () => {
       .reverse()
       .find((message) => message.role === "assistant");
       if (!isFirst) {
+        setChatMessages(newMessages);
         if (lastAssistantMessage?.recommends && lastAssistantMessage.recommends.length > 0) {
-          setChatMessages(newMessages);
           setRecommendTags(lastAssistantMessage.recommends);
         }
       } else {
-        console.log('newMessages', newMessages);
         showMessagesSequentially(
           newMessages,
           lastAssistantMessage?.recommends || []
@@ -201,14 +198,17 @@ const ChatDesign = () => {
 
   const renderAssistant = () => {
     return (
-      <View className={styles.assistantAvatarContainer}>
-        <Image
-          src={ASSISTANT_AVATAR_IMAGE_URL}
-          className={styles.assistantAvatar}
-        />
-        <Text className={styles.assistantName}>梨莉莉</Text>
+      <View className={styles.chatDesignHeader}>
+        <View className={styles.assistantAvatarContainer}>
+
+          <Image
+            src={ASSISTANT_AVATAR_IMAGE_URL}
+            className={styles.assistantAvatar}
+          />
+          <Text className={styles.assistantName}>黎莉莉</Text>
+        </View>
         <View
-          className={styles.assistantName}
+          className={styles.designResetInfo}
           onClick={() => {
             Taro.redirectTo({
               url: pageUrls.home + "?newSession=true",
@@ -274,8 +274,7 @@ const ChatDesign = () => {
 
   return (
     <PageContainer
-      headerContent={isDesigning ? "正在设计新方案..." : null}
-      headerExtraContent={isDesigning ? null : renderAssistant()}
+      headerExtraContent={isDesigning ? "正在设计新方案..." : renderAssistant()}
       showHome={false}
       onKeyboardHeightChange={handleKeyboardHeightChange}
     >
@@ -308,7 +307,9 @@ const ChatDesign = () => {
                 title: item,
               }))}
               onTagSelect={(tag) => {
-                handleSend(tag.title);
+                if (!isDesigning) {
+                  handleSend(tag.title);
+                }
                 // setInputValue((prev) =>
                 //   !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
                 // );
@@ -335,7 +336,7 @@ const ChatDesign = () => {
               showConfirmBar={false}
             />
             <Image
-              src={!isEmptyMessage(inputValue) ? activeSendSvg : sendSvg}
+              src={!isEmptyMessage(inputValue) && !isDesigning ? activeSendSvg : sendSvg}
               style={{ width: "26px", height: "26px" }}
               onClick={handleSend}
             />

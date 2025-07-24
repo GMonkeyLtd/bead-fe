@@ -224,7 +224,6 @@ const DateTimeDrawer = ({
     const year = years[selectedIndexes[0]];
     const month = months[selectedIndexes[1]];
     const day = days[selectedIndexes[2]];
-    console.log(year, month, day, dateType, 'year, month, day')
     return {
       year: year,
       month: month,

@@ -15,6 +15,7 @@ import rightArrowGoldenIcon from "@/assets/icons/right-arrow-golden.svg";
 import { pageUrls } from "@/config/page-urls";
 import { generateUUID } from "@/utils/uuid";
 import { useDesign } from "@/store/DesignContext";
+import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
 
 interface BraceletDraftWithImage extends BraceletDraft {
   bracelet_image?: string;
@@ -33,31 +34,32 @@ export const BraceletDraftCard = ({
   draftData?: BraceletDraft;
   generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
 }) => {
-  const [draft, setDraft] = useState<BraceletDraftWithImage | null>(null);
+  // const [draft, setDraft] = useState<BraceletDraftWithImage | null>(null);
   const { addBeadData } = useDesign();
+  const { draft, isPolling, startPolling, updateDraft } = usePollDraft({});
+
 
   useEffect(() => {
     if (draftData) {
-      setDraft(draftData);
+      updateDraft(draftData);
       return;
     }
     if (!sessionId || !draftId) {
       return;
     }
-    apiSession
-      .getDesignDraft({ session_id: sessionId, draft_id: draftId })
-      .then((res) => {
-        setDraft(res.data);
-      });
+    startPolling(sessionId, draftId);
   }, [sessionId, draftId, draftData]);
 
   useEffect(() => {
     if (draft?.beads?.length && draft.beads.length > 0) {
-      generateBraceletImage(draft.beads).then((braceletImage) => {
-        setDraft({
+      generateBraceletImage(draft.beads.map(item => ({
+        ...item,
+        bead_diameter: item.diameter,
+      }))).then((braceletImage) => {
+        updateDraft({
           ...draft,
           bracelet_image: braceletImage,
-        } as BraceletDraftWithImage);
+        } as DraftData);
       });
     }
   }, [draft]);
@@ -104,7 +106,7 @@ export const BraceletDraftCard = ({
       draft_id: draft?.draft_id,
       session_id: sessionId,
     });
-    Taro.redirectTo({
+    Taro.navigateTo({
       url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
     });
   }

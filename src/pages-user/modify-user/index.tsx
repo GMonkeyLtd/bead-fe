@@ -113,9 +113,11 @@ const ModifyUser = () => {
 
   return (
     <PageContainer
-      headerContent={
+      headerExtraContent={
         <Text className={modifyUserStyle.modifyUserTitle}>编辑资料</Text>
       }
+      headerContent={null}
+      showHome={false}
     >
       {/* <View className={modifyUserStyle.modifyUserHeader}>
         <Text className={modifyUserStyle.modifyUserTitle}>编辑资料</Text>
@@ -157,11 +159,9 @@ const ModifyUser = () => {
         </View>
       </View>
       <View className={modifyUserStyle.contactInfo} onClick={handleContactInfo}>
+        <View>联系方式</View>
         <View>
-          联系方式
-        </View>
-        <View>
-          <Image 
+          <Image
             src={rightArrowIcon}
             mode="aspectFit"
             style={{ width: "18px" }}

@@ -16,17 +16,16 @@ const AppHeader = ({
   showHome = true,
   onBack,
   style = {},
-  headerContent,
-  extraContent = "",
+  extraContent,
 }: {
   isWhite?: boolean;
   showBack?: boolean;
   showHome?: boolean;
   onBack?: () => void;
   style?: React.CSSProperties;
-  headerContent?: React.ReactNode;
   extraContent?: React.ReactNode;
 }) => {
+  console.log(isWhite, 'isWhite')
   const {
     height: navBarHeight,
     top: navBarTop,
@@ -55,7 +54,9 @@ const AppHeader = ({
         right: 0,
         zIndex: 100,
         height: navBarHeight,
-        padding: `${navBarTop}px ${showBack ? navBarWidth : 16}px 10px 16px`,
+        padding: `${navBarTop}px ${
+          showBack ? navBarWidth + 10 : 16
+        }px 10px 16px`,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -131,31 +132,19 @@ const AppHeader = ({
             />
           </View>
         )}
-        {extraContent && (
+      </View>
+        {extraContent !== undefined ? (
           <View
             style={{
               flex: 1,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              fontFamily: "Source Han Serif CN",
             }}
           >
             {extraContent}
           </View>
-        )}
-      </View>
-      {headerContent !== undefined ? (
-        <View
-          style={{
-            flex: 1,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontFamily: "Source Han Serif CN",
-          }}
-        >
-          {headerContent}
-        </View>
       ) : (
         <Image
           src={isWhite ? logoWhite : logo}

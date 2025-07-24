@@ -8,7 +8,6 @@ interface PageContainerProps {
   children: React.ReactNode;
   isWhite?: boolean;
   keyboardHeight?: number; // 保留手动传入的选项，优先级高于自动监听
-  headerContent?: React.ReactNode;
   headerExtraContent?: React.ReactNode;
   showHeader?: boolean;
   style?: React.CSSProperties;
@@ -32,7 +31,6 @@ const PageContainer = ({
   children,
   isWhite = false,
   keyboardHeight: manualKeyboardHeight,
-  headerContent = "",
   headerExtraContent = "",
   showHeader = true,
   style = {},
@@ -45,7 +43,6 @@ const PageContainer = ({
   padding = "0",
   onScroll,
   scrollTop,
-  enablePullDownRefresh = false,
   enableKeyboardListener = true,
   onKeyboardHeightChange,
 }: PageContainerProps) => {
@@ -150,7 +147,6 @@ const PageContainer = ({
       {showHeader && (
         <AppHeader
           isWhite={isWhite}
-          headerContent={headerContent}
           showBack={showBack}
           showHome={showHome}
           extraContent={headerExtraContent}

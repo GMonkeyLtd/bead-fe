@@ -1,25 +1,44 @@
+.chatDesignHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: 16px;
+}
+
 .assistantAvatarContainer {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  .assistantAvatar {
-    width: 36px;
-    height: 36px;
-  }
-  .assistantName {
-    font-family: "Source Han Serif CN";
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: normal;
-  }
-
-  .headerResetInfo {
-    font-family: "Source Han Serif CN";
-    font-size: 14px;
-  }
 }
+
+.assistantAvatar {
+  width: 36px;
+  height: 36px;
+}
+.assistantName {
+  font-family: "Source Han Serif CN";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.designResetInfo {
+  font-family: "Source Han Serif CN";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  color: #a99691;
+}
+
+.headerResetInfo {
+  font-family: "Source Han Serif CN";
+  font-size: 14px;
+}
+
 
 .chatContainer {
   position: relative;

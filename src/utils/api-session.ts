@@ -272,4 +272,23 @@ export default {
       { cancelToken: config?.cancelToken, ...config }
     );
   },
+
+  saveDraft: (
+    params: {
+      session_id: string;
+      beads: BeadItem[];
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<{ draft: DesignDraftResponse }>(
+      `/user/sessions/${params.session_id}/drafts/diy`,
+      {
+        beads: params.beads,
+      },
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  }
 };

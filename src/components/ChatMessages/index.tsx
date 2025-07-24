@@ -64,6 +64,14 @@ const MessageItem = React.memo(({
       style={messageStyle}
     >
       <UserMessage message={message} />
+      {message.draft_id && (
+        <BraceletDraftCard
+          sessionId={sessionId}
+          draftId={message.draft_id}
+          draftIndex={message.draft_index}
+          generateBraceletImage={generateBraceletImage}
+        />
+      )}
     </View>
   );
 });
@@ -95,7 +103,7 @@ export default forwardRef<
     const [scrollAnchor, setScrollAnchor] = useState<string>("");
     const scrollViewRef = useRef<any>(null);
     const [scrollTop, setScrollTop] = useState(0);
-
+    console.log('messages', messages);
 
 
     // 使用 useMemo 缓存消息列表，避免不必要的重新渲染
