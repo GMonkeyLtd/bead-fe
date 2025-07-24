@@ -34,9 +34,7 @@ export const BraceletDraftCard = ({
   draftData?: BraceletDraft;
   generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
 }) => {
-  // const [draft, setDraft] = useState<BraceletDraftWithImage | null>(null);
-  const { addBeadData } = useDesign();
-  const { draft, isPolling, startPolling, updateDraft } = usePollDraft({});
+  const { draft, startPolling, updateDraft } = usePollDraft({});
 
 
   useEffect(() => {
@@ -98,16 +96,8 @@ export const BraceletDraftCard = ({
     if (!draft?.beads || draft?.beads?.length === 0) {
       return;
     }
-    const beadDataId = "bead-" + generateUUID();
-    addBeadData({
-      image_url: draft?.bracelet_image,
-      bead_list: draft?.beads,
-      bead_data_id: beadDataId,
-      draft_id: draft?.draft_id,
-      session_id: sessionId,
-    });
-    Taro.navigateTo({
-      url: pageUrls.customDesign + "?beadDataId=" + beadDataId,
+    Taro.redirectTo({
+      url: pageUrls.customDesign + "?sessionId=" + sessionId + "&draftId=" + draft?.draft_id,
     });
   }
 
@@ -171,7 +161,7 @@ export const BraceletDraftCard = ({
             onClick={() => {
               viewDraftDesign();
             }}
-            text="查询效果"
+            text="查看效果"
             isPrimary
             icon={
               <Image

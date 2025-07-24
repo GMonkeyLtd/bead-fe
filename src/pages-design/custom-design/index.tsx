@@ -5,22 +5,29 @@ import { beadsApi } from "@/utils/api";
 import PageContainer from "@/components/PageContainer";
 import { useDesign } from "@/store/DesignContext";
 import { pageUrls } from "@/config/page-urls";
-import apiSession from "@/utils/api-session";
+import apiSession, { BeadItem } from "@/utils/api-session";
+import { usePollDraft } from "@/hooks/usePollDraft";
+import { CUSTOM_RENDER_RATIO } from "@/config/beads";
 
 const CustomDesign = () => {
-  const [designData, setDesignData] = useState<any>(null);
   const [beadTypeMap, setBeadTypeMap] = useState<any>({});
   const [allBeadList, setAllBeadList] = useState<any[]>([]);
-  const { beadData, addBeadData } = useDesign();
+  const { draft, startPolling } = usePollDraft({ showLoading: true });
 
-  const [customResult, setCustomResult] = useState<any>({});
-  const { beadDataId } = Taro.getCurrentInstance()?.router?.params || {};
+  const { draftId, sessionId } = Taro.getCurrentInstance()?.router?.params || {};
+  console.log(draft, 'draft')
 
   // 使用ref获取子组件状态
   const customDesignRef = useRef<CustomDesignRingRef>(null);
 
   useEffect(() => {
-    beadsApi.getBeadList().then((res) => {
+    if (draftId && sessionId) {
+      startPolling(sessionId, draftId);
+    }
+  }, [draftId]);
+
+  useEffect(() => {
+    beadsApi.getBeadList({ showLoading: true }).then((res) => {
       const resData = res.data;
       setAllBeadList(resData);
       setBeadTypeMap(
@@ -37,15 +44,6 @@ const CustomDesign = () => {
       );
     });
   }, []);
-
-  useEffect(() => {
-    if (beadDataId) {
-      const _beadData = beadData.find(
-        (item) => item.bead_data_id === beadDataId
-      );
-      setDesignData(_beadData);
-    }
-  }, [beadDataId, beadData]);
 
   const checkDeadsDataChanged = (_oldBeads: any[], _newBeads: any[]) => {
     if (!_oldBeads || !_newBeads || _oldBeads?.length !== _newBeads?.length) {
@@ -74,7 +72,7 @@ const CustomDesign = () => {
   }
 
   const onCreate = (imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
-    if (!imageUrl || !designData?.session_id || !designData?.draft_id) {
+    if (!imageUrl || !sessionId || !draftId) {
       return;
     }
     const beads = editedBeads.map((item) => {
@@ -88,16 +86,16 @@ const CustomDesign = () => {
 
     if (isSaveAndBack) {
       apiSession.saveDraft({
-        session_id: designData?.session_id,
+        session_id: sessionId,
         beads,
       }).then((res) => {
-        backToChatDesign(designData?.session_id);
+        backToChatDesign(sessionId);
       })
       return;
     }
     apiSession.cloneDraft({
-      session_id: designData?.session_id,
-      draft_id: designData?.draft_id,
+      session_id: sessionId,
+      draft_id: draftId,
       beads,
     }).then((res) => {
       const { draft_id, session_id } = res?.data || {};
@@ -116,7 +114,7 @@ const CustomDesign = () => {
 
   };
 
-  const onSaveAndBack = (image_url: string | undefined, beads: any[]) => {
+  const onSaveAndBack = (image_url: string | undefined, beads: BeadItem[]) => {
     if (!image_url) {
       return;
     }
@@ -125,8 +123,8 @@ const CustomDesign = () => {
 
   const handleBack = () => {
     const { image_url, beads } = getCustomDesignState();
-    if (!checkDeadsDataChanged(designData?.bead_list || [], beads || [])) {
-      backToChatDesign(designData?.session_id);
+    if (!checkDeadsDataChanged(draft?.beads || [], beads || [])) {
+      sessionId && backToChatDesign(sessionId);
       return;
     }
     Taro.showActionSheet({
@@ -135,7 +133,7 @@ const CustomDesign = () => {
         if (res.tapIndex === 0) {
           onSaveAndBack(image_url, beads);
         } else {
-          Taro.navigateBack();
+          sessionId && backToChatDesign(sessionId);
         }
       },
       fail: function (res) {
@@ -160,16 +158,14 @@ const CustomDesign = () => {
     <PageContainer onBack={handleBack}>
       <CustomDesignRing
         ref={customDesignRef}
-        beads={designData?.bead_list?.map((item) => {
-          const diameter = item.bead_diameter || item.diameter;
+        beads={draft?.beads?.map((item) => {
           return {
-            id: item.id || item.bead_id,
+            id: item.bead_id,
             image_url: item.image_url,
-            render_diameter: diameter * 3,
-            bead_diameter: diameter,
+            render_diameter: item.diameter * CUSTOM_RENDER_RATIO,
+            bead_diameter: item.diameter,
           };
         })}
-        size={300}
         beadTypeMap={beadTypeMap}
         // 移除onChange回调
         // onChange={onChange}

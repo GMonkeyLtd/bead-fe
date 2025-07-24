@@ -49,7 +49,7 @@ export interface PersonalizedGenerateResult {
   name: string;
   image_url: string;
   color: string;
-  wuxing: string;
+  wuxing: string[];
   english: string;
   bead_diameter: number;
 }
@@ -181,7 +181,7 @@ export const generateApi = {
 
 export const beadsApi = {
   getBeadList: (config?: ApiConfig) =>
-    http.get<PersonalizedGenerateResult[]>(
+    http.get<{ data: PersonalizedGenerateResult[] }>(
       "/user/beads",
       {},
       {
@@ -305,14 +305,10 @@ export const inspirationApi = {
     params: { page: number; page_size: number } | { work_id: string },
     config?: ApiConfig
   ) => {
-    return http.post<InspirationResult>(
-      "/user/community/home",
-      params,
-      {
-        cancelToken: config?.cancelToken,
-        ...config,
-      }
-    );
+    return http.post<InspirationResult>("/user/community/home", params, {
+      cancelToken: config?.cancelToken,
+      ...config,
+    });
   },
   collectInspiration: (params: { work_id: string }, config?: ApiConfig) => {
     return http.post<{
@@ -339,18 +335,17 @@ export const inspirationApi = {
       ...config,
     });
   },
-  getCollectInspiration: (params: { page: number; pageSize: number }, config?: ApiConfig) => {
-    return http.post<InspirationResult>(
-      "/user/community/collections",
-      params,
-      {
-        cancelToken: config?.cancelToken,
-        ...config,
-      }
-    );
+  getCollectInspiration: (
+    params: { page: number; pageSize: number },
+    config?: ApiConfig
+  ) => {
+    return http.post<InspirationResult>("/user/community/collections", params, {
+      cancelToken: config?.cancelToken,
+      ...config,
+    });
   },
   viewWorkDetail: (params: { work_id: string }, config?: ApiConfig) => {
-    return http.post<{  
+    return http.post<{
       data: {
         any: [];
       };
@@ -365,8 +360,11 @@ export const inspirationApi = {
 // 文件相关API
 export const fileApi = {
   // 上传文件 - 支持取消
-  upload: (filePath: string, formData?: Record<string, any>, config?: ApiConfig) =>
-    http.upload("/upload", filePath, formData, config?.cancelToken),
+  upload: (
+    filePath: string,
+    formData?: Record<string, any>,
+    config?: ApiConfig
+  ) => http.upload("/upload", filePath, formData, config?.cancelToken),
 };
 
 // 导出所有API

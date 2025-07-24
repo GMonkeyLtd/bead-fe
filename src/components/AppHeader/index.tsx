@@ -25,7 +25,6 @@ const AppHeader = ({
   style?: React.CSSProperties;
   extraContent?: React.ReactNode;
 }) => {
-  console.log(isWhite, 'isWhite')
   const {
     height: navBarHeight,
     top: navBarTop,

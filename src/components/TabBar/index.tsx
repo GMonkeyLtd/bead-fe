@@ -109,7 +109,6 @@ const TabBar: React.FC<TabBarProps> = ({
       Taro.redirectTo({
         url: item.path,
         fail: () => {
-          // 如果navigateTo失败，尝试switchTab
           Taro.switchTab({ url: item.path });
         },
       });

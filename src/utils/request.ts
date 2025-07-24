@@ -228,10 +228,10 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
     
     // 请求前拦截处理
     const finalConfig = await requestInterceptor(config)
-
+    
     // 再次检查取消令牌
     config.cancelToken?.throwIfCancelled()
-
+    
     // 显示加载提示
     if (finalConfig.showLoading) {
       Taro.showLoading({
