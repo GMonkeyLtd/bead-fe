@@ -484,7 +484,6 @@ const PosterGenerator: React.FC<PosterGeneratorProps> = ({
       // 绘制水晶信息
       let crystalX = 128 * dpr;
       let crystalY = 516 * dpr;
-      
       // 并发加载水晶图片
       const crystalImages = await Promise.all(
         data.crystals?.slice(0, 2).map(async (crystal) => {

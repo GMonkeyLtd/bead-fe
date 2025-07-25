@@ -448,13 +448,12 @@ const Result = () => {
       <PosterGenerator
         data={posterData}
         onGenerated={(url) => {
-          console.log(url, autoShareRef.current, "url");
           setShareImageUrl(url);
           if (autoShareRef.current) {
             saveImage(url);
           }
         }}
-        showPoster={true}
+        showPoster={false}
       />
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog

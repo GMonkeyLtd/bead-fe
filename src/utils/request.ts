@@ -8,24 +8,14 @@ const domain = 'https://api.gmonkey.top'
 // const domain = 'https://test.qianjunye.com'
 
 // 判断是否为开发环境
-const isDevelopment = process.env.NODE_ENV === 'development'
+const isTest = false
 
 // 根据环境构建API基础URL
 const getBaseURL = () => {
-  const basePath = isDevelopment ? '/test_api/v1' : '/api/v1'
+  const basePath = isTest ? '/test_api/v1' : '/api/v1'
   const fullURL = domain + basePath
-  if (isDevelopment) {
-    console.log('开发环境 - API基础URL:', fullURL)
-  }
-  return fullURL
-}
-
-const getMerchantBaseURL = () => {
-  const basePath = isDevelopment ? '/test_api/v1' : '/api/v1'
-  const fullURL = domain + basePath
-  if (isDevelopment) {
-    console.log('开发环境 - 商户API基础URL:', fullURL)
-  }
+  
+  console.log('Backend url: ', fullURL)
   return fullURL
 }
 
@@ -37,7 +27,7 @@ const defaultConfig = {
   loadingText: '加载中...',
   showError: true,
   isMock: false,
-  merchantBaseUrl: getMerchantBaseURL()
+  merchantBaseUrl: getBaseURL()
 }
 
 export interface BaseResponse {
@@ -460,12 +450,6 @@ export const setBaseURL = (baseURL: string) => {
 
 export const setMerchantBaseURL = (url: string) => {
   defaultConfig.merchantBaseUrl = url
-}
-
-// 重新计算基础URL（根据环境）
-export const recalculateBaseURLs = () => {
-  defaultConfig.baseURL = getBaseURL()
-  defaultConfig.merchantBaseUrl = getMerchantBaseURL()
 }
 
 export const setIsMock = (isMock: boolean) => {
