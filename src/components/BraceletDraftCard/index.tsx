@@ -1,4 +1,4 @@
-import { View, Image } from "@tarojs/components";
+import { View, Image, Canvas } from "@tarojs/components";
 import styles from "./index.module.scss";
 import Taro from "@tarojs/taro";
 import { BRACELET_BG_IMAGE_URL } from "@/config";
@@ -16,6 +16,7 @@ import { pageUrls } from "@/config/page-urls";
 import { generateUUID } from "@/utils/uuid";
 import { useDesign } from "@/store/DesignContext";
 import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
+import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 
 interface BraceletDraftWithImage extends BraceletDraft {
   bracelet_image?: string;
@@ -26,15 +27,31 @@ export const BraceletDraftCard = ({
   draftId,
   draftIndex,
   draftData,
-  generateBraceletImage,
+  shouldLoad = true, // 控制是否立即加载图像
+  onImageLoaded,
 }: {
   sessionId?: string;
   draftId?: string;
   draftIndex?: number;
   draftData?: BraceletDraft;
-  generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
+  shouldLoad?: boolean; // 是否立即加载图像
+  onImageLoaded?: () => void; // 图像加载完成回调
 }) => {
   const { draft, startPolling, updateDraft } = usePollDraft({});
+  
+  // 为每个卡片实例生成唯一的canvasId，避免多个卡片共享同一个Canvas
+  const uniqueCanvasId = useMemo(() => `bracelet-canvas-${draftId || generateUUID()}`, [draftId]);
+  
+  // 控制Canvas的显示状态，生成完成后销毁
+  const [showCanvas, setShowCanvas] = useState(true);
+  
+  // 使用独立的CircleRing Canvas实例
+  const { generateCircleRing, canvasProps, cleanupCanvas } = useCircleRingCanvas({
+    canvasId: uniqueCanvasId,
+    targetSize: 1024,
+    isDifferentSize: true,
+    fileType: "png"
+  });
 
 
   useEffect(() => {
@@ -49,18 +66,39 @@ export const BraceletDraftCard = ({
   }, [sessionId, draftId, draftData]);
 
   useEffect(() => {
-    if (draft?.beads?.length && draft.beads.length > 0) {
-      generateBraceletImage(draft.beads.map(item => ({
-        ...item,
+    if (draft?.beads?.length && draft.beads.length > 0 && showCanvas && shouldLoad) {
+      // 使用本地的generateCircleRing而不是传入的generateBraceletImage
+      generateCircleRing(draft.beads.map(item => ({
+        image_url: item.image_url,
         bead_diameter: item.diameter,
       }))).then((braceletImage) => {
-        updateDraft({
-          ...draft,
-          bracelet_image: braceletImage,
-        } as DraftData);
+        if (braceletImage) {
+          updateDraft({
+            ...draft,
+            bracelet_image: braceletImage,
+          } as DraftData);
+          // 图像生成完成后，隐藏Canvas以释放资源
+          setShowCanvas(false);
+          cleanupCanvas();
+          // 调用加载完成回调
+          onImageLoaded?.();
+        }
+      }).catch((error) => {
+        console.error("生成手串图像失败:", error);
+        // 即使失败也要隐藏Canvas
+        setShowCanvas(false);
+        cleanupCanvas();
       });
     }
-  }, [draft]);
+  }, [draft, generateCircleRing, showCanvas, shouldLoad]);
+
+  // 组件卸载时清理Canvas
+  useEffect(() => {
+    return () => {
+      setShowCanvas(false);
+      cleanupCanvas();
+    };
+  }, [cleanupCanvas]);
 
   const beadsInfo = useMemo(() => {
     return draft?.beads?.reduce((acc, bead) => {
@@ -101,6 +139,17 @@ export const BraceletDraftCard = ({
     });
   }
 
+  const viewImage = () => {
+    if (!draft.bracelet_image) {
+      return;
+    }
+
+    Taro.previewImage({
+      current: draft.bracelet_image,
+      urls: [draft.bracelet_image],
+    });
+  };
+
   return (
     <View
       className={styles.braceletDraftCard}
@@ -111,6 +160,24 @@ export const BraceletDraftCard = ({
         backgroundRepeat: "no-repeat",
       }}
     >
+      {/* 隐藏的Canvas元素，用于绘制手串图像，生成完成后销毁 */}
+      {showCanvas && (
+        <Canvas
+          canvasId={canvasProps.canvasId}
+          id={canvasProps.id}
+          height={canvasProps.height}
+          width={canvasProps.width}
+          style={{
+            width: canvasProps.style.width,
+            height: canvasProps.style.height,
+            visibility: "hidden",
+            position: "absolute",
+            top: "-999999px",
+            left: "-999999px",
+            zIndex: -100,
+          }}
+        />
+      )}
       <View className={styles.braceletDraftCardHeaderContainer}>
         <View className={styles.braceletDraftCardHeader}>{`方案展示 ${draftIndex}`}</View>
         <View className={styles.braceletDraftCardHeader}>{draft.draft_id}</View>
@@ -143,7 +210,7 @@ export const BraceletDraftCard = ({
               </View>
             ))}
           </View>
-          <View className={styles.braceletBgImageContainer}>
+          <View className={styles.braceletBgImageContainer} onClick={viewImage}>
             <CircleRingImage
               imageUrl={draft.bracelet_image}
               size={140}

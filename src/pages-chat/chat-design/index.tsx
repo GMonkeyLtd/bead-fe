@@ -29,14 +29,6 @@ const ChatDesign = () => {
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const draftIndexRef = useRef(1);
 
-  const { canvasProps, generateCircleRing: generateBraceletImage } =
-    useCircleRingCanvas({
-      targetSize: 1024,
-      isDifferentSize: true,
-      fileType: "png",
-      canvasId: "chat-design-canvas",
-    });
-
   const spareHeight = useMemo(() => {
     const inputHeight =
       recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
@@ -70,7 +62,7 @@ const ChatDesign = () => {
           } else {
             waitTime = 2000;
           }
-          
+
           // 2秒后显示下一条消息
           if (currentIndex + 1 < messages.length) {
             setTimeout(() => {
@@ -161,12 +153,15 @@ const ChatDesign = () => {
       });
       // 获取newMessages中最后一个role为assistant的message
       const lastAssistantMessage = newMessages
-      .slice()
-      .reverse()
-      .find((message) => message.role === "assistant");
+        .slice()
+        .reverse()
+        .find((message) => message.role === "assistant");
       if (!isFirst) {
         setChatMessages(newMessages);
-        if (lastAssistantMessage?.recommends && lastAssistantMessage.recommends.length > 0) {
+        if (
+          lastAssistantMessage?.recommends &&
+          lastAssistantMessage.recommends.length > 0
+        ) {
           setRecommendTags(lastAssistantMessage.recommends);
         }
       } else {
@@ -179,7 +174,8 @@ const ChatDesign = () => {
   };
 
   useEffect(() => {
-    const { year, month, day, hour, gender, isLunar, session_id } = params || {};
+    const { year, month, day, hour, gender, isLunar, session_id } =
+      params || {};
     if (session_id) {
       setSessionId(session_id);
       querySessionHistory(session_id);
@@ -200,7 +196,6 @@ const ChatDesign = () => {
     return (
       <View className={styles.chatDesignHeader}>
         <View className={styles.assistantAvatarContainer}>
-
           <Image
             src={ASSISTANT_AVATAR_IMAGE_URL}
             className={styles.assistantAvatar}
@@ -286,10 +281,6 @@ const ChatDesign = () => {
           isChatting={isDesigning}
           maxHeight={`calc(100% - ${spareHeight}px)`}
           sessionId={sessionId}
-          generateBraceletImage={async (beads) => {
-            const result = await generateBraceletImage(beads);
-            return result || "";
-          }}
         />
 
         {/* <BraceletDraftCard
@@ -336,19 +327,16 @@ const ChatDesign = () => {
               showConfirmBar={false}
             />
             <Image
-              src={!isEmptyMessage(inputValue) && !isDesigning ? activeSendSvg : sendSvg}
+              src={
+                !isEmptyMessage(inputValue) && !isDesigning
+                  ? activeSendSvg
+                  : sendSvg
+              }
               style={{ width: "26px", height: "26px" }}
               onClick={handleSend}
             />
           </View>
         </View>
-        <Canvas
-          canvasId={canvasProps.canvasId}
-          id={canvasProps.id}
-          height={canvasProps.height}
-          width={canvasProps.width}
-          style={canvasProps.style as any}
-        />
       </View>
     </PageContainer>
   );

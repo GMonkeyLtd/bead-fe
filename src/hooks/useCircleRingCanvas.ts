@@ -221,12 +221,31 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     };
   }, []);
 
+  // 清理Canvas资源
+  const cleanupCanvas = useCallback(() => {
+    try {
+      // 清除所有结果缓存
+      resultsRef.current.clear();
+      processingQueueRef.current.clear();
+      
+      // 尝试销毁Canvas上下文
+      const ctx = Taro.createCanvasContext(canvasId);
+      if (ctx) {
+        ctx.clearRect(0, 0, targetSize, targetSize);
+        ctx.draw();
+      }
+    } catch (error) {
+      console.warn("清理Canvas资源时出错:", error);
+    }
+  }, [canvasId, targetSize]);
+
   return {
     generateCircleRing,
     getResult,
     clearResult,
     clearAllResults,
     getProcessingStatus,
+    cleanupCanvas,
     // 返回Canvas组件所需的props
     canvasProps: {
       canvasId,

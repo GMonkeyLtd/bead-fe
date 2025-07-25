@@ -53,7 +53,7 @@ const CircleRing = ({
   }
 
   // 使用优化的hook
-  const { generateCircleRing, getResult, canvasProps } = useCircleRingCanvas({
+  const { generateCircleRing, getResult, canvasProps, cleanupCanvas } = useCircleRingCanvas({
     targetSize,
     isDifferentSize,
     fileType: fileType as "png" | "jpg" | "jpeg",
@@ -73,11 +73,15 @@ const CircleRing = ({
           .then((imageUrl) => {
             if (imageUrl) {
               onChange("success", imageUrl, dotsBgImageData);
+              // 生成完成后清理Canvas资源
+              cleanupCanvas();
             }
           })
           .catch((error) => {
             console.error("生成手串失败:", error);
             onChange("error", "", dotsBgImageData);
+            // 即使失败也要清理Canvas资源
+            cleanupCanvas();
           });
       } else if (result.status === "success" && result.imageUrl) {
         // 如果已经有结果，直接调用onChange
@@ -86,7 +90,14 @@ const CircleRing = ({
         onChange("error", "", dotsBgImageData);
       }
     }
-  }, [dotsBgImageData, generateCircleRing, getResult, onChange]);
+  }, [dotsBgImageData, generateCircleRing, getResult, onChange, cleanupCanvas]);
+
+  // 组件卸载时清理Canvas资源
+  useEffect(() => {
+    return () => {
+      cleanupCanvas();
+    };
+  }, [cleanupCanvas]);
 
   // 渲染Canvas（隐藏的，用于绘制）
   return (
