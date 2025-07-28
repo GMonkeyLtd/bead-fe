@@ -14,7 +14,6 @@ import "./index.scss";
 import CrystalButton from "@/components/CrystalButton";
 import api, { userApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
-import LinkUtils from "@/utils/linkUtils";
 
 type ContactMethod = "phone" | "wechat";
 

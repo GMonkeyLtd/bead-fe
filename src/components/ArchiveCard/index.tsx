@@ -10,6 +10,7 @@ import deleteSvg from "@/assets/icons/delete.svg";
 
 interface ArchiveCardProps {
   archive: ArchiveItem;
+  isCurrent: boolean;
   onClick?: () => void;
   onCurrentClick?: () => void;
   onSwitchClick?: () => void;
@@ -23,13 +24,12 @@ export interface ArchiveItem {
   gender: "男生" | "女生";
   birthDate: string;
   birthTime: string;
-  isCurrent: boolean;
-  isCustom: boolean;
 }
 
 const ArchiveCard: React.FC<ArchiveCardProps> = ({
   archive,
   onClick,
+  isCurrent,
   onCurrentClick,
   onSwitchClick,
   onDeleteClick,
@@ -55,7 +55,7 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({
   };
 
   return (
-    <View className={`${styles.archiveCard} ${archive.isCustom ? styles.customArchive : ''}`} onClick={handleCardClick}>
+    <View className={`${styles.archiveCard} ${isCurrent ? styles.currentArchive : ''}`} onClick={handleCardClick}>
       <View className={styles.cardContent}>
         <View className={styles.cardHeader}>
           <View className={styles.archiveNameSection}>
@@ -93,7 +93,7 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({
       </View>
       
       <View className={styles.actionSection}>
-        {archive.isCurrent ? (
+        {isCurrent ? (
           // 当前档案状态 - 显示"当前档案"按钮
           <View 
             className={`${styles.currentArchiveButton} ${styles.active}`}

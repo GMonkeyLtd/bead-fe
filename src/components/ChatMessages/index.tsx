@@ -1,4 +1,5 @@
 import { ScrollView, View, Image } from "@tarojs/components";
+import Taro from "@tarojs/taro";
 import React, {
   forwardRef,
   useImperativeHandle,
@@ -20,6 +21,7 @@ import { LoadingDots } from "../ChatLoading";
 export interface ChatMessagesRef {
   scrollToBottom: () => void;
   scrollToIndex: (index: number) => void;
+  loadMoreMessages: () => void;
 }
 
 // 消息项组件 - 使用 React.memo 优化渲染性能
@@ -75,6 +77,33 @@ const MessageItem = React.memo(({
           onImageLoaded={() => onImageLoaded?.(message.message_id)}
         />
       )}
+    </View>
+  );
+});
+
+// 消息分组组件
+const MessageGroup = React.memo(({
+  messages,
+  sessionId,
+  generateBraceletImage,
+  draftCounterRef,
+}: {
+  messages: ChatMessageItem[];
+  sessionId: string;
+  generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
+  draftCounterRef: React.MutableRefObject<number>;
+}) => {
+  return (
+    <View className={styles.messageGroup}>
+      {messages.map((message) => (
+        <MessageItem
+          key={message.message_id}
+          message={message}
+          sessionId={sessionId}
+          generateBraceletImage={generateBraceletImage}
+          draftCounterRef={draftCounterRef}
+        />
+      ))}
     </View>
   );
 });
@@ -163,12 +192,14 @@ export default forwardRef<
     }, [messages, sessionId, hasMoreMessages, getMessageLoadPriority]);
 
     const scrollToBottom = useCallback(() => {
+      isScrollingToBottom.current = true;
       // 使用 setTimeout 确保 DOM 更新完成后再设置 scrollIntoView
       setTimeout(() => {
         setScrollAnchor("scrollViewbottomAnchor");
         // 备用方案：如果 scrollIntoView 不工作，使用 scrollTop
         setTimeout(() => {
           setScrollTop(9999);
+          isScrollingToBottom.current = false;
         }, 200);
       }, 100);
     }, []);
@@ -184,6 +215,7 @@ export default forwardRef<
     useImperativeHandle(ref, () => ({
       scrollToBottom,
       scrollToIndex,
+      loadMoreMessages,
     }));
 
     // 监听消息变化，自动滚动到底部
@@ -227,6 +259,7 @@ export default forwardRef<
     return (
       <ScrollView
         ref={scrollViewRef}
+        type="list"
         enhanced
         scrollY
         scrollTop={scrollTop}
@@ -246,6 +279,8 @@ export default forwardRef<
             <ChatLoading text="正在设计新方案..." />
           </View>
         )}
+
+        {/* 滚动到底部的锚点 */}
         <View
           id="scrollViewbottomAnchor"
           style={{ height: "1px", width: "100%" }}

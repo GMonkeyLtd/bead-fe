@@ -9,6 +9,7 @@ export default defineAppConfig({
       root: 'pages-chat',
       pages: [
         'chat-design/index',
+        'chat-record/index',
       ]
     },
     {

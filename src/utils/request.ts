@@ -8,7 +8,7 @@ const domain = 'https://api.gmonkey.top'
 // const domain = 'https://test.qianjunye.com'
 
 // 判断是否为开发环境
-const isTest = false
+const isTest = true
 
 // 根据环境构建API基础URL
 const getBaseURL = () => {

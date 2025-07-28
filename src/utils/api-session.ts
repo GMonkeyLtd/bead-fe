@@ -30,6 +30,23 @@ export interface BeadItem {
   func_summary: string;
 }
 
+export interface SessionItem {
+  session_id: string;
+  title: string;
+  description: string;
+  message_count: number;
+  birth: {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    is_lunar: boolean;
+    gender: number;
+  };
+  updated_at: string;
+  created_at: string;
+}
+
 export interface BraceletDraft {
   session_id: string;
   draft_id: string;

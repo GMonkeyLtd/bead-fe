@@ -5,15 +5,13 @@
   gap: 16px;
   padding: 16px;
   background: rgba(255, 255, 255, 0.4);
-  border: 1px solid #FF9421;
+  border: 1px solid #eae4dc8c;
   border-radius: 10px;
   margin-bottom: 12px;
   box-sizing: border-box;
 
-  &.customArchive {
-    border: 1px solid #FFF;
-    background: rgba(255, 255, 255, 0.40);
-    border-radius: 10px;
+  &.currentArchive {
+    border: 1px solid #FF9421;
   }
 }
 
@@ -40,8 +38,8 @@
 
 .archiveName {
   font-family: "Source Han Serif CN", serif;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 500;
+  font-size: 14px;
   line-height: 1.437em;
   letter-spacing: 0.07em;
   color: #1F1722;

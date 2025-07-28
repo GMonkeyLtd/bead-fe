@@ -76,7 +76,6 @@ const PageContainer = ({
     try {
       const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
       const { bottomHeight } = getSafeAreaInfo();
-      console.log(bottomHeight, "bottomHeight");
       
       return {
         navBarTop,
@@ -117,6 +116,7 @@ const PageContainer = ({
     width: "100vw",
     height: contentHeight,
     top: contentTop,
+    boxSizing: 'border-box',
     padding: typeof padding === 'number' ? `${padding}px` : padding,
   };
 

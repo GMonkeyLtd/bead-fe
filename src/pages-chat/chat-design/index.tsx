@@ -309,6 +309,7 @@ const ChatDesign = () => {
               <Image
                 src={userRecordSvg}
                 style={{ width: "27px", height: "27px" }}
+                mode="widthFix"
               />
             </View>
             <View className={styles.inputWrapper}>
