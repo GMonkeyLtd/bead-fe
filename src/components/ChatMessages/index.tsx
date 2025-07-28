@@ -15,7 +15,6 @@ import apiSession, {
 } from "@/utils/api-session";
 import ChatLoading from "../ChatLoading";
 import { BraceletDraftCard } from "../BraceletDraftCard";
-import { DotImageData } from "@/hooks/useCircleRingCanvas";
 import { LoadingDots } from "../ChatLoading";
 
 export interface ChatMessagesRef {
@@ -106,8 +105,6 @@ export default forwardRef<
     const scrollViewRef = useRef<any>(null);
     const [scrollTop, setScrollTop] = useState(0);
     const [loadedMessageIds, setLoadedMessageIds] = useState<Set<string>>(new Set());
-    console.log('messages', messages);
-
 
     // 标记消息为已加载
     const markMessageAsLoaded = useCallback((messageId: string) => {

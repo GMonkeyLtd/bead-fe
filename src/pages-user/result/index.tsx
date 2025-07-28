@@ -38,6 +38,8 @@ const Result = () => {
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
   const [designNo, setDesignNo] = useState("");
   const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
+  const [rizhuInfo, setRizhuInfo] = useState<any[]>("");
+  const [wuxingInfo, setWuxingInfo] = useState<any[]>([]);
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] =
@@ -45,7 +47,7 @@ const Result = () => {
   const autoShareRef = useRef(false);
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
-  const showBack = params?.showBack;
+  const { sessionId, from } = params || {};
 
   const posterData = useMemo(() => {
     return {
@@ -74,14 +76,21 @@ const Result = () => {
           getOrderData(order_uuid);
         }
         setBeadsInfo(beads_info);
-        const { bracelet_name, recommendation_text, bead_ids_deduplication } =
-          word_info;
+        const {
+          bracelet_name,
+          recommendation_text,
+          bead_ids_deduplication,
+          rizhu,
+          wuxing,
+        } = word_info;
 
         setImageUrl(image_url);
         setBraceletName(bracelet_name);
         setBeadDescriptions(bead_ids_deduplication);
         setDesignNo(id);
         setBraceletDescription(recommendation_text);
+        setRizhuInfo(rizhu || wuxing?.[0]);
+        setWuxingInfo(wuxing);
       })
       .catch((err) => {
         console.log(err, "err");
@@ -257,7 +266,22 @@ const Result = () => {
         "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
       }}
     >
-      <AppHeader isWhite showBack={showBack === "false"} />
+      <AppHeader isWhite onBack={() => {
+        console.log(from, "from");
+        if (from === "chat") {
+          Taro.redirectTo({
+            url: pageUrls.chatDesign + "?session_id=" + sessionId,
+          });
+        } else {
+          if (Taro.getCurrentPages().length > 1) {
+            Taro.navigateBack();
+          } else {
+            Taro.redirectTo({
+              url: pageUrls.userCenter,
+            });
+          }
+        }
+      }}   />
       <View
         className="result-content-container"
         style={{
@@ -346,10 +370,8 @@ const Result = () => {
                 <View className="result-content-wuxing-display-container">
                   <WuxingDisplay
                     element={{
-                      type: "金",
-                      description: "身强型，喜火、土、金",
-                      strength: "身强型",
-                      preferences: ["火", "土", "金"],
+                      type: rizhuInfo,
+                      description: `五行属性喜${wuxingInfo?.join("、")}`,
                     }}
                   />
                 </View>

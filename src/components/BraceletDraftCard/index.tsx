@@ -78,27 +78,27 @@ export const BraceletDraftCard = ({
             bracelet_image: braceletImage,
           } as DraftData);
           // 图像生成完成后，隐藏Canvas以释放资源
-          setShowCanvas(false);
-          cleanupCanvas();
+          // setShowCanvas(false);
+          // cleanupCanvas();
           // 调用加载完成回调
           onImageLoaded?.();
         }
       }).catch((error) => {
         console.error("生成手串图像失败:", error);
         // 即使失败也要隐藏Canvas
-        setShowCanvas(false);
-        cleanupCanvas();
+        // setShowCanvas(false);
+        // cleanupCanvas();
       });
     }
   }, [draft, generateCircleRing, showCanvas, shouldLoad]);
 
   // 组件卸载时清理Canvas
-  useEffect(() => {
-    return () => {
-      setShowCanvas(false);
-      cleanupCanvas();
-    };
-  }, [cleanupCanvas]);
+  // useEffect(() => {
+  //   return () => {
+  //     setShowCanvas(false);
+  //     cleanupCanvas();
+  //   };
+  // }, [cleanupCanvas]);
 
   const beadsInfo = useMemo(() => {
     return draft?.beads?.reduce((acc, bead) => {
@@ -116,7 +116,7 @@ export const BraceletDraftCard = ({
   const viewDraftDesign = () => {
     if (draft?.design_id) {
       Taro.redirectTo({
-        url: `${pageUrls.result}?designBackendId=${draft?.design_id}`,
+        url: `${pageUrls.result}?designBackendId=${draft?.design_id}&from=chat&sessionId=${sessionId}`,
       });
       return;
     }
@@ -161,23 +161,29 @@ export const BraceletDraftCard = ({
       }}
     >
       {/* 隐藏的Canvas元素，用于绘制手串图像，生成完成后销毁 */}
-      {showCanvas && (
-        <Canvas
-          canvasId={canvasProps.canvasId}
-          id={canvasProps.id}
-          height={canvasProps.height}
-          width={canvasProps.width}
-          style={{
-            width: canvasProps.style.width,
-            height: canvasProps.style.height,
-            visibility: "hidden",
-            position: "absolute",
-            top: "-999999px",
-            left: "-999999px",
-            zIndex: -100,
-          }}
-        />
-      )}
+      {/* {showCanvas && ( */}
+      {/* <View style={{
+        width: canvasProps.style.width,
+        height: canvasProps.style.height,
+        visibility: "hidden",
+        position: "absolute",
+        top: "-999999px",
+        left: "-999999px",
+        zIndex: -100,
+      }}>
+          <Canvas
+            canvasId={canvasProps.canvasId}
+            id={canvasProps.id}
+            height={canvasProps.height}
+            width={canvasProps.width}
+            style={{
+              width: canvasProps.style.width,
+              height: canvasProps.style.height,
+              
+            }}
+          />
+      </View> */}
+      {/* )} */}
       <View className={styles.braceletDraftCardHeaderContainer}>
         <View className={styles.braceletDraftCardHeader}>{`方案展示 ${draftIndex}`}</View>
         <View className={styles.braceletDraftCardHeader}>{draft.draft_id}</View>

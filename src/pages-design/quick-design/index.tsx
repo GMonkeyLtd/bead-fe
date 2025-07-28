@@ -157,7 +157,7 @@ const QuickDesign = () => {
     );
     if (res.data?.progress === 100) {
       Taro.redirectTo({
-        url: `${pageUrls.result}?designBackendId=${res.data?.design_id}`,
+        url: `${pageUrls.result}?designBackendId=${res.data?.design_id}&from=chat&sessionId=${sessionId}`,
       });
       // processDesignData({
       //   image_urls: [res.data?.image_url],

@@ -61,7 +61,11 @@
   justify-content: center;
   z-index: 10;
   color: #fff;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 45%, rgba(0, 0, 0, 0.60) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 45%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
 }
 
 .crystal-title-section {
@@ -118,12 +122,32 @@
 
 .crystal-action-section {
   position: absolute;
-  bottom: 200px;
+  bottom: 204px;
   left: 0;
   right: 0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   z-index: 10;
+  gap: 10px;
+}
+
+.crystal-link-text {
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 350;
+  line-height: normal;
+  letter-spacing: 1px;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: none;
+  text-decoration-thickness: auto;
+  text-underline-offset: auto;
+  text-underline-position: from-font;
 }
 
 .crystal-custom-button {

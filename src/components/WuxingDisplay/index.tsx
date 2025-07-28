@@ -62,7 +62,9 @@ const WuxingDisplay: React.FC<WuxingDisplayProps> = ({
       className="wuxing-card"
       style={{
         background: `url(${config.bgUrl})`,
-        backgroundSize: 'cover'
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center'
       }}
     >
       <view className="card-content-right">

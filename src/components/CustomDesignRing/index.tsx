@@ -15,6 +15,7 @@ import "./CustomDesignRing.scss";
 import { computeBraceletLength } from "@/utils/cystal-tools";
 import CircleRing, { CircleRingImage } from "../CircleRing";
 import { BEADS_SIZE_RENDER } from "@/config/beads";
+import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 
 interface Bead {
   image_url: string;
@@ -107,6 +108,11 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   const positionCacheRef = useRef<Map<string, Position[]>>(new Map());
   const isProcessingRef = useRef<boolean>(false);
   const requestAnimationFrameId = useRef<number>(0);
+  const { generateCircleRing } = useCircleRingCanvas({
+    targetSize: 1024,
+    isDifferentSize: true,
+    fileType: "png",
+  });
 
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({
@@ -183,8 +189,20 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   );
 
   useEffect(() => {
+    if (dots.length > 0) {
+      // 将 dots 转换为 DotImageData 格式
+      const dotImageData = dots.map(dot => ({
+        image_url: dot.image_url,
+        bead_diameter: dot.bead_diameter,
+      }));
+      
+      generateCircleRing(dotImageData).then((imageUrl) => {
+        const newImageUrl = imageUrl || "";
+        setImageUrl(newImageUrl);
+      });
+    }
     debouncedCalculatePredictedLength(dots);
-  }, [dots, debouncedCalculatePredictedLength]);
+  }, [dots, debouncedCalculatePredictedLength, generateCircleRing]);
 
   useEffect(() => {
     if (imageUrl && createFlag) {
@@ -587,7 +605,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   // 优化：防抖更新珠子
   const debouncedUpdateBeads = useMemo(
     () =>
-      debounce((newDots: any[]) => {
+      debounce((newDots: Bead[]) => {
         processBeads(newDots);
         setImageUrl("");
       }, 100),
@@ -595,7 +613,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   );
 
   const updateBeads = useCallback(
-    (newDots: any[]) => {
+    (newDots: Bead[]) => {
       debouncedUpdateBeads(newDots);
     },
     [debouncedUpdateBeads]
@@ -815,15 +833,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     );
   };
 
-  const handleCircleRingChange = useCallback(
-    (status: string, canvasImage: string, dotsBgImageData: any[]) => {
-      if (status === "success") {
-        setImageUrl(canvasImage);
+  // const handleCircleRingChange = useCallback(
+  //   (status: string, canvasImage: string, dotsBgImageData: any[]) => {
+  //     if (status === "success") {
+  //       setImageUrl(canvasImage);
       
-      }
-    },
-    []
-  );
+  //     }
+  //   },
+  //   []
+  // );
 
   return (
     <View className="custom-design-ring-container">
@@ -1000,14 +1018,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
         </View>
         {renderBeads()}
       </View>
-      <CircleRing
+      {/* <CircleRing
         dotsBgImageData={dots}
         targetSize={1024}
         canvasId="circle-ring-canvas111"
         isDifferentSize
         fileType="jpg"
         onChange={handleCircleRingChange}
-      />
+      /> */}
     </View>
   );
 });

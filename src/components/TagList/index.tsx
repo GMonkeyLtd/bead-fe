@@ -10,15 +10,16 @@ interface Tag {
 interface TagListProps {
   tags: Tag[];
   onTagSelect?: (tag: Tag) => void;
+  style?: React.CSSProperties;
 }
 
-const TagList: React.FC<TagListProps> = ({ tags, onTagSelect }) => {
+const TagList: React.FC<TagListProps> = ({ tags, onTagSelect, style = {} }) => {
   const handleTagClick = (tag: Tag) => {
     onTagSelect?.(tag);
   };
 
   return (
-    <View className="tag-list">
+    <View className="tag-list" style={style}>
       <ScrollView
         className="tags-scroll-view"
         scrollX

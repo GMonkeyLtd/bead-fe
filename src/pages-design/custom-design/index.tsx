@@ -84,34 +84,20 @@ const CustomDesign = () => {
       };
     })
 
-    if (isSaveAndBack) {
+    
       apiSession.saveDraft({
         session_id: sessionId,
         beads,
       }).then((res) => {
-        backToChatDesign(sessionId);
+        const { draft_id, session_id } = res?.data || {};
+        if (isSaveAndBack) {
+          backToChatDesign(session_id);
+        } else {
+          Taro.redirectTo({
+            url: `${pageUrls.quickDesign}?sessionId=${session_id}&draftId=${draft_id}&imageUrl=${encodeURIComponent(imageUrl)}`,
+          });
+        }
       })
-      return;
-    }
-    apiSession.cloneDraft({
-      session_id: sessionId,
-      draft_id: draftId,
-      beads,
-    }).then((res) => {
-      const { draft_id, session_id } = res?.data || {};
-
-      Taro.redirectTo({
-        url: `${pageUrls.quickDesign}?sessionId=${session_id}&draftId=${
-          draft_id
-        }&imageUrl=${encodeURIComponent(imageUrl)}`,
-      });
-    }).catch((err) => {
-      Taro.showToast({
-        title: "定制失败:" + JSON.stringify(err),
-        icon: "error",
-      });
-    })
-
   };
 
   const onSaveAndBack = (image_url: string | undefined, beads: BeadItem[]) => {

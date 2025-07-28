@@ -10,12 +10,13 @@ import sendSvg from "@/assets/icons/send.svg";
 import { isEmptyMessage, splitMessage } from "@/utils/messageFormatter";
 import activeSendSvg from "@/assets/icons/active-send.svg";
 import TagList from "@/components/TagList";
-import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { ChatMessagesRef } from "@/components/ChatMessages";
 import { pageUrls } from "@/config/page-urls";
+import { getRecommendTemplate } from "@/utils/utils";
+import userRecordSvg from "@/assets/icons/user-record.svg";
 
-const INPUT_HEIGHT = 58 + 24;
-const INPUT_RECOMMEND_HEIGHT = 90 + 24;
+const INPUT_HEIGHT = 30 + 24 + 10;
+const INPUT_RECOMMEND_HEIGHT = 30 + 30 + 24 + 16;
 
 const ChatDesign = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
@@ -56,12 +57,7 @@ const ChatDesign = () => {
           setTimeout(() => {
             chatMessagesRef.current?.scrollToBottom();
           }, 100);
-
-          if (messages[currentIndex].content?.length > 30) {
-            waitTime = 3000;
-          } else {
-            waitTime = 2000;
-          }
+          waitTime = (messages[currentIndex].content?.length / 20) * 1000;
 
           // 2秒后显示下一条消息
           if (currentIndex + 1 < messages.length) {
@@ -72,9 +68,7 @@ const ChatDesign = () => {
           } else {
             // 所有消息显示完毕
             // 显示推荐标签
-            if (recommends && recommends.length > 0) {
-              setRecommendTags(recommends);
-            }
+            setRecommendTags(recommends || []);
             setHasMoreMessages(false);
           }
         }
@@ -248,7 +242,7 @@ const ChatDesign = () => {
           return message;
         });
         // 使用依次显示函数
-        showMessagesSequentially(processedMessages, res.data.recommends);
+        showMessagesSequentially(processedMessages, res.data.recommends || []);
       })
       .catch((err) => {
         Taro.showToast({
@@ -299,42 +293,54 @@ const ChatDesign = () => {
               }))}
               onTagSelect={(tag) => {
                 if (!isDesigning) {
-                  handleSend(tag.title);
+                  handleSend(getRecommendTemplate(tag.title));
                 }
                 // setInputValue((prev) =>
                 //   !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
                 // );
               }}
+              style={{
+                marginBottom: "10px",
+              }}
             />
           )}
-          <View className={styles.inputWrapper}>
-            <Textarea
-              className={styles.messageInput}
-              value={inputValue}
-              placeholder="输入您的定制需求..."
-              placeholderStyle="color: #00000033;"
-              onInput={(e) => setInputValue(e.detail.value)}
-              onConfirm={handleSend}
-              autoHeight
-              adjustPosition={false}
-              // adjustKeyboardTo="bottom"
-              // onFocus={() => {
-              //   setKeyboardHeight(90);
-              // }}
-              // onBlur={() => {
-              //   setKeyboardHeight(0);
-              // }}
-              showConfirmBar={false}
-            />
-            <Image
-              src={
-                !isEmptyMessage(inputValue) && !isDesigning
-                  ? activeSendSvg
-                  : sendSvg
-              }
-              style={{ width: "26px", height: "26px" }}
-              onClick={handleSend}
-            />
+          <View className={styles.inputBottomContainer}>
+            <View className={styles.chatRecordEnter}>
+              <Image
+                src={userRecordSvg}
+                style={{ width: "27px", height: "27px" }}
+              />
+            </View>
+            <View className={styles.inputWrapper}>
+              <Textarea
+                className={styles.messageInput}
+                value={inputValue}
+                placeholder="输入您的定制需求..."
+                placeholderStyle="color: #00000033;"
+                onInput={(e) => setInputValue(e.detail.value)}
+                onConfirm={handleSend}
+                autoHeight
+                adjustPosition={false}
+                // adjustKeyboardTo="bottom"
+                // onFocus={() => {
+                //   setKeyboardHeight(90);
+                // }}
+                // onBlur={() => {
+                //   setKeyboardHeight(0);
+                // }}
+                showConfirmBar={false}
+                confirmType="send"
+              />
+              <Image
+                src={
+                  !isEmptyMessage(inputValue) && !isDesigning
+                    ? activeSendSvg
+                    : sendSvg
+                }
+                style={{ width: "26px", height: "26px" }}
+                onClick={handleSend}
+              />
+            </View>
           </View>
         </View>
       </View>

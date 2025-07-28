@@ -170,7 +170,8 @@ const Home = () => {
                       border: "1.1px solid rgba(255, 255, 255, 0.20)",
                       background: "rgba(0, 0, 0, 0.30)",
                       backdropFilter: "blur(4px)",
-                      boxShadow: 'none'
+                      boxShadow: 'none',
+                      width: "154px",
                     }}
                     textStyle={{
                       color: "#fff",
@@ -192,6 +193,9 @@ const Home = () => {
                       />
                     }
                   />
+                  <View className="crystal-link-text">
+                      产看我的档案
+                  </View>
                 </View>
               </View>
             </View>
