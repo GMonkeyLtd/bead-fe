@@ -11,6 +11,7 @@ import CrystalButton from "@/components/CrystalButton";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import { getNavBarHeightAndTop, getSafeArea } from "@/utils/style-tools";
 import BraceletDetailDialog from "@/components/BraceletDetailDialog";
+import BeadList from "@/components/BeadList";
 
 interface BeadInfo {
   id: string;
@@ -265,32 +266,9 @@ const InspirationDetailPage: React.FC = () => {
               {designData?.word_info?.recommendation_text}
             </Text>
             {/* 珠子信息区域 */}
-            <View className={styles.beadSection}>
-              {designData?.word_info?.bead_ids_deduplication
-                ?.slice(0, 4)
-                .map((bead) => (
-                  <View key={bead.id} className={styles.beadCard}>
-                    <View className={styles.beadImageContainer}>
-                      <Image
-                        src={bead.image_url}
-                        className={styles.beadImage}
-                        mode="aspectFill"
-                      />
-                    </View>
-                    <View className={styles.beadContent}>
-                      <Text className={styles.beadName}>
-                        {bead.name}「{bead.wuxing?.split("、")[0]}」
-                      </Text>
-                      <View className={styles.beadEffect}>
-                        <View className={styles.beadEffectLine} />
-                        <Text className={styles.beadEffectText}>
-                          {bead.function}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                ))}
-            </View>
+            <BeadList 
+              beads={designData?.word_info?.bead_ids_deduplication}
+              />
             {/* 作者和时间 */}
             <View className={styles.workDetailContainer}>
               <View className={styles.authorTimeSection}>
@@ -333,7 +311,7 @@ const InspirationDetailPage: React.FC = () => {
               style={{ width: "24px", height: "24px" }}
             />
           }
-          style={{ width: "220px", margin: "26px 0 46px",  }}
+          style={{ width: "220px", margin: "24px 0 24px",  }}
           isPrimary={true}
         />
       </View>

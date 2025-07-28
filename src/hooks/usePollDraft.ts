@@ -1,3 +1,4 @@
+import { showModal } from '@tarojs/taro';
 import { useState, useEffect, useCallback, useRef } from "react";
 import apiSession, {
   CreateSessionResponse,
@@ -22,7 +23,7 @@ export interface DraftData {
   bracelet_image?: string;
 }
 
-export const usePollDraft = ({ pollingInterval = 2000, maxRetries = 2 }) => {
+export const usePollDraft = ({ pollingInterval = 2000, maxRetries = 2, showLoading = false }) => {
   const [draft, setDraft] = useState<DraftData | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export const usePollDraft = ({ pollingInterval = 2000, maxRetries = 2 }) => {
               session_id: sessionId,
               draft_id: draftId,
             },
-            { showError: false }
+            { showError: false, showLoading }
           )) as DesignDraftResponse;
 
           if (response.code === 200 && response.data) {

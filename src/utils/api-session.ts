@@ -19,7 +19,7 @@ export interface BaseResponse {
 }
 
 export interface BeadItem {
-  id: string;
+  bead_id: string;
   name: string;
   image_url: string;
   color: string;
@@ -216,7 +216,7 @@ export default {
     },
     config?: ApiConfig
   ) => {
-    return http.post<{ draft: DesignDraftResponse }>(
+    return http.post<DesignDraftResponse>(
       `/user/sessions/${params.session_id}/drafts/${params.draft_id}/clone`,
       {
         Beads: params.beads,

@@ -48,7 +48,6 @@ export function useInfiniteScroll<T = any>({
   const observerRef = useRef<any>(null);
   const isLoadingRef = useRef(false);
   const pageRef = useRef(initialPage); // 添加pageRef来同步跟踪当前页码
-  console.log(page, 'page', listKey)
 
   // 加载数据
   const loadData = useCallback(async (pageNum: number, isRefresh = false) => {

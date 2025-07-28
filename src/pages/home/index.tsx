@@ -15,7 +15,6 @@ import apiSession from "@/utils/api-session";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
-  const [checkFirst, setCheckFirst] = useState(false);
   const [lastSessionId, setLastSessionId] = useState("");
   const instance = Taro.getCurrentInstance();
   const { newSession } = instance.router?.params || {};
@@ -38,9 +37,7 @@ const Home = () => {
     }).catch((e) => {
       setLastSessionId("");
       console.error("getLastSession error: ", e);
-    }).finally(() => {
-      setCheckFirst(true);
-    });
+    })
   })
 
   const startDesign = () => {
@@ -105,22 +102,6 @@ const Home = () => {
     gender: number;
     isLunar: boolean;
   }) => {
-    // Taro.redirectTo({
-    //   url:
-    //     pageUrls.design + '?year=' +
-    //     year +
-    //     "&month=" +
-    //     month +
-    //     "&day=" +
-    //     day +
-    //     "&hour=" +
-    //     hour +
-    //     "&gender=" +
-    //     gender +
-    //     "&isLunar=" +
-    //     isLunar,
-    // });
-
     Taro.redirectTo({
       url: pageUrls.chatDesign + '?year=' +
         year +
@@ -189,7 +170,8 @@ const Home = () => {
                       border: "1.1px solid rgba(255, 255, 255, 0.20)",
                       background: "rgba(0, 0, 0, 0.30)",
                       backdropFilter: "blur(4px)",
-                      boxShadow: 'none'
+                      boxShadow: 'none',
+                      width: "154px",
                     }}
                     textStyle={{
                       color: "#fff",
@@ -211,6 +193,9 @@ const Home = () => {
                       />
                     }
                   />
+                  <View className="crystal-link-text">
+                      产看我的档案
+                  </View>
                 </View>
               </View>
             </View>

@@ -1,0 +1,73 @@
+// 珠子信息区域样式
+.beadSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    align-items: stretch;
+    gap: 6px;
+    // background: #f8f9fa;
+  }
+  
+  .beadCard {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #efebe8;
+    border-radius: 4px;
+    flex: 1;
+  }
+  
+  .beadImageContainer {
+    display: flex;
+    justify-content: stretch;
+    align-items: stretch;
+    gap: 10px;
+    padding: 0 2px;
+    width: 19px;
+    height: 19px;
+  }
+  
+  .beadImage {
+    width: 15px;
+    height: 15px;
+  }
+  
+  .beadContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+  
+  .beadName {
+    font-family: "Noto Sans SC", sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1.2;
+    text-align: center;
+    color: #1f1722;
+  }
+  
+  .beadEffect {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .beadEffectLine {
+    width: 1px;
+    height: 12px;
+    background: #e2dcd6;
+  }
+  
+  .beadEffectText {
+    font-family: "Noto Sans SC", sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1.2;
+    text-align: center;
+    color: #1f1722;
+    opacity: 0.6;
+  }

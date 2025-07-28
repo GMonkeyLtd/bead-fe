@@ -126,21 +126,7 @@ const QuickDesign = () => {
     if (sessionId && draftId && imageUrl) {
       quickDesignByDraft(sessionId, draftId, imageUrl);
     }
-    if (beadDataId) {
-      const _beadData = beadData.find(
-        (item) => item.bead_data_id === beadDataId
-      );
-      quickDesignByImage(_beadData?.image_url, _beadData?.bead_list);
-      return;
-    }
-    quickDesignByInfo(
-      year,
-      month,
-      day,
-      hour,
-      gender,
-      isLunar === "true" ? true : false
-    );
+
 
     return () => {
       if (timeRef.current) {
@@ -154,122 +140,6 @@ const QuickDesign = () => {
       setShowVideo(false);
     };
   }, []);
-
-  const processDesignData = (data) => {
-    const uniqueId = generateUUID();
-    const {
-      image_urls,
-      bracelet_name,
-      recommendation_text,
-      bead_ids_deduplication,
-      design_id,
-    } = data;
-    addDesignData({
-      image_urls,
-      bracelet_name,
-      recommendation_text,
-      bead_ids_deduplication,
-      design_id: uniqueId,
-      design_backend_id: design_id,
-    });
-    Taro.redirectTo({
-      url:
-        pageUrls.result +
-        "?imageUrl=" +
-        encodeURIComponent(image_urls[0]) +
-        "&designId=" +
-        uniqueId,
-    });
-  };
-
-  const quickDesignByInfo = (
-    year,
-    month,
-    day,
-    hour,
-    gender,
-    isLunar: boolean
-  ) => {
-    if (!year || !month || !day || !hour || !gender) {
-      return;
-    }
-    setDesigning(true);
-    cancelTokenForInfo.current = CancelToken.create();
-    generateApi
-      .quickGenerate(
-        {
-          birth_year: parseInt(year || "0"),
-          birth_month: parseInt(month || "0"),
-          birth_day: parseInt(day || "0"),
-          birth_hour: parseInt(hour || "0"),
-          is_lunar: isLunar,
-          sex: parseInt(gender || "0"),
-        },
-        {
-          cancelToken: cancelTokenForInfo.current,
-        }
-      )
-      .then((res) => {
-        if (!res?.images_url?.[0]) {
-          throw new Error("生成失败");
-        }
-        processDesignData({ image_urls: res?.images_url });
-      })
-      .catch((err) => {
-        console.log(err, "err");
-        Taro.showToast({
-          title: "服务繁忙，请稍后再试",
-          icon: "none",
-          duration: 3000,
-        });
-        setTimeout(() => {
-          Taro.redirectTo({
-            url: pageUrls.home,
-          });
-        }, 3000);
-        console.error(JSON.stringify(err));
-      })
-      .finally(() => {
-        setDesigning(false);
-      });
-  };
-
-  const quickDesignByImage = async (imageUrl, beadsData) => {
-    setDesigning(true);
-    try {
-      const base64 = await imageToBase64(imageUrl, false);
-      cancelTokenForImage.current = CancelToken.create();
-      const res = await generateApi.personalizedGenerateByImage(
-        {
-          bead_info: beadsData,
-          image_base64: [base64 as string],
-        },
-        {
-          cancelToken: cancelTokenForImage.current,
-        }
-      );
-      if (!res.data?.image_urls?.[0]) {
-        throw new Error("生成失败");
-      }
-      Taro.redirectTo({
-        url:
-          pageUrls.result +
-          "?imageUrl=" +
-          encodeURIComponent(res.data?.image_urls?.[0]) +
-          "&designBackendId=" +
-          res.data?.design_id,
-      });
-    } catch (err) {
-      console.error(err, "err");
-      Taro.showToast({
-        title: "生成失败",
-        icon: "none",
-      });
-      setTimeout(() => {
-        Taro.navigateBack();
-      }, 3000);
-    }
-  };
 
   const pollDesignProgress = async (sessionId, draftId, designId) => {
     cancelPollDesignProgress.current = CancelToken.create();
@@ -287,7 +157,7 @@ const QuickDesign = () => {
     );
     if (res.data?.progress === 100) {
       Taro.redirectTo({
-        url: `${pageUrls.result}?designBackendId=${res.data?.design_id}`,
+        url: `${pageUrls.result}?designBackendId=${res.data?.design_id}&from=chat&sessionId=${sessionId}`,
       });
       // processDesignData({
       //   image_urls: [res.data?.image_url],

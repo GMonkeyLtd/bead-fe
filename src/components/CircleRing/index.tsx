@@ -37,8 +37,6 @@ import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 const CircleRing = ({
   targetSize = 1024, // 保存图片的尺寸
   dotsBgImageData,
-  canvasId = "circle-canvas",
-  showCanvas = false,
   // 是否区分珠子尺寸
   isDifferentSize = false,
   fileType = "png",
@@ -53,11 +51,10 @@ const CircleRing = ({
   }
 
   // 使用优化的hook
-  const { generateCircleRing, getResult, canvasProps } = useCircleRingCanvas({
+  const { generateCircleRing, getResult } = useCircleRingCanvas({
     targetSize,
     isDifferentSize,
     fileType: fileType as "png" | "jpg" | "jpeg",
-    canvasId,
   });
 
   // 当dotsBgImageData变化时，生成新的手串
@@ -73,11 +70,13 @@ const CircleRing = ({
           .then((imageUrl) => {
             if (imageUrl) {
               onChange("success", imageUrl, dotsBgImageData);
+              // 生成完成后清理Canvas资源
             }
           })
           .catch((error) => {
             console.error("生成手串失败:", error);
             onChange("error", "", dotsBgImageData);
+            // 即使失败也要清理Canvas资源
           });
       } else if (result.status === "success" && result.imageUrl) {
         // 如果已经有结果，直接调用onChange
@@ -89,23 +88,7 @@ const CircleRing = ({
   }, [dotsBgImageData, generateCircleRing, getResult, onChange]);
 
   // 渲染Canvas（隐藏的，用于绘制）
-  return (
-    <Canvas
-      canvasId={canvasProps.canvasId}
-      id={canvasProps.id}
-      height={canvasProps.height}
-      width={canvasProps.width}
-      style={{
-        width: `${targetSize}px`,
-        height: `${targetSize}px`,
-        visibility: "hidden",
-        position: "absolute" as const,
-        top: "-999999px",
-        left: "-999999px",
-        zIndex: -100,
-      }}
-    />
-  );
+  return null;
 };
 
 export default React.memo(CircleRing);

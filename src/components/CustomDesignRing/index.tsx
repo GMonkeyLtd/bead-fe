@@ -14,6 +14,8 @@ import CrystalButton from "../CrystalButton";
 import "./CustomDesignRing.scss";
 import { computeBraceletLength } from "@/utils/cystal-tools";
 import CircleRing, { CircleRingImage } from "../CircleRing";
+import { BEADS_SIZE_RENDER } from "@/config/beads";
+import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 
 interface Bead {
   image_url: string;
@@ -46,14 +48,6 @@ export interface CustomDesignRingRef {
 
 }
 
-const WUXING_MAP = ["金", "火", "土", "木", "水"];
-const targetSize = 1024;
-
-const SIZE_MAP = {
-  8: 34,
-  10: 48,
-  12: 56,
-};
 
 // 防抖函数
 const debounce = (func: Function, wait: number) => {
@@ -88,7 +82,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
 }>(({
   beads = [],
   canvasId = "custom-circle-canvas",
-  size = 0,
+  size,
   spacing = 0,
   beadTypeMap = {},
   renderRatio = 2,
@@ -114,6 +108,11 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   const positionCacheRef = useRef<Map<string, Position[]>>(new Map());
   const isProcessingRef = useRef<boolean>(false);
   const requestAnimationFrameId = useRef<number>(0);
+  const { generateCircleRing } = useCircleRingCanvas({
+    targetSize: 1024,
+    isDifferentSize: true,
+    fileType: "png",
+  });
 
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({
@@ -158,12 +157,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     try {
       const windowInfo = Taro.getWindowInfo();
       const { height: safeHeight } = windowInfo.safeArea || { height: 0 };
-      const predictSize = safeHeight / 2 - 16 - 45;
-      setCanvasSize(!size && predictSize ? predictSize : size);
+      const predictSize = safeHeight * 0.5 - 16 - 45 - 46;
+      setCanvasSize(!size && predictSize ? predictSize : size || 400);
     } catch (error) {
       console.warn("Failed to get window info:", error);
       // 降级使用固定尺寸
-      const fallbackSize = 300;
+      const fallbackSize = 400;
       setCanvasSize(!size ? fallbackSize : size);
     }
   }, [size]);
@@ -190,8 +189,20 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   );
 
   useEffect(() => {
+    if (dots.length > 0) {
+      // 将 dots 转换为 DotImageData 格式
+      const dotImageData = dots.map(dot => ({
+        image_url: dot.image_url,
+        bead_diameter: dot.bead_diameter,
+      }));
+      
+      generateCircleRing(dotImageData).then((imageUrl) => {
+        const newImageUrl = imageUrl || "";
+        setImageUrl(newImageUrl);
+      });
+    }
     debouncedCalculatePredictedLength(dots);
-  }, [dots, debouncedCalculatePredictedLength]);
+  }, [dots, debouncedCalculatePredictedLength, generateCircleRing]);
 
   useEffect(() => {
     if (imageUrl && createFlag) {
@@ -594,7 +605,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   // 优化：防抖更新珠子
   const debouncedUpdateBeads = useMemo(
     () =>
-      debounce((newDots: any[]) => {
+      debounce((newDots: Bead[]) => {
         processBeads(newDots);
         setImageUrl("");
       }, 100),
@@ -602,7 +613,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   );
 
   const updateBeads = useCallback(
-    (newDots: any[]) => {
+    (newDots: Bead[]) => {
       debouncedUpdateBeads(newDots);
     },
     [debouncedUpdateBeads]
@@ -652,6 +663,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
       });
       return;
     }
+    if (predictedLength - dots[selectedBeadIndex].bead_diameter * 0.1 < 12) {
+      Taro.showToast({
+        title: "哎呀，珠子有点少啦！一般手围建议不少于12cm噢。",
+        icon: "none",
+        duration: 3000,
+      });
+      return;
+    }
     const newDots = [...dots];
     newDots.splice(selectedBeadIndex, 1);
     const nextIndex = Math.min(selectedBeadIndex, newDots.length - 1);
@@ -661,8 +680,20 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
 
   const handleBeadClick = useCallback(
     (bead: any, size: number) => {
+      
       const newDots = [...dots];
+
       if (selectedBeadIndex === -1) {
+        
+        if (predictedLength + size * 0.1  > 23) {
+          Taro.showToast({
+            title: "哎呀，珠子有点多啦！一般手围建议不超过23cm噢。",
+            icon: "none",
+            duration: 3000,
+          });
+          return;
+        }
+       
         newDots.push({
           ...bead,
           render_diameter: size * renderRatio,
@@ -677,7 +708,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
       }
       updateBeads(newDots);
     },
-    [dots, selectedBeadIndex, renderRatio, updateBeads]
+    [dots, selectedBeadIndex, renderRatio, updateBeads, predictedLength]
   );
 
   // 清理资源
@@ -699,13 +730,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     return (
       <View
         key={curWuxing}
+        className="hide-scrollbar"
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           overflowY: "auto",
+          overflowX: "hidden",
           width: "100%",
-          padding: "0px 0px 24px 12px",
+          padding: "0px 0px 24px 4px",
           gap: "16px",
           borderRadius: "0 8px 8px 0",
           height: "100%",
@@ -721,69 +754,78 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
               style={{
                 width: "100%",
                 height: "120px",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignContent: "center",
-                gap: "8px",
-                // boxSizing: "border-box",
               }}
             >
-              {[8, 10, 12].map((size) => {
-                return (
-                  <View
-                    key={`${item.id}-${size}`}
-                    onClick={() => handleBeadClick(item, size)}
-                    style={{
-                      flex: 1,
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
+              <View
+                className="hide-scrollbar"
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: "8px",
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  padding: "0 4px",
+                  height: "100%",
+                  alignItems: "center",
+                }}
+              >
+                {BEADS_SIZE_RENDER.map((beadItem) => {
+                  return (
                     <View
+                      key={`${item.id}-${beadItem.bead_diameter}`}
+                      onClick={() => handleBeadClick(item, beadItem.bead_diameter)}
                       style={{
+                        flexShrink: 0,
+                        width: "80px",
+                        height: "100%",
                         display: "flex",
+                        flexDirection: "column",
                         alignItems: "center",
-                        justifyContent: "center",
-                        height: "72px",
-                        width: "72px",
-                        backgroundColor: "#ffffff8a",
-                        borderRadius: "4px",
+                        justifyContent: "space-between",
                       }}
                     >
-                      <Image
-                        src={item.image_url}
+                      <View
                         style={{
-                          width: `${SIZE_MAP[size] * 0.7}px`,
-                          height: `${SIZE_MAP[size] * 0.7}px`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "72px",
+                          width: "72px",
+                          backgroundColor: "#ffffff8a",
+                          borderRadius: "4px",
                         }}
-                      />
+                      >
+                        <Image
+                          src={item.image_url}
+                          style={{
+                            width: `${beadItem.render_diameter}px`,
+                            height: `${beadItem.render_diameter}px`,
+                          }}
+                        />
+                      </View>
+                      <View
+                        style={{
+                          fontSize: "12px",
+                          color: "#333",
+                          textAlign: "center",
+                          marginTop: "4px",
+                        }}
+                      >
+                        {item.name}
+                      </View>
+                      <View
+                        style={{
+                          fontSize: "10px",
+                          color: "#8e7767",
+                          textAlign: "center",
+                        }}
+                      >
+                        {beadItem.bead_diameter}mm
+                      </View>
                     </View>
-                    <View
-                      style={{
-                        fontSize: "12px",
-                        color: "#333",
-                        textAlign: "center",
-                        marginTop: "4px",
-                      }}
-                    >
-                      {item.name}
-                    </View>
-                    <View
-                      style={{
-                        fontSize: "10px",
-                        color: "#8e7767",
-                        textAlign: "center",
-                      }}
-                    >
-                      {size}mm
-                    </View>
-                  </View>
-                );
-              })}
+                  );
+                })}
+              </View>
             </View>
           );
         })}
@@ -791,15 +833,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     );
   };
 
-  const handleCircleRingChange = useCallback(
-    (status: string, canvasImage: string, dotsBgImageData: any[]) => {
-      if (status === "success") {
-        setImageUrl(canvasImage);
+  // const handleCircleRingChange = useCallback(
+  //   (status: string, canvasImage: string, dotsBgImageData: any[]) => {
+  //     if (status === "success") {
+  //       setImageUrl(canvasImage);
       
-      }
-    },
-    []
-  );
+  //     }
+  //   },
+  //   []
+  // );
 
   return (
     <View className="custom-design-ring-container">
@@ -811,12 +853,44 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          height: `${canvasSize + 16 + 45}px`,
+          height: `${canvasSize + 16 + 45 + 46}px`,
           // height: '50%',
-          flexShrink: 0,
-          flexGrow: 0,
+          // flexShrink: 0,
         }}
       >
+        <View style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          padding: "16px 20px 0 0",
+        }}>
+          <View
+            style={{
+              border: "1px solid #f5d8be",
+              opacity: !imageUrl ? 0.5 : 1,
+              background: "#e4c0a038",
+              borderRadius: "8px",
+              padding: "4px 8px",
+              fontSize: "14px",
+              boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
+              letterSpacing: "1px",
+            }}
+            onClick={() => {
+              onOk?.(
+                imageUrl,
+                dots.map((item) => ({
+                  id: item.id,
+                  image_url: item.image_url,
+                  bead_diameter: item.bead_diameter,
+                  render_diameter: item.render_diameter,
+                }))
+              );
+            }}
+          >
+            查看效果
+          </View>
+        </View>
         <View
           style={{
             width: "100%",
@@ -869,34 +943,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
             />
           </View>
         </View>
-        <View
-          style={{
-            position: "absolute",
-            top: "24px",
-            right: "24px",
-            border: "1px solid #f5d8be",
-            opacity: !imageUrl ? 0.5 : 1,
-            background: "#e4c0a038",
-            borderRadius: "8px",
-            padding: "8px 16px",
-            fontSize: "14px",
-            boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
-            letterSpacing: "4px",
-          }}
-          onClick={() => {
-            onOk?.(
-              imageUrl,
-              dots.map((item) => ({
-                id: item.id,
-                image_url: item.image_url,
-                bead_diameter: item.bead_diameter,
-                render_diameter: item.render_diameter,
-              }))
-            );
-          }}
-        >
-          渲染
-        </View>
 
         <View
           style={{
@@ -908,21 +954,22 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
             gap: "16px",
           }}
         >
-          <CrystalButton onClick={onCounterclockwiseMove} text="右移" />
-          <CrystalButton onClick={onClockwiseMove} text="左移" />
+          <CrystalButton onClick={onCounterclockwiseMove} text="右移" style={{ height: "36px" }} />
+          <CrystalButton onClick={onClockwiseMove} text="左移" style={{ height: "36px" }} />
 
-          <CrystalButton onClick={onDelete} text="删除" />
+          <CrystalButton onClick={onDelete} text="删除" style={{ height: "36px" }} />
         </View>
       </View>
       {/* 左侧纵向Tab选择器 */}
       <View className="custom-design-ring-bottom-container">
         <View
+          className="hide-scrollbar"
           style={{
             width: "60px",
             height: "100%",
             backgroundColor: "#f5f5f5",
             borderRadius: "8px 0 0 8px",
-            padding: "8px",
+            padding: "12px 4px",
             overflowY: "auto",
             flexShrink: 0,
             display: "flex",
@@ -971,14 +1018,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
         </View>
         {renderBeads()}
       </View>
-      <CircleRing
+      {/* <CircleRing
         dotsBgImageData={dots}
         targetSize={1024}
         canvasId="circle-ring-canvas111"
         isDifferentSize
         fileType="jpg"
         onChange={handleCircleRingChange}
-      />
+      /> */}
     </View>
   );
 });

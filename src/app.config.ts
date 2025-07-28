@@ -15,7 +15,7 @@ export default defineAppConfig({
       root: 'pages-design',
       pages: [
         'quick-design/index',
-        'design/index',
+        // 'design/index',
         'custom-design/index'
       ]
     },

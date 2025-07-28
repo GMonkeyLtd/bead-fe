@@ -16,34 +16,39 @@ const UserCenterPage: React.FC = () => {
   const [showIncomeCard, setShowIncomeCard] = useState(false);
   const [imageHistory, setImageHistory] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const initPageData = () => {
-    userApi.getUserInfo().then((res) => {
-      setUserInfo(res?.data);
+  const initPageData = async() => {
+    setLoading(true);
+    const userInfo = await userApi.getUserInfo({ showLoading: true });
+    setUserInfo(userInfo?.data);
+    const historyRes = await userHistoryApi.getImageHistory({
+      showLoading: true,
     });
-    userHistoryApi.getImageHistory().then((res) => {
-      const history = (res?.data || []).map((item) => {
+    const history = (historyRes?.data || []).map((item) => {
         return {
           id: item.ID,
           name: item.WordInfo.bracelet_name,
           image: item.ImageURL || DESIGN_PLACEHOLDER_IMAGE_URL,
         };
-      });
-      setImageHistory(history);
     });
-  }
+    setImageHistory(history);
+    setLoading(false);
+  };
 
   useDidShow(() => {
     initPageData();
-  })
+  });
 
   const handleItemClick = (item: any) => {
+    if (loading) return;
     Taro.navigateTo({
       url: `${pageUrls.result}?designBackendId=${item.id}&showBack=true`,
     });
   };
 
   const handleOrdersClick = () => {
+    if (loading) return;
     Taro.navigateTo({
       url: pageUrls.orderList,
     });
@@ -53,20 +58,22 @@ const UserCenterPage: React.FC = () => {
     <CrystalContainer showBack={false} showHome={false}>
       <View className={styles.pageContent}>
         <View className={styles.pageTopContainer}>
-          <UserInfoCard
-            userName={
-              userInfo?.nick_name?.slice(0, 10) ||
-              "微信用户" + Math.random().toString(36).substring(2, 15)
-            }
-            userSlogan="璞光集，好运气"
-            avatar={userInfo?.avatar_url || "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/default-avatar.png"} // 替换为实际头像URL
-            showAction={userInfo?.is_merchant}
-            onActionClick={() => {
-              Taro.redirectTo({
-                url: pageUrls.merchantLogin,
-              })
-            }}
-          />
+          {userInfo && !loading && (
+            <UserInfoCard
+              userName={
+                userInfo?.nick_name?.slice(0, 10) ||
+                "微信用户" + Math.random().toString(36).substring(2, 15)
+              }
+              userSlogan="璞光集，好运气"
+              avatar={userInfo?.avatar_url} // 替换为实际头像URL
+              showAction={userInfo?.is_merchant}
+              onActionClick={() => {
+                Taro.redirectTo({
+                  url: pageUrls.merchantLogin,
+                });
+              }}
+            />
+          )}
 
           {/* 功能卡片区域 */}
           <View className={styles.featureCards}>
@@ -112,6 +119,7 @@ const UserCenterPage: React.FC = () => {
               <View
                 className={`${styles.featureCard} ${styles.profileCard}`}
                 onClick={() => {
+                  if (loading) return;
                   Taro.navigateTo({
                     url: pageUrls.modifyUser,
                   });
@@ -132,27 +140,24 @@ const UserCenterPage: React.FC = () => {
             </View>
           </View>
         </View>
-          <View className={styles.imageHistoryTitle}>
-            <Image
-              src={MyWorkIcon}
-              style={{
-                width: "35px",
-                height: "12px",
-                position: "absolute",
-                bottom: "12px",
-                left: "50px",
-              }}
-            />
-            我的作品
+        <View className={styles.imageHistoryTitle}>
+          <Image
+            src={MyWorkIcon}
+            style={{
+              width: "35px",
+              height: "12px",
+              position: "absolute",
+              bottom: "12px",
+              left: "50px",
+            }}
+          />
+          我的作品
+        </View>
+        {imageHistory.length > 0 && !loading && (
+          <View className={styles.imageHistoryContainer}>
+            <BraceletList items={imageHistory} onItemClick={handleItemClick} />
           </View>
-          {imageHistory.length > 0 && (
-            <View className={styles.imageHistoryContainer}>
-              <BraceletList
-                items={imageHistory}
-                onItemClick={handleItemClick}
-              />
-            </View>
-          )}
+        )}
       </View>
       <TabBar />
     </CrystalContainer>

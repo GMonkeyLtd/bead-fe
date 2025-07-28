@@ -87,7 +87,6 @@ const ChatPage: React.FC = () => {
   };
 
   const processChatResult = (resData: any) => {
-    console.log(resData, "resData");
     updateSessionData({
       newMessage: {
         role: resData.role,

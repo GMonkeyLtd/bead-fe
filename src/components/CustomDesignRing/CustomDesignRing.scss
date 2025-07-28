@@ -11,11 +11,12 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 50%;
+  height: 60%;
   box-sizing: border-box;
   position: relative;
   background: linear-gradient(180deg, #f5f7fa00 80%, #d8d8d9 100%);
   padding-bottom: 16px;
+  flex: 0;
 
   // &::after {
   //     content: '';
@@ -37,6 +38,22 @@
   height: 50%;
   width: 100%;
   box-sizing: border-box;
-  padding: 20px;
+  padding: 20px 20px 0;
   flex: 1;
+}
+
+// 隐藏滚动条样式
+.hide-scrollbar {
+  -webkit-overflow-scrolling: touch;
+  
+  // Webkit浏览器 (Chrome, Safari, Edge)
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  // Firefox
+  scrollbar-width: none;
+  
+  // IE/Edge
+  -ms-overflow-style: none;
 }

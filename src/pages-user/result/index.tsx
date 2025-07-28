@@ -1,22 +1,18 @@
-import { View, Image } from "@tarojs/components";
+import { View, Image, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState, useRef } from "react";
 import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import "./index.scss";
 import AppHeader from "@/components/AppHeader";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
-import logoSvg from "@/assets/icons/logo.svg";
 import expendImage from "@/assets/icons/expend.svg";
 import CrystalButton from "@/components/CrystalButton";
 import {
   CRYSTALS_BG_IMAGE_URL,
   LOGO_IMAGE_URL,
-  LOGO_WITH_BACKGROUND_IMAGE_URL,
   APP_QRCODE_IMAGE_URL,
-  QR_CODE_IMAGE_URL,
   DESIGN_PLACEHOLDER_IMAGE_URL,
 } from "@/config";
 import { useDesign } from "@/store/DesignContext";
-import createBeadImage from "@/assets/icons/create-bead.svg";
 import shareDesignImage from "@/assets/icons/share-design.svg";
 import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
@@ -26,10 +22,13 @@ import api from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 import { computeBraceletLength } from "@/utils/cystal-tools";
 import BraceletDetailDialog from "@/components/BraceletDetailDialog";
+import WuxingDisplay from "@/components/WuxingDisplay";
+import WearTipsSvg from "@/assets/icons/wear-tips.svg";
+import BeadList from "@/components/BeadList";
+import MaterialSvg from "@/assets/icons/material.svg";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
-  const [originImageUrl, setOriginImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
   const [braceletName, setBraceletName] = useState("");
@@ -39,13 +38,16 @@ const Result = () => {
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
   const [designNo, setDesignNo] = useState("");
   const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
+  const [rizhuInfo, setRizhuInfo] = useState<any[]>("");
+  const [wuxingInfo, setWuxingInfo] = useState<any[]>([]);
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [orderList, setOrderList] = useState<any[]>([]);
-  const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
+  const [braceletDetailDialogShow, setBraceletDetailDialogShow] =
+    useState(false);
   const autoShareRef = useRef(false);
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
-  const showBack = params?.showBack;
+  const { sessionId, from } = params || {};
 
   const posterData = useMemo(() => {
     return {
@@ -74,18 +76,21 @@ const Result = () => {
           getOrderData(order_uuid);
         }
         setBeadsInfo(beads_info);
-        const { bracelet_name, recommendation_text, bead_ids_deduplication } =
-          word_info;
+        const {
+          bracelet_name,
+          recommendation_text,
+          bead_ids_deduplication,
+          rizhu,
+          wuxing,
+        } = word_info;
 
         setImageUrl(image_url);
         setBraceletName(bracelet_name);
-        setBeadDescriptions(
-          bead_ids_deduplication?.length > 2
-            ? bead_ids_deduplication.slice(0, 2)
-            : bead_ids_deduplication
-        );
+        setBeadDescriptions(bead_ids_deduplication);
         setDesignNo(id);
         setBraceletDescription(recommendation_text);
+        setRizhuInfo(rizhu || wuxing?.[0]);
+        setWuxingInfo(wuxing);
       })
       .catch((err) => {
         console.log(err, "err");
@@ -98,7 +103,7 @@ const Result = () => {
 
   const initData = () => {
     // 获取传入的图片URL参数
-    
+
     if (params?.designBackendId) {
       const imageUrl = params?.imageUrl || "";
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
@@ -153,49 +158,50 @@ const Result = () => {
       });
       return;
     }
-    
+
     try {
       // 检查相册权限
       const authSetting = await Taro.getSetting();
-      const writePhotosAlbumAuth = authSetting.authSetting['scope.writePhotosAlbum'];
-      
+      const writePhotosAlbumAuth =
+        authSetting.authSetting["scope.writePhotosAlbum"];
+
       if (writePhotosAlbumAuth === false) {
         // 权限被拒绝，引导用户到设置页面
         const res = await Taro.showModal({
-          title: '提示',
-          content: '需要相册权限才能保存图片，请在设置中开启权限',
-          confirmText: '去设置',
-          cancelText: '取消'
+          title: "提示",
+          content: "需要相册权限才能保存图片，请在设置中开启权限",
+          confirmText: "去设置",
+          cancelText: "取消",
         });
-        
+
         if (res.confirm) {
           await Taro.openSetting();
         }
         return;
       }
-      
+
       if (writePhotosAlbumAuth === undefined) {
         // 首次申请权限
         try {
           await Taro.authorize({
-            scope: 'scope.writePhotosAlbum'
+            scope: "scope.writePhotosAlbum",
           });
         } catch (authError) {
           // 用户拒绝了权限
           const res = await Taro.showModal({
-            title: '提示',
-            content: '需要相册权限才能保存图片，请在设置中开启权限',
-            confirmText: '去设置',
-            cancelText: '取消'
+            title: "提示",
+            content: "需要相册权限才能保存图片，请在设置中开启权限",
+            confirmText: "去设置",
+            cancelText: "取消",
           });
-          
+
           if (res.confirm) {
             await Taro.openSetting();
           }
           return;
         }
       }
-      
+
       Taro.showToast({
         title: "保存中",
         icon: "loading",
@@ -211,14 +217,15 @@ const Result = () => {
       });
     } catch (error) {
       console.error("保存图片失败:", error);
-      
+
       // 检查是否是用户取消操作
-      const errorMessage = typeof error === 'object' && error !== null && 'errMsg' in error 
-        ? (error as { errMsg: string }).errMsg 
-        : '';
-      
+      const errorMessage =
+        typeof error === "object" && error !== null && "errMsg" in error
+          ? (error as { errMsg: string }).errMsg
+          : "";
+
       // 如果不是用户取消操作，则显示报错
-      if (!errorMessage.includes('cancel')) {
+      if (!errorMessage.includes("cancel")) {
         Taro.showToast({
           title: "保存失败",
           icon: "error",
@@ -259,7 +266,22 @@ const Result = () => {
         "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
       }}
     >
-      <AppHeader isWhite showBack={showBack === 'false'} />
+      <AppHeader isWhite onBack={() => {
+        console.log(from, "from");
+        if (from === "chat") {
+          Taro.redirectTo({
+            url: pageUrls.chatDesign + "?session_id=" + sessionId,
+          });
+        } else {
+          if (Taro.getCurrentPages().length > 1) {
+            Taro.navigateBack();
+          } else {
+            Taro.redirectTo({
+              url: pageUrls.userCenter,
+            });
+          }
+        }
+      }}   />
       <View
         className="result-content-container"
         style={{
@@ -302,95 +324,112 @@ const Result = () => {
                 <View className="result-content-card-text-title">
                   {braceletName}
                 </View>
-                <View className="bracelet-length-info-container" onClick={() => beadsInfo?.length > 0 && setBraceletDetailDialogShow(true)}>
-                  <View className="bracelet-length-info-count-container">
+                <View
+                  className="bracelet-length-info-container"
+                  onClick={() =>
+                    beadsInfo?.length > 0 && setBraceletDetailDialogShow(true)
+                  }
+                >
+                  {/* <View className="bracelet-length-info-count-container">
                     <View className="bracelet-length-info-count">
                       {beadsInfo?.length || 0}
                     </View>
                     <View className="bracelet-length-info-unit">颗</View>
-                  </View>
+                  </View> */}
                   {predictedBraceletLength > 0 && (
                     <View className="bracelet-length-info-size-container">
                       {/* <View>{`${predictedBraceletLength}～${
                         predictedBraceletLength + 0.5
                       } cm`}</View>
                       <View style={{ width: "1px", height: "12px", backgroundColor: "#1F1722", opacity: 0.7 }}></View> */}
-                      <View>明细 ></View>
+                      <View>{"手串明细 >"}</View>
                     </View>
                   )}
                 </View>
               </View>
-              <View className="result-content-card-text-content">
-                {braceletDescription}
-              </View>
-            </View>
-            <View className="bead-description-container">
-              <View className="bead-description-list">
-                {beadDescriptions.length > 0 &&
-                  beadDescriptions.map((item, index) => (
-                    <View className="bead-item" key={index}>
-                      <View className="bead-title" key={index}>
-                        <Image
-                          src={item.image_url}
-                          style={{
-                            width: "15px",
-                            height: "15px",
-                            marginRight: "4px",
-                          }}
-                        />
-                        <View>{`${item.name}「${item.wuxing}」`}</View>
-                      </View>
-                      <View className="bead-description">{item.function}</View>
+              <View className="result-content-center-container">
+                <View className="result-content-center-text">
+                  <View className="result-content-bracelet-description">
+                    {braceletDescription}
+                  </View>
+                  <View className="result-content-wear-tips">
+                    <View className="result-content-wear-tips-title-container">
+                      <Image
+                        src={WearTipsSvg}
+                        style={{ width: "16px", height: "16px" }}
+                      />
+                      <Text className="result-content-wear-tips-title">
+                        佩戴建议
+                      </Text>
                     </View>
-                  ))}
+                    <View className="result-content-bracelet-description">
+                      天然水晶佩戴一段时间后建议定期净化噢~可以用清水冲洗或在月光下放置一晚，以保持水晶的能量纯净和光泽度。
+                    </View>
+                  </View>
+                </View>
+                <View className="result-content-wuxing-display-container">
+                  <WuxingDisplay
+                    element={{
+                      type: rizhuInfo,
+                      description: `五行属性喜${wuxingInfo?.join("、")}`,
+                    }}
+                  />
+                </View>
               </View>
-              <View className="bead-share-qrcode">
-                <Image
-                  src={APP_QRCODE_IMAGE_URL}
-                  mode="widthFix"
-                  style={{ width: "62px", height: "62px" }}
+              <View className="result-content-wear-tips">
+                <View className="result-content-wear-tips-title-container">
+                  <Image
+                    src={MaterialSvg}
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                  <Text className="result-content-wear-tips-title">
+                    水晶材料
+                  </Text>
+                </View>
+                <BeadList
+                  beads={beadDescriptions}
+                  cardStyle={{ background: "#F9F9F9" }}
                 />
-                <View className="bead-share-qrcode-text">开启专属定制</View>
               </View>
             </View>
           </View>
-        </View>
 
-        {orderList?.length > 0 && (
-          <View className="result-order-list-container">
-            <View className="result-order-list-title">
-              {`相关订单（${orderList.length}）`}
+          {orderList?.length > 0 && (
+            <View className="result-order-list-container">
+              <View className="result-order-list-title">
+                {`相关订单（${orderList.length}）`}
+              </View>
+              <OrderListComp
+                orders={orderList.map((item) => ({
+                  id: item.order_uuid,
+                  orderNumber: item.order_uuid,
+                  status: item.order_status,
+                  merchantName: item.merchant_info?.name,
+                  createTime: item.created_at,
+                  budget: item.price,
+                }))}
+                showActions={false}
+                showImage={false}
+                onItemClick={(item) => {
+                  if (
+                    [
+                      OrderStatus.PendingDispatch,
+                      OrderStatus.Dispatching,
+                    ].includes(item.status)
+                  ) {
+                    Taro.navigateTo({
+                      url: `${pageUrls.orderDispatching}?orderId=${item.id}`,
+                    });
+                  } else {
+                    Taro.navigateTo({
+                      url: `${pageUrls.orderDetail}?orderId=${item.id}`,
+                    });
+                  }
+                }}
+              />
             </View>
-            <OrderListComp
-              orders={orderList.map((item) => ({
-                id: item.order_uuid,
-                orderNumber: item.order_uuid,
-                status: item.order_status,
-                merchantName: item.merchant_info?.name,
-                createTime: item.created_at,
-                budget: item.price,
-              }))}
-              showActions={false}
-              showImage={false}
-              onItemClick={(item) => {
-                if (
-                  [
-                    OrderStatus.PendingDispatch,
-                    OrderStatus.Dispatching,
-                  ].includes(item.status)
-                ) {
-                  Taro.navigateTo({
-                    url: `${pageUrls.orderDispatching}?orderId=${item.id}`,
-                  });
-                } else {
-                  Taro.navigateTo({
-                    url: `${pageUrls.orderDetail}?orderId=${item.id}`,
-                  });
-                }
-              }}
-            />
-          </View>
-        )}
+          )}
+        </View>
       </View>
       <View className="result-content-card-action">
         <CrystalButton
@@ -431,13 +470,12 @@ const Result = () => {
       <PosterGenerator
         data={posterData}
         onGenerated={(url) => {
-          console.log(url, autoShareRef.current, 'url')
           setShareImageUrl(url);
           if (autoShareRef.current) {
             saveImage(url);
           }
         }}
-        showPoster={true}
+        showPoster={false}
       />
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog

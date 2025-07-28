@@ -15,7 +15,6 @@ import apiSession, {
 } from "@/utils/api-session";
 import ChatLoading from "../ChatLoading";
 import { BraceletDraftCard } from "../BraceletDraftCard";
-import { DotImageData } from "@/hooks/useCircleRingCanvas";
 import { LoadingDots } from "../ChatLoading";
 
 export interface ChatMessagesRef {
@@ -27,13 +26,15 @@ export interface ChatMessagesRef {
 const MessageItem = React.memo(({
   message,
   sessionId,
-  generateBraceletImage,
   animationDelay = 0,
+  shouldLoadImage = true,
+  onImageLoaded,
 }: {
   message: ChatMessageItem;
   sessionId: string;
-  generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
   animationDelay?: number;
+  shouldLoadImage?: boolean;
+  onImageLoaded?: (messageId: string) => void;
 }) => {
   const messageStyle = {
     animationDelay: `${animationDelay}ms`,
@@ -52,7 +53,8 @@ const MessageItem = React.memo(({
           sessionId={sessionId}
           draftId={message.draft_id}
           draftIndex={message.draft_index}
-          generateBraceletImage={generateBraceletImage}
+          shouldLoad={shouldLoadImage}
+          onImageLoaded={() => onImageLoaded?.(message.message_id)}
         />
       )}
     </View>
@@ -69,7 +71,8 @@ const MessageItem = React.memo(({
           sessionId={sessionId}
           draftId={message.draft_id}
           draftIndex={message.draft_index}
-          generateBraceletImage={generateBraceletImage}
+          shouldLoad={shouldLoadImage}
+          onImageLoaded={() => onImageLoaded?.(message.message_id)}
         />
       )}
     </View>
@@ -83,7 +86,6 @@ export default forwardRef<
     messages: ChatMessageItem[];
     isChatting: boolean;
     maxHeight?: string;
-    generateBraceletImage: (beads: DotImageData[]) => Promise<string>;
     autoScrollToBottom?: boolean;
     hasMoreMessages?: boolean;
   }
@@ -94,7 +96,6 @@ export default forwardRef<
       messages,
       isChatting,
       maxHeight,
-      generateBraceletImage,
       autoScrollToBottom = true,
       hasMoreMessages = false,
     },
@@ -103,8 +104,38 @@ export default forwardRef<
     const [scrollAnchor, setScrollAnchor] = useState<string>("");
     const scrollViewRef = useRef<any>(null);
     const [scrollTop, setScrollTop] = useState(0);
-    console.log('messages', messages);
+    const [loadedMessageIds, setLoadedMessageIds] = useState<Set<string>>(new Set());
 
+    // 标记消息为已加载
+    const markMessageAsLoaded = useCallback((messageId: string) => {
+      setLoadedMessageIds(prev => new Set([...prev, messageId]));
+    }, []);
+
+    // 计算消息的加载优先级：底部消息优先加载，顶部消息延迟加载
+    const getMessageLoadPriority = useCallback((index: number, messageId: string) => {
+      const totalMessages = messages.length;
+      if (totalMessages === 0) return true;
+      
+      // 如果已经加载过，直接返回true
+      if (loadedMessageIds.has(messageId)) {
+        return true;
+      }
+      
+      // 底部3条消息立即加载，其他消息延迟加载
+      const shouldLoadImmediately = index >= totalMessages - 3;
+      
+      // 如果不在底部3条，但有draft_id，延迟加载
+      if (!shouldLoadImmediately && messageId) {
+        // 延迟加载：2秒后开始加载
+        setTimeout(() => {
+          if (!loadedMessageIds.has(messageId)) {
+            markMessageAsLoaded(messageId);
+          }
+        }, 2000 + (totalMessages - index) * 500); // 越靠上的消息延迟越长
+      }
+      
+      return shouldLoadImmediately;
+    }, [messages.length, loadedMessageIds, markMessageAsLoaded]);
 
     // 使用 useMemo 缓存消息列表，避免不必要的重新渲染
     const messageItems = useMemo(() => {
@@ -115,17 +146,21 @@ export default forwardRef<
         const animationDelay = hasMoreMessages && isRecentMessage ? 
           (messages.length - 1 - index) * 100 : 0;
         
+        // 计算是否应该立即加载图像
+        const shouldLoadImage = getMessageLoadPriority(index, message.message_id);
+        
         return (
           <MessageItem
             key={message.message_id}
             message={message}
             sessionId={sessionId}
-            generateBraceletImage={generateBraceletImage}
             animationDelay={animationDelay}
+            shouldLoadImage={shouldLoadImage}
+            onImageLoaded={markMessageAsLoaded}
           />
         );
       });
-    }, [messages, sessionId, generateBraceletImage, hasMoreMessages]);
+    }, [messages, sessionId, hasMoreMessages, getMessageLoadPriority]);
 
     const scrollToBottom = useCallback(() => {
       // 使用 setTimeout 确保 DOM 更新完成后再设置 scrollIntoView
@@ -175,6 +210,20 @@ export default forwardRef<
       }
     }, [scrollAnchor]);
 
+    // 滚动监听，当滚动到顶部时加载更多消息的图像
+    const handleScroll = useCallback((e: any) => {
+      const { scrollTop } = e.detail;
+      // 如果滚动到顶部附近，加载更多消息的图像
+      if (scrollTop < 100) {
+        // 加载前5条消息的图像
+        messages.slice(0, 5).forEach(message => {
+          if (!loadedMessageIds.has(message.message_id)) {
+            markMessageAsLoaded(message.message_id);
+          }
+        });
+      }
+    }, [messages, loadedMessageIds, markMessageAsLoaded]);
+
     return (
       <ScrollView
         ref={scrollViewRef}
@@ -186,6 +235,7 @@ export default forwardRef<
         enableFlex
         className={styles.chatMessagesContainer}
         scrollIntoView={scrollAnchor}
+        onScroll={handleScroll}
       >
         {messageItems}
         {hasMoreMessages && (

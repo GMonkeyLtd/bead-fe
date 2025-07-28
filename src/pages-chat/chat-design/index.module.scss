@@ -56,17 +56,35 @@
   padding: 0 12px;
   background: rgba(255, 255, 255, 0.27);
 
-  .inputWrapper {
+  .inputBottomContainer {
     display: flex;
+    align-items: center;
+    gap: 4px;
     box-sizing: border-box;
+  }
+
+  .chatRecordEnter {
+    width: 20px;
+    height: 30px;
+    padding: 10px 16px;
+    border-radius: 20px;
+    border: 1px solid #FFE4C1;
+    background: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .inputWrapper {
+    flex: 1;
+    display: flex;
     gap: 8px;
-    min-height: 51px;
-    max-height: 58px;
-    background: #ffffff;
-    margin-top: 10px;
-    border-radius: 10px;
+    height: 30px;
     align-items: center;
     padding: 10px 16px;
+    border-radius: 20px;
+    border: 1px solid #FF9D1D;
+    background: #FFF;
 
     .messageInput {
       flex: 1;
@@ -79,8 +97,7 @@
       word-wrap: break-word;
       word-break: break-all;
       box-sizing: border-box;
-      min-height: 32px;
-      max-height: 58px;
+      width: fit-content;
     }
 
     .iconButton {
