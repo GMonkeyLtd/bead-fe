@@ -1,0 +1,384 @@
+.archiveCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #FF9421;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+
+  &.customArchive {
+    border: 1px solid #FFF;
+    background: rgba(255, 255, 255, 0.40);
+    border-radius: 10px;
+  }
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.archiveNameSection {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.archiveName {
+  font-family: "Source Han Serif CN", serif;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.437em;
+  letter-spacing: 0.07em;
+  color: #1F1722;
+  opacity: 0.9;
+}
+
+.nameIcon {
+  width: 12px;
+  height: 12px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconDot {
+  width: 9.19px;
+  height: 8.27px;
+  background: rgba(31, 23, 34, 0.3);
+  border-radius: 50%;
+}
+
+.designCountBadge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 6px;
+  background: #FFEDD8;
+  border-radius: 4px;
+}
+
+.designCountText {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 350;
+  font-size: 11px;
+  line-height: 1.35em;
+  color: #583408;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, #F2EFEC 0%, rgba(255, 255, 255, 0.5) 100%);
+}
+
+.archiveInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+}
+
+.infoLabel {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 11px;
+  line-height: 1.2em;
+  color: rgba(31, 23, 34, 0.5);
+  opacity: 0.9;
+}
+
+.infoValue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.genderIcon {
+  width: 14px;
+  height: 14px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.genderSymbol {
+  width: 12.83px;
+  height: 7.88px;
+  border-radius: 2px;
+  position: relative;
+
+  &.male {
+    background: #5F55B9;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5.83px;
+      height: 2.33px;
+      background: #5F55B9;
+      border-radius: 1px;
+    }
+  }
+
+  &.female {
+    background: #FF6B97;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5.83px;
+      height: 2.33px;
+      background: #FF6B97;
+      border-radius: 1px;
+    }
+  }
+}
+
+.infoText {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.2em;
+  color: rgba(31, 23, 34, 0.8);
+  opacity: 0.9;
+
+  &.timeText {
+    color: rgba(31, 23, 34, 0.8);
+  }
+}
+
+.actionSection {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  gap: 10px;
+}
+
+// 当前档案状态样式
+.currentArchiveButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(255, 148, 33, 0.1);
+  border: 1px dashed rgba(255, 148, 33, 0.1);
+  border-radius: 44px;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.active {
+    background: rgba(255, 148, 33, 0.2);
+    border-color: rgba(255, 148, 33, 0.3);
+  }
+
+  &:hover {
+    background: rgba(255, 148, 33, 0.15);
+  }
+}
+
+.buttonIcon {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconCircle {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(180deg, #DCFFA3 0%, #2ABF68 100%);
+  border-radius: 50%;
+  position: absolute;
+}
+
+.iconCheck {
+  width: 4.44px;
+  height: 3.1px;
+  border: 1px solid #FFFFFF;
+  border-top: none;
+  border-right: none;
+  transform: rotate(-45deg);
+  position: absolute;
+  top: 5.73px;
+  left: 5.09px;
+}
+
+.buttonText {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 350;
+  font-size: 12px;
+  line-height: 1.35em;
+  color: #1F1722;
+  opacity: 0.5;
+}
+
+// 非当前档案状态样式
+.switchArchiveButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #FFFFFF;
+  border: 1px solid rgba(84, 62, 55, 0.09);
+  border-radius: 44px;
+  flex: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 148, 33, 0.05);
+  }
+}
+
+.switchIcon {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.switchArrow1 {
+  position: absolute;
+  width: 7px;
+  height: 2.33px;
+  background: #FF9421;
+  border-radius: 1px;
+  top: 3.5px;
+  left: 4.67px;
+}
+
+.switchArrow2 {
+  position: absolute;
+  width: 7px;
+  height: 2.33px;
+  background: #FF9421;
+  border-radius: 1px;
+  top: 8.17px;
+  left: 2.33px;
+}
+
+.switchText {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 350;
+  font-size: 12px;
+  line-height: 1.35em;
+  color: #1F1722;
+}
+
+.deleteButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 0, 0, 0.02);
+  border: 1px solid rgba(255, 0, 0, 0.1);
+  border-radius: 44px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 0, 0, 0.05);
+  }
+}
+
+.deleteIcon {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteSymbol {
+  width: 11.13px;
+  height: 12.25px;
+  background: rgba(255, 0, 0, 0.3);
+  border-radius: 1px;
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 1px;
+    background: rgba(255, 0, 0, 0.3);
+    top: 50%;
+    left: 50%;
+  }
+
+  &::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+
+  &::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+}
+
+// 响应式设计
+@media (max-width: 375px) {
+  .archiveCard {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .archiveName {
+    font-size: 14px;
+  }
+
+  .actionSection {
+    gap: 8px;
+  }
+
+  .switchArchiveButton {
+    padding: 6px 10px;
+  }
+
+  .deleteButton {
+    width: 28px;
+    height: 28px;
+  }
+} 

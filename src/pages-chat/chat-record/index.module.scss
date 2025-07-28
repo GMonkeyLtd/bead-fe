@@ -1,0 +1,68 @@
+.chatRecordPage {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 253, 250, 0.48) 0%,
+    rgba(244, 242, 238, 0.5) 17.99%,
+    rgba(244, 242, 238, 0.39) 37.47%,
+    rgba(244, 242, 238, 0.17) 100%
+  );
+  padding: 20px 16px;
+  box-sizing: border-box;
+}
+
+.pageHeader {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.pageTitle {
+  font-family: "Source Han Serif CN", serif;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.4em;
+  color: #1F1722;
+  opacity: 0.9;
+}
+
+.archiveList {
+  height: calc(100vh - 120px);
+  padding-bottom: 20px;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 148, 33, 0.3);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 148, 33, 0.5);
+  }
+}
+
+// 响应式设计
+@media (max-width: 375px) {
+  .chatRecordPage {
+    padding: 16px 12px;
+  }
+
+  .pageHeader {
+    margin-bottom: 20px;
+  }
+
+  .pageTitle {
+    font-size: 18px;
+  }
+
+  .archiveList {
+    height: calc(100vh - 100px);
+  }
+}
