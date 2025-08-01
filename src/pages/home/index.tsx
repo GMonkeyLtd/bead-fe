@@ -193,9 +193,9 @@ const Home = () => {
                       />
                     }
                   />
-                  <View className="crystal-link-text">
-                      产看我的档案
-                  </View>
+                  {/* <View className="crystal-link-text"> */}
+                      {/* 产看我的档案 */}
+                  {/* </View> */}
                 </View>
               </View>
             </View>

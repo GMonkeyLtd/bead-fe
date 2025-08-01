@@ -94,18 +94,11 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                   <View className="budget-dialog-budget-header">
                     <Text className="budget-dialog-budget-label">我的预算</Text>
                   </View>
-                  <View className="budget-dialog-budget-input-wrapper">
-                    <Input
-                      className="budget-dialog-input"
-                      value={budget}
-                      onInput={handleBudgetChange}
-                      type="digit"
-                      placeholder="0.00"
-                      focus={true}
-                      // placeholderClass="budget-input-placeholder"
-                      // placeholderTextColor="red"
-                      placeholderStyle="color: #00000033;"
-                    />
+                  <View className="budget-dialog-budget-price-wrapper">
+                    <View className="budget-dialog-budget-input-value">
+                      299
+                    </View>
+                    <View className="budget-dialog-budget-input-unit">RMB</View>
                   </View>
                 </View>
 

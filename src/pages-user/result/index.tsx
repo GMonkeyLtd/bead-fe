@@ -1,4 +1,4 @@
-import { View, Image, Text } from "@tarojs/components";
+import { View, Image, Text, Button } from "@tarojs/components";
 import { useEffect, useMemo, useState, useRef } from "react";
 import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import "./index.scss";
@@ -14,7 +14,7 @@ import {
 } from "@/config";
 import { useDesign } from "@/store/DesignContext";
 import shareDesignImage from "@/assets/icons/share-design.svg";
-import PosterGenerator from "@/components/PosterGenerator";
+// import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
 import { OrderStatus } from "@/utils/orderUtils";
 import OrderListComp from "@/components/OrderListComp";
@@ -26,6 +26,7 @@ import WuxingDisplay from "@/components/WuxingDisplay";
 import WearTipsSvg from "@/assets/icons/wear-tips.svg";
 import BeadList from "@/components/BeadList";
 import MaterialSvg from "@/assets/icons/material.svg";
+import createBeadImage from "@/assets/icons/create-bead.svg";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -149,45 +150,46 @@ const Result = () => {
   }, [beadsInfo]);
 
   // 保存图片到相册
-  const saveImage = async (url: string) => {
-    if (!url) {
-      autoShareRef.current = true;
-      Taro.showToast({
-        title: "分享图正在制作中...",
-        icon: "none",
-      });
-      return;
-    }
-
+  const saveImage = async () => {
+    setLoading(true);
+    Taro.showToast({
+      title: "正在生成分享图...",
+      icon: "none",
+    });    
     try {
-      // 检查相册权限
-      const authSetting = await Taro.getSetting();
-      const writePhotosAlbumAuth =
-        authSetting.authSetting["scope.writePhotosAlbum"];
-
-      if (writePhotosAlbumAuth === false) {
-        // 权限被拒绝，引导用户到设置页面
-        const res = await Taro.showModal({
-          title: "提示",
-          content: "需要相册权限才能保存图片，请在设置中开启权限",
-          confirmText: "去设置",
-          cancelText: "取消",
-        });
-
-        if (res.confirm) {
-          await Taro.openSetting();
+      const res = await Taro.request({
+        url: "http://106.75.246.41:8000/api/generate-crystal-poster",
+        method: "POST",
+        header: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          crystal_data: {
+            design_id: designNo,
+            bracelet_image: imageUrl,
+            bracelet_name: braceletName,
+            rizhu: rizhuInfo,
+            wuxing: wuxingInfo,
+            bracelet_description: braceletDescription,
+            crystal_list: beadDescriptions?.map((item) => ({
+              id: item.id,
+              name: item.name,
+              wuxing: item.wuxing,
+              function: item.function,
+              image_url: item.image_url,
+            })),
+          }
         }
-        return;
-      }
+      })
+      console.log("请求成功，响应:", res);
+      if (res.data.data) {
+        // 检查相册权限
+        const authSetting = await Taro.getSetting();
+        const writePhotosAlbumAuth =
+          authSetting.authSetting["scope.writePhotosAlbum"];
 
-      if (writePhotosAlbumAuth === undefined) {
-        // 首次申请权限
-        try {
-          await Taro.authorize({
-            scope: "scope.writePhotosAlbum",
-          });
-        } catch (authError) {
-          // 用户拒绝了权限
+        if (writePhotosAlbumAuth === false) {
+          // 权限被拒绝，引导用户到设置页面
           const res = await Taro.showModal({
             title: "提示",
             content: "需要相册权限才能保存图片，请在设置中开启权限",
@@ -200,24 +202,69 @@ const Result = () => {
           }
           return;
         }
+
+        if (writePhotosAlbumAuth === undefined) {
+          // 首次申请权限
+          try {
+            await Taro.authorize({
+              scope: "scope.writePhotosAlbum",
+            });
+          } catch (authError) {
+            // 用户拒绝了权限
+            const res = await Taro.showModal({
+              title: "提示",
+              content: "需要相册权限才能保存图片，请在设置中开启权限",
+              confirmText: "去设置",
+              cancelText: "取消",
+            });
+
+            if (res.confirm) {
+              await Taro.openSetting();
+            }
+            return;
+          }
+        }
+
+        Taro.showToast({
+          title: "保存中",
+          icon: "loading",
+        });
+
+        // 将base64转换为临时文件
+        const base64Data = res.data.data;
+        console.log('Base64 data length:', base64Data?.length);
+        
+        const tempFilePath = `${Taro.env.USER_DATA_PATH}/temp_poster_${Date.now()}.webp`;
+        console.log(tempFilePath, "tempFilePath");
+        await Taro.getFileSystemManager().writeFile({
+          filePath: tempFilePath,
+          data: base64Data,
+          encoding: 'base64',
+          success: () => {
+            setShareImageUrl(tempFilePath);
+            Taro.saveImageToPhotosAlbum({
+              filePath: tempFilePath,
+              success: () => {
+                Taro.showToast({
+                  title: "保存成功",
+                  icon: "success",
+                });
+              },
+              fail: (error) => {
+                Taro.showToast({
+                  title: "保存失败",
+                  icon: "error",
+                });
+                console.log(error, "保存失败");
+              }
+            });
+          },
+          fail: (error) => {
+            console.log("写入失败", error);
+          }
+        });
       }
-
-      Taro.showToast({
-        title: "保存中",
-        icon: "loading",
-      });
-
-      await Taro.saveImageToPhotosAlbum({
-        filePath: url,
-      });
-
-      Taro.showToast({
-        title: "保存成功",
-        icon: "success",
-      });
     } catch (error) {
-      console.error("保存图片失败:", error);
-
       // 检查是否是用户取消操作
       const errorMessage =
         typeof error === "object" && error !== null && "errMsg" in error
@@ -226,14 +273,15 @@ const Result = () => {
 
       // 如果不是用户取消操作，则显示报错
       if (!errorMessage.includes("cancel")) {
+        console.error(error, "error");
         Taro.showToast({
           title: "保存失败",
           icon: "error",
         });
       }
-    } finally {
+    }
+    finally {
       setLoading(false);
-      autoShareRef.current = false;
     }
   };
 
@@ -281,7 +329,7 @@ const Result = () => {
             });
           }
         }
-      }}   />
+      }} />
       <View
         className="result-content-container"
         style={{
@@ -444,7 +492,7 @@ const Result = () => {
             />
           }
         />
-        {/* <CrystalButton
+        <CrystalButton
           onClick={doCreate}
           isPrimary
           text="制作成品"
@@ -456,7 +504,7 @@ const Result = () => {
               style={{ width: "24px", height: "24px" }}
             />
           }
-        /> */}
+        />
       </View>
       {budgetDialogShow && (
         <BudgetDialog
@@ -467,7 +515,7 @@ const Result = () => {
           onClose={() => setBudgetDialogShow(false)}
         />
       )}
-      <PosterGenerator
+      {/* <PosterGenerator
         data={posterData}
         onGenerated={(url) => {
           setShareImageUrl(url);
@@ -476,7 +524,7 @@ const Result = () => {
           }
         }}
         showPoster={false}
-      />
+      /> */}
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}

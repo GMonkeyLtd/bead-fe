@@ -127,26 +127,31 @@
   color: #1f1722;
 }
 
-.budget-dialog-budget-input-wrapper {
+.budget-dialog-budget-price-wrapper {
   display: flex;
   flex-direction: row;
   gap: 10px;
   padding: 8px 0;
+  align-items: flex-end;
 }
 
-.budget-dialog-input {
-  font-family: "Source Han Serif CN", serif;
-  font-weight: 500;
+.budget-dialog-budget-input-value {
+  color: #1F1722;
+  font-family: "Source Han Serif CN" serif;
   font-size: 32px;
-  height: 34px;
-  line-height: 1.437em;
-  // color: rgba(0, 0, 0, 0.2);
-  border: none;
-  outline: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  min-width: 100px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  line-height: 1;
+}
+
+.budget-dialog-budget-input-unit {
+  color: rgba(31, 23, 34, 0.20);
+  font-family: "Noto Sans SC";
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .budget-dialog-unlimited-text {
@@ -205,13 +210,10 @@
 
   background: linear-gradient(180deg, #282724 0%, #000000 100%);
   border: 1px solid;
-  border-image: linear-gradient(
-      360deg,
+  border-image: linear-gradient(360deg,
       rgba(0, 0, 0, 0.05) 0%,
       rgba(52, 52, 52, 0.39) 60.1%,
-      rgba(0, 0, 0, 0.06) 100%
-    )
-    1;
+      rgba(0, 0, 0, 0.06) 100%) 1;
   border-radius: 100px;
   box-shadow: inset 0px -4px 16px 0px rgba(0, 0, 0, 0.3),
     inset 0px -2px 6px 0px rgba(255, 255, 255, 0.75);
@@ -240,11 +242,9 @@
 .budget-dialog-button-reflection {
   width: 100%;
   height: 12px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.74) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.74) 0%,
+      rgba(255, 255, 255, 0) 100%);
   border-radius: 1000px;
   filter: blur(12.2px);
 }
@@ -266,11 +266,9 @@
   letter-spacing: 4px;
   text-align: center;
 
-  background: radial-gradient(
-    ellipse at 31.28% 83.62%,
-    #fff0de 0%,
-    #ffe4b5 100%
-  );
+  background: radial-gradient(ellipse at 31.28% 83.62%,
+      #fff0de 0%,
+      #ffe4b5 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
