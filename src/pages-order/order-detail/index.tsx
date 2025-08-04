@@ -11,6 +11,8 @@ import {
   OrderStatus as OrderStatusEnum,
   processingOrderStatus,
   OrderStatusMap,
+  getOrderStatusDescription,
+  getOrderStatusTip
 } from "@/utils/orderUtils";
 import CrystalButton from "@/components/CrystalButton";
 import shareDesignImage from "@/assets/icons/share-design.svg";
@@ -64,11 +66,18 @@ const OrderDetail: React.FC = () => {
     return [OrderStatusEnum.OrderStatusPendingPayment].includes(orderStatus);
   }, [orderStatus]);
 
+  const isSptRefund = useMemo(() => {
+    return [OrderStatusEnum.OrderStatusPendingShipment].includes(orderStatus);
+  }, [orderStatus]);
+
+  const isSptCancel = useMemo(() => {
+    return [OrderStatusEnum.OrderStatusPendingPayment, OrderStatusEnum.OrderStatusPendingShipment].includes(orderStatus);
+  }, [orderStatus]);
+
   const handlOnPurchase = () => {
         
   };
 
-      console.log(order, 'res')
 
   return (
     <CrystalContainer
@@ -115,14 +124,19 @@ const OrderDetail: React.FC = () => {
             productImage={order?.design_info?.image_url}
             beads={order?.design_info?.beads_info || []}
             orderAction={
-              processingOrderStatus.includes(orderStatus)
+              isSptCancel
                 ? {
                   text: "取消订单",
                   onClick: () => {
                     setCancelDialogVisible(true);
                   },
                 }
-                : undefined
+                : isSptRefund ? {
+                  text: "申请退款",
+                  onClick: () => {
+                    setCancelDialogVisible(true);
+                  },
+                } : undefined
             }
           />)}
       </View>
@@ -176,8 +190,10 @@ const OrderDetail: React.FC = () => {
       <CancelOrderDialog
         visible={cancelDialogVisible}
         onClose={() => setCancelDialogVisible(false)}
+        type={isSptRefund ? 'refund' : 'cancel'}
         onConfirm={(reason: string) => {
-          userHistoryApi.cancelOrder(order?.order_uuid).then(() => {
+          if (isSptCancel) {
+            userHistoryApi.cancelOrder(order?.order_uuid).then(() => {
             Taro.showToast({
               title: "取消订单成功",
               icon: "success",
@@ -189,7 +205,15 @@ const OrderDetail: React.FC = () => {
               title: "取消订单失败",
               icon: "none",
             });
-          });
+            });
+          } else if (isSptRefund) {
+            // userHistoryApi.refundOrder(order?.order_uuid).then(() => {
+            //   Taro.showToast({
+            //     title: "退款成功",
+            //     icon: "success",
+            //   });
+            // });
+          }
         }}
       />
     </CrystalContainer>
@@ -212,7 +236,7 @@ const OrderStatus: React.FC<{ status: OrderStatusEnum }> = ({ status }) => {
         }}
       >
         <Text className="order-status-title">
-          {`订单${formattedOrderStatus}`}
+          {getOrderStatusDescription(status)}
         </Text>
         <StatusBadge
           type={
@@ -228,7 +252,7 @@ const OrderStatus: React.FC<{ status: OrderStatusEnum }> = ({ status }) => {
           <View className="chat-icon">
             <Image src={connectIcon} />
           </View>
-          <Text className="status-text">稍后商家将主动与您联系</Text>
+          <Text className="status-text">{getOrderStatusTip(status)}</Text>
         </View>
       )}
     </View>

@@ -65,3 +65,47 @@ export const getStatusBadgeType = (status: OrderStatus): StatusBadgeType => {
       return StatusBadgeType.Processing;
   }
 };
+
+export const getOrderStatusDescription = (status: OrderStatus) => {
+  switch (status) {
+    case OrderStatus.OrderStatusInProgress:
+    case OrderStatus.OrderStatusNegotiating:
+      return "定制细节沟通中";
+    case OrderStatus.OrderStatusPendingPayment:
+      return "请确认定制信息";
+    case OrderStatus.OrderStatusPendingShipment:
+      return "等待商家定制";
+    case OrderStatus.OrderStatusShipped:
+      return "快递已发出";
+    case OrderStatus.OrderStatusReceived:
+      return "快递已签收";
+    case OrderStatus.OrderStatusCompleted:
+      return "恭喜您，收获新手串";
+    case OrderStatus.OrderStatusCancelled:
+      return "用户取消定制";
+    case OrderStatus.OrderStatusRefunding:
+      return "请等待商家处理";
+    case OrderStatus.OrderStatusRefunded:
+      return "退款成功";
+    default:
+      return`订单${OrderStatusMap[status]}`;
+  }
+}
+
+export const getOrderStatusTip = (status: OrderStatus) => {
+  switch (status) {
+    case OrderStatus.OrderStatusInProgress:
+    case OrderStatus.OrderStatusNegotiating:
+      return '稍后商家将主动与您联系';
+    case OrderStatus.OrderStatusPendingPayment:
+      return "请及时付款";
+    case OrderStatus.OrderStatusPendingShipment:
+      return "定制周期一般在7-10天";
+    case OrderStatus.OrderStatusShipped:
+      return "商家已发货，请耐心等待";
+    case OrderStatus.OrderStatusRefunding:
+      return "已提交退款申请，预计24小时内为您处理";
+    default:
+      return '';
+  }
+}
