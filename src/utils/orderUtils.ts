@@ -1,33 +1,48 @@
 import { StatusBadgeType } from "@/components/StatusBadge";
 
 export enum OrderStatus {
-  PendingDispatch = '0', // 待派单
-  Dispatching = '1', // 派单中
-  InService = '2', // 服务中
-  Completed = '3', // 已完成
-  Cancelled = '4', // 用户取消
-  MerchantCancel = '5', // 商家取消
-  MerchantCancelPending = '6', // 商家取消待审核
+  // 进行中（表示订单创建后未到支付环节或处理中）
+  OrderStatusInProgress = "in_progress",
+  // 沟通中（用户和商家就订单细节进行协商）
+  OrderStatusNegotiating = "negotiating",
+  // 待支付（商家和用户达成一致，商家设置价格成功，等待用户支付）
+  OrderStatusPendingPayment = "pending_payment",
+  // 待发货（用户已支付，等待商家发货）
+  OrderStatusPendingShipment = "pending_shipment",
+  // 已发货（商家已发出商品，等待用户签收）
+  OrderStatusShipped = "shipped",
+  // 已签收（用户确认收到商品）
+  OrderStatusReceived = "received",
+  // 已完成（整个订单流程结束）
+  OrderStatusCompleted = "completed",
+  // 已取消（订单被用户取消）
+  OrderStatusCancelled = "cancelled",
+  // 退款中（用户发起退款申请，正在处理中）
+  OrderStatusRefunding = "refunding",
+  // 已退款（订单完成退款流程）
+  OrderStatusRefunded = "refunded"
 }
 export const OrderStatusMap = {
-  [OrderStatus.PendingDispatch]: "待派单",
-  [OrderStatus.Dispatching]: "派单中",
-  [OrderStatus.InService]: "服务中",
-  [OrderStatus.Completed]: "已完成",
-  [OrderStatus.Cancelled]: "用户已取消",
-  [OrderStatus.MerchantCancel]: "商家已取消",
-  [OrderStatus.MerchantCancelPending]: "商家取消中",
+  [OrderStatus.OrderStatusInProgress]: "进行中",
+  [OrderStatus.OrderStatusNegotiating]: "沟通中",
+  [OrderStatus.OrderStatusPendingPayment]: "待支付",
+  [OrderStatus.OrderStatusPendingShipment]: "待发货",
+  [OrderStatus.OrderStatusShipped]: "已发货",
+  [OrderStatus.OrderStatusReceived]: "已签收",
+  [OrderStatus.OrderStatusCompleted]: "已完成",
+  [OrderStatus.OrderStatusCancelled]: "已取消",
+  [OrderStatus.OrderStatusRefunding]: "退款中",
+  [OrderStatus.OrderStatusRefunded]: "已退款"
 };
 
 export const processingOrderStatus = [
-  OrderStatus.PendingDispatch,
-  OrderStatus.Dispatching,
-  OrderStatus.InService,
+  OrderStatus.OrderStatusInProgress,
+  OrderStatus.OrderStatusNegotiating,
+  OrderStatus.OrderStatusPendingPayment,
 ];
 
 export const cancelledOrderStatus = [
-  OrderStatus.Cancelled,
-  OrderStatus.MerchantCancel,
+  OrderStatus.OrderStatusCancelled,
 ];
 
 
@@ -40,9 +55,11 @@ export const formatOrderStatus = (status: OrderStatus) => {
 
 export const getStatusBadgeType = (status: OrderStatus): StatusBadgeType => {
   switch (status) {
-    case OrderStatus.Cancelled:
+    case OrderStatus.OrderStatusCancelled:
+    case OrderStatus.OrderStatusRefunding:
+    case OrderStatus.OrderStatusRefunded:
       return StatusBadgeType.Error;
-    case OrderStatus.Completed:
+    case OrderStatus.OrderStatusCompleted:
       return StatusBadgeType.Success;
     default:
       return StatusBadgeType.Processing;

@@ -61,5 +61,7 @@ export default defineAppConfig({
     backgroundColor: '#F4F1EE',
     enablePullDownRefresh: false
   },
-
+  "requiredPrivateInfos": [
+    "chooseAddress"
+  ]
 })

@@ -1,4 +1,4 @@
-.merchant-card {
+.productPriceCard {
   width: 100%;
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), #ffffff);
   border-radius: 10px;
@@ -15,19 +15,13 @@
   box-sizing: border-box;
 }
 
-.merchant-info {
+.productPriceHeader {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.merchant-header {
-  display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   gap: 6px;
 }
 
-.merchant-tag {
+.merchantTag {
   display: flex;
   height: 20px;
   padding: 0px 6px;
@@ -44,13 +38,32 @@
   line-height: 135%;
 }
 
-.merchant-title {
+.productPriceTitle {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.merchant-name {
+.merchantName {
+  color: #1F1722;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 1px;
+}
+
+.finalPriceSection {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #F6F5F5;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.finalPriceLabel {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 500;
   font-size: 16px;
@@ -59,81 +72,27 @@
   color: #1F1722;
   opacity: 0.9;
   margin: 0;
-  flex: 1;
+  text-align: left;
 }
 
-.merchant-address {
-  font-family: 'Noto Sans SC', sans-serif;
-  font-weight: 300;
-  font-size: 11px;
-  line-height: 1.2em;
-  letter-spacing: 1px;
-  color: #1F1722;
+.finalPriceValue {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.22em;
+  color: #FF6421;
   opacity: 0.9;
   margin: 0;
+  text-align: right;
 }
 
-.metrics-section {
-  display: flex;
-  gap: 10px;
-}
-
-.metric-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.metric-value {
-  font-family: 'Source Han Serif CN', serif;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1.437em;
-  letter-spacing: 1px;
-  color: #1F1722;
-  opacity: 0.9;
-}
-
-.rating-value {
-  color: #FF8800;
-}
-
-.metric-value-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-}
-
-.arrow-icon {
-  display: flex;
-  align-items: center;
-  padding-bottom: 3px;
-}
-
-.metric-label {
-  font-family: 'Noto Sans SC', sans-serif;
-  font-weight: 350;
-  font-size: 11px;
-  line-height: 1.2em;
-  letter-spacing: 1px;
-  color: rgba(31, 23, 34, 0.5);
-  text-align: justify;
-}
-
-.divider {
-  height: 1px;
-  background: #F2EFEC;
-  width: 100%;
-}
-
-.history-section {
+.productImageSection {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.history-title {
+.productImageTitle {
   font-family: 'Source Han Serif CN', serif;
   font-weight: 500;
   font-size: 12px;
@@ -144,21 +103,28 @@
   margin: 0;
 }
 
-.history-images {
+.productImageTitleContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.productImageUploadTime {
+  color: rgba(31, 23, 34, 0.50);
+  font-family: "Noto Sans SC";
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: normal;
+}
+
+.productImages {
   position: relative;
   height: 80px;
   overflow: hidden;
 }
 
-.image-list {
-  display: flex;
-  gap: 8px;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.history-image {
+.productImage {
   width: 80px;
   height: 80px;
   border-radius: 10px;
@@ -171,7 +137,7 @@
   }
 }
 
-.image-fade {
+.imageFade {
   position: absolute;
   top: 0;
   right: 0;
@@ -181,19 +147,20 @@
   pointer-events: none;
 }
 
-.action-buttons {
+.actionButtons {
   display: flex;
   gap: 10px;
   padding-top: 6px;
 }
 
-.action-btn {
+.actionBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
   border-radius: 44px;
   border: 1px solid;
+  padding: 8px 12px;
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 350;
   font-size: 11px;
@@ -202,6 +169,7 @@
   background: #FFFBF5;
   border-color: #F9F0E3;
   color: #1F1722;
+  flex: 1;
 
   &:hover {
     opacity: 0.8;
@@ -222,12 +190,7 @@
   }
 }
 
-.call-btn,
-.confirm-btn {
-  flex: 1;
-}
-
-.confirm-btn {
+.confirmBtn {
   background: #FF8019;
   border-color: #FF8019;
 
@@ -236,7 +199,7 @@
   }
 }
 
-.purchase-notice {
+.purchaseNotice {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -247,7 +210,7 @@
   box-sizing: border-box;
 }
 
-.purchase-notice-text {
+.purchaseNoticeText {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 400;
   font-size: 11px;

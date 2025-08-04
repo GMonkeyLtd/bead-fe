@@ -1,6 +1,5 @@
-import { DesignDraftResponse } from './api-session';
 import { ApiConfig } from "./api";
-import http, { setBaseURL, setIsMock, CancelToken } from "./request";
+import http from "./request";
 
 export interface MessageItem {
   message_id: string;

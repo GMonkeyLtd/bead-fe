@@ -290,11 +290,12 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
           throw new Error('登录失败，请手动重试');
         }
       }
+      console.log(error, error.message, 'error');
 
       // 显示错误提示
       if (config.showError !== false) {
         Taro.showToast({
-          title: '出错啦～' + JSON.stringify(error),
+          title: '操作失败:' + error.message,
           icon: 'none',
           duration: 5000,
         })
