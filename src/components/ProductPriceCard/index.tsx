@@ -6,6 +6,7 @@ import confirmOrderIcon from "@/assets/icons/confirm-order.svg";
 import ImageSlider from "../ImageSlider";
 import styles from "./index.module.scss";
 import qrCodeIcon from "@/assets/icons/qrcode.svg";
+import withDrawIcon from "@/assets/icons/withdraw.svg";
 
 export enum ProductAction {
   ContactMerchant = "contactMerchant",  // 联系商家
@@ -33,6 +34,7 @@ interface ProductPriceCardProps {
   } | null;
   showBuyNotice?: boolean;
   showImages?: boolean;
+  isAfterSale?: boolean;
 }
 
 const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
@@ -45,6 +47,7 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
   onShowQrCode,
   showBuyNotice,
   showImages,
+  isAfterSale,
 }) => {
   console.log(name, productImages, 'productImages')
   return (
@@ -60,7 +63,7 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
 
       {/* 商品最终价格区域 */}
       <View className={styles.finalPriceSection}>
-        <Text className={styles.finalPriceLabel}>商品价格</Text>
+        <Text className={styles.finalPriceLabel}>{isAfterSale ? "退款金额" : "商品价格"}</Text>
         <Text className={styles.finalPriceValue}>¥ {price.toFixed(2)}</Text>
       </View>
 
@@ -107,6 +110,12 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
             <View className={styles.actionBtn + " " + styles.confirmBtn} onClick={actions?.[ProductAction.ConfirmOrder]?.onClick}>
               <Image src={confirmOrderIcon} />
               <Text>确认收货</Text>
+            </View>
+          )}
+          {actions?.[ProductAction.WithDrawRefund] && (
+            <View className={styles.actionBtn + " " + styles.confirmBtn} onClick={actions?.[ProductAction.WithDrawRefund]?.onClick}>
+              <Image src={withDrawIcon} />
+              <Text>撤销申请</Text>
             </View>
           )}
         </View>

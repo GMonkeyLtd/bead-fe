@@ -45,7 +45,7 @@ const OrderDetail: React.FC = () => {
     api.userHistory.getOrderById(orderId || "").then((res) => {
       const _order = res?.data?.orders?.[0];
       _order.order_status = OrderStatusEnum.AfterSale;
-      _order.after_sale_status = AfterSaleStatus.RefundReviewing;
+      _order.after_sale_status = AfterSaleStatus.Refunded;
       if (_order?.address) {
         const newAddress = {
           detailInfo: _order?.address?.detail_info,
@@ -86,7 +86,10 @@ const OrderDetail: React.FC = () => {
   }, [orderStatus]);
 
   const showJoinGroupChat = useMemo(() => {
-    return [OrderStatusEnum.AfterSale, OrderStatusEnum.Completed].includes(orderStatus);
+    if (orderStatus === OrderStatusEnum.AfterSale) {
+      return [AfterSaleStatus.Refunding, AfterSaleStatus.Refunded].includes(order?.after_sale_status);
+    }
+    return [OrderStatusEnum.Completed].includes(orderStatus);
   }, [orderStatus]);
 
   const isSptCancel = useMemo(() => {
@@ -100,6 +103,11 @@ const OrderDetail: React.FC = () => {
   const handlOnPurchase = () => {
 
   };
+
+  const onWithDrawRefund = () => {
+
+  };
+  
   const onViewLogistics = () => {
     payApi.getWaybillToken({ order_id: order?.order_uuid }).then((res) => {
       const waybill_token = res?.data?.waybill_token;
@@ -158,11 +166,21 @@ const OrderDetail: React.FC = () => {
         }
       }
     };
+    if (orderStatus === OrderStatusEnum.AfterSale && order?.after_sale_status === AfterSaleStatus.RefundReviewing) {
+      return {
+        [ProductAction.ContactMerchant]: {
+          text: "联系商家",
+          onClick: () => {
+            setQrCodeVisible(true);
+          },
+        },
+        [ProductAction.WithDrawRefund]: {
+          text: "撤销申请",
+          onClick: onWithDrawRefund,
+        },
+      }
+    }
     return null;
-  }
-
-  const getProductImages = () => {
-
   }
 
   return (
@@ -195,12 +213,13 @@ const OrderDetail: React.FC = () => {
           name={order?.merchant_info?.name}
           price={order?.price || 0}
           isSelf={order?.merchant_info?.is_self_operated}
-          showImages={orderStatus !== OrderStatusEnum.AfterSale}
+          showImages={!(orderStatus === OrderStatusEnum.AfterSale && [AfterSaleStatus.Refunding, AfterSaleStatus.Refunded].includes(order?.after_sale_status))}
           productImages={order?.product_photos?.images_url || order?.merchant_info?.transaction_history?.images_url || []}
           imageUploadTime={order?.product_photos?.upload_time}
           onShowQrCode={() => {
             setQrCodeVisible(true);
           }}
+          isAfterSale={orderStatus === OrderStatusEnum.AfterSale}
           showBuyNotice={showBuyTip}
           actions={getProductActionsByStatus()}
         />}

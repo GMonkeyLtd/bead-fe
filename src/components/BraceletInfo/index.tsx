@@ -87,12 +87,13 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
         </View>
 
         {/* 价格 */}
-        <View className="price-section">
-          <View className="price-label">
-            <View className="price-label-text">参考价：</View>
-            {showPrice && <Text className="price">¥{price.toFixed(2)}</Text>}
-          </View>
-        </View>
+        {showPrice &&
+          <View className="price-section">
+            <View className="price-label">
+              <View className="price-label-text">参考价：</View>
+              <Text className="price">¥{price.toFixed(2)}</Text>
+            </View>
+          </View>}
       </View>
     </View>
   );
@@ -119,7 +120,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
     if (existingBead) {
       existingBead.quantity += item?.quantity || 1;
     } else {
-      acc.push({  
+      acc.push({
         name: item?.name,
         size: item?.bead_diameter,
         quantity: item?.quantity || 1,
@@ -127,7 +128,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
     }
     return acc;
   }, []);
-  
+
   return (
     <View className={`bead-detail-list ${className}`}>
       {/* 表头 */}
