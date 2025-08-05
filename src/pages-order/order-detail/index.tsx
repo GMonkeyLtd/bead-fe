@@ -37,6 +37,10 @@ const OrderDetail: React.FC = () => {
   const [cancelDialogVisible, setCancelDialogVisible] = useState<boolean>(false);
   const plugin = requirePlugin('logisticsPlugin');
 
+  const queryPrice = () => {
+    payApi.getReferencePrice({ design_id: order?.design_info?.design_id }).then((res) => {
+  }
+
   const getOrderDetail = () => {
     const instance = Taro.getCurrentInstance();
     const params = instance.router?.params;
