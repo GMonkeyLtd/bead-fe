@@ -15,7 +15,7 @@ import {
   getOrderStatusTip,
   showReferencePrice,
   getStatusBadgeType,
-  AfterSaleStatus
+  AfterSaleStatus,
 } from "@/utils/orderUtils";
 import CrystalButton from "@/components/CrystalButton";
 import shareDesignImage from "@/assets/icons/share-design.svg";
@@ -29,23 +29,28 @@ import CancelOrderDialog from "@/components/CancelOrderDialog";
 import payApi from "@/utils/api-pay";
 import JoinGroupChat from "@/components/JoinGroupChat";
 
+enum PaymentStatus {
+  Processing = 0,
+  Success = 1,
+  Failed = 2,
+  Canceled = 3,
+}
+
 const OrderDetail: React.FC = () => {
   const [order, setOrder] = useState<any>(null);
   const [tradePrice, setTradePrice] = useState<number>(0);
   const [address, setAddress] = useState<AddressInfo | undefined>(undefined);
   const [qrCodeVisible, setQrCodeVisible] = useState<boolean>(false);
-  const [cancelDialogVisible, setCancelDialogVisible] = useState<boolean>(false);
-  const plugin = requirePlugin('logisticsPlugin');
-
-  const queryPrice = () => {
-    payApi.getReferencePrice({ design_id: order?.design_info?.design_id }).then((res) => {
-  }
+  const [cancelDialogVisible, setCancelDialogVisible] =
+    useState<boolean>(false);
+  const [addressLoading, setAddressLoading] = useState<boolean>(false);
+  const plugin = requirePlugin("logisticsPlugin");
 
   const getOrderDetail = () => {
     const instance = Taro.getCurrentInstance();
     const params = instance.router?.params;
     const orderId = params?.orderId;
-    console.log(orderId, 'orderId')
+    console.log(orderId, "orderId");
     api.userHistory.getOrderById(orderId || "").then((res) => {
       const _order = res?.data?.orders?.[0];
       _order.order_status = OrderStatusEnum.AfterSale;
@@ -60,12 +65,12 @@ const OrderDetail: React.FC = () => {
           userName: _order?.address?.user_name,
           nationalCode: _order?.address?.national_code,
           postalCode: _order?.address?.postal_code,
-        }
+        };
         setAddress(newAddress);
       }
       setOrder(_order);
     });
-  }
+  };
 
   useEffect(() => {
     getOrderDetail();
@@ -74,11 +79,22 @@ const OrderDetail: React.FC = () => {
   const orderStatus = order?.order_status;
 
   const showMerchantCard = useMemo(() => {
-    return [OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating, OrderStatusEnum.Cancelled, OrderStatusEnum.MerchantCancelled].includes(orderStatus);
+    return [
+      OrderStatusEnum.InProgress,
+      OrderStatusEnum.Negotiating,
+      OrderStatusEnum.Cancelled,
+      OrderStatusEnum.MerchantCancelled,
+    ].includes(orderStatus);
   }, [orderStatus]);
 
   const showLogistics = useMemo(() => {
-    return [OrderStatusEnum.PendingPayment, OrderStatusEnum.PendingShipment, OrderStatusEnum.Shipped, OrderStatusEnum.Received, OrderStatusEnum.Completed].includes(orderStatus);
+    return [
+      OrderStatusEnum.PendingPayment,
+      OrderStatusEnum.PendingShipment,
+      OrderStatusEnum.Shipped,
+      OrderStatusEnum.Received,
+      OrderStatusEnum.Completed,
+    ].includes(orderStatus);
   }, [orderStatus]);
 
   const isSptRefund = useMemo(() => {
@@ -86,12 +102,19 @@ const OrderDetail: React.FC = () => {
   }, [orderStatus]);
 
   const showBuyTip = useMemo(() => {
-    return [OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating, OrderStatusEnum.PendingPayment, OrderStatusEnum.PendingShipment].includes(orderStatus);
+    return [
+      OrderStatusEnum.InProgress,
+      OrderStatusEnum.Negotiating,
+      OrderStatusEnum.PendingPayment,
+      OrderStatusEnum.PendingShipment,
+    ].includes(orderStatus);
   }, [orderStatus]);
 
   const showJoinGroupChat = useMemo(() => {
     if (orderStatus === OrderStatusEnum.AfterSale) {
-      return [AfterSaleStatus.Refunding, AfterSaleStatus.Refunded].includes(order?.after_sale_status);
+      return [AfterSaleStatus.Refunding, AfterSaleStatus.Refunded].includes(
+        order?.after_sale_status
+      );
     }
     return [OrderStatusEnum.Completed].includes(orderStatus);
   }, [orderStatus]);
@@ -104,33 +127,115 @@ const OrderDetail: React.FC = () => {
     ].includes(orderStatus);
   }, [orderStatus]);
 
-  const handlOnPurchase = () => {
+  const shouldStopPolling = (status: PaymentStatus) => {
+    return status === PaymentStatus.Success || status === PaymentStatus.Failed || status === PaymentStatus.Canceled;
+  }
 
+  const queryPaymentStatus = async (tradeId: string): Promise<boolean> => {
+    try {
+      const res = await api.user.queryTradeStatus(tradeId);
+
+      // 根据实际 API 返回结构调整数据获取方式，使用类型断言
+      const status = res?.data?.trade_status as PaymentStatus;
+
+      // 检查是否应该停止轮询
+      if (status !== undefined && shouldStopPolling(status)) {
+        console.log("订单状态已变更，停止轮询");
+        if (status === PaymentStatus.Success) {
+          showToast({
+            title: "充值成功",
+            icon: "success",
+          });
+          // 根据新状态决定跳转页面
+          onSuccess?.(res?.data?.amount, status);
+          setTimeout(() => {
+            onClose();
+          }, 3000);
+        }
+        if (status === PaymentStatus.Failed) {
+          showToast({
+            title: "充值失败",
+            icon: "none",
+          });
+        }
+        if (status === PaymentStatus.Canceled) {
+          showToast({
+            title: "充值已取消",
+            icon: "none",
+          });
+        }
+        return false; // 表示轮询应该停止
+      }
+
+      return true; // 表示轮询应该继续
+    } catch (error) {
+      console.error("查询订单失败:", error);
+      return true; // 出错时继续轮询
+    }
+  }
+
+  const startPolling = (_tradeId: string) => {
+
+    console.log("开始轮询订单状态");
+
+    // 先立即查询一次
+    queryPaymentStatus(_tradeId);
+
+    // 设置定时器，每指定间隔查询一次
+    pollingTimerRef.current = setInterval(async () => {
+      if (!_tradeId) {
+        stopPolling();
+        return;
+      }
+
+      const shouldContinue = await queryPaymentStatus(_tradeId);
+      if (!shouldContinue) {
+        stopPolling();
+      }
+    }, 3000);
   };
 
-  const onWithDrawRefund = () => {
-
+  const handleOnPurchase = () => {
+    if (addressLoading) {
+      return;
+    }
+    payApi.purchase({orderId: order?.order_uuid, amount: order?.order_price}).then((res) => {
+      const wxPayParams = res?.data;
+       const tradeId = res.data.trade_uuid;
+      startPolling(tradeId);
+     Taro.requestPayment({
+      timeStamp: wxPayParams.time_stamp,  // 秒级时间戳
+      nonceStr: wxPayParams.nonce_str,
+      package: wxPayParams.package, // 服务端返回
+      signType: wxPayParams.sign_type,
+      paySign: wxPayParams.pay_sign,
+      success: () => Taro.showToast({ title: '支付成功' }),
+      fail: (err) => console.error('支付失败', err)
+    });
+    })
   };
-  
+
+  const onWithDrawRefund = () => {};
+
   const onViewLogistics = () => {
     payApi.getWaybillToken({ order_id: order?.order_uuid }).then((res) => {
       const waybill_token = res?.data?.waybill_token;
       plugin?.openWaybillTracking({
         waybillToken: waybill_token,
-      })
-    })
-  }
+      });
+    });
+  };
 
   const onConfirmOrder = () => {
     payApi.confirmOrder({ order_id: order?.order_uuid }).then((res) => {
       const { transaction_id, merchant_id, merchant_trade_no } = res?.data;
       if (wx.miniapp?.openBusinessView) {
         wx.miniapp.openBusinessView({
-          businessType: 'weappOrderConfirm',
+          businessType: "weappOrderConfirm",
           extraData: {
             merchant_id,
             merchant_trade_no,
-            transaction_id
+            transaction_id,
           },
           success() {
             getOrderDetail();
@@ -140,19 +245,21 @@ const OrderDetail: React.FC = () => {
           },
           complete() {
             getOrderDetail();
-          }
+          },
         });
       } else {
         //引导用户升级微信版本
       }
-    })
-  }
+    });
+  };
 
   const getProductActionsByStatus = () => {
     if ([OrderStatusEnum.PendingPayment].includes(orderStatus)) {
       return null;
     }
-    if ([OrderStatusEnum.Shipped, OrderStatusEnum.Received].includes(orderStatus)) {
+    if (
+      [OrderStatusEnum.Shipped, OrderStatusEnum.Received].includes(orderStatus)
+    ) {
       return {
         [ProductAction.ContactMerchant]: {
           text: "联系商家",
@@ -167,10 +274,13 @@ const OrderDetail: React.FC = () => {
         [ProductAction.ConfirmOrder]: {
           text: "确认收货",
           onClick: onConfirmOrder,
-        }
-      }
-    };
-    if (orderStatus === OrderStatusEnum.AfterSale && order?.after_sale_status === AfterSaleStatus.RefundReviewing) {
+        },
+      };
+    }
+    if (
+      orderStatus === OrderStatusEnum.AfterSale &&
+      order?.after_sale_status === AfterSaleStatus.RefundReviewing
+    ) {
       return {
         [ProductAction.ContactMerchant]: {
           text: "联系商家",
@@ -182,10 +292,31 @@ const OrderDetail: React.FC = () => {
           text: "撤销申请",
           onClick: onWithDrawRefund,
         },
-      }
+      };
     }
     return null;
-  }
+  };
+
+  const handleAddressChange = (_address: AddressInfo) => {
+    setAddressLoading(true);
+    setAddress(_address);
+    payApi.addAddressToOrder({
+      order_uuid: order?.order_uuid,
+      detailInfo: _address?.detailInfo,
+      provinceName: _address?.provinceName,
+      cityName: _address?.cityName,
+      countyName: _address?.countyName,
+      telNumber: _address?.telNumber,
+      userName: _address?.userName,
+      nationalCode: _address?.nationalCode,
+      postalCode: _address?.postalCode,
+    }).catch((e) => {
+      console.error('error',e);
+    })
+    .finally(() => {
+      setAddressLoading(false);
+    });
+  };
 
   return (
     <CrystalContainer
@@ -196,7 +327,10 @@ const OrderDetail: React.FC = () => {
       disablePaddingBottom
     >
       <View style={{ padding: "24px 24px 0 24px" }}>
-        <OrderStatus status={orderStatus} afterSaleStatus={order?.after_sale_status} />
+        <OrderStatus
+          status={orderStatus}
+          afterSaleStatus={order?.after_sale_status}
+        />
       </View>
       <View
         className="order-detail-container"
@@ -207,29 +341,55 @@ const OrderDetail: React.FC = () => {
           overflowY: "auto",
         }}
       >
-        {showLogistics && <LogisticsCard address={address} onAdressChange={setAddress} enableChangeAddress={orderStatus === OrderStatusEnum.PendingPayment} logisticsStatus={order?.waybill_status} onViewLogistics={onViewLogistics} />}
-        {showMerchantCard ? <MerchantCard
-          isCanceled={orderStatus === OrderStatusEnum.Cancelled || orderStatus === OrderStatusEnum.MerchantCancelled}
-          name={order?.merchant_info?.name}
-          isSelf={order?.merchant_info?.is_self_operated}
-          historyImages={order?.merchant_info?.transaction_history?.images_url || []}
-        /> : <ProductPriceCard
-          name={order?.merchant_info?.name}
-          price={order?.price || 0}
-          isSelf={order?.merchant_info?.is_self_operated}
-          showImages={!(orderStatus === OrderStatusEnum.AfterSale && [AfterSaleStatus.Refunding, AfterSaleStatus.Refunded].includes(order?.after_sale_status))}
-          productImages={order?.product_photos?.images_url || order?.merchant_info?.transaction_history?.images_url || []}
-          imageUploadTime={order?.product_photos?.upload_time}
-          onShowQrCode={() => {
-            setQrCodeVisible(true);
-          }}
-          isAfterSale={orderStatus === OrderStatusEnum.AfterSale}
-          showBuyNotice={showBuyTip}
-          actions={getProductActionsByStatus()}
-        />}
-        {showJoinGroupChat && (
-          <JoinGroupChat />
+        {showLogistics && (
+          <LogisticsCard
+            address={address}
+            onAddressChange={handleAddressChange}
+            enableChangeAddress={orderStatus === OrderStatusEnum.PendingPayment}
+            logisticsStatus={order?.waybill_status}
+            onViewLogistics={onViewLogistics}
+          />
         )}
+        {showMerchantCard ? (
+          <MerchantCard
+            isCanceled={
+              orderStatus === OrderStatusEnum.Cancelled ||
+              orderStatus === OrderStatusEnum.MerchantCancelled
+            }
+            name={order?.merchant_info?.name}
+            isSelf={order?.merchant_info?.is_self_operated}
+            historyImages={
+              order?.merchant_info?.transaction_history?.images_url || []
+            }
+          />
+        ) : (
+          <ProductPriceCard
+            name={order?.merchant_info?.name}
+            price={order?.price || 0}
+            isSelf={order?.merchant_info?.is_self_operated}
+            showImages={
+              !(
+                orderStatus === OrderStatusEnum.AfterSale &&
+                [AfterSaleStatus.Refunding, AfterSaleStatus.Refunded].includes(
+                  order?.after_sale_status
+                )
+              )
+            }
+            productImages={
+              order?.product_photos?.images_url ||
+              order?.merchant_info?.transaction_history?.images_url ||
+              []
+            }
+            imageUploadTime={order?.product_photos?.upload_time}
+            onShowQrCode={() => {
+              setQrCodeVisible(true);
+            }}
+            isAfterSale={orderStatus === OrderStatusEnum.AfterSale}
+            showBuyNotice={showBuyTip}
+            actions={getProductActionsByStatus()}
+          />
+        )}
+        {showJoinGroupChat && <JoinGroupChat />}
         {order?.design_info && (
           <BraceletInfo
             orderNumber={order?.order_uuid}
@@ -243,27 +403,37 @@ const OrderDetail: React.FC = () => {
             orderAction={
               isSptCancel
                 ? {
-                  text: "取消订单",
-                  onClick: () => {
-                    setCancelDialogVisible(true);
-                  },
-                }
-                : isSptRefund ? {
-                  text: "申请退款",
-                  onClick: () => {
-                    setCancelDialogVisible(true);
-                  },
-                } : undefined
+                    text: "取消订单",
+                    onClick: () => {
+                      setCancelDialogVisible(true);
+                    },
+                  }
+                : isSptRefund
+                ? {
+                    text: "申请退款",
+                    onClick: () => {
+                      setCancelDialogVisible(true);
+                    },
+                  }
+                : undefined
             }
-          />)}
+          />
+        )}
       </View>
 
       {OrderStatusEnum.PendingPayment === orderStatus && (
         <View className="order-action-container">
-          <CrystalButton onClick={console.log} text={`确认支付 ¥${order?.price}`} style={{ margin: "20px 24px", width: "100%" }} isPrimary />
+          <CrystalButton
+            onClick={handleOnPurchase}
+            text={`确认支付 ¥${order?.price}`}
+            style={{ margin: "20px 24px", width: "100%" }}
+            isPrimary
+          />
         </View>
       )}
-      {[OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating].includes(orderStatus) && (
+      {[OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating].includes(
+        orderStatus
+      ) && (
         <View className="order-action-container">
           <CrystalButton
             onClick={console.log}
@@ -307,29 +477,37 @@ const OrderDetail: React.FC = () => {
       <CancelOrderDialog
         visible={cancelDialogVisible}
         onClose={() => setCancelDialogVisible(false)}
-        type={isSptRefund ? 'refund' : 'cancel'}
+        type={isSptRefund ? "refund" : "cancel"}
         onConfirm={(reason: string) => {
           if (isSptCancel) {
-            userHistoryApi.cancelOrder(order?.order_uuid).then(() => {
-              Taro.showToast({
-                title: "取消订单成功",
-                icon: "success",
+            userHistoryApi
+              .cancelOrder(order?.order_uuid, reason)
+              .then(() => {
+                Taro.showToast({
+                  title: "取消订单成功",
+                  icon: "success",
+                });
+                setCancelDialogVisible(false);
+                getOrderDetail();
+              })
+              .catch((error) => {
+                console.error('取消订单失败:', error)
+                Taro.showToast({
+                  title: "取消订单失败",
+                  icon: "none",
+                });
               });
+          } else if (isSptRefund) {
+            payApi.applyRefund({ orderId: order?.order_uuid, reason }).then(() => {
               setCancelDialogVisible(false);
-              Taro.navigateBack();
+              getOrderDetail();
             }).catch((error) => {
+              console.error('退款申请提交失败:', error)
               Taro.showToast({
-                title: "取消订单失败",
+                title: "退款申请提交失败",
                 icon: "none",
               });
             });
-          } else if (isSptRefund) {
-            // userHistoryApi.refundOrder(order?.order_uuid).then(() => {
-            //   Taro.showToast({
-            //     title: "退款成功",
-            //     icon: "success",
-            //   });
-            // });
           }
         }}
       />
@@ -340,7 +518,10 @@ const OrderDetail: React.FC = () => {
 export default OrderDetail;
 
 // 订单状态组件
-const OrderStatus: React.FC<{ status: OrderStatusEnum, afterSaleStatus: AfterSaleStatus }> = ({ status, afterSaleStatus }) => {
+const OrderStatus: React.FC<{
+  status: OrderStatusEnum;
+  afterSaleStatus: AfterSaleStatus;
+}> = ({ status, afterSaleStatus }) => {
   const orderStatusTip = getOrderStatusTip(status, afterSaleStatus);
   return (
     <View className="order-status">

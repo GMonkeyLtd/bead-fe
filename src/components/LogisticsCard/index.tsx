@@ -19,7 +19,7 @@ export interface AddressInfo {
 
 interface LogisticsCardProps {
     address?: AddressInfo;
-    onAdressChange?: (address: AddressInfo) => void;
+    onAddressChange?: (address: AddressInfo) => void;
     enableChangeAddress?: boolean;
     logisticsStatus?: number;
     onViewLogistics?: () => void;
@@ -27,7 +27,7 @@ interface LogisticsCardProps {
 
 const LogisticsCard: React.FC<LogisticsCardProps> = ({
     address,
-    onAdressChange,
+    onAddressChange,
     logisticsStatus,
     enableChangeAddress = true,
     onViewLogistics,
@@ -59,7 +59,7 @@ const LogisticsCard: React.FC<LogisticsCardProps> = ({
         if (!enableChangeAddress) return;
         Taro.chooseAddress({
             success: (result) => {
-                onAdressChange?.(result);
+                onAddressChange?.(result);
             }
         });
     };

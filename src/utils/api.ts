@@ -364,14 +364,14 @@ export const userHistoryApi = {
       }
     ),
 
-  cancelOrder: (orderId: string, config?: ApiConfig) =>
+  cancelOrder: (orderId: string, reason: string, config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
     }>(
       `/user/cancelorder`,
-      { order_uuid: orderId },
+      { order_uuid: orderId, reason },
       {
         showLoading: true,
         cancelToken: config?.cancelToken,
