@@ -61,7 +61,13 @@ export default defineAppConfig({
     backgroundColor: '#F4F1EE',
     enablePullDownRefresh: false
   },
-  "requiredPrivateInfos": [
+  requiredPrivateInfos: [
     "chooseAddress"
-  ]
+  ],
+  plugins: {
+    "logisticsPlugin": {
+      "version": "2.3.0",
+      "provider": "wx9ad912bf20548d92"
+    }
+  }
 })

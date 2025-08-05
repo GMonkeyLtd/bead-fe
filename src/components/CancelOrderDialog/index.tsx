@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { View, Text } from "@tarojs/components";
+import { View, Text, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import "./index.scss";
+import styles from "./index.module.scss";
+import radioSelectedIcon from "@/assets/icons/radio-selected.svg";
 
 export interface CancelOrderDialogProps {
   visible: boolean;
@@ -69,28 +70,29 @@ const CancelOrderDialog: React.FC<CancelOrderDialogProps> = ({
   };
 
   return (
-    <View className='cancel-order-dialog-overlay' onClick={handleOverlayClick}>
-      <View className='cancel-order-dialog' onClick={handleDialogClick}>
+    <View className={styles.cancelOrderDialogOverlay} onClick={handleOverlayClick}>
+      <View className={styles.cancelOrderDialog} onClick={handleDialogClick}>
         {/* 标题 */}
-        <View className='dialog-header'>
-          <Text className='dialog-title'>{type === 'cancel' ? "请选择取消原因" : "请选择退款原因"}</Text>
+        <View className={styles.dialogHeader}>
+          <Text className={styles.dialogTitle}>{type === 'cancel' ? "请选择取消原因" : "请选择退款原因"}</Text>
         </View>
 
         {/* 内容区域 */}
-        <View className='dialog-content'>
-          {/* <View className='reason-prompt'>
-            <Text className='prompt-text'>请选择取消订单的原因：</Text>
+        <View className={styles.dialogContent}>
+          {/* <View className={styles.reasonPrompt}>
+            <Text className={styles.promptText}>请选择取消订单的原因：</Text>
           </View> */}
 
-          <View className='reason-list'>
+          <View className={styles.reasonList}>
             {reasons[type].map((reason) => (
               <View
                 key={reason}
-                className='reason-item'
+                className={styles.reasonItem}
                 onClick={() => handleReasonSelect(reason)}
               >
-                <Text className='reason-text'>{reason}</Text>
-                <View className={`radio-button ${selectedReason === reason ? 'selected' : ''}`}>
+                <Text className={styles.reasonText}>{reason}</Text>
+                <View className={`${styles.radioButton} ${selectedReason === reason ? styles.selected : ''}`}>
+                  {selectedReason === reason && <Image src={radioSelectedIcon} className={styles.radioInner} />}
                 </View>
               </View>
             ))}
@@ -98,9 +100,9 @@ const CancelOrderDialog: React.FC<CancelOrderDialogProps> = ({
         </View>
 
         {/* 底部按钮 */}
-        <View className='dialog-footer'>
-          <View className='confirm-button' onClick={handleConfirm}>
-            <Text className='confirm-text'>确定取消</Text>
+        <View className={styles.dialogFooter}>
+          <View className={styles.confirmButton} onClick={handleConfirm}>
+            <Text className={styles.confirmText}>{type === 'cancel' ? "确定取消" : "确定退款"}</Text>
           </View>
         </View>
       </View>

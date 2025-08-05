@@ -11,6 +11,7 @@ interface BraceletCardProps {
   quantity: number;
   price: number;
   productImage: string;
+  showPrice?: boolean;
   onMoreClick?: () => void;
   className?: string;
   orderAction?: {
@@ -28,6 +29,7 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
   productImage,
   className = "",
   orderAction,
+  showPrice = false,
 }) => {
 
   const handleCopyImageUrl = (orderNumber: string) => {
@@ -86,7 +88,7 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
 
         {/* 价格 */}
         <View className="price-section">
-          <Text className="price">¥{price.toFixed(2)}</Text>
+          {showPrice && <Text className="price">¥{price.toFixed(2)}</Text>}
         </View>
       </View>
     </View>
@@ -152,6 +154,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
 
 export interface BraceletInfoProps extends BraceletCardProps {
   beads?: BeadItem[];
+  showPrice?: boolean;
   style?: React.CSSProperties;
 }
 const BraceletInfo: React.FC<BraceletInfoProps> = ({
@@ -161,6 +164,7 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
   quantity,
   price,
   productImage,
+  showPrice = false,
   style = {},
   beads,
   orderAction,
@@ -183,9 +187,10 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
         price={price}
         productImage={productImage}
         orderAction={orderAction}
+        showPrice={showPrice}
       />
 
-      {beads?.length > 0 && <BeadDetailList beads={beads} />}
+      {beads && beads?.length > 0 && <BeadDetailList beads={beads} />}
     </View>
   );
 };

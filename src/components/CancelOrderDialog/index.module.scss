@@ -1,4 +1,4 @@
-.cancel-order-dialog-overlay {
+.cancelOrderDialogOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,9 +11,8 @@
   z-index: 1000;
 }
 
-.cancel-order-dialog {
+.cancelOrderDialog {
   width: 100%;
-  height: 575px;
   background: #F5F2EF;
   border-radius: 8px 8px 0 0;
   display: flex;
@@ -22,16 +21,17 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding-bottom: 24px;
 }
 
-.dialog-header {
+.dialogHeader {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 32px 24px 12px;
 }
 
-.dialog-title {
+.dialogTitle {
   font-family: 'Source Han Serif CN', serif;
   font-weight: 600;
   font-size: 18px;
@@ -41,18 +41,18 @@
   opacity: 0.9;
 }
 
-.dialog-content {
+.dialogContent {
   flex: 1;
   padding: 0;
   display: flex;
   flex-direction: column;
 }
 
-.reason-prompt {
+.reasonPrompt {
   padding: 14px 24px;
 }
 
-.prompt-text {
+.promptText {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 300;
   font-size: 14px;
@@ -61,13 +61,14 @@
   color: rgba(31, 23, 34, 0.5);
 }
 
-.reason-list {
+.reasonList {
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin-bottom: 24px;
 }
 
-.reason-item {
+.reasonItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -80,7 +81,7 @@
   }
 }
 
-.reason-text {
+.reasonText {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 350;
   font-size: 14px;
@@ -89,7 +90,7 @@
   color: #1F1722;
 }
 
-.radio-button {
+.radioButton {
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -101,28 +102,24 @@
   transition: all 0.2s ease;
 
   &.selected {
-    background: orange;
-    border: 1px solid rgba(52, 52, 52, 0.39);
+    border: none;
     box-shadow: inset 0px -2px 6px rgba(0, 0, 0, 0.3);
   }
 }
 
-.radio-inner {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #FF9114 19.68%, #FFCA40 59.79%, #FFE0F9 100%);
-  box-shadow: 0 0 4px rgba(255, 145, 20, 0.5);
+.radioInner {
+  width: 20px;
+  height: 20px;
 }
 
-.dialog-footer {
+.dialogFooter {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 0 24px 24px;
 }
 
-.confirm-button {
+.confirmButton {
   width: 219px;
   height: 46px;
   background: linear-gradient(180deg, #282724 0%, #000000 100%);
@@ -157,7 +154,7 @@
   }
 }
 
-.confirm-text {
+.confirmText {
   font-family: 'Source Han Serif CN', serif;
   font-weight: 600;
   font-size: 15px;

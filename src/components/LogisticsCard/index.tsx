@@ -4,6 +4,7 @@ import styles from "./index.module.scss";
 import rightArrowIcon from "@/assets/icons/right-arrow.svg";
 import Taro from "@tarojs/taro";
 import addressLine from "@/assets/icons/order-address-line.png";
+import logisticsIcon from "@/assets/icons/logistics.svg";
 
 export interface AddressInfo {
     cityName: string;
@@ -19,16 +20,43 @@ export interface AddressInfo {
 interface LogisticsCardProps {
     address?: AddressInfo;
     onAdressChange?: (address: AddressInfo) => void;
+    enableChangeAddress?: boolean;
+    logisticsStatus?: number;
+    onViewLogistics?: () => void;
 }
 
 const LogisticsCard: React.FC<LogisticsCardProps> = ({
     address,
-    onAdressChange
+    onAdressChange,
+    logisticsStatus,
+    enableChangeAddress = true,
+    onViewLogistics,
 }) => {
 
     console.log(address, 'address')
+    const transformLogisticsStatus = (status: number) => {
+        switch (status) {
+            case 0:
+                return '等待快递小哥揽收';
+            case 1:
+                return '已揽件';
+            case 2:
+                return '运输中';
+            case 3:
+                return '派件中';
+            case 4:
+                return '已签收';
+            case 5:
+                return '异常';
+            case 6:
+                return '代签收';
+            default:
+                return '未知状态';
+        }
+    }
 
     const onSelectAddress = () => {
+        if (!enableChangeAddress) return;
         Taro.chooseAddress({
             success: (result) => {
                 onAdressChange?.(result);
@@ -44,6 +72,14 @@ const LogisticsCard: React.FC<LogisticsCardProps> = ({
         );
         return (
             <View className={styles.receiverInfo}>
+                {logisticsStatus !== undefined && (<View className={styles.logisticsStatus} onClick={onViewLogistics}>
+                    <View className={styles.logisticsStatusContent}>
+                        <Image src={logisticsIcon} className={styles.logisticsIcon} />
+                        <Text className={styles.logisticsStatusText}>{transformLogisticsStatus(logisticsStatus)}</Text>
+                    </View>
+                    <Image src={rightArrowIcon} className={styles.rightArrowIcon} />
+                </View>)}
+                {logisticsStatus !== undefined && (<View className={styles.logisticsStatusDivider} />)}
                 <View className={styles.addressInfo}>
                     <Text className={styles.regionText}>
                         {address.provinceName}{address.cityName}{address.countyName}
@@ -66,7 +102,7 @@ const LogisticsCard: React.FC<LogisticsCardProps> = ({
         <View className={styles.logisticsCard} onClick={onSelectAddress}>
             <View className={styles.addressContent}>
                 {renderReceiverInfo()}
-                <Image src={rightArrowIcon} className={styles.rightArrowIcon} />
+                {enableChangeAddress && <Image src={rightArrowIcon} className={styles.rightArrowIcon} />}
             </View>
             <View className={styles.addressLineContainer} />
         </View>

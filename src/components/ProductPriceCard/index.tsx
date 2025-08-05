@@ -7,6 +7,13 @@ import ImageSlider from "../ImageSlider";
 import styles from "./index.module.scss";
 import qrCodeIcon from "@/assets/icons/qrcode.svg";
 
+export enum ProductAction {
+  ContactMerchant = "contactMerchant",  // 联系商家
+  CheckLogistics = "checkLogistics",  // 查看物流
+  ConfirmOrder = "confirmOrder",  // 确认收货
+  WithDrawRefund = "withDrawRefund",  // 撤销退款
+}
+
 interface ProductPriceCardProps {
   name: string;
   price: number;
@@ -17,9 +24,13 @@ interface ProductPriceCardProps {
   showHistory?: boolean;
   isCanceled?: boolean;
   isSelf?: boolean;
-  onCheckLogistics?: () => void;
-  onConfirmOrder?: () => void;
   onShowQrCode?: () => void;
+  actions?: {
+    [key in ProductAction]: {
+      text: string;
+      onClick: () => void;
+    };
+  } | null;
 }
 
 const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
@@ -28,8 +39,7 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
   productImages,
   imageUploadTime,
   isSelf = false,
-  onCheckLogistics,
-  onConfirmOrder,
+  actions,
   onShowQrCode,
 }) => {
   console.log(name, productImages, 'productImages')
@@ -51,23 +61,23 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
       </View>
 
       {/* 历史成交区域 */}
-        <View className={styles.productImageSection}>
-          <View className={styles.productImageTitleContainer}>
-            <Text className={styles.productImageTitle}>商家实拍图</Text>
-            <Text className={styles.productImageUploadTime}>{`${imageUploadTime} 上传`}</Text>
-          </View>
-          <View className={styles.productImages}>
-            <ImageSlider
-              images={productImages}
-              width={80}
-              height={80}
-              gap={8}
-              borderRadius={10}
-              showGradientMask={true}
-            />
-            <View className={styles.imageFade}></View>
-          </View>
+      <View className={styles.productImageSection}>
+        <View className={styles.productImageTitleContainer}>
+          <Text className={styles.productImageTitle}>商家实拍图</Text>
+          <Text className={styles.productImageUploadTime}>{`${imageUploadTime} 上传`}</Text>
         </View>
+        <View className={styles.productImages}>
+          <ImageSlider
+            images={productImages}
+            width={80}
+            height={80}
+            gap={8}
+            borderRadius={10}
+            showGradientMask={true}
+          />
+          <View className={styles.imageFade}></View>
+        </View>
+      </View>
 
       {/* 购买须知区域 */}
       <View className={styles.purchaseNotice}>
@@ -75,20 +85,28 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
       </View>
 
       {/* 操作按钮区域 */}
-      <View className={styles.actionButtons}>
-        <View className={styles.actionBtn} onClick={onShowQrCode}>
-          <Image src={phoneIcon} />
-          <Text>联系商家</Text>
+      {actions && Object.keys(actions).length > 0 && (
+        <View className={styles.actionButtons}>
+          {actions?.[ProductAction.ContactMerchant] && (
+            <View className={styles.actionBtn} onClick={actions?.[ProductAction.ContactMerchant]?.onClick}>
+              <Image src={phoneIcon} />
+              <Text>联系商家</Text>
+            </View>
+          )}
+          {actions?.[ProductAction.CheckLogistics] && (
+            <View className={styles.actionBtn} onClick={actions?.[ProductAction.CheckLogistics]?.onClick}>
+              <Image src={locationIcon} />
+              <Text>查看物流</Text>
+            </View>
+          )}
+          {actions?.[ProductAction.ConfirmOrder] && (
+            <View className={styles.actionBtn + " " + styles.confirmBtn} onClick={actions?.[ProductAction.ConfirmOrder]?.onClick}>
+              <Image src={confirmOrderIcon} />
+              <Text>确认收货</Text>
+            </View>
+          )}
         </View>
-        <View className={styles.actionBtn} onClick={onCheckLogistics}>
-          <Image src={locationIcon} />
-          <Text>查看物流</Text>
-        </View>
-        <View className={styles.actionBtn + " " + styles.confirmBtn} onClick={onConfirmOrder}>
-          <Image src={confirmOrderIcon} />
-          <Text>确认收货</Text>
-        </View>
-      </View>
+      )}
     </View>
   );
 };

@@ -4,7 +4,7 @@ import "./index.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import BraceletInfo from "@/components/BraceletInfo";
 import MerchantCard from "@/components/MerchantCard";
-import ProductPriceCard from "@/components/ProductPriceCard";
+import ProductPriceCard, { ProductAction } from "@/components/ProductPriceCard";
 import connectIcon from "@/assets/icons/connect.svg";
 import {
   formatOrderStatus,
@@ -12,17 +12,20 @@ import {
   processingOrderStatus,
   OrderStatusMap,
   getOrderStatusDescription,
-  getOrderStatusTip
+  getOrderStatusTip,
+  showReferencePrice,
+  getStatusBadgeType
 } from "@/utils/orderUtils";
 import CrystalButton from "@/components/CrystalButton";
 import shareDesignImage from "@/assets/icons/share-design.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import StatusBadge, { StatusBadgeType } from "@/components/StatusBadge";
-import Taro from "@tarojs/taro";
+import Taro, { requirePlugin } from "@tarojs/taro";
 import api, { userApi, userHistoryApi } from "@/utils/api";
 import LogisticsCard, { AddressInfo } from "@/components/LogisticsCard";
 import QrCodeDialog from "@/components/QrCodeDialog";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
+import payApi from "@/utils/api-pay";
 
 const OrderDetail: React.FC = () => {
   const [order, setOrder] = useState<any>(null);
@@ -30,15 +33,16 @@ const OrderDetail: React.FC = () => {
   const [address, setAddress] = useState<AddressInfo | undefined>(undefined);
   const [qrCodeVisible, setQrCodeVisible] = useState<boolean>(false);
   const [cancelDialogVisible, setCancelDialogVisible] = useState<boolean>(false);
+  const plugin = requirePlugin('logisticsPlugin');
 
-  useEffect(() => {
+  const getOrderDetail = () => {
     const instance = Taro.getCurrentInstance();
     const params = instance.router?.params;
     const orderId = params?.orderId;
     console.log(orderId, 'orderId')
     api.userHistory.getOrderById(orderId || "").then((res) => {
       const _order = res?.data?.orders?.[0];
-      _order.order_status = OrderStatusEnum.OrderStatusInProgress;
+      _order.order_status = OrderStatusEnum.Completed;
       if (_order?.address) {
         const newAddress = {
           detailInfo: _order?.address?.detail_info,
@@ -54,30 +58,102 @@ const OrderDetail: React.FC = () => {
       }
       setOrder(_order);
     });
+  }
+
+  useEffect(() => {
+    getOrderDetail();
   }, []);
 
-  const orderStatus = OrderStatusEnum.OrderStatusPendingPayment; // order?.order_status;
+  const orderStatus = order?.order_status;
 
   const showMerchantCard = useMemo(() => {
-    return [OrderStatusEnum.OrderStatusInProgress, OrderStatusEnum.OrderStatusNegotiating].includes(orderStatus);
+    return [OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating].includes(orderStatus);
   }, [orderStatus]);
 
   const showLogistics = useMemo(() => {
-    return [OrderStatusEnum.OrderStatusPendingPayment].includes(orderStatus);
+    return [OrderStatusEnum.PendingPayment, OrderStatusEnum.PendingShipment, OrderStatusEnum.Shipped, OrderStatusEnum.Received, OrderStatusEnum.Completed].includes(orderStatus);
   }, [orderStatus]);
 
   const isSptRefund = useMemo(() => {
-    return [OrderStatusEnum.OrderStatusPendingShipment].includes(orderStatus);
+    return [OrderStatusEnum.PendingShipment].includes(orderStatus);
   }, [orderStatus]);
 
+
   const isSptCancel = useMemo(() => {
-    return [OrderStatusEnum.OrderStatusPendingPayment, OrderStatusEnum.OrderStatusPendingShipment].includes(orderStatus);
+    return [
+      OrderStatusEnum.InProgress,
+      OrderStatusEnum.Negotiating,
+      OrderStatusEnum.PendingPayment,
+    ].includes(orderStatus);
   }, [orderStatus]);
 
   const handlOnPurchase = () => {
-        
-  };
 
+  };
+  const onViewLogistics = () => {
+    payApi.getWaybillToken({ order_id: order?.order_uuid }).then((res) => {
+      const waybill_token = res?.data?.waybill_token;
+      plugin?.openWaybillTracking({
+        waybillToken: waybill_token,
+      })
+    })
+  }
+
+  const onConfirmOrder = () => {
+    payApi.confirmOrder({ order_id: order?.order_uuid }).then((res) => {
+      const { transaction_id, merchant_id, merchant_trade_no } = res?.data;
+      if (wx.miniapp?.openBusinessView) {
+        wx.miniapp.openBusinessView({
+          businessType: 'weappOrderConfirm',
+          extraData: {
+            merchant_id,
+            merchant_trade_no,
+            transaction_id
+          },
+          success() {
+            getOrderDetail();
+          },
+          fail() {
+            getOrderDetail();
+          },
+          complete() {
+            getOrderDetail();
+          }
+        });
+      } else {
+        //引导用户升级微信版本
+      }
+    })
+  }
+
+  const getProductActionsByStatus = () => {
+    if ([OrderStatusEnum.PendingPayment].includes(orderStatus)) {
+      return null;
+    }
+    if ([OrderStatusEnum.Shipped, OrderStatusEnum.Received].includes(orderStatus)) {
+      return {
+        [ProductAction.ContactMerchant]: {
+          text: "联系商家",
+          onClick: () => {
+            setQrCodeVisible(true);
+          },
+        },
+        [ProductAction.CheckLogistics]: {
+          text: "查看物流",
+          onClick: onViewLogistics,
+        },
+        [ProductAction.ConfirmOrder]: {
+          text: "确认收货",
+          onClick: onConfirmOrder,
+        }
+      }
+    };
+    return null;
+  }
+
+  const getProductImages = () => {
+
+  }
 
   return (
     <CrystalContainer
@@ -99,7 +175,7 @@ const OrderDetail: React.FC = () => {
           overflowY: "auto",
         }}
       >
-        {showLogistics && <LogisticsCard address={address} onAdressChange={setAddress} />}
+        {showLogistics && <LogisticsCard address={address} onAdressChange={setAddress} enableChangeAddress={orderStatus === OrderStatusEnum.PendingPayment} logisticsStatus={order?.waybill_status} onViewLogistics={onViewLogistics} />}
         {showMerchantCard ? <MerchantCard
           name={order?.merchant_info?.name}
           isSelf={order?.merchant_info?.is_self_operated}
@@ -113,6 +189,7 @@ const OrderDetail: React.FC = () => {
           onShowQrCode={() => {
             setQrCodeVisible(true);
           }}
+          actions={getProductActionsByStatus()}
         />}
         {order?.design_info && (
           <BraceletInfo
@@ -121,6 +198,7 @@ const OrderDetail: React.FC = () => {
             productNumber={order?.design_info?.design_id}
             quantity={order?.design_info?.beads_info?.length}
             price={order?.price || 0}
+            showPrice={showReferencePrice(orderStatus)}
             productImage={order?.design_info?.image_url}
             beads={order?.design_info?.beads_info || []}
             orderAction={
@@ -141,16 +219,16 @@ const OrderDetail: React.FC = () => {
           />)}
       </View>
 
-      {OrderStatusEnum.OrderStatusPendingPayment === orderStatus && (
+      {OrderStatusEnum.PendingPayment === orderStatus && (
         <View className="order-action-container">
-          <CrystalButton onClick={console.log} text={`确认支付 ¥${order?.price}元`} style={{ margin: "20px 24px", width: "100%" }} isPrimary />
+          <CrystalButton onClick={console.log} text={`确认支付 ¥${order?.price}`} style={{ margin: "20px 24px", width: "100%" }} isPrimary />
         </View>
       )}
-      {[OrderStatusEnum.OrderStatusInProgress, OrderStatusEnum.OrderStatusNegotiating].includes(orderStatus) && (
+      {[OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating].includes(orderStatus) && (
         <View className="order-action-container">
           <CrystalButton
             onClick={console.log}
-            text="分享"
+            text="社群"
             prefixIcon={
               <Image
                 src={shareDesignImage}
@@ -179,14 +257,14 @@ const OrderDetail: React.FC = () => {
           />
         </View>
       )}
-      
+
       <QrCodeDialog
         visible={qrCodeVisible}
         qrCodeUrl={order?.merchant_info?.qr_code || ""}
         // merchantName={order?.merchant_info?.name || ""}
         onClose={() => setQrCodeVisible(false)}
       />
-      
+
       <CancelOrderDialog
         visible={cancelDialogVisible}
         onClose={() => setCancelDialogVisible(false)}
@@ -194,17 +272,17 @@ const OrderDetail: React.FC = () => {
         onConfirm={(reason: string) => {
           if (isSptCancel) {
             userHistoryApi.cancelOrder(order?.order_uuid).then(() => {
-            Taro.showToast({
-              title: "取消订单成功",
-              icon: "success",
-            });
-            setCancelDialogVisible(false);
-            Taro.navigateBack();
-          }).catch((error) => {
-            Taro.showToast({
-              title: "取消订单失败",
-              icon: "none",
-            });
+              Taro.showToast({
+                title: "取消订单成功",
+                icon: "success",
+              });
+              setCancelDialogVisible(false);
+              Taro.navigateBack();
+            }).catch((error) => {
+              Taro.showToast({
+                title: "取消订单失败",
+                icon: "none",
+              });
             });
           } else if (isSptRefund) {
             // userHistoryApi.refundOrder(order?.order_uuid).then(() => {
@@ -224,7 +302,7 @@ export default OrderDetail;
 
 // 订单状态组件
 const OrderStatus: React.FC<{ status: OrderStatusEnum }> = ({ status }) => {
-  const formattedOrderStatus = formatOrderStatus(status);
+  const orderStatusTip = getOrderStatusTip(status);
   return (
     <View className="order-status">
       <View
@@ -239,20 +317,16 @@ const OrderStatus: React.FC<{ status: OrderStatusEnum }> = ({ status }) => {
           {getOrderStatusDescription(status)}
         </Text>
         <StatusBadge
-          type={
-            status === OrderStatusEnum.OrderStatusCancelled
-              ? StatusBadgeType.Error
-              : StatusBadgeType.Processing
-          }
+          type={getStatusBadgeType(status)}
           text={OrderStatusMap[status]}
         />
       </View>
-      {processingOrderStatus.includes(status) && (
+      {orderStatusTip && (
         <View className="order-status-content">
           <View className="chat-icon">
             <Image src={connectIcon} />
           </View>
-          <Text className="status-text">{getOrderStatusTip(status)}</Text>
+          <Text className="status-text">{orderStatusTip}</Text>
         </View>
       )}
     </View>

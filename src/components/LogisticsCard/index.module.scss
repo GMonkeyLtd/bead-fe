@@ -16,7 +16,43 @@
     box-sizing: border-box;
 }
 
-.addressContent {
+.logisticsStatus {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.logisticsIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.logisticsStatusText {
+    color: #1F1722;
+    font-family: "Noto Sans SC";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 1px;
+}
+
+.logisticsStatusContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.logisticsStatusDivider {
+    width: 100%;
+    height: 1px;
+    background-color: #F2EFEC;
+}
+
+    .addressContent {
     width: 100%;
     box-sizing: border-box;
     padding: 16px;

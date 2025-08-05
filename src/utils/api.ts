@@ -241,7 +241,7 @@ export const userHistoryApi = {
         "orders": [
           {
             "order_uuid": "20250625155842657587",
-            "order_status": "pending_shipment",
+            "order_status": "shipped",
             "waybill_status": 0,
             "price": 400.00,
             "reference_price": 500.00,
