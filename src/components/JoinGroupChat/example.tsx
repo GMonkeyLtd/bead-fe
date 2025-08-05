@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, Button } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import JoinGroupChat from "./index";
+import JoinGroupChat from ".";
 
 // 在现有页面中使用JoinGroupChat组件的示例
-const UsageExample: React.FC = () => {
+const JoinGroupChatComp: React.FC = () => {
   const [showJoinGroup, setShowJoinGroup] = useState(false);
 
   // 模拟从API获取群聊信息
@@ -97,4 +97,4 @@ const UsageExample: React.FC = () => {
   );
 };
 
-export default UsageExample; 
+export default JoinGroupChatComp; 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, Button } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import JoinGroupChat from "./index";
+import JoinGroupChat from ".";
 
 const JoinGroupChatDemo: React.FC = () => {
   const [showJoinGroup, setShowJoinGroup] = useState(false);

@@ -20,11 +20,7 @@ export enum OrderStatus {
   // 商家取消（商家取消订单）
   MerchantCancelled = "merchant_cancelled",
   // 退款中（用户发起退款申请，正在处理中）
-  Refunding = "refunding",
-  // 已退款（订单完成退款流程）
-  Refunded = "refunded",
-  // 订单状态退款审核中（用户已提交退款申请，等待商家审核）
-  RefundReviewing = "refund_reviewing"
+  AfterSale = "after_sale"
 }
 export const OrderStatusMap = {
   [OrderStatus.InProgress]: "进行中",
@@ -36,10 +32,21 @@ export const OrderStatusMap = {
   [OrderStatus.Completed]: "已完成",
   [OrderStatus.Cancelled]: "已取消",
   [OrderStatus.MerchantCancelled]: "商家取消",
-  [OrderStatus.Refunding]: "退款中",
-  [OrderStatus.Refunded]: "已退款",
-  [OrderStatus.RefundReviewing]: "退款中"
+  [OrderStatus.AfterSale]: "售后中"
 };
+
+export enum AfterSaleStatus {
+  None = "",
+  Refunding = "refunding",
+  Refunded = "refunded",
+  RefundReviewing = "refund_reviewing"
+}
+
+export const AfterSaleStatusMap = {
+  [AfterSaleStatus.Refunding]: "退款中",
+  [AfterSaleStatus.Refunded]: "退款成功",
+  [AfterSaleStatus.RefundReviewing]: "待审核"
+}
 
 export const processingOrderStatus = [
   OrderStatus.InProgress,
@@ -52,9 +59,9 @@ export const cancelledOrderStatus = [
 ];
 
 
-export const formatOrderStatus = (status: OrderStatus) => {
-  if (processingOrderStatus.includes(status)) {
-    return "进行中";
+export const formatOrderStatus = (status: OrderStatus, afterSaleStatus: AfterSaleStatus) => {
+  if (status === OrderStatus.AfterSale) {
+    return AfterSaleStatusMap[afterSaleStatus];
   }
   return OrderStatusMap[status];
 };
@@ -63,8 +70,7 @@ export const getStatusBadgeType = (status: OrderStatus): StatusBadgeType => {
   switch (status) {
     case OrderStatus.Cancelled:
     case OrderStatus.MerchantCancelled:
-    case OrderStatus.Refunding:
-    case OrderStatus.Refunded:
+    case OrderStatus.AfterSale:
       return StatusBadgeType.Error;
     case OrderStatus.Completed:
       return StatusBadgeType.Success;
@@ -73,7 +79,14 @@ export const getStatusBadgeType = (status: OrderStatus): StatusBadgeType => {
   }
 };
 
-export const getOrderStatusDescription = (status: OrderStatus) => {
+export const afterSaleStatusDescriptionMap = {
+  [AfterSaleStatus.Refunding]: "退款进行中",
+  [AfterSaleStatus.Refunded]: "退款成功",
+  [AfterSaleStatus.RefundReviewing]: "请等待商家处理"
+}
+
+
+export const getOrderStatusDescription = (status: OrderStatus, afterSaleStatus: AfterSaleStatus) => {
   switch (status) {
     case OrderStatus.InProgress:
     case OrderStatus.Negotiating:
@@ -92,18 +105,20 @@ export const getOrderStatusDescription = (status: OrderStatus) => {
       return "用户取消定制";
     case OrderStatus.MerchantCancelled:
       return "商家取消定制";
-    case OrderStatus.Refunding:
-      return "退款进行中";
-    case OrderStatus.Refunded:
-      return "退款成功";
-    case OrderStatus.RefundReviewing:
-      return "请等待商家处理";
+    case OrderStatus.AfterSale:
+      return afterSaleStatusDescriptionMap[afterSaleStatus];
     default:
       return`订单${OrderStatusMap[status]}`;
   }
 }
 
-export const getOrderStatusTip = (status: OrderStatus, statusTime: number) => {
+export const afterSaleStatusTipMap = {
+  [AfterSaleStatus.Refunding]: "退款金额原路返回，银行卡支付的退款预计3个工作日",
+  [AfterSaleStatus.Refunded]: "",
+  [AfterSaleStatus.RefundReviewing]: "已提交退款申请，预计24小时内为您处理"
+}
+
+export const getOrderStatusTip = (status: OrderStatus, afterSaleStatus: AfterSaleStatus, statusTime?: number) => {
   switch (status) {
     case OrderStatus.InProgress:
     case OrderStatus.Negotiating:
@@ -114,11 +129,12 @@ export const getOrderStatusTip = (status: OrderStatus, statusTime: number) => {
       return "定制周期一般在7-10天";
     case OrderStatus.Shipped:
       return "商家已发货，请耐心等待";
-    case OrderStatus.RefundReviewing:
-      return "已提交退款申请，预计24小时内为您处理";
-    case OrderStatus.Refunding:
-      return "退款金额原路返回，银行卡支付的退款预计3个工作日";
+    case OrderStatus.AfterSale:
+      return afterSaleStatusTipMap[afterSaleStatus];
     case OrderStatus.Received:
+      if (!statusTime) {
+        return "";
+      }
       // 自动确认收货时间为10天
       const autoConfirmDays = 10;
       const now = Date.now();
@@ -146,5 +162,5 @@ export const getOrderStatusTip = (status: OrderStatus, statusTime: number) => {
 }
 
 export const showReferencePrice = (status: OrderStatus) => {
-  return status === OrderStatus.InProgress || status === OrderStatus.Negotiating;
+  return [OrderStatus.InProgress, OrderStatus.Negotiating, OrderStatus.Cancelled, OrderStatus.MerchantCancelled].includes(status);
 }

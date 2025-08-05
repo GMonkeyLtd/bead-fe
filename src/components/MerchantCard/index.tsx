@@ -65,11 +65,11 @@ const MerchantCard: React.FC<MerchantCardProps> = ({
         </View> */}
 
         {/* 分隔线 */}
-        <View className="divider"></View>
+        {!isCanceled && <View className="divider"></View>}
       </View>
 
       {/* 历史成交区域 */}
-      {showHistory && (
+      {showHistory && !isCanceled && (
         <View className="history-section">
           <Text className="history-title">近30日成交</Text>
           <View className="history-images">

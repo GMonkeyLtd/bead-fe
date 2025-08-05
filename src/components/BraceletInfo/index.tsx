@@ -88,7 +88,10 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
 
         {/* 价格 */}
         <View className="price-section">
-          {showPrice && <Text className="price">¥{price.toFixed(2)}</Text>}
+          <View className="price-label">
+            <View className="price-label-text">参考价：</View>
+            {showPrice && <Text className="price">¥{price.toFixed(2)}</Text>}
+          </View>
         </View>
       </View>
     </View>

@@ -36,6 +36,7 @@
       cursor: pointer;
     }
   }
+
   .order-action {
     display: flex;
     align-items: center;
@@ -49,7 +50,8 @@
     font-size: 11px;
     font-style: normal;
     font-weight: 350;
-    line-height: 135%; /* 14.85px */
+    line-height: 135%;
+    /* 14.85px */
 
     background: rgba(0, 0, 0, 0.04);
 
@@ -145,6 +147,22 @@
       align-items: flex-end;
       gap: 4px;
       padding: 4px 0;
+
+      .price-label {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 2px;
+
+        .price-label-text {
+          color: rgba(31, 23, 34, 0.70);
+          font-family: "Noto Sans SC";
+          font-size: 11px;
+          font-style: normal;
+          font-weight: 300;
+          line-height: normal;
+        }
+      }
 
       .price {
         font-family: "Noto Sans SC", sans-serif;

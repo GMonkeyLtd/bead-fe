@@ -1,19 +1,7 @@
-.joinGroupChatOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-}
+
 
 .joinGroupChat {
-  width: 345px;
+  width: 100%;
   background: #FFFFFF;
   border-radius: 10px;
   display: flex;
@@ -28,6 +16,7 @@
     7px 63px 18px 0px rgba(0, 0, 0, 0),
     inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.43);
   padding: 10px 16px 20px;
+  box-sizing: border-box;
   gap: 10px;
 }
 
@@ -51,12 +40,8 @@
 }
 
 .memberAvatar {
-  width: 21px;
+  width: 47px;
   height: 21px;
-  border-radius: 50%;
-  border: 1px solid #FFFFFF;
-  object-fit: cover;
-  position: relative;
 }
 
 .groupDetails {
@@ -79,24 +64,9 @@
   background-clip: text;
 }
 
-.onlineIndicator {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.onlineDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #514B46;
-}
-
-.onlineText {
-  font-family: 'Noto Sans SC', sans-serif;
-  font-weight: 400;
-  font-size: 10px;
-  color: #514B46;
+.rightArrowIcon {
+  width: 16px;
+  height: 10px;
 }
 
 .featuresSection {
@@ -130,7 +100,6 @@
 .icon {
   width: 20px;
   height: 20px;
-  filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
 }
 
 .featureText {
@@ -143,6 +112,7 @@
 }
 
 .bottomSection {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -150,13 +120,16 @@
 }
 
 .couponTag {
+  position: absolute;
+  top: -8px;
+  right: 0;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
   padding: 1px 4px;
-  background: linear-gradient(135deg, #FFB787 0%, #CD2421 100%);
-  border-radius: 7px 0px 7px 0px;
+  border-radius: 7px 0;
+  background: linear-gradient(152deg, #FFB787 21.56%, #CD2421 130.38%), #FFF;
 }
 
 .couponText {
@@ -169,7 +142,7 @@
 }
 
 .joinButton {
-  width: 313px;
+  width: 100%;
   height: 38px;
   background: linear-gradient(180deg, #282724 0%, #000000 100%);
   border-radius: 100px;

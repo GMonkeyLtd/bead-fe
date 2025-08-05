@@ -3,40 +3,29 @@ import { View, Text, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import styles from "./index.module.scss";
 import qrcodeIcon from "@/assets/icons/qrcode.svg";
-import giftIcon from "@/assets/icons/collect.svg"; // 使用现有图标作为礼物图标
-import userGroupIcon from "@/assets/icons/user-center.svg"; // 使用现有图标作为用户组图标
-import headsetIcon from "@/assets/icons/phone.svg"; // 使用现有图标作为客服图标
+import { APP_QRCODE_IMAGE_URL, JOIN_GROUP_AVATAR_IMAGE_URL} from "@/config";
+import rightArrowIcon from "@/assets/icons/right-arrow.svg";
+import CrystalButton from "../CrystalButton";
+import giftIcon from "@/assets/icons/gift.svg";
+import groupIcon from "@/assets/icons/group.svg";
+import zixunIcon from "@/assets/icons/zixun.svg";
 
 export interface JoinGroupChatProps {
-  visible: boolean;
-  onClose: () => void;
   groupInfo?: {
     name: string;
-    memberAvatars?: string[];
     qrCodeUrl?: string;
   };
 }
 
 const defaultGroupInfo = {
-  name: "瑶光记·水晶手串 达人交流群",
-  memberAvatars: [
-    "/src/assets/figma-images/member-avatar-1.png",
-    "/src/assets/figma-images/member-avatar-2.png", 
-    "/src/assets/figma-images/member-avatar-3.png"
-  ],
-  qrCodeUrl: "https://via.placeholder.com/200x200/FFFFFF/000000?text=QR"
+  name: "璞光集水晶手串交流群",
+  qrCodeUrl: APP_QRCODE_IMAGE_URL
 };
 
 const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
-  visible,
-  onClose,
   groupInfo = defaultGroupInfo,
 }) => {
   const [showQRCode, setShowQRCode] = useState(false);
-
-  if (!visible) {
-    return null;
-  }
 
   const handleJoinClick = () => {
     setShowQRCode(true);
@@ -49,8 +38,6 @@ const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
   const handleOverlayClick = () => {
     if (showQRCode) {
       handleQRCodeClose();
-    } else {
-      onClose();
     }
   };
 
@@ -60,8 +47,8 @@ const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
 
   const features = [
     { icon: giftIcon, text: "群内专属优惠" },
-    { icon: userGroupIcon, text: "水晶买家交流" },
-    { icon: headsetIcon, text: "官方咨询" }
+    { icon: groupIcon, text: "水晶买家交流" },
+    { icon: zixunIcon, text: "官方咨询" }
   ];
 
   return (
@@ -70,22 +57,18 @@ const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
         {/* 群聊信息区域 */}
         <View className={styles.groupInfoSection}>
           <View className={styles.groupHeader}>
-            <View className={styles.memberAvatars}>
-              {groupInfo.memberAvatars?.map((avatar, index) => (
-                <Image 
-                  key={index}
-                  src={avatar} 
-                  className={styles.memberAvatar}
-                  style={{ zIndex: groupInfo.memberAvatars!.length - index }}
-                />
-              ))}
-            </View>
+            <Image
+              src={JOIN_GROUP_AVATAR_IMAGE_URL}
+              className={styles.memberAvatar}
+              style={{ zIndex: 1 }}
+            />
             <View className={styles.groupDetails}>
               <Text className={styles.groupName}>{groupInfo.name}</Text>
-              <View className={styles.onlineIndicator}>
-                <View className={styles.onlineDot} />
-                <Text className={styles.onlineText}>在线</Text>
-              </View>
+              <Image
+                src={rightArrowIcon}
+                className={styles.rightArrowIcon}
+                style={{ width: "12px", height: "12px" }}
+              />
             </View>
           </View>
         </View>
@@ -104,14 +87,9 @@ const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
 
         {/* 底部区域 */}
         <View className={styles.bottomSection}>
+          <CrystalButton text="立即加入" onClick={handleJoinClick} isPrimary style={{ width: "100%" }} />
           <View className={styles.couponTag}>
             <Text className={styles.couponText}>进群领取专属优惠券</Text>
-          </View>
-          <View className={styles.joinButton} onClick={handleJoinClick}>
-            <View className={styles.buttonReflection} />
-            <View className={styles.buttonContent}>
-              <Text className={styles.joinText}>立即加入</Text>
-            </View>
           </View>
         </View>
       </View>
@@ -127,7 +105,7 @@ const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
               </View>
             </View>
             <View className={styles.qrCodeContent}>
-              <Image src={groupInfo.qrCodeUrl} className={styles.qrCodeImage} />
+              <Image src={groupInfo.qrCodeUrl || ""} className={styles.qrCodeImage} />
               <Text className={styles.qrCodeTip}>请使用微信扫描二维码加入群聊</Text>
             </View>
           </View>

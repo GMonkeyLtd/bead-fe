@@ -31,6 +31,8 @@ interface ProductPriceCardProps {
       onClick: () => void;
     };
   } | null;
+  showBuyNotice?: boolean;
+  showImages?: boolean;
 }
 
 const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
@@ -41,6 +43,8 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
   isSelf = false,
   actions,
   onShowQrCode,
+  showBuyNotice,
+  showImages,
 }) => {
   console.log(name, productImages, 'productImages')
   return (
@@ -61,7 +65,7 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
       </View>
 
       {/* 历史成交区域 */}
-      <View className={styles.productImageSection}>
+      {showImages && (<View className={styles.productImageSection}>
         <View className={styles.productImageTitleContainer}>
           <Text className={styles.productImageTitle}>商家实拍图</Text>
           <Text className={styles.productImageUploadTime}>{`${imageUploadTime} 上传`}</Text>
@@ -77,12 +81,12 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
           />
           <View className={styles.imageFade}></View>
         </View>
-      </View>
+      </View>)}
 
       {/* 购买须知区域 */}
-      <View className={styles.purchaseNotice}>
+      {showBuyNotice && (<View className={styles.purchaseNotice}>
         <Text className={styles.purchaseNoticeText}>买单须知：定制商品商家发货后，非质量问题无法退换</Text>
-      </View>
+      </View>)}
 
       {/* 操作按钮区域 */}
       {actions && Object.keys(actions).length > 0 && (

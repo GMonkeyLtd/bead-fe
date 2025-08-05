@@ -14,7 +14,8 @@ import {
   getOrderStatusDescription,
   getOrderStatusTip,
   showReferencePrice,
-  getStatusBadgeType
+  getStatusBadgeType,
+  AfterSaleStatus
 } from "@/utils/orderUtils";
 import CrystalButton from "@/components/CrystalButton";
 import shareDesignImage from "@/assets/icons/share-design.svg";
@@ -26,6 +27,7 @@ import LogisticsCard, { AddressInfo } from "@/components/LogisticsCard";
 import QrCodeDialog from "@/components/QrCodeDialog";
 import CancelOrderDialog from "@/components/CancelOrderDialog";
 import payApi from "@/utils/api-pay";
+import JoinGroupChat from "@/components/JoinGroupChat";
 
 const OrderDetail: React.FC = () => {
   const [order, setOrder] = useState<any>(null);
@@ -42,7 +44,8 @@ const OrderDetail: React.FC = () => {
     console.log(orderId, 'orderId')
     api.userHistory.getOrderById(orderId || "").then((res) => {
       const _order = res?.data?.orders?.[0];
-      _order.order_status = OrderStatusEnum.Completed;
+      _order.order_status = OrderStatusEnum.AfterSale;
+      _order.after_sale_status = AfterSaleStatus.RefundReviewing;
       if (_order?.address) {
         const newAddress = {
           detailInfo: _order?.address?.detail_info,
@@ -67,7 +70,7 @@ const OrderDetail: React.FC = () => {
   const orderStatus = order?.order_status;
 
   const showMerchantCard = useMemo(() => {
-    return [OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating].includes(orderStatus);
+    return [OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating, OrderStatusEnum.Cancelled, OrderStatusEnum.MerchantCancelled].includes(orderStatus);
   }, [orderStatus]);
 
   const showLogistics = useMemo(() => {
@@ -78,6 +81,13 @@ const OrderDetail: React.FC = () => {
     return [OrderStatusEnum.PendingShipment].includes(orderStatus);
   }, [orderStatus]);
 
+  const showBuyTip = useMemo(() => {
+    return [OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating, OrderStatusEnum.PendingPayment, OrderStatusEnum.PendingShipment].includes(orderStatus);
+  }, [orderStatus]);
+
+  const showJoinGroupChat = useMemo(() => {
+    return [OrderStatusEnum.AfterSale, OrderStatusEnum.Completed].includes(orderStatus);
+  }, [orderStatus]);
 
   const isSptCancel = useMemo(() => {
     return [
@@ -164,7 +174,7 @@ const OrderDetail: React.FC = () => {
       disablePaddingBottom
     >
       <View style={{ padding: "24px 24px 0 24px" }}>
-        <OrderStatus status={orderStatus} />
+        <OrderStatus status={orderStatus} afterSaleStatus={order?.after_sale_status} />
       </View>
       <View
         className="order-detail-container"
@@ -177,6 +187,7 @@ const OrderDetail: React.FC = () => {
       >
         {showLogistics && <LogisticsCard address={address} onAdressChange={setAddress} enableChangeAddress={orderStatus === OrderStatusEnum.PendingPayment} logisticsStatus={order?.waybill_status} onViewLogistics={onViewLogistics} />}
         {showMerchantCard ? <MerchantCard
+          isCanceled={orderStatus === OrderStatusEnum.Cancelled || orderStatus === OrderStatusEnum.MerchantCancelled}
           name={order?.merchant_info?.name}
           isSelf={order?.merchant_info?.is_self_operated}
           historyImages={order?.merchant_info?.transaction_history?.images_url || []}
@@ -184,13 +195,18 @@ const OrderDetail: React.FC = () => {
           name={order?.merchant_info?.name}
           price={order?.price || 0}
           isSelf={order?.merchant_info?.is_self_operated}
+          showImages={orderStatus !== OrderStatusEnum.AfterSale}
           productImages={order?.product_photos?.images_url || order?.merchant_info?.transaction_history?.images_url || []}
           imageUploadTime={order?.product_photos?.upload_time}
           onShowQrCode={() => {
             setQrCodeVisible(true);
           }}
+          showBuyNotice={showBuyTip}
           actions={getProductActionsByStatus()}
         />}
+        {showJoinGroupChat && (
+          <JoinGroupChat />
+        )}
         {order?.design_info && (
           <BraceletInfo
             orderNumber={order?.order_uuid}
@@ -301,8 +317,8 @@ const OrderDetail: React.FC = () => {
 export default OrderDetail;
 
 // 订单状态组件
-const OrderStatus: React.FC<{ status: OrderStatusEnum }> = ({ status }) => {
-  const orderStatusTip = getOrderStatusTip(status);
+const OrderStatus: React.FC<{ status: OrderStatusEnum, afterSaleStatus: AfterSaleStatus }> = ({ status, afterSaleStatus }) => {
+  const orderStatusTip = getOrderStatusTip(status, afterSaleStatus);
   return (
     <View className="order-status">
       <View
@@ -314,11 +330,11 @@ const OrderStatus: React.FC<{ status: OrderStatusEnum }> = ({ status }) => {
         }}
       >
         <Text className="order-status-title">
-          {getOrderStatusDescription(status)}
+          {getOrderStatusDescription(status, afterSaleStatus)}
         </Text>
         <StatusBadge
           type={getStatusBadgeType(status)}
-          text={OrderStatusMap[status]}
+          text={formatOrderStatus(status, afterSaleStatus)}
         />
       </View>
       {orderStatusTip && (
