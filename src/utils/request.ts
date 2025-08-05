@@ -4,7 +4,7 @@ import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
 
-const domain = 'https://api.gmonkey.top'
+const domain = 'https://api-gray.gmonkey.top'
 // const domain = 'https://test.qianjunye.com'
 
 // 判断是否为开发环境
