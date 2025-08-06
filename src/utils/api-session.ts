@@ -307,8 +307,8 @@ export default {
     return http.get<{
       data: any;
     }>(
-      `/designs/${designId}`,
-      {},
+      `/user/designs/${designId}`,
+      undefined,
       {
         showLoading: false,
         cancelToken: config?.cancelToken,

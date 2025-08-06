@@ -27,6 +27,7 @@ import WearTipsSvg from "@/assets/icons/wear-tips.svg";
 import BeadList from "@/components/BeadList";
 import MaterialSvg from "@/assets/icons/material.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
+import apiSession from "@/utils/api-session";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -45,21 +46,9 @@ const Result = () => {
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] =
     useState(false);
-  const autoShareRef = useRef(false);
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
   const { sessionId, from } = params || {};
-
-  const posterData = useMemo(() => {
-    return {
-      title: braceletName,
-      description: braceletDescription,
-      crystals: beadDescriptions,
-      qrCode: APP_QRCODE_IMAGE_URL,
-      mainImage: imageUrl,
-      designNo: designNo,
-    };
-  }, [braceletName, braceletDescription, beadDescriptions, imageUrl, designNo]);
 
   const getOrderData = (orderUuid: string[]) => {
     api.userHistory.getOrderById(orderUuid).then((res) => {
@@ -68,28 +57,26 @@ const Result = () => {
   };
 
   const getDesignData = (designId: string) => {
-    api.userHistory
-      .getDesignById(parseInt(designId))
+    apiSession.getDesignItem(parseInt(designId))
       .then((res) => {
-        const { id, image_url, word_info, order_uuid, beads_info } =
+        const { design_id, image_url, info, order_uuid } =
           res?.data || {};
         if (order_uuid?.length > 0) {
           getOrderData(order_uuid);
         }
-        setBeadsInfo(beads_info);
         const {
-          bracelet_name,
-          recommendation_text,
-          bead_ids_deduplication,
+          name,
+          description,
+          recommend_beads,
           rizhu,
           wuxing,
-        } = word_info;
-
+        } = info;
+        setBeadsInfo(info.beads);
         setImageUrl(image_url);
-        setBraceletName(bracelet_name);
-        setBeadDescriptions(bead_ids_deduplication);
-        setDesignNo(id);
-        setBraceletDescription(recommendation_text);
+        setBraceletName(name);
+        setBeadDescriptions(recommend_beads);
+        setDesignNo(design_id);
+        setBraceletDescription(description);
         setRizhuInfo(rizhu || wuxing?.[0]);
         setWuxingInfo(wuxing);
       })
@@ -109,25 +96,6 @@ const Result = () => {
       const imageUrl = params?.imageUrl || "";
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
       getDesignData(params?.designBackendId);
-    }
-
-    if (params?.designId) {
-      const result = designData.find(
-        (item: any) => item.design_id === params.designId
-      );
-      const {
-        image_urls,
-        bracelet_name,
-        recommendation_text,
-        bead_ids_deduplication,
-        design_backend_id,
-      } = result;
-
-      setImageUrl(image_urls?.[0] || "");
-      setBraceletName(bracelet_name || "");
-      setBraceletDescription(recommendation_text || "");
-      setBeadDescriptions(bead_ids_deduplication || []);
-      setDesignNo(design_backend_id || "");
     }
   };
 
@@ -155,6 +123,7 @@ const Result = () => {
     Taro.showToast({
       title: "正在生成分享图...",
       icon: "none",
+      duration: 3000,
     });
     try {
       const res = await Taro.request({
@@ -304,6 +273,7 @@ const Result = () => {
       urls: [imageUrl],
     });
   };
+  console.log(braceletName, "braceletName");
 
   return (
     <View
