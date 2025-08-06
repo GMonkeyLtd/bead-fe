@@ -51,7 +51,6 @@ export const AfterSaleStatusMap = {
 export const processingOrderStatus = [
   OrderStatus.InProgress,
   OrderStatus.Negotiating,
-  OrderStatus.PendingPayment,
 ];
 
 export const cancelledOrderStatus = [

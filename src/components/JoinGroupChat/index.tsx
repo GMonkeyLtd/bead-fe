@@ -9,6 +9,7 @@ import CrystalButton from "../CrystalButton";
 import giftIcon from "@/assets/icons/gift.svg";
 import groupIcon from "@/assets/icons/group.svg";
 import zixunIcon from "@/assets/icons/zixun.svg";
+import JoinGroupQrcode from "./JoinGroupQrcode";
 
 export interface JoinGroupChatProps {
   groupInfo?: {
@@ -95,22 +96,10 @@ const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
       </View>
 
       {/* 二维码弹窗 */}
-      {showQRCode && (
-        <View className={styles.qrCodeOverlay} onClick={handleQRCodeClose}>
-          <View className={styles.qrCodeDialog} onClick={handleDialogClick}>
-            <View className={styles.qrCodeHeader}>
-              <Text className={styles.qrCodeTitle}>扫码加入群聊</Text>
-              <View className={styles.closeButton} onClick={handleQRCodeClose}>
-                <Image src={qrcodeIcon} className={styles.closeIcon} />
-              </View>
-            </View>
-            <View className={styles.qrCodeContent}>
-              <Image src={groupInfo.qrCodeUrl || ""} className={styles.qrCodeImage} />
-              <Text className={styles.qrCodeTip}>请使用微信扫描二维码加入群聊</Text>
-            </View>
-          </View>
-        </View>
-      )}
+      <JoinGroupQrcode
+        showQRCode={showQRCode}
+        onClose={handleQRCodeClose}
+      />
     </View>
   );
 };

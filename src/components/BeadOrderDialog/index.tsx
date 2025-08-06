@@ -77,7 +77,7 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
             </View>
           </View>
           <View className='budget-info'>
-            <Text className='budget-text'>预算：{budget}</Text>
+            <Text className='budget-text'>参考价：{budget}</Text>
           </View>
         </View>
 

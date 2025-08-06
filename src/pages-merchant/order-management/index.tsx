@@ -77,7 +77,7 @@ export default function OrderManagement() {
   const currentOrders = useMemo(() => {
     if (activeTab === "进行中") {
       return orders.filter(
-        (item) => [OrderStatus.InService, OrderStatus.MerchantCancelPending].includes(item.status as OrderStatus)
+        (item) => ["2"].includes(item.status)
       );
     } else if (activeTab === "已完成") {
       return orders.filter(

@@ -158,7 +158,7 @@ const Result = () => {
     });    
     try {
       const res = await Taro.request({
-        url: "http://106.75.246.41:8000/api/generate-crystal-poster",
+        url: "http://106.75.233.97:8000/api/generate-crystal-poster",
         method: "POST",
         header: {
           'Content-Type': 'application/json'

@@ -3,6 +3,24 @@
   box-sizing: border-box;
 }
 
+.connectInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #1F1722;
+  font-family: "Source Han Serif CN";
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: 1px;
+}
+
+.copyIcon {
+  width: 16px;
+  height: 16px;
+}
+
 /* Web端容器优化 */
 @media screen and (min-width: 768px) {
   .orderListContainer {
@@ -50,7 +68,8 @@
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    grid-column: 1 / -1; /* 空状态占满整行 */
+    grid-column: 1 / -1;
+    /* 空状态占满整行 */
     margin: 20px 0;
   }
 }
@@ -114,7 +133,7 @@
     padding: 24px;
     cursor: pointer;
     border: 1px solid transparent;
-    
+
     &:hover {
       transform: translateY(-4px);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
@@ -243,7 +262,7 @@
   .detailBtn {
     font-size: 12px !important;
     padding: 8px 16px !important;
-    
+
     &:hover {
       background: rgba(255, 145, 20, 0.1) !important;
       color: #FF8800 !important;
@@ -500,7 +519,7 @@
     height: 36px !important;
     border-radius: 8px !important;
     font-size: 12px !important;
-    
+
     &:hover {
       background: rgba(255, 179, 93, 0.3) !important;
       transform: translateY(-1px);
@@ -552,7 +571,7 @@
     border-radius: 8px !important;
     font-size: 12px !important;
     min-width: 80px;
-    
+
     &:hover {
       background: #C00E0E !important;
       color: #ffffff !important;
@@ -602,7 +621,7 @@
     height: 36px !important;
     border-radius: 8px !important;
     font-size: 12px !important;
-    
+
     &:hover {
       background: #0DB043 !important;
       transform: translateY(-1px);
@@ -652,13 +671,13 @@
     border-radius: 10px !important;
     font-size: 14px !important;
     font-weight: 600 !important;
-    
+
     &:hover {
       background: linear-gradient(135deg, #FF8800 0%, #FFB35D 100%) !important;
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(255, 145, 20, 0.3) !important;
     }
-    
+
     &:active {
       transform: translateY(0);
     }
@@ -694,12 +713,12 @@
     display: none;
     align-items: center;
     gap: 16px;
-    
+
     &.visible {
       display: flex;
     }
   }
-  
+
   .bulkSelection {
     display: flex;
     align-items: center;
@@ -707,13 +726,13 @@
     color: #666;
     font-size: 14px;
   }
-  
+
   .bulkButtons {
     display: flex;
     gap: 8px;
     margin-left: auto;
   }
-  
+
   .bulkBtn {
     padding: 8px 16px;
     border: 1px solid #ddd;
@@ -723,26 +742,26 @@
     cursor: pointer;
     font-size: 12px;
     transition: all 0.3s ease;
-    
+
     &:hover {
       border-color: #FF8800;
       color: #FF8800;
     }
-    
+
     &.primary {
       background: #FF8800;
       border-color: #FF8800;
       color: #ffffff;
-      
+
       &:hover {
         background: #FF7700;
       }
     }
-    
+
     &.danger {
       border-color: #C00E0E;
       color: #C00E0E;
-      
+
       &:hover {
         background: #C00E0E;
         color: #ffffff;
@@ -764,15 +783,15 @@
     background: #ffffff;
     cursor: pointer;
     transition: all 0.3s ease;
-    
+
     &:hover {
       border-color: #FF8800;
     }
-    
+
     &.checked {
       background: #FF8800;
       border-color: #FF8800;
-      
+
       &::after {
         content: '✓';
         display: flex;
@@ -784,7 +803,7 @@
       }
     }
   }
-  
+
   .orderCard.selectable {
     position: relative;
     padding-left: 48px;
@@ -802,11 +821,11 @@
     opacity: 0;
     transition: all 0.3s ease;
   }
-  
+
   .orderCard:hover .orderHoverMenu {
     opacity: 1;
   }
-  
+
   .hoverMenuBtn {
     width: 32px;
     height: 32px;
@@ -820,7 +839,7 @@
     justify-content: center;
     transition: all 0.3s ease;
     font-size: 14px;
-    
+
     &:hover {
       border-color: #FF8800;
       color: #FF8800;
@@ -835,19 +854,19 @@
     padding: 14px;
     margin-bottom: 10px;
   }
-  
+
   .orderDetails {
     gap: 6px;
   }
-  
+
   .orderDesc {
     font-size: 12px;
   }
-  
+
   .actionButtons {
     gap: 8px;
   }
-  
+
   .callBtn,
   .cancelBtn,
   .completeBtn,
@@ -855,4 +874,4 @@
     height: 32px !important;
     font-size: 10px !important;
   }
-} 
+}

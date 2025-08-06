@@ -305,12 +305,12 @@ const ChatDesign = () => {
             />
           )}
           <View className={styles.inputBottomContainer}>
-            <View className={styles.chatRecordEnter}>
+            {/* <View className={styles.chatRecordEnter}>
               <Image
                 src={userRecordSvg}
                 style={{ width: "27px", height: "27px" }}
               />
-            </View>
+            </View> */}
             <View className={styles.inputWrapper}>
               <Textarea
                 className={styles.messageInput}

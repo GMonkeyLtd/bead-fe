@@ -113,11 +113,11 @@ export const userApi = {
     //   }, 1000);
     // });
 
-    return http.post("/merchant/getorderlist", { page: 0, page_size: 0 });
+    return http.post("/merchant/getorderlist", { page: 0, page_size: 100 });
   },
 
   getDispatch: () => {
-    return http.post("/merchant/getdispatch", { page: 0, page_size: 0 });
+    return http.post("/merchant/getdispatch", { page: 0, page_size: 100 });
   },
 
   grabOrder: (orderId: string) => {

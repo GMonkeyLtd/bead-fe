@@ -33,7 +33,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     payApi.getReferencePrice({
       design_id: designNumber
     }).then((res) => {
-      setBudget(res.data.data.reference_price);
+      setBudget(res.data.reference_price);
     });
   }, [designNumber]);
 
@@ -77,6 +77,12 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     // 只允许数字和小数点
     const numericValue = value.replace(/[^\d.]/g, "");
     setBudget(numericValue);
+  };
+
+  const onModifyDesign = () => {
+    Taro.navigateTo({
+      url: `${pageUrls.customDesign}?designId=${designNumber}`
+    });
   };
 
   return (
@@ -150,7 +156,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               isPrimary
             />
           </View>
-          <View className="budget-dialog-button-link">
+          <View className="budget-dialog-button-link" onClick={onModifyDesign}>
             修改定制方案
           </View>
         </View>

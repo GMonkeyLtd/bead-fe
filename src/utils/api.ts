@@ -205,7 +205,7 @@ export const userHistoryApi = {
     ),
 
   getDesignById: (designId: number, config?: ApiConfig) =>
-    http.post<PersonalizedGenerateResult[]>(
+    http.post<{ data: any}>(
       `/user/getdesignitem`,
       {
         image_id: designId,
@@ -233,106 +233,6 @@ export const userHistoryApi = {
     }),
 
   getOrderById: (orderId: string | string[], config?: ApiConfig) => {
-
-    return Promise.resolve({
-      "code": 200,
-      "data": {
-        "count": 1,
-        "orders": [
-          {
-            "order_uuid": "20250625155842657587",
-            "order_status": "shipped",
-            "waybill_status": 0,
-            "price": 400.00,
-            "reference_price": 500.00,
-            "created_at": "2025-06-25 15:58:43",
-            "merchant_info": {
-              "merchant_id": "1",
-              "is_self_operated": true,
-              "qr_code": "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/app-qrcode.png",
-              "name": "东海县亿特珠宝有限公司",
-              "address": "北京市朝阳区建国路88号",
-              "credit": 5,
-              "transaction_rate": 100,
-              "response_rate": 100,
-              "transaction_history": {
-                "images_url": [
-                  "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250623182844.056_4c406fbb255402bd3d814f75e5186b30.jpg",
-                  "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250624102729.990_1ac4e9de8f220c25fc9705c2261d4148.jpg",
-                  "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250623182844.056_4c406fbb255402bd3d814f75e5186b30.jpg",
-                  "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250625142822.796_80fd15c26043962abf275dd65d1dd8a0.jpg"
-                ]
-              }
-            },
-            "design_info": {
-              "design_id": "17",
-              "image_url": "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250625154154.590_a973cdf20002585f04e74afb58f227a1.jpg",
-              "beads_info": [
-                {
-                  "bead_diameter": 8,
-                  "color": "棕色",
-                  "english": "Yellow Rutilated Quartz 2",
-                  "function": "增强自信",
-                  "id": "34",
-                  "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/huyanshi2.png",
-                  "name": "虎眼石 2",
-                  "wuxing": "土"
-                }
-              ],
-              "beads_number": 1,
-              "word_info": {
-                "bead_ids_deduplication": [
-                  {
-                    "color": "棕色",
-                    "english": "Yellow Rutilated Quartz 2",
-                    "function": "稳定情绪",
-                    "id": "34",
-                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%99%8E%E7%9C%BC%E7%9F%B32.png",
-                    "name": "虎眼石 2",
-                    "wuxing": "土"
-                  },
-                  {
-                    "color": "棕色",
-                    "english": "Yellow Rutilated Quartz 2",
-                    "function": "增强自信",
-                    "id": "34",
-                    "image_url": "https://zhuluoji.cn-sh2.ufileos.com/beads/%E8%99%8E%E7%9C%BC%E7%9F%B32.png",
-                    "name": "虎眼石 2",
-                    "wuxing": "土"
-                  }
-                ],
-                "bracelet_name": "虎眼守护",
-                "recommendation_text": "虎眼石手串，土行能量充沛，助你稳定情绪，增强自信，守护平安。"
-              }
-            },
-            "product_photos": {
-              "upload_time": "2025-06-25 15:58:43",
-              "images_url": [
-                "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250623182844.056_4c406fbb255402bd3d814f75e5186b30.jpg",
-                "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250624102729.990_1ac4e9de8f220c25fc9705c2261d4148.jpg",
-                "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250623182844.056_4c406fbb255402bd3d814f75e5186b30.jpg",
-                "https://zhuluoji.cn-sh2.ufileos.com/user-images-history/user2/20250625142822.796_80fd15c26043962abf275dd65d1dd8a0.jpg"
-              ]
-            },
-            "address": {
-              "user_name": "张三",
-              "postal_code": "100000",
-              "province_name": "北京市",
-              "city_name": "北京市",
-              "county_name": "东城区",
-              "street_name": "王府井街道",
-              "detail_info": "王府井大街 88 号东方广场 A 座 1001 室",
-              "national_code": "CN",
-              "tel_number": "13800138000"
-            }
-          }
-        ]
-      },
-      "message": "success"
-    })
-
-
-
     return http.post<{
       data: {
         any: [];

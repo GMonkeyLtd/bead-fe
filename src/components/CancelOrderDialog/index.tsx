@@ -8,10 +8,8 @@ export interface CancelOrderDialogProps {
   visible: boolean;
   type?: 'cancel' | 'refund';
   onClose: () => void;
-  onConfirm: (reason: string) => void;
+  onConfirm: (type: "cancel" | "refund", reason: string) => void;
 }
-
-
 
 const reasons = {
   cancel: [
@@ -57,7 +55,7 @@ const CancelOrderDialog: React.FC<CancelOrderDialogProps> = ({
       });
       return;
     }
-    onConfirm(selectedReason);
+    onConfirm(type, selectedReason);
   };
 
   const handleOverlayClick = () => {

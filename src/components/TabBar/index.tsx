@@ -139,7 +139,7 @@ const TabBar: React.FC<TabBarProps> = ({
             onClick={() => handleTabClick(item)}
           >
             <Image
-              src={isActive ? item.iconActive : theme === TabBarTheme.LIGHT ? item.iconDark : item.icon}
+              src={isActive ? item.iconActive : theme === TabBarTheme.LIGHT ? item.iconDark || item.icon : item.icon}
               className={styles.tabIcon}
             />
             <View

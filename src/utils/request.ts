@@ -3,8 +3,8 @@ import { AuthManager } from './auth'
 import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
-
-const domain = 'https://api.gmonkey.top'
+ const domain = 'https://api.gmonkey.top' 
+const grayDomain = 'https://api-gray.gmonkey.top'
 // const domain = 'https://test.qianjunye.com'
 
 // 判断是否为开发环境
@@ -12,8 +12,8 @@ const isTest = false
 
 // 根据环境构建API基础URL
 const getBaseURL = () => {
-  const basePath = isTest ? '/test_api/v1' : '/api/v1'
-  const fullURL = domain + basePath
+  const apiDomain = isTest ? grayDomain : domain
+  const fullURL = apiDomain + '/api/v1'
   
   console.log('Backend url: ', fullURL)
   return fullURL

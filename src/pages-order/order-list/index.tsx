@@ -17,6 +17,7 @@ const OrderListDemo: React.FC = () => {
           orderNumber: item.order_uuid,
           status: item.order_status,
           merchantName: item.merchant_info?.name,
+          productName: item.design_info?.word_info?.bracelet_name,
           orderImage: item.design_info?.image_url,
           budget: item.price || 0,
           createTime: item.created_at,

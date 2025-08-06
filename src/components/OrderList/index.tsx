@@ -13,6 +13,7 @@ import ContactUserDialog from "@/components/ContactUserDialog";
 import phoneIcon from "@/assets/icons/phone.svg";
 import api from "@/utils/api-merchant";
 import { pageUrls } from "@/config/page-urls";
+import copyIcon from "@/assets/icons/copy.svg";
 
 export interface Order {
   id: string;
@@ -152,6 +153,30 @@ export default function OrderList({
     });
   };
 
+  const handleCopyOrderNumber = (orderNumber: string) => {
+    Taro.setClipboardData({
+      data: orderNumber,
+    })
+  }
+
+  const renderConnectInfo = (order: Order) => {
+    let info = '', copyData = '';
+    if (order.userInfo?.default_contact === 0) {
+      info = `电话：${order.userInfo?.phone}`;
+      copyData = order.userInfo?.phone || '';
+    } else {
+
+      info = `微信：${order.userInfo?.wechat_id}`;
+      copyData = order.userInfo?.wechat_id || '';
+    }
+    return (
+      <View className={styles.connectInfo} onClick={() => handleCopyOrderNumber(copyData)}>
+        <Text>{info}</Text>
+        <Image src={copyIcon} mode='aspectFit' className={styles.copyIcon} />
+      </View>
+    );
+  };
+
   const renderActionButtons = (order: Order) => {
     if (!showActions) return null;
 
@@ -163,29 +188,34 @@ export default function OrderList({
       );
     }
 
-    if (order.status === OrderStatus.InService) {
+    // 2: 进行中
+    if (order.status === "2") {
       return (
         <View className={styles.orderActions}>
           <View className={styles.actionButtons}>
             <View
               className={styles.callBtn}
-              onClick={() => handleCallUser(order)}
+              onClick={() => {
+                const sessionId = "52b028102005e0d" || order.session_id;
+                Taro.navigateTo({
+                  url: `${pageUrls.chatDesign}?session_id=${sessionId}`,
+                });
+              }}
             >
-              <Image src={phoneIcon} className={styles.phoneIcon} />
-              联系用户
+              沟通记录
             </View>
             <View
               className={styles.orderCancelBtn}
               onClick={() => handleCancelOrder(order)}
             >
-              取消订单
+              取消
             </View>
           </View>
           <View
             className={styles.completeBtn}
             onClick={() => handleCompleteOrder(order)}
           >
-            完成订单
+            发起支付
           </View>
         </View>
       );
@@ -239,9 +269,8 @@ export default function OrderList({
                     showMenuByLongpress={false}
                   />
                   <View className={styles.orderDetails}>
-                    <Text className={styles.orderDesc}>
-                      {order.userInfo?.nick_name || "微信用户"}
-                    </Text>
+                    {renderConnectInfo(order)}
+                    {/* {order.userInfo?.nick_name || "微信用户"} */}
                     <Text className={styles.orderTime}>{order.createTime}</Text>
                   </View>
                 </View>

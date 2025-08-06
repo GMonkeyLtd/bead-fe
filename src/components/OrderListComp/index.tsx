@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image } from "@tarojs/components";
 import StatusBadge, { StatusBadgeType } from "@/components/StatusBadge";
-import { OrderStatus, OrderStatusMap } from "@/utils/orderUtils";
+import { getStatusBadgeType, OrderStatus, OrderStatusMap } from "@/utils/orderUtils";
 import phoneIcon from "@/assets/icons/phone.svg";
 import wechatIcon from "@/assets/icons/wechat.svg";
 import remarkIcon from "@/assets/icons/remark.svg";
@@ -15,6 +15,7 @@ export interface OrderItem {
   orderNumber: string;
   status: OrderStatus;
   merchantName: string;
+  productName: string;
   orderImage?: string;
   createTime: string;
   budget?: number; // 预算，用于显示"预算：不限"等
@@ -39,36 +40,28 @@ const OrderListComp: React.FC<OrderListProps> = ({
   showImage = true,
 }) => {
   // 根据订单状态获取StatusBadge类型
-  const getStatusBadgeType = (status: OrderStatus): StatusBadgeType => {
-    switch (status) {
-      case OrderStatus.Cancelled:
-        return StatusBadgeType.Error;
-      case OrderStatus.Completed:
-        return StatusBadgeType.Success;
-      default:
-        return StatusBadgeType.Processing;
-    }
-  };
+  // const getStatusBadgeType = (status: OrderStatus): StatusBadgeType => {
+  //   switch (status) {
+  //     case OrderStatus.Cancelled:
+      
+  //       return StatusBadgeType.Error;
+  //     case OrderStatus.Completed:
+  //       return StatusBadgeType.Success;
+  //     default:
+  //       return StatusBadgeType.Processing;
+  //   }
+  // };
 
   // 根据订单状态获取显示文本
   const getStatusText = (status: OrderStatus): string => {
-    if (status === OrderStatus.PendingDispatch) {
-      return "等待商家";
-    }
+
     return OrderStatusMap[status];
   };
 
   // 根据订单状态获取商家显示文本
-  const getMerchantDisplayText = (order: OrderItem): string => {
-    if (
-      [
-        OrderStatus.PendingDispatch,
-        OrderStatus.Dispatching,
-      ].includes(order.status)
-    ) {
-      return "匹配商家中...";
-    }
-    return order.merchantName || "商家";
+  const getOrderTitle = (order: OrderItem): string => {
+    
+    return order.productName || "水晶手串";
   };
 
   // 渲染订单操作按钮
@@ -126,11 +119,11 @@ const OrderListComp: React.FC<OrderListProps> = ({
   // 渲染价格或预算信息
   const renderPriceInfo = (order: OrderItem) => {
     if (order.budget === undefined) {
-      return "预算：不限";
+      return "参考价：不限";
     }
     return order.budget === 0
-      ? "预算：不限"
-      : `预算：¥${order.budget.toFixed(2)}`;
+      ? "参考价：不限"
+      : `参考价：¥${order.budget.toFixed(2)}`;
   };
 
   return (
@@ -169,7 +162,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
                 )}
                 <View className={styles.merchantInfo}>
                   <Text className={styles.merchantName}>
-                    {getMerchantDisplayText(order)}
+                    {getOrderTitle(order)}
                   </Text>
                   <Text className={styles.orderTime}>{order.createTime}</Text>
                 </View>
