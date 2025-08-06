@@ -1,0 +1,325 @@
+.product-price-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1001;
+  backdrop-filter: blur(6px);
+}
+
+.product-price-form {
+  width: 100%;
+  background: #F5F2EF;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  max-height: 80vh;
+  padding-bottom: 40px;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 32px 24px 16px;
+  border-bottom: 1px solid rgba(210, 197, 183, 0.3);
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.form-title {
+  font-family: 'Source Han Serif CN', serif;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.437;
+  letter-spacing: 22.22%;
+  color: #1F1722;
+  opacity: 0.9;
+}
+
+.order-number {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.35em;
+  letter-spacing: 1px;
+  color: #1F1722;
+  opacity: 0.7;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.5);
+  margin: 0 24px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.product-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.product-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-name {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.2;
+  color: #1F1722;
+  opacity: 0.9;
+}
+
+.form-content {
+  flex: 1;
+  padding: 0 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-height: 50vh;
+  box-sizing: border-box;
+}
+
+.price-section,
+.images-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.section-title {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.2;
+  color: #1F1722;
+  opacity: 0.9;
+}
+
+.required {
+  color: #E74C3C;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.section-subtitle {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #1F1722;
+  opacity: 0.6;
+}
+
+.price-input-container {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 12px 16px;
+  border: 1px solid rgba(210, 197, 183, 0.5);
+  transition: border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: #D2C5B7;
+  }
+}
+
+.currency-symbol {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #1F1722;
+  margin-right: 8px;
+}
+
+.price-input {
+  flex: 1;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #1F1722;
+  border: none;
+  outline: none;
+  background: transparent;
+
+  &::placeholder {
+    color: rgba(31, 23, 34, 0.4);
+  }
+}
+
+.images-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.image-item {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #FFFFFF;
+  border: 1px solid rgba(210, 197, 183, 0.3);
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.remove-icon {
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.add-image-btn {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px dashed rgba(210, 197, 183, 0.6);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.3);
+
+  &:hover {
+    border-color: #D2C5B7;
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  &.uploading {
+    border-color: #D2C5B7;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+  }
+}
+
+.add-icon {
+  font-size: 24px;
+  color: #D2C5B7;
+  font-weight: 300;
+  margin-bottom: 4px;
+}
+
+.add-text {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  color: #D2C5B7;
+  text-align: center;
+}
+
+.uploading-text {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  color: #D2C5B7;
+  text-align: center;
+}
+
+.form-footer {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  border-top: 1px solid rgba(210, 197, 183, 0.3);
+}
+
+// 响应式设计
+@media (max-width: 375px) {
+  .form-header {
+    padding: 24px 20px 12px;
+  }
+
+  .form-content {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .form-footer {
+    padding: 20px;
+  }
+
+  .images-grid {
+    gap: 10px;
+  }
+}

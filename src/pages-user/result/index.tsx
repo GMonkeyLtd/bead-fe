@@ -1,7 +1,7 @@
 import { View, Image, Text, Button } from "@tarojs/components";
 import { useEffect, useMemo, useState, useRef } from "react";
 import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
-import "./index.scss";
+import styles from "./index.module.scss";
 import AppHeader from "@/components/AppHeader";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import expendImage from "@/assets/icons/expend.svg";
@@ -155,10 +155,10 @@ const Result = () => {
     Taro.showToast({
       title: "正在生成分享图...",
       icon: "none",
-    });    
+    });
     try {
       const res = await Taro.request({
-        url: "http://106.75.233.97:8000/api/generate-crystal-poster",
+        url: 'https://api-gray.gmonkey.top/api/generate-share-poster',
         method: "POST",
         header: {
           'Content-Type': 'application/json'
@@ -233,7 +233,7 @@ const Result = () => {
         // 将base64转换为临时文件
         const base64Data = res.data.data;
         console.log('Base64 data length:', base64Data?.length);
-        
+
         const tempFilePath = `${Taro.env.USER_DATA_PATH}/temp_poster_${Date.now()}.webp`;
         console.log(tempFilePath, "tempFilePath");
         await Taro.getFileSystemManager().writeFile({
@@ -307,7 +307,7 @@ const Result = () => {
 
   return (
     <View
-      className="result-container"
+      className={styles.resultContainer}
       style={{
         height: "100vh",
         paddingTop: `-${navBarTop}px`,
@@ -331,7 +331,7 @@ const Result = () => {
         }
       }} />
       <View
-        className="result-content-container"
+        className={styles.resultContentContainer}
         style={{
           position: "relative",
           paddingTop: `${navBarTop + navBarHeight + 20}px`,
@@ -340,7 +340,7 @@ const Result = () => {
         }}
       >
         <View
-          className="result-content-bg-image"
+          className={styles.resultContentBgImage}
           style={{
             top: 0,
           }}
@@ -351,71 +351,71 @@ const Result = () => {
             style={{ width: "100%" }}
           />
         </View>
-        <View className="result-content-card">
-          <View className="result-content-card-image" onClick={viewImage}>
+        <View className={styles.resultContentCard}>
+          <View className={styles.resultContentCardImage} onClick={viewImage}>
             {/* <Image mode="widthFix" src={imageUrl} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} /> */}
-            <View className="logo-image-container" onClick={viewImage}>
+            <View className={styles.logoImageContainer} onClick={viewImage}>
               <Image
-                className="logo-image"
+                className={styles.logoImage}
                 src={LOGO_IMAGE_URL}
                 mode="widthFix"
               />
             </View>
-            <Image className="expend-image" src={expendImage} mode="widthFix" />
+            <Image className={styles.expendImage} src={expendImage} mode="widthFix" />
           </View>
-          <View className="result-content-card-text-container">
-            <View className="result-content-card-text">
+          <View className={styles.resultContentCardTextContainer}>
+            <View className={styles.resultContentCardText}>
               {designNo && (
-                <View className="result-content-card-subtitle">{`设计编号：${designNo}`}</View>
+                <View className={styles.resultContentCardSubtitle}>{`设计编号：${designNo}`}</View>
               )}
-              <View className="result-content-card-text-title-container">
-                <View className="result-content-card-text-title">
+              <View className={styles.resultContentCardTextTitleContainer}>
+                <View className={styles.resultContentCardTextTitle}>
                   {braceletName}
                 </View>
                 <View
-                  className="bracelet-length-info-container"
+                  className={styles.braceletLengthInfoContainer}
                   onClick={() =>
                     beadsInfo?.length > 0 && setBraceletDetailDialogShow(true)
                   }
                 >
                   {/* <View className="bracelet-length-info-count-container">
-                    <View className="bracelet-length-info-count">
-                      {beadsInfo?.length || 0}
-                    </View>
-                    <View className="bracelet-length-info-unit">颗</View>
-                  </View> */}
+                      <View className="bracelet-length-info-count">
+                        {beadsInfo?.length || 0}
+                      </View>
+                      <View className="bracelet-length-info-unit">颗</View>
+                    </View> */}
                   {predictedBraceletLength > 0 && (
-                    <View className="bracelet-length-info-size-container">
+                    <View className={styles.braceletLengthInfoSizeContainer}>
                       {/* <View>{`${predictedBraceletLength}～${
-                        predictedBraceletLength + 0.5
-                      } cm`}</View>
-                      <View style={{ width: "1px", height: "12px", backgroundColor: "#1F1722", opacity: 0.7 }}></View> */}
+                          predictedBraceletLength + 0.5
+                        } cm`}</View>
+                        <View style={{ width: "1px", height: "12px", backgroundColor: "#1F1722", opacity: 0.7 }}></View> */}
                       <View>{"手串明细 >"}</View>
                     </View>
                   )}
                 </View>
               </View>
-              <View className="result-content-center-container">
-                <View className="result-content-center-text">
-                  <View className="result-content-bracelet-description">
+              <View className={styles.resultContentCenterContainer}>
+                <View className={styles.resultContentCenterText}>
+                  <View className={styles.resultContentBraceletDescription}>
                     {braceletDescription}
                   </View>
-                  <View className="result-content-wear-tips">
-                    <View className="result-content-wear-tips-title-container">
+                  <View className={styles.resultContentWearTips}>
+                    <View className={styles.resultContentWearTipsTitleContainer}>
                       <Image
                         src={WearTipsSvg}
                         style={{ width: "16px", height: "16px" }}
                       />
-                      <Text className="result-content-wear-tips-title">
+                      <Text className={styles.resultContentWearTipsTitle}>
                         佩戴建议
                       </Text>
                     </View>
-                    <View className="result-content-bracelet-description">
+                    <View className={styles.resultContentBraceletDescription}>
                       天然水晶佩戴一段时间后建议定期净化噢~可以用清水冲洗或在月光下放置一晚，以保持水晶的能量纯净和光泽度。
                     </View>
                   </View>
                 </View>
-                <View className="result-content-wuxing-display-container">
+                <View className={styles.resultContentWuxingDisplayContainer}>
                   <WuxingDisplay
                     element={{
                       type: rizhuInfo,
@@ -424,13 +424,13 @@ const Result = () => {
                   />
                 </View>
               </View>
-              <View className="result-content-wear-tips">
-                <View className="result-content-wear-tips-title-container">
+              <View className={styles.resultContentWearTips}>
+                <View className={styles.resultContentWearTipsTitleContainer}>
                   <Image
                     src={MaterialSvg}
                     style={{ width: "16px", height: "16px" }}
                   />
-                  <Text className="result-content-wear-tips-title">
+                  <Text className={styles.resultContentWearTipsTitle}>
                     水晶材料
                   </Text>
                 </View>
@@ -442,44 +442,33 @@ const Result = () => {
             </View>
           </View>
 
-          {orderList?.length > 0 && (
-            <View className="result-order-list-container">
-              <View className="result-order-list-title">
-                {`相关订单（${orderList.length}）`}
-              </View>
-              <OrderListComp
-                orders={orderList.map((item) => ({
-                  id: item.order_uuid,
-                  orderNumber: item.order_uuid,
-                  status: item.order_status,
-                  merchantName: item.merchant_info?.name,
-                  createTime: item.created_at,
-                  budget: item.price,
-                }))}
-                showActions={false}
-                showImage={false}
-                onItemClick={(item) => {
-                  if (
-                    [
-                      OrderStatus.PendingDispatch,
-                      OrderStatus.Dispatching,
-                    ].includes(item.status)
-                  ) {
-                    Taro.navigateTo({
-                      url: `${pageUrls.orderDispatching}?orderId=${item.id}`,
-                    });
-                  } else {
-                    Taro.navigateTo({
-                      url: `${pageUrls.orderDetail}?orderId=${item.id}`,
-                    });
-                  }
-                }}
-              />
-            </View>
-          )}
         </View>
+        {orderList?.length > 0 && (
+          <View className={styles.resultOrderListContainer}>
+            <View className={styles.resultOrderListTitle}>
+              {`相关订单（${orderList.length}）`}
+            </View>
+            <OrderListComp
+              orders={orderList.map((item) => ({
+                id: item.order_uuid,
+                orderNumber: item.order_uuid,
+                status: item.order_status,
+                merchantName: item.merchant_info?.name,
+                createTime: item.created_at,
+                budget: item.price,
+              }))}
+              showActions={false}
+              showImage={false}
+              onItemClick={(item) => {
+                Taro.navigateTo({
+                  url: `${pageUrls.orderDetail}?orderId=${item.id}`,
+                });
+              }}
+            />
+          </View>
+        )}
       </View>
-      <View className="result-content-card-action">
+      <View className={styles.resultContentCardAction}>
         <CrystalButton
           onClick={() => saveImage(shareImageUrl)}
           text="分享"

@@ -14,6 +14,8 @@ import phoneIcon from "@/assets/icons/phone.svg";
 import api from "@/utils/api-merchant";
 import { pageUrls } from "@/config/page-urls";
 import copyIcon from "@/assets/icons/copy.svg";
+import ProductPriceForm from "../ProductPriceForm";
+
 
 export interface Order {
   id: string;
@@ -63,6 +65,7 @@ export default function OrderList({
   const [currentUserInfo, setCurrentUserInfo] = useState<
     Order["userInfo"] | null
   >(null);
+  const [productPriceForm, setProductPriceForm] = useState<any>(null);
 
   const handleClose = () => {
     setDetailData(null);
@@ -213,7 +216,16 @@ export default function OrderList({
           </View>
           <View
             className={styles.completeBtn}
-            onClick={() => handleCompleteOrder(order)}
+            onClick={() => {
+              setProductPriceForm(<ProductPriceForm
+                visible={true}
+                orderNumber={order.orderNo}
+                productName={order.braceletInfo?.word_info?.bracelet_name || ""}
+                productImage={order.braceletInfo?.image_url || ""}
+                onClose={() => setProductPriceForm(null)}
+                onConfirm={() => {}}
+              />);
+            }}
           >
             发起支付
           </View>
@@ -322,6 +334,7 @@ export default function OrderList({
           onClose={handleCloseContactDialog}
         />
       )}
-    </View>
+      {productPriceForm}
+      </View>
   );
 }

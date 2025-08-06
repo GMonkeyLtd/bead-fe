@@ -4,7 +4,17 @@ import http from "./request";
 
 
 export default {
-  addAddressToOrder: (params: AddressInfo & { order_uuid: string }, config?: ApiConfig) => {
+  addAddressToOrder: (params: { 
+    order_uuid: string,
+    detail_info: string,
+    province_name: string,
+    city_name: string,
+    county_name: string,
+    tel_number: string,
+    user_name: string,
+    national_code: string,
+    postal_code: string,
+  }, config?: ApiConfig) => {
     return http.post<any>(`/user/address`, params, config);
   },
   getReferencePrice: (params: {
@@ -30,7 +40,7 @@ export default {
       }
     ),
   withdrawRefund: (params: { orderId: string }, config?: ApiConfig) =>
-    http.post<any>(`user/cancel_refund`, { order_uuid: params.orderId }, config),
+    http.post<any>(`/user/cancel_refund`, { order_uuid: params.orderId }, config),
   purchase: (params: { orderId: string, amount: number }, config?: ApiConfig) =>
     http.post<{
       data: {

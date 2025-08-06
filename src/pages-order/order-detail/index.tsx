@@ -223,7 +223,7 @@ const OrderDetail: React.FC = () => {
               icon: "none",
             });
           });
-      } else if (isSptRefund) {
+      } else {
         payApi.applyRefund({ orderId: order?.order_uuid, reason }).then(() => {
           setCancelDialogVisible(false);
           getOrderDetail();
@@ -252,6 +252,7 @@ const OrderDetail: React.FC = () => {
   const onViewLogistics = () => {
     payApi.getWaybillToken({ order_id: order?.order_uuid }).then((res) => {
       const waybill_token = res?.data?.waybill_token;
+      console.log(waybill_token, plugin?.openWaybillTracking, "waybill_token");
       plugin?.openWaybillTracking({
         waybillToken: waybill_token,
       });
@@ -261,8 +262,9 @@ const OrderDetail: React.FC = () => {
   const onConfirmOrder = () => {
     payApi.confirmOrder({ order_id: order?.order_uuid }).then((res) => {
       const { transaction_id, merchant_id, merchant_trade_no } = res?.data;
-      if (wx.miniapp?.openBusinessView) {
-        wx.miniapp.openBusinessView({
+      console.log(transaction_id, merchant_id, merchant_trade_no,wx?.openBusinessView, "transaction_id, merchant_id, merchant_trade_no");
+      if (wx?.openBusinessView) {
+        wx?.openBusinessView({
           businessType: "weappOrderConfirm",
           extraData: {
             merchant_id,
@@ -270,9 +272,11 @@ const OrderDetail: React.FC = () => {
             transaction_id,
           },
           success() {
+            console.log("success");
             getOrderDetail();
           },
           fail() {
+            console.log("fail");
             getOrderDetail();
           },
           complete() {
@@ -282,6 +286,12 @@ const OrderDetail: React.FC = () => {
       } else {
         //引导用户升级微信版本
       }
+    }).catch((e) => {
+      console.log(e, e.message, "e");
+      Taro.showToast({
+        title: e?.message || "确认收货失败",
+        icon: "none",
+      });
     });
   };
 
@@ -334,14 +344,14 @@ const OrderDetail: React.FC = () => {
     setAddress(_address);
     payApi.addAddressToOrder({
       order_uuid: order?.order_uuid,
-      detailInfo: _address?.detailInfo,
-      provinceName: _address?.provinceName,
-      cityName: _address?.cityName,
-      countyName: _address?.countyName,
-      telNumber: _address?.telNumber,
-      userName: _address?.userName,
-      nationalCode: _address?.nationalCode,
-      postalCode: _address?.postalCode,
+      detail_info: _address?.detailInfo,
+      province_name: _address?.provinceName,
+      city_name: _address?.cityName,
+      county_name: _address?.countyName,
+      tel_number: _address?.telNumber,
+      user_name: _address?.userName,
+      national_code: _address?.nationalCode,
+      postal_code: _address?.postalCode,
     }).catch((e) => {
       console.error('error',e);
     })
@@ -378,7 +388,7 @@ const OrderDetail: React.FC = () => {
             address={address}
             onAddressChange={handleAddressChange}
             enableChangeAddress={orderStatus === OrderStatusEnum.PendingPayment}
-            logisticsStatus={order?.waybill_status}
+            logisticsStatus={orderStatus === OrderStatusEnum.Shipped ? order?.waybill_status : undefined}
             onViewLogistics={onViewLogistics}
           />
         )}

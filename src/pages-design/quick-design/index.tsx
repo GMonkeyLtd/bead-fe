@@ -268,7 +268,7 @@ const QuickDesign = () => {
               />
             </View>
             <View className="quick-design-loading-title">
-              渲染中
+              定制中
               <View className="quick-design-loading-title-dot">
                 <View className="quick-design-loading-title-dot-item">...</View>
               </View>

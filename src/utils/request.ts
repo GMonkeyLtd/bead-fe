@@ -8,7 +8,7 @@ const grayDomain = 'https://api-gray.gmonkey.top'
 // const domain = 'https://test.qianjunye.com'
 
 // 判断是否为开发环境
-const isTest = false
+const isTest = true
 
 // 根据环境构建API基础URL
 const getBaseURL = () => {
@@ -182,6 +182,10 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
       AuthManager.clearAuth();
       reject(new Error('登录已过期，请重新登录'));
     } else {
+      if (data.error) {
+        reject(new Error(data.error))
+        return
+      }
       // 其他HTTP错误
       let errorMessage = '网络请求失败'
       switch (statusCode) {
@@ -193,12 +197,6 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
           break
         case 404:
           errorMessage = '请求的资源不存在'
-          break
-        case 500:
-          errorMessage = '服务器内部错误'
-          break
-        case 503:
-          errorMessage = '服务暂不可用'
           break
       }
       reject(new Error(errorMessage))
@@ -290,7 +288,6 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
           throw new Error('登录失败，请手动重试');
         }
       }
-      console.log(error, error.message, 'error');
 
       // 显示错误提示
       if (config.showError !== false) {
@@ -301,7 +298,7 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
         })
       }
 
-      throw JSON.stringify(error)+ finalConfig.url
+      throw error;
     }
   }
   
