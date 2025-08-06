@@ -8,14 +8,15 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import styles from "./index.module.scss";
+// 移除react-native导入，使用Taro的ViewProps
+import TypewriterText from "@/components/TypewriterText";
 import apiSession, {
   BraceletDraft,
   ChatMessageItem,
 } from "@/utils/api-session";
-import ChatLoading from "../ChatLoading";
+import ChatLoading, { LoadingDots } from "../ChatLoading";
 import { BraceletDraftCard } from "../BraceletDraftCard";
-import { LoadingDots } from "../ChatLoading";
+import styles from "./index.module.scss";
 
 export interface ChatMessagesRef {
   scrollToBottom: () => void;
@@ -30,12 +31,25 @@ const MessageItem = React.memo(({
   shouldLoadImage = true,
   onImageLoaded,
 }: {
-  message: ChatMessageItem;
+  message: ChatMessageItem & {
+    isNew?: boolean;
+    onTypingComplete?: () => void;
+  };
   sessionId: string;
   animationDelay?: number;
   shouldLoadImage?: boolean;
   onImageLoaded?: (messageId: string) => void;
+  onTypingComplete?: () => void;
 }) => {
+  const [isTypingComplete, setIsTypingComplete] = useState(!message.isNew);
+
+  const handleTypingComplete = () => {
+    setIsTypingComplete(true);
+    if (message.onTypingComplete) {
+      message.onTypingComplete();
+    }
+  };
+
   const messageStyle = {
     animationDelay: `${animationDelay}ms`,
   };
@@ -47,15 +61,15 @@ const MessageItem = React.memo(({
       id={`message-${message.message_id}`}
       style={messageStyle}
     >
-      <AssistantMessage message={message} />
-      {message.draft_id && (
-        <BraceletDraftCard
-          sessionId={sessionId}
-          draftId={message.draft_id}
-          draftIndex={message.draft_index}
-          shouldLoad={shouldLoadImage}
-          onImageLoaded={() => onImageLoaded?.(message.message_id)}
-        />
+      <AssistantMessage message={message} onTypingComplete={handleTypingComplete} />
+      {message.draft_id && isTypingComplete && (
+          <BraceletDraftCard
+            sessionId={sessionId}
+            draftId={message.draft_id}
+            draftIndex={message.draft_index}
+            shouldLoad={shouldLoadImage && isTypingComplete}
+            onImageLoaded={() => onImageLoaded?.(message.message_id)}
+          />
       )}
     </View>
   ) : (
@@ -103,7 +117,7 @@ export default forwardRef<
   ) => {
     const [scrollAnchor, setScrollAnchor] = useState<string>("");
     const scrollViewRef = useRef<any>(null);
-    const [scrollTop, setScrollTop] = useState(0);
+    const [scrollTopState, setScrollTopState] = useState(0);
     const [loadedMessageIds, setLoadedMessageIds] = useState<Set<string>>(new Set());
 
     // 标记消息为已加载
@@ -112,24 +126,27 @@ export default forwardRef<
     }, []);
 
     // 计算消息的加载优先级：底部消息优先加载，顶部消息延迟加载
-    const getMessageLoadPriority = useCallback((index: number, messageId: string) => {
+    const getMessageLoadPriority = useCallback((index: number, messageId: string, tempId?: string) => {
       const totalMessages = messages.length;
       if (totalMessages === 0) return true;
       
+      // 使用tempId或messageId作为标识符
+      const id = tempId || messageId;
+      
       // 如果已经加载过，直接返回true
-      if (loadedMessageIds.has(messageId)) {
+      if (loadedMessageIds.has(id)) {
         return true;
       }
       
       // 底部3条消息立即加载，其他消息延迟加载
       const shouldLoadImmediately = index >= totalMessages - 3;
       
-      // 如果不在底部3条，但有draft_id，延迟加载
-      if (!shouldLoadImmediately && messageId) {
+      // 如果不在底部3条，但有id，延迟加载
+      if (!shouldLoadImmediately && id) {
         // 延迟加载：2秒后开始加载
         setTimeout(() => {
-          if (!loadedMessageIds.has(messageId)) {
-            markMessageAsLoaded(messageId);
+          if (!loadedMessageIds.has(id)) {
+            markMessageAsLoaded(id);
           }
         }, 2000 + (totalMessages - index) * 500); // 越靠上的消息延迟越长
       }
@@ -147,7 +164,7 @@ export default forwardRef<
           (messages.length - 1 - index) * 100 : 0;
         
         // 计算是否应该立即加载图像
-        const shouldLoadImage = getMessageLoadPriority(index, message.message_id);
+        const shouldLoadImage = getMessageLoadPriority(index, message.message_id || '', message.tempId);
         
         return (
           <MessageItem
@@ -163,14 +180,10 @@ export default forwardRef<
     }, [messages, sessionId, hasMoreMessages, getMessageLoadPriority]);
 
     const scrollToBottom = useCallback(() => {
-      // 使用 setTimeout 确保 DOM 更新完成后再设置 scrollIntoView
-      setTimeout(() => {
-        setScrollAnchor("scrollViewbottomAnchor");
-        // 备用方案：如果 scrollIntoView 不工作，使用 scrollTop
-        setTimeout(() => {
-          setScrollTop(9999);
-        }, 200);
-      }, 100);
+      // 立即设置 scrollAnchor
+      setScrollAnchor("scrollViewbottomAnchor");
+      // 备用方案：直接设置一个足够大的 scrollTop 值
+      setScrollTopState(100000);
     }, []);
 
     const scrollToIndex = useCallback((index: number) => {
@@ -229,7 +242,7 @@ export default forwardRef<
         ref={scrollViewRef}
         enhanced
         scrollY
-        scrollTop={scrollTop}
+        scrollTop={scrollTopState}
         style={{ height: maxHeight }}
         showScrollbar={false}
         enableFlex
@@ -243,12 +256,12 @@ export default forwardRef<
         )}
         {isChatting && (
           <View className={styles.chatMessageItemContainer}>
-            <ChatLoading text="正在设计新方案..." />
+            <ChatLoading text='正在设计新方案...' />
           </View>
         )}
         <View
-          id="scrollViewbottomAnchor"
-          style={{ height: "1px", width: "100%" }}
+          id='scrollViewbottomAnchor'
+          style={{ height: '1px', width: '100%' }}
         />
       </ScrollView>
     );
@@ -256,11 +269,17 @@ export default forwardRef<
 );
 
 // 使用 React.memo 优化消息组件渲染
-export const AssistantMessage = React.memo(({ message }: { message: ChatMessageItem }) => {
+export const AssistantMessage = React.memo(({ message, onTypingComplete }: { message: ChatMessageItem, onTypingComplete?: () => void }) => {
   return (
     <View className={styles.assistantMessageContainer}>
       <View className={styles.assistantMessageBubble}>
-        <View className={styles.assistantMessageText}>{message.content}</View>
+        <TypewriterText
+          text={message.content || ''}
+          isActive={!!message.isNew}
+          speed={30}
+          onComplete={onTypingComplete}
+          className={styles.assistantMessageText}
+        />
       </View>
     </View>
   );

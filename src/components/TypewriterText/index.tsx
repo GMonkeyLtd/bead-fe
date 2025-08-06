@@ -75,7 +75,7 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({
   return (
     <View className={`${styles.typewriterText} ${className || ""}`}>
       {displayText}
-      {showCursor && <View className={styles.cursor}>|</View>}
+      {/* {showCursor && <View className={styles.cursor}>|</View>} */}
     </View>
   );
 };

@@ -60,6 +60,9 @@ export interface ChatMessageItem {
   created_at: string;
   draft_id?: string;
   draft_index?: number;
+  tempId?: string;
+  onTypingComplete?: () => void;
+  isNew?: boolean;
 }
 
 export interface ChatResponse extends BaseResponse {

@@ -1,19 +1,18 @@
-import Taro from "@tarojs/taro";
-import { View, Text, Image, Textarea, Canvas } from "@tarojs/components";
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
-import PageContainer from "@/components/PageContainer";
-import apiSession, { ChatMessageItem } from "@/utils/api-session";
-import styles from "./index.module.scss";
-import { ASSISTANT_AVATAR_IMAGE_URL } from "@/config";
-import ChatMessages from "@/components/ChatMessages";
-import sendSvg from "@/assets/icons/send.svg";
-import { isEmptyMessage, splitMessage } from "@/utils/messageFormatter";
-import activeSendSvg from "@/assets/icons/active-send.svg";
-import TagList from "@/components/TagList";
-import { ChatMessagesRef } from "@/components/ChatMessages";
-import { pageUrls } from "@/config/page-urls";
-import { getRecommendTemplate } from "@/utils/utils";
-import userRecordSvg from "@/assets/icons/user-record.svg";
+import Taro from '@tarojs/taro';
+import { View, Text, Image, Textarea, Canvas } from '@tarojs/components';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import PageContainer from '@/components/PageContainer';
+import apiSession, { ChatMessageItem } from '@/utils/api-session';
+import { ASSISTANT_AVATAR_IMAGE_URL } from '@/config';
+import ChatMessages, { ChatMessagesRef } from '@/components/ChatMessages';
+import TagList from '@/components/TagList';
+import { pageUrls } from '@/config/page-urls';
+import { isEmptyMessage, splitMessage } from '@/utils/messageFormatter';
+import { getRecommendTemplate } from '@/utils/utils';
+import sendSvg from '@/assets/icons/send.svg';
+import activeSendSvg from '@/assets/icons/active-send.svg';
+import userRecordSvg from '@/assets/icons/user-record.svg';
+import styles from './index.module.scss';
 
 const INPUT_HEIGHT = 30 + 24 + 10;
 const INPUT_RECOMMEND_HEIGHT = 30 + 30 + 24 + 16;
@@ -39,19 +38,35 @@ const ChatDesign = () => {
   }, [recommendTags]);
 
   // 依次显示消息的函数
+  // 为每条消息添加唯一ID
+  const assignUniqueIds = useCallback((messages: ChatMessageItem[]) => {
+    return messages.map((msg, index) => ({
+      ...msg,
+      tempId: `msg-${Date.now()}-${index}`
+    }));
+  }, []);
+
+  // 依次显示消息的函数
   const showMessagesSequentially = useCallback(
     (messages: ChatMessageItem[], recommends?: string[]) => {
       if (messages.length === 0) return;
 
       setHasMoreMessages(true);
       let currentIndex = 0;
-      let waitTime = 3000;
+      const messagesWithIds = assignUniqueIds(messages);
+      console.log(messagesWithIds, messages)
 
-      const showNextMessage = () => {
-        if (currentIndex < messages.length) {
+      // 监听打字完成的回调
+      const handleTypingComplete = () => {
+        console.log('handleTypingComplete')
+        if (currentIndex + 1 < messagesWithIds.length) {
+          currentIndex++;
           setChatMessages((prev) => {
             const newMessages = [...prev];
-            newMessages.push(messages[currentIndex]);
+            newMessages.push({
+                ...messagesWithIds[currentIndex],
+                isNew: true
+              });
             return newMessages;
           });
 
@@ -59,26 +74,31 @@ const ChatDesign = () => {
           setTimeout(() => {
             chatMessagesRef.current?.scrollToBottom();
           }, 100);
-          waitTime = (messages[currentIndex].content?.length / 20) * 1000;
-
-          // 2秒后显示下一条消息
-          if (currentIndex + 1 < messages.length) {
-            setTimeout(() => {
-              currentIndex++;
-              showNextMessage();
-            }, waitTime);
-          } else {
-            // 所有消息显示完毕
-            // 显示推荐标签
-            setRecommendTags(recommends || []);
-            setHasMoreMessages(false);
-          }
+        } else {
+          // 所有消息显示完毕
+          // 显示推荐标签
+          setRecommendTags(recommends || []);
+          setHasMoreMessages(false);
         }
       };
 
-      showNextMessage();
+      // 初始显示第一条消息
+      setChatMessages((prev) => {
+        const newMessages = [...prev];
+        newMessages.push({
+          ...messagesWithIds[currentIndex],
+          isNew: true,
+          onTypingComplete: handleTypingComplete
+        });
+        return newMessages;
+      });
+
+      // 滚动到底部
+      setTimeout(() => {
+        chatMessagesRef.current?.scrollToBottom();
+      }, 100);
     },
-    []
+    [assignUniqueIds]
   );
 
   const initChat = ({
@@ -154,7 +174,11 @@ const ChatDesign = () => {
         .find((message) => message.role === "assistant");
       // 有历史会话
       if (!isFirst) {
-        setChatMessages(newMessages);
+        // 历史消息不设置isNew
+        setChatMessages(newMessages.map(msg => ({
+          ...msg,
+          isNew: false
+        })));
         if (
           lastAssistantMessage?.recommends &&
           lastAssistantMessage.recommends.length > 0
@@ -212,7 +236,7 @@ const ChatDesign = () => {
           className={styles.designResetInfo}
           onClick={() => {
             Taro.redirectTo({
-              url: pageUrls.home + "?newSession=true",
+              url: pageUrls.home + '?newSession=true',
             });
           }}
         >
@@ -327,8 +351,8 @@ const ChatDesign = () => {
               <Textarea
                 className={styles.messageInput}
                 value={inputValue}
-                placeholder="输入您的定制需求..."
-                placeholderStyle="color: #00000033;"
+                placeholder='输入您的定制需求...'
+                placeholderStyle='color: #00000033;'
                 onInput={(e) => setInputValue(e.detail.value)}
                 onConfirm={handleSend}
                 autoHeight
