@@ -18,6 +18,8 @@ import userRecordSvg from "@/assets/icons/user-record.svg";
 const INPUT_HEIGHT = 30 + 24 + 10;
 const INPUT_RECOMMEND_HEIGHT = 30 + 30 + 24 + 16;
 
+const INIT_MESSAGE = "嚯，你终于来了，我是你的专属水晶疗愈师，可以叫我莉莉～"
+
 const ChatDesign = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
 
@@ -150,6 +152,7 @@ const ChatDesign = () => {
         .slice()
         .reverse()
         .find((message) => message.role === "assistant");
+      // 有历史会话
       if (!isFirst) {
         setChatMessages(newMessages);
         if (
@@ -159,6 +162,7 @@ const ChatDesign = () => {
           setRecommendTags(lastAssistantMessage.recommends);
         }
       } else {
+        // 无历史对话，都是新消息
         showMessagesSequentially(
           newMessages,
           lastAssistantMessage?.recommends || []
@@ -175,6 +179,14 @@ const ChatDesign = () => {
       querySessionHistory(session_id);
     }
     if (year && month && day && hour && gender && isLunar) {
+      setChatMessages([
+        {
+          message_id: Date.now().toString(),
+          role: "assistant",
+          content: INIT_MESSAGE,
+          created_at: new Date().toISOString(),
+        },
+      ]);
       initChat({
         birth_year: parseInt(year || "0") || 0,
         birth_month: parseInt(month || "0") || 0,

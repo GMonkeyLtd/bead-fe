@@ -1,3 +1,4 @@
+import config from "../../config";
 import http, {
   setBaseURL,
   setIsMock,
@@ -192,6 +193,35 @@ export const beadsApi = {
     ),
 };
 
+export const userDesignApi = {
+  getDesignList: (config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/designs`,
+      {},
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
+  },
+  getDesignItem: (designId: number, config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/designs/${designId}`,
+      {},
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
+  }
+}
+
 export const userHistoryApi = {
   getImageHistory: (config?: ApiConfig) =>
     http.get<PersonalizedGenerateResult[]>(
@@ -205,7 +235,7 @@ export const userHistoryApi = {
     ),
 
   getDesignById: (designId: number, config?: ApiConfig) =>
-    http.post<{ data: any}>(
+    http.post<{ data: any }>(
       `/user/getdesignitem`,
       {
         image_id: designId,

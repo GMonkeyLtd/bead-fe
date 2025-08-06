@@ -7,7 +7,8 @@ import UserInfoCard from "@/components/UserInfoCard";
 import Taro, { useDidShow } from "@tarojs/taro";
 import rightArrow from "@/assets/icons/right-arrow.svg";
 import TabBar from "@/components/TabBar";
-import { userHistoryApi, userApi } from "@/utils/api";
+import { userHistoryApi, userApi, userDesignApi } from "@/utils/api";
+import sessionApi from "@/utils/api-session";
 import MyWorkIcon from "@/assets/icons/my-work.svg";
 import { pageUrls } from "@/config/page-urls";
 import { DESIGN_PLACEHOLDER_IMAGE_URL } from "@/config";
@@ -22,7 +23,7 @@ const UserCenterPage: React.FC = () => {
     setLoading(true);
     const userInfo = await userApi.getUserInfo({ showLoading: true });
     setUserInfo(userInfo?.data);
-    const historyRes = await userHistoryApi.getImageHistory({
+    const historyRes = await sessionApi.getDesignList({
       showLoading: true,
     });
     const history = (historyRes?.data || []).map((item) => {

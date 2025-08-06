@@ -289,5 +289,31 @@ export default {
         ...config,
       }
     );
+  },
+  getDesignList: (config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/user/designs`,
+      undefined,
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
+  },
+  getDesignItem: (designId: number, config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/designs/${designId}`,
+      {},
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
   }
 };
