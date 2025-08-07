@@ -15,7 +15,7 @@ import { DESIGN_PLACEHOLDER_IMAGE_URL } from "@/config";
 
 const UserCenterPage: React.FC = () => {
   const [showIncomeCard, setShowIncomeCard] = useState(false);
-  const [imageHistory, setImageHistory] = useState<any[]>([]);
+  const [designList, setDesignList] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -26,14 +26,14 @@ const UserCenterPage: React.FC = () => {
     const historyRes = await sessionApi.getDesignList({
       showLoading: true,
     });
-    const history = (historyRes?.data || []).map((item) => {
+    const designs = (historyRes?.data?.designs || []).map((item) => {
         return {
-          id: item.ID,
-          name: item.WordInfo.bracelet_name,
-          image: item.ImageURL || DESIGN_PLACEHOLDER_IMAGE_URL,
+          id: item.design_id,
+          name: item.info.name,
+          image: item.image_url || DESIGN_PLACEHOLDER_IMAGE_URL,
         };
     });
-    setImageHistory(history);
+    setDesignList(designs);
     setLoading(false);
   };
 
@@ -154,9 +154,9 @@ const UserCenterPage: React.FC = () => {
           />
           我的作品
         </View>
-        {imageHistory.length > 0 && !loading && (
+        {designList.length > 0 && !loading && (
           <View className={styles.imageHistoryContainer}>
-            <BraceletList items={imageHistory} onItemClick={handleItemClick} />
+            <BraceletList items={designList} onItemClick={handleItemClick} />
           </View>
         )}
       </View>

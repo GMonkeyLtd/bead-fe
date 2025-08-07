@@ -1,18 +1,19 @@
-import Taro from '@tarojs/taro';
-import { View, Text, Image, Textarea, Canvas } from '@tarojs/components';
-import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import PageContainer from '@/components/PageContainer';
-import apiSession, { ChatMessageItem } from '@/utils/api-session';
-import { ASSISTANT_AVATAR_IMAGE_URL } from '@/config';
-import ChatMessages, { ChatMessagesRef } from '@/components/ChatMessages';
-import TagList from '@/components/TagList';
-import { pageUrls } from '@/config/page-urls';
-import { isEmptyMessage, splitMessage } from '@/utils/messageFormatter';
-import { getRecommendTemplate } from '@/utils/utils';
-import sendSvg from '@/assets/icons/send.svg';
-import activeSendSvg from '@/assets/icons/active-send.svg';
-import userRecordSvg from '@/assets/icons/user-record.svg';
-import styles from './index.module.scss';
+import Taro from "@tarojs/taro";
+import { View, Text, Image, Textarea, Canvas } from "@tarojs/components";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import PageContainer from "@/components/PageContainer";
+import apiSession, { ChatMessageItem } from "@/utils/api-session";
+import styles from "./index.module.scss";
+import { LILI_AVATAR_IMAGE_URL } from "@/config";
+import ChatMessages from "@/components/ChatMessages";
+import sendSvg from "@/assets/icons/send.svg";
+import { isEmptyMessage, splitMessage } from "@/utils/messageFormatter";
+import activeSendSvg from "@/assets/icons/active-send.svg";
+import TagList from "@/components/TagList";
+import { ChatMessagesRef } from "@/components/ChatMessages";
+import { pageUrls } from "@/config/page-urls";
+import { getRecommendTemplate } from "@/utils/utils";
+import userRecordSvg from "@/assets/icons/user-record.svg";
 
 const INPUT_HEIGHT = 30 + 24 + 10;
 const INPUT_RECOMMEND_HEIGHT = 30 + 30 + 24 + 16;
@@ -227,7 +228,7 @@ const ChatDesign = () => {
       <View className={styles.chatDesignHeader}>
         <View className={styles.assistantAvatarContainer}>
           <Image
-            src={ASSISTANT_AVATAR_IMAGE_URL}
+            src={LILI_AVATAR_IMAGE_URL} 
             className={styles.assistantAvatar}
           />
           <Text className={styles.assistantName}>黎莉莉</Text>

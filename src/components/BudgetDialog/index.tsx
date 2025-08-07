@@ -16,6 +16,7 @@ interface BudgetDialogProps {
   productImage?: string;
   onClose?: () => void;
   onConfirm?: (budget: number) => void;
+  referencePrice?: number;
 }
 
 const BudgetDialog: React.FC<BudgetDialogProps> = ({
@@ -25,18 +26,10 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   productImage,
   onConfirm,
   onClose,
+  referencePrice,
+  onModifyDesign,
 }) => {
-  const [budget, setBudget] = useState<number>(50);
   const { keyboardHeight } = useKeyboardHeight();
-
-  useEffect(() => {
-    payApi.getReferencePrice({
-      design_id: designNumber
-    }).then((res) => {
-      setBudget(res.data.reference_price);
-    });
-  }, [designNumber]);
-
 
   const handleConfirm = async () => {
 
@@ -44,24 +37,23 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     const { default_contact, phone, wechat_id } = userData?.data || {};
     if (default_contact === 0 && !phone) {
       Taro.navigateTo({
-        url: `${pageUrls.contactPreference}?budget=${budget}&designId=${designNumber}`
-      });
-      return;
-    } 
-    if (default_contact === 1 && !wechat_id) {
-      Taro.navigateTo({
-        url: `${pageUrls.contactPreference}?budget=${budget}&designId=${designNumber}`
+        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`
       });
       return;
     }
-    const budgetValue = parseFloat(budget) || 0;
+    if (default_contact === 1 && !wechat_id) {
+      Taro.navigateTo({
+        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`
+      });
+      return;
+    }
     if (onConfirm) {
-      onConfirm(budgetValue);
+      onConfirm(referencePrice || 0);
       return;
     }
     api.userHistory.createOrder({
       design_id: parseInt(designNumber),
-      price: budgetValue
+      price: referencePrice
     }).then((res) => {
       const { order_uuid } = res?.data || {};
       Taro.navigateTo({
@@ -69,19 +61,6 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
       }).then(() => {
         onClose?.();
       });
-    });
-  };
-
-  const handleBudgetChange = (e: any) => {
-    const value = e.detail.value;
-    // 只允许数字和小数点
-    const numericValue = value.replace(/[^\d.]/g, "");
-    setBudget(numericValue);
-  };
-
-  const onModifyDesign = () => {
-    Taro.navigateTo({
-      url: `${pageUrls.customDesign}?designId=${designNumber}`
     });
   };
 
@@ -111,7 +90,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                   </View>
                   <View className="budget-dialog-budget-price-wrapper">
                     <View className="budget-dialog-budget-input-value">
-                      {budget}
+                      {referencePrice}
                     </View>
                     <View className="budget-dialog-budget-input-unit">RMB</View>
                   </View>

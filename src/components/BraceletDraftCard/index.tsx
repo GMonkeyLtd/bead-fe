@@ -70,7 +70,7 @@ export const BraceletDraftCard = ({
       // 使用本地的generateCircleRing而不是传入的generateBraceletImage
       generateCircleRing(draft.beads.map(item => ({
         image_url: item.image_url,
-        bead_diameter: item.diameter,
+        diameter: item.diameter,
       }))).then((braceletImage) => {
         if (braceletImage) {
           updateDraft({
@@ -135,7 +135,7 @@ export const BraceletDraftCard = ({
       return;
     }
     Taro.redirectTo({
-      url: pageUrls.customDesign + "?sessionId=" + sessionId + "&draftId=" + draft?.draft_id,
+      url: pageUrls.customDesign + "?sessionId=" + sessionId + "&draftId=" + draft?.draft_id + "&from=chat",
     });
   }
 

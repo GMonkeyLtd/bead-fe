@@ -4,8 +4,8 @@ import Taro, { showToast, useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import "./index.scss";
 import MerchantHeader from "@/components/MerchantHeader";
 import OrderList from "@/components/OrderList";
-import api from "@/utils/api-merchant";
-import { OrderStatus } from "@/utils/orderUtils";
+import merchantApi from "@/utils/api-merchant";
+import { AfterSaleStatus, formatOrderStatus, OrderStatus } from "@/utils/orderUtils";
 import TabBar from "@/components/TabBar";
 
 interface Order {
@@ -19,100 +19,100 @@ interface Order {
   description: string;
 }
 
-type TabType = "进行中" | "已完成" | "已取消";
-const TAB_LIST = ["进行中", "已完成", "已取消"];
-
 export default function OrderManagement() {
-  const [activeTab, setActiveTab] = useState<TabType>("进行中");
+  const [activeTab, setActiveTab] = useState<OrderStatus>(OrderStatus.Negotiating);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
+  const [orderStatusList, setOrderStatusList] = useState<any[]>([]);
 
-  const tab = Taro.getCurrentInstance().router?.params?.tab;
+  const getOrdersByStatus = (statusItem: any) => {
+    const status = statusItem.parent_status ? statusItem.parent_status : statusItem.status;
+    const afterSaleStatus = statusItem.parent_status ? statusItem.status : null;
+    console.log(status, afterSaleStatus, 'statusItem');
+    merchantApi.user.getOrderList({
+      order_status: status,
+      after_sale_status: afterSaleStatus,
+      page: 0,
+      page_size: 100,
+    }).then((res: any) => {
+      const orders = res.data.orders || [];
+      setOrders(orders);
+    });
+  }
 
-  useEffect(() => {
-    const index = tab ? Number(tab) : 0;
-    setActiveTab(TAB_LIST[index] as TabType);
-  }, [tab]);
-
-  const loadOrders = async () => {
-    setLoading(true);
-    Taro.showLoading();
+  const loadOrderStatusList = async () => {
+    Taro.showLoading({
+      title: "加载中...",
+      mask: true,
+    });
     try {
-      // 模拟API调用
-      api.user.getOrderList().then((res: any) => {
-        const orderList = res.data.orders?.map((item) => {
-          return {
-            id: item.order_uuid,
-            orderNo: item.order_uuid,
-            status: item.order_status,
-            price: item.price,
-            createTime: item.created_at,
-            image: item.design_info?.image_url || "",
-            userPhone: item.user_info?.phone || "暂无",
-            braceletInfo: item.design_info || {},
-            userInfo: item.user_info || {},
-          };
-        });
-        setOrders(orderList || []);
-      });
+      const res = await merchantApi.user.getOrderStatusList()
+      const statusList: any[] = [];
+      Object.keys(res.data).filter((key) => key !== "total").forEach((key) => {
+        if (key === "after_sale") {
+          Object.keys(res.data[key]).forEach((subKey) => {
+            statusList.push(
+              {
+              status: subKey,
+              status_text: formatOrderStatus(key as OrderStatus, subKey as AfterSaleStatus),
+              count: res.data[key][subKey],
+              parent_status: key,
+            });
+          });
+        } else {
+
+        statusList.push({
+          status: key,
+          status_text: formatOrderStatus(key as OrderStatus),
+            count: res.data[key]
+          });
+        }
+      })
+      setOrderStatusList(statusList);
+      setActiveTab(statusList[0].status as OrderStatus);
+      getOrdersByStatus(statusList[0]);
     } catch (error) {
       showToast({
-        title: "加载失败",
+        title: "获取订单状态列表失败",
         icon: "none",
       });
     } finally {
-      setLoading(false);
       Taro.hideLoading();
     }
   };
 
   useDidShow(() => {
-    loadOrders();
-  }); 
-
-  usePullDownRefresh(() => {
-    loadOrders();
+    loadOrderStatusList();
   });
 
-  const currentOrders = useMemo(() => {
-    if (activeTab === "进行中") {
-      return orders.filter(
-        (item) => ["2"].includes(item.status)
-      );
-    } else if (activeTab === "已完成") {
-      return orders.filter(
-        (item) => (item.status as OrderStatus) === OrderStatus.Completed
-      );
-    } else if (activeTab === "已取消") {
-      return orders.filter((item) =>
-        [OrderStatus.Cancelled, OrderStatus.MerchantCancel].includes(
-          item.status as OrderStatus
-        )
-      );
-    }
-  }, [orders, activeTab]);
+  usePullDownRefresh(() => {
+    loadOrderStatusList()
+  });
 
   return (
     <View className="order-management-container">
-      <MerchantHeader />
+      {/* <MerchantHeader /> */}
       <View className="tabs-container">
-        {TAB_LIST.map((tab) => (
+        {orderStatusList.map((status) => (
           <View
-            key={tab}
-            className={`tab-item ${activeTab === tab ? "active" : ""}`}
-            onClick={() => setActiveTab(tab as TabType)}
+            key={status.status}
+            className={`tab-item ${activeTab === status.status ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab(status.status as OrderStatus);
+              getOrdersByStatus(status);
+            }}
           >
-            <Text className="tab-text">{tab}</Text>
+            <Text className="tab-text">{`${status.status_text}(${status.count})`}</Text>
           </View>
         ))}
       </View>
 
       <OrderList
-        orders={currentOrders || []}
+        orders={orders || []}
         loading={loading}
-        onRefresh={loadOrders}
+        onRefresh={loadOrderStatusList}
         style={{
-          height: "calc(100vh - 220px)",
+          height: "calc(100vh - 260px)",
         }}
       />
       <TabBar isMerchant={true} />

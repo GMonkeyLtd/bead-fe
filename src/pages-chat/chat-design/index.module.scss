@@ -48,13 +48,25 @@
   justify-content: space-between;
   height: 100%;
   padding: 20px;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background-image: url("https://zhuluoji.cn-sh2.ufileos.com/images-frontend/chat-background.png");
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+  }
 }
 
 .inputContainer {
   width: 100vw;
   box-sizing: border-box;
-  padding: 0 12px;
-  background: rgba(255, 255, 255, 0.27);
+  padding: 12px 12px;
 
   .inputBottomContainer {
     display: flex;

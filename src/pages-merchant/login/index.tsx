@@ -16,7 +16,7 @@ export default function Login() {
     const isLogin = MerchantAuthManager.checkLogin();
     if (isLogin) {
       redirectTo({
-        url: pageUrls.merchantGrabOrders,
+        url: pageUrls.merchantOrderManagement,
       });
     }
   }, []);
@@ -58,7 +58,7 @@ export default function Login() {
       });
       setTimeout(() => {
         navigateTo({
-          url: pageUrls.merchantGrabOrders,
+          url: pageUrls.merchantOrderManagement,
         });
       }, 1000);
     } catch (error) {

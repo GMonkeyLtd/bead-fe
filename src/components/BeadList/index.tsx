@@ -15,11 +15,11 @@ const BeadList = ({ beads, cardStyle }) => {
           </View>
           <View className={styles.beadContent}>
             <Text className={styles.beadName}>
-              {bead.name}「{bead.wuxing?.split("、")[0]}」
+              {bead.name}「{bead.wuxing?.[0]}」
             </Text>
             <View className={styles.beadEffect}>
               <View className={styles.beadEffectLine} />
-              <Text className={styles.beadEffectText}>{bead.function}</Text>
+              <Text className={styles.beadEffectText}>{bead.func_summary}</Text>
             </View>
           </View>
         </View>

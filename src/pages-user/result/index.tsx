@@ -12,7 +12,6 @@ import {
   APP_QRCODE_IMAGE_URL,
   DESIGN_PLACEHOLDER_IMAGE_URL,
 } from "@/config";
-import { useDesign } from "@/store/DesignContext";
 import shareDesignImage from "@/assets/icons/share-design.svg";
 // import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
@@ -27,6 +26,7 @@ import WearTipsSvg from "@/assets/icons/wear-tips.svg";
 import BeadList from "@/components/BeadList";
 import MaterialSvg from "@/assets/icons/material.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
+import apiSession from "@/utils/api-session";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -34,7 +34,6 @@ const Result = () => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
   const [braceletName, setBraceletName] = useState("");
   const [braceletDescription, setBraceletDescription] = useState("");
-  const { designData } = useDesign();
   const [shareImageUrl, setShareImageUrl] = useState("");
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
   const [designNo, setDesignNo] = useState("");
@@ -45,21 +44,12 @@ const Result = () => {
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] =
     useState(false);
-  const autoShareRef = useRef(false);
+  const [referencePrice, setReferencePrice] = useState<number>(0);
+  const [designSessionId, setDesignSessionId] = useState<string>("");
+  const [designDraftId, setDesignDraftId] = useState<string>("");
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
   const { sessionId, from } = params || {};
-
-  const posterData = useMemo(() => {
-    return {
-      title: braceletName,
-      description: braceletDescription,
-      crystals: beadDescriptions,
-      qrCode: APP_QRCODE_IMAGE_URL,
-      mainImage: imageUrl,
-      designNo: designNo,
-    };
-  }, [braceletName, braceletDescription, beadDescriptions, imageUrl, designNo]);
 
   const getOrderData = (orderUuid: string[]) => {
     api.userHistory.getOrderById(orderUuid).then((res) => {
@@ -68,30 +58,31 @@ const Result = () => {
   };
 
   const getDesignData = (designId: string) => {
-    api.userHistory
-      .getDesignById(parseInt(designId))
+    apiSession.getDesignItem(parseInt(designId))
       .then((res) => {
-        const { id, image_url, word_info, order_uuid, beads_info } =
+        const { design_id, image_url, info, order_uuids, reference_price, session_id, draft_id } =
           res?.data || {};
-        if (order_uuid?.length > 0) {
-          getOrderData(order_uuid);
+        if (order_uuids?.length > 0) {
+          getOrderData(order_uuids);
         }
-        setBeadsInfo(beads_info);
         const {
-          bracelet_name,
-          recommendation_text,
-          bead_ids_deduplication,
+          name,
+          description,
+          recommend_beads,
           rizhu,
           wuxing,
-        } = word_info;
-
+        } = info;
+        setBeadsInfo(info.beads);
         setImageUrl(image_url);
-        setBraceletName(bracelet_name);
-        setBeadDescriptions(bead_ids_deduplication);
-        setDesignNo(id);
-        setBraceletDescription(recommendation_text);
+        setBraceletName(name);
+        setBeadDescriptions(recommend_beads);
+        setDesignNo(design_id);
+        setBraceletDescription(description);
         setRizhuInfo(rizhu || wuxing?.[0]);
         setWuxingInfo(wuxing);
+        setReferencePrice(reference_price);
+        setDesignSessionId(session_id);
+        setDesignDraftId(draft_id);
       })
       .catch((err) => {
         console.log(err, "err");
@@ -110,25 +101,6 @@ const Result = () => {
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
       getDesignData(params?.designBackendId);
     }
-
-    if (params?.designId) {
-      const result = designData.find(
-        (item: any) => item.design_id === params.designId
-      );
-      const {
-        image_urls,
-        bracelet_name,
-        recommendation_text,
-        bead_ids_deduplication,
-        design_backend_id,
-      } = result;
-
-      setImageUrl(image_urls?.[0] || "");
-      setBraceletName(bracelet_name || "");
-      setBraceletDescription(recommendation_text || "");
-      setBeadDescriptions(bead_ids_deduplication || []);
-      setDesignNo(design_backend_id || "");
-    }
   };
 
   useEffect(() => {
@@ -145,7 +117,7 @@ const Result = () => {
 
   const predictedBraceletLength = useMemo(() => {
     return beadsInfo?.length > 0
-      ? computeBraceletLength(beadsInfo, "bead_diameter")
+      ? computeBraceletLength(beadsInfo, "diameter")
       : 0;
   }, [beadsInfo]);
 
@@ -155,6 +127,7 @@ const Result = () => {
     Taro.showToast({
       title: "正在生成分享图...",
       icon: "none",
+      duration: 3000,
     });
     try {
       const res = await Taro.request({
@@ -304,6 +277,12 @@ const Result = () => {
       urls: [imageUrl],
     });
   };
+  
+  const handleModifyDesign = () => {
+    Taro.navigateTo({
+      url: `${pageUrls.customDesign}?designId=${designNo}&sessionId=${designSessionId}&draftId=${designDraftId}&from=result`,
+    });
+  };
 
   return (
     <View
@@ -359,6 +338,7 @@ const Result = () => {
                 className={styles.logoImage}
                 src={LOGO_IMAGE_URL}
                 mode="widthFix"
+                style={{ width: "48px", height: "23px" }}
               />
             </View>
             <Image className={styles.expendImage} src={expendImage} mode="widthFix" />
@@ -502,9 +482,11 @@ const Result = () => {
           designNumber={designNo}
           productImage={imageUrl}
           onClose={() => setBudgetDialogShow(false)}
+          referencePrice={referencePrice}
+          onModifyDesign={handleModifyDesign}
         />
       )}
-      {/* <PosterGenerator
+      {/* <PosterGenerator  // 生成海报   
         data={posterData}
         onGenerated={(url) => {
           setShareImageUrl(url);

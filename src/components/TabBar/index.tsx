@@ -67,13 +67,13 @@ const TAB_BAR_ITEMS = [
 ];
 
 const TAB_BAR_ITEMS_MERCHANT = [
-  {
-    key: "grab-orders",
-    icon: grabOrdersIcon,
-    iconActive: grabOrdersActiveIcon,
-    text: "接单",
-    path: pageUrls.merchantGrabOrders,
-  },
+  // {
+  //   key: "grab-orders",
+  //   icon: grabOrdersIcon,
+  //   iconActive: grabOrdersActiveIcon,
+  //   text: "接单",
+  //   path: pageUrls.merchantGrabOrders,
+  // },
   {
     key: "order-list",
     icon: orderListIcon,
