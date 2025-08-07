@@ -435,7 +435,7 @@ const OrderDetail: React.FC = () => {
         {order?.design_info && (
           <BraceletInfo
             orderNumber={order?.order_uuid}
-            productName={order?.design_info?.word_info?.bracelet_name}
+            productName={order?.design_info?.word_info?.name}
             productNumber={order?.design_info?.design_id}
             quantity={order?.design_info?.beads_info?.length}
             price={order?.price || 0}
