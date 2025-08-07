@@ -1,7 +1,7 @@
 import { View, Image } from "@tarojs/components";
 import styles from "./index.module.scss";
 import crystalStyle from "@/style/crystal.module.scss";
-import { ASSISTANT_LG_IMAGE_URL } from "@/config";
+import { LILI_LOADING_IMAGE_URL } from "@/config";
 
 // import loading from "@/assets/loading.svg";
 
@@ -12,7 +12,7 @@ export default function ChatLoading({ text, style }: { text: string, style?: Rea
         <LoadingDots />
         <View className={styles.loadingText}>{text}</View>
       </View>
-      <Image src={ASSISTANT_LG_IMAGE_URL} className={styles.loadingImage} />
+      <Image src={LILI_LOADING_IMAGE_URL} className={styles.loadingImage} />
     </View>
   );
 }

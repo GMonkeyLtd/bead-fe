@@ -52,7 +52,7 @@ export interface PersonalizedGenerateResult {
   color: string;
   wuxing: string[];
   english: string;
-  bead_diameter: number;
+  diameter: number;
 }
 
 export interface PersonalizedGenerate2Params {

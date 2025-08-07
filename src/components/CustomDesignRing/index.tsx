@@ -20,7 +20,7 @@ import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 interface Bead {
   image_url: string;
   render_diameter: number; // 渲染直径
-  bead_diameter: number; // 珠子直径
+  diameter: number; // 珠子直径
   id?: string | number;
 }
 
@@ -121,7 +121,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
       beads: dots.map((item) => ({
         id: item.id,
         image_url: item.image_url,
-        bead_diameter: item.bead_diameter,
+        diameter: item.diameter,
         render_diameter: item.render_diameter,
       })),
       predictedLength,
@@ -131,7 +131,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     getBeads: () => dots.map((item) => ({
       id: item.id,
       image_url: item.image_url,
-      bead_diameter: item.bead_diameter,
+      diameter: item.diameter,
       render_diameter: item.render_diameter,
     })),
     getPredictedLength: () => predictedLength,
@@ -181,7 +181,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     () =>
       debounce((dots: any[]) => {
         if (dots.length > 0) {
-          const predictLength = computeBraceletLength(dots, "bead_diameter");
+          const predictLength = computeBraceletLength(dots, "diameter");
           setPredictedLength(predictLength);
         }
       }, 100),
@@ -193,7 +193,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
       // 将 dots 转换为 DotImageData 格式
       const dotImageData = dots.map(dot => ({
         image_url: dot.image_url,
-        bead_diameter: dot.bead_diameter,
+        diameter: dot.diameter,
       }));
       
       generateCircleRing(dotImageData).then((imageUrl) => {
@@ -212,7 +212,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
         dots.map((item) => ({
           id: item.id,
           image_url: item.image_url,
-          bead_diameter: item.bead_diameter,
+          diameter: item.diameter,
           render_diameter: item.render_diameter,
         }))
       );
@@ -225,7 +225,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     const cacheKey = _beads
       .map(
         (item) =>
-          `${item.image_url}_${item.render_diameter}_${item.bead_diameter}_${item.id}`
+          `${item.image_url}_${item.render_diameter}_${item.diameter}_${item.id}`
       )
       .join(",");
 
@@ -337,7 +337,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
         id: b.id,
         image_url: b.image_url,
         render_diameter: b.render_diameter,
-        bead_diameter: b.bead_diameter,
+        diameter: b.diameter,
       }))
     );
   }, [beads]);
@@ -663,7 +663,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
       });
       return;
     }
-    if (predictedLength - dots[selectedBeadIndex].bead_diameter * 0.1 < 12) {
+    if (predictedLength - dots[selectedBeadIndex].diameter * 0.1 < 12) {
       Taro.showToast({
         title: "哎呀，珠子有点少啦！一般手围建议不少于12cm噢。",
         icon: "none",
@@ -697,13 +697,13 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
         newDots.push({
           ...bead,
           render_diameter: size * renderRatio,
-          bead_diameter: size,
+          diameter: size,
         });
       } else {
         newDots[selectedBeadIndex] = {
           ...bead,
           render_diameter: size * renderRatio,
-          bead_diameter: size,
+          diameter: size,
         };
       }
       updateBeads(newDots);
@@ -772,8 +772,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
                 {BEADS_SIZE_RENDER.map((beadItem) => {
                   return (
                     <View
-                      key={`${item.id}-${beadItem.bead_diameter}`}
-                      onClick={() => handleBeadClick(item, beadItem.bead_diameter)}
+                      key={`${item.id}-${beadItem.diameter}`}
+                      onClick={() => handleBeadClick(item, beadItem.diameter)}
                       style={{
                         flexShrink: 0,
                         width: "80px",
@@ -820,7 +820,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
                           textAlign: "center",
                         }}
                       >
-                        {beadItem.bead_diameter}mm
+                        {beadItem.diameter}mm
                       </View>
                     </View>
                   );
@@ -882,7 +882,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
                 dots.map((item) => ({
                   id: item.id,
                   image_url: item.image_url,
-                  bead_diameter: item.bead_diameter,
+                  diameter: item.diameter,
                   render_diameter: item.render_diameter,
                 }))
               );

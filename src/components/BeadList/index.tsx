@@ -19,7 +19,7 @@ const BeadList = ({ beads, cardStyle }) => {
             </Text>
             <View className={styles.beadEffect}>
               <View className={styles.beadEffectLine} />
-              <Text className={styles.beadEffectText}>{bead.function}</Text>
+              <Text className={styles.beadEffectText}>{bead.func_summary}</Text>
             </View>
           </View>
         </View>

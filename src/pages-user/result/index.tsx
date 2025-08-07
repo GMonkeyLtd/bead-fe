@@ -12,7 +12,6 @@ import {
   APP_QRCODE_IMAGE_URL,
   DESIGN_PLACEHOLDER_IMAGE_URL,
 } from "@/config";
-import { useDesign } from "@/store/DesignContext";
 import shareDesignImage from "@/assets/icons/share-design.svg";
 // import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
@@ -35,7 +34,6 @@ const Result = () => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
   const [braceletName, setBraceletName] = useState("");
   const [braceletDescription, setBraceletDescription] = useState("");
-  const { designData } = useDesign();
   const [shareImageUrl, setShareImageUrl] = useState("");
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
   const [designNo, setDesignNo] = useState("");
@@ -46,6 +44,9 @@ const Result = () => {
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] =
     useState(false);
+  const [referencePrice, setReferencePrice] = useState<number>(0);
+  const [designSessionId, setDesignSessionId] = useState<string>("");
+  const [designDraftId, setDesignDraftId] = useState<string>("");
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
   const { sessionId, from } = params || {};
@@ -59,10 +60,10 @@ const Result = () => {
   const getDesignData = (designId: string) => {
     apiSession.getDesignItem(parseInt(designId))
       .then((res) => {
-        const { design_id, image_url, info, order_uuid } =
+        const { design_id, image_url, info, order_uuids, reference_price, session_id, draft_id } =
           res?.data || {};
-        if (order_uuid?.length > 0) {
-          getOrderData(order_uuid);
+        if (order_uuids?.length > 0) {
+          getOrderData(order_uuids);
         }
         const {
           name,
@@ -79,6 +80,9 @@ const Result = () => {
         setBraceletDescription(description);
         setRizhuInfo(rizhu || wuxing?.[0]);
         setWuxingInfo(wuxing);
+        setReferencePrice(reference_price);
+        setDesignSessionId(session_id);
+        setDesignDraftId(draft_id);
       })
       .catch((err) => {
         console.log(err, "err");
@@ -113,7 +117,7 @@ const Result = () => {
 
   const predictedBraceletLength = useMemo(() => {
     return beadsInfo?.length > 0
-      ? computeBraceletLength(beadsInfo, "bead_diameter")
+      ? computeBraceletLength(beadsInfo, "diameter")
       : 0;
   }, [beadsInfo]);
 
@@ -273,7 +277,12 @@ const Result = () => {
       urls: [imageUrl],
     });
   };
-  console.log(braceletName, "braceletName");
+  
+  const handleModifyDesign = () => {
+    Taro.navigateTo({
+      url: `${pageUrls.customDesign}?designId=${designNo}&sessionId=${designSessionId}&draftId=${designDraftId}&from=result`,
+    });
+  };
 
   return (
     <View
@@ -329,6 +338,7 @@ const Result = () => {
                 className={styles.logoImage}
                 src={LOGO_IMAGE_URL}
                 mode="widthFix"
+                style={{ width: "48px", height: "23px" }}
               />
             </View>
             <Image className={styles.expendImage} src={expendImage} mode="widthFix" />
@@ -472,9 +482,11 @@ const Result = () => {
           designNumber={designNo}
           productImage={imageUrl}
           onClose={() => setBudgetDialogShow(false)}
+          referencePrice={referencePrice}
+          onModifyDesign={handleModifyDesign}
         />
       )}
-      {/* <PosterGenerator
+      {/* <PosterGenerator  // 生成海报   
         data={posterData}
         onGenerated={(url) => {
           setShareImageUrl(url);

@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import PageContainer from "@/components/PageContainer";
 import apiSession, { ChatMessageItem } from "@/utils/api-session";
 import styles from "./index.module.scss";
-import { ASSISTANT_AVATAR_IMAGE_URL } from "@/config";
+import { LILI_AVATAR_IMAGE_URL } from "@/config";
 import ChatMessages from "@/components/ChatMessages";
 import sendSvg from "@/assets/icons/send.svg";
 import { isEmptyMessage, splitMessage } from "@/utils/messageFormatter";
@@ -203,7 +203,7 @@ const ChatDesign = () => {
       <View className={styles.chatDesignHeader}>
         <View className={styles.assistantAvatarContainer}>
           <Image
-            src={ASSISTANT_AVATAR_IMAGE_URL}
+            src={LILI_AVATAR_IMAGE_URL} 
             className={styles.assistantAvatar}
           />
           <Text className={styles.assistantName}>黎莉莉</Text>

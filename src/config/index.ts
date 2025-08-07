@@ -30,6 +30,8 @@ export const CRYSTAL_CARD_GRADIENT_BG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufile
 export const ASSISTANT_AVATAR_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/assistant-avatar.png";
 export const HOME_BG_VIDEO_URL = "https://zhuluoji.cn-sh2.ufileos.com/resources/home-vidio.mp4";
 export const JOIN_GROUP_AVATAR_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/join-group-avatar.png";
+export const LILI_LOADING_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/lili-loading.png";
+export const LILI_AVATAR_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/lili-avatar.png";
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 

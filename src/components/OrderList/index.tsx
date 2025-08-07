@@ -1,40 +1,47 @@
 import { useState, useEffect } from "react";
 import { View, Text, Button, Image, ScrollView } from "@tarojs/components";
-import Taro, { showToast, showModal } from "@tarojs/taro";
+import Taro, { showToast, showModal, requirePlugin } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import StatusBadge from "../StatusBadge";
 import {
   formatOrderStatus,
   getStatusBadgeType,
   OrderStatus,
+  AfterSaleStatus,
 } from "@/utils/orderUtils";
 import BeadOrderDialog from "@/components/BeadOrderDialog";
 import ContactUserDialog from "@/components/ContactUserDialog";
 import phoneIcon from "@/assets/icons/phone.svg";
-import api from "@/utils/api-merchant";
+import  merchantApi from "@/utils/api-merchant";
 import { pageUrls } from "@/config/page-urls";
 import copyIcon from "@/assets/icons/copy.svg";
 import ProductPriceForm from "../ProductPriceForm";
-
+import ProductImageUpload from "../ProductImageUpload";
+import WayBillForm from "../WayBillForm";
 
 export interface Order {
-  id: string;
-  orderNo: string;
-  status: OrderStatus;
+  order_uuid: string;
+  order_status: OrderStatus;
   price: number;
-  createTime: string;
-  image: string;
-  userPhone: string;
-  description: string;
-  braceletInfo: any;
-  userInfo?: {
+  create_time: string;
+  design_info: any;
+  remark: string;
+  created_at: string;
+  updated_at: string;
+  user_info?: {
     default_contact: number; // 0: 电话, 1: 微信
     phone?: string;
     wechat_id?: string;
     nick_name?: string;
     avatar_url?: string;
   };
+  after_sale_info?: {
+    after_sale_status: string;
+    after_sale_status_text: string;
+    pre_sales_status: string;
+  }
   beadsData?: any[];
+  order_details?: any;
 }
 
 export interface OrderListProps {
@@ -63,19 +70,12 @@ export default function OrderList({
   const [detailData, setDetailData] = useState<Order | null>(null);
   const [contactDialogVisible, setContactDialogVisible] = useState(false);
   const [currentUserInfo, setCurrentUserInfo] = useState<
-    Order["userInfo"] | null
+    Order["user_info"] | null
   >(null);
-  const [productPriceForm, setProductPriceForm] = useState<any>(null);
-
+  const [orderActionDialog, setOrderActionDialog] = useState<any>(null);
+  const logisticsPlugin = requirePlugin("logisticsPlugin");
   const handleClose = () => {
     setDetailData(null);
-  };
-
-  const handleCallUser = (order: Order) => {
-    if (order.userInfo) {
-      setCurrentUserInfo(order.userInfo);
-      setContactDialogVisible(true);
-    }
   };
 
   const handleCloseContactDialog = () => {
@@ -83,31 +83,23 @@ export default function OrderList({
     setCurrentUserInfo(null);
   };
 
-  const handleAddWechat = (order: Order) => {
-    showModal({
-      title: "添加微信",
-      content: `请添加用户微信：${order.description}`,
-      showCancel: false,
-    });
-  };
-
   const handleCancelOrder = (order: Order) => {
     // 跳转到取消订单页面，传递订单信息
     Taro.navigateTo({
-      url: `${pageUrls.cancelOrder}?orderId=${order.id}&orderNo=${order.orderNo}&price=${order.price}`,
+      url: `${pageUrls.cancelOrder}?orderId=${order.order_uuid}&orderNo=${order.order_uuid}&price=${order.price}`,
     });
   };
 
   const handleCompleteOrder = async (order: Order) => {
     const res = await showModal({
       title: "确认完成",
-      content: `确定完成订单 ${order.orderNo} 吗？`,
+      content: `确定完成订单 ${order.order_uuid} 吗？`,
       confirmText: "确认完成",
       cancelText: "取消",
     });
 
     if (res.confirm) {
-      api.user.completeOrder(order.id).then((res: any) => {
+      merchantApi.user.completeOrder(order.order_uuid).then((res: any) => {
         if (res.code === 200) {
           showToast({
             title: "完成订单成功",
@@ -119,21 +111,8 @@ export default function OrderList({
     }
   };
 
-  const handleGrabOrder = async (order: Order) => {
-    const res = await showModal({
-      title: "确认抢单",
-      content: `确定要抢订单 ${order.orderNo} 吗？`,
-      confirmText: "确认抢单",
-      cancelText: "取消",
-    });
-
-    if (res.confirm && onOrderAction) {
-      onOrderAction("grab", order);
-    }
-  };
-
   const handleOrderDetail = (order: Order) => {
-    const beadsData = order?.braceletInfo?.beads_info?.reduce(
+    const beadsData = order?.design_info?.beads_info?.reduce(
       (acc: any[], item: any) => {
         const existingBead = acc.find((bead) => bead.name === item?.name);
         if (existingBead) {
@@ -141,7 +120,7 @@ export default function OrderList({
         } else {
           acc.push({
             name: item?.name,
-            size: item?.size,
+            size: item?.bead_diameter + "mm",
             quantity: item?.quantity || 1,
           });
         }
@@ -162,15 +141,37 @@ export default function OrderList({
     })
   }
 
+  // 脱敏处理函数
+  const maskContactInfo = (contact: string, type: 'phone' | 'wechat') => {
+    if (!contact) return '';
+
+    if (type === 'phone') {
+      // 手机号脱敏：前3位 + **** + 后4位
+      if (contact.length >= 7) {
+        return `${contact.substring(0, 3)}****${contact.substring(contact.length - 4)}`;
+      }
+      return contact;
+    } else {
+      // 微信号脱敏：前3位 + **** + 后4位
+      if (contact.length >= 7) {
+        return `${contact.substring(0, 3)}****${contact.substring(contact.length - 4)}`;
+      }
+      return contact;
+    }
+  };
+
   const renderConnectInfo = (order: Order) => {
     let info = '', copyData = '';
-    if (order.userInfo?.default_contact === 0) {
-      info = `电话：${order.userInfo?.phone}`;
-      copyData = order.userInfo?.phone || '';
+    if (order.user_info?.default_contact === 0) {
+      const phone = order.user_info?.phone || '';
+      const maskedPhone = maskContactInfo(phone, 'phone');
+      info = `电话：${maskedPhone}`;
+      copyData = phone; // 复制时使用原始数据
     } else {
-
-      info = `微信：${order.userInfo?.wechat_id}`;
-      copyData = order.userInfo?.wechat_id || '';
+      const wechat = order.user_info?.wechat_id || '';
+      const maskedWechat = maskContactInfo(wechat, 'wechat');
+      info = `微信：${maskedWechat}`;
+      copyData = wechat; // 复制时使用原始数据
     }
     return (
       <View className={styles.connectInfo} onClick={() => handleCopyOrderNumber(copyData)}>
@@ -180,26 +181,35 @@ export default function OrderList({
     );
   };
 
+  const onAgreeRefund = (order: Order) => {
+    merchantApi.user.agreeRefund(order.order_uuid).then((res: any) => {
+      if (res.code === 200) {
+        showToast({
+          title: "同意退款成功",
+          icon: "success",
+        });
+        onRefresh?.();
+      }
+    }).catch((err: any) => {
+      showToast({
+        title: "同意退款失败" + err.message,
+        icon: "none",
+      });
+    });
+  }
+
   const renderActionButtons = (order: Order) => {
     if (!showActions) return null;
 
-    if (isGrab) {
-      return (
-        <View className={styles.grabBtn} onClick={() => handleGrabOrder(order)}>
-          立即抢单
-        </View>
-      );
-    }
-
-    // 2: 进行中
-    if (order.status === "2") {
+    // 2: 进行中、待支付
+    if ([OrderStatus.Negotiating, OrderStatus.InProgress, OrderStatus.PendingPayment].includes(order.order_status)) {
       return (
         <View className={styles.orderActions}>
           <View className={styles.actionButtons}>
             <View
               className={styles.callBtn}
               onClick={() => {
-                const sessionId = "52b028102005e0d" || order.session_id;
+                const sessionId = order.session_id;
                 Taro.navigateTo({
                   url: `${pageUrls.chatDesign}?session_id=${sessionId}`,
                 });
@@ -214,28 +224,118 @@ export default function OrderList({
               取消
             </View>
           </View>
-          <View
+          {[OrderStatus.Negotiating, OrderStatus.InProgress].includes(order.order_status) && (<View
             className={styles.completeBtn}
             onClick={() => {
-              setProductPriceForm(<ProductPriceForm
+              setOrderActionDialog(<ProductPriceForm
                 visible={true}
-                orderNumber={order.orderNo}
-                productName={order.braceletInfo?.word_info?.bracelet_name || ""}
-                productImage={order.braceletInfo?.image_url || ""}
-                onClose={() => setProductPriceForm(null)}
-                onConfirm={() => {}}
+                orderNumber={order.order_uuid}
+                productName={order.design_info?.word_info?.bracelet_name || ""}
+                productImage={order.design_info?.image_url || ""}
+                onClose={() => setOrderActionDialog(null)}
+                onConfirm={onRefresh}
               />);
             }}
           >
             发起支付
-          </View>
+          </View>)}
         </View>
       );
     }
+    if ([OrderStatus.PendingShipment, OrderStatus.Shipped].includes(order.order_status)) {
+      return (
+        <View className={styles.orderActions}>
+          <View className={styles.actionButtons}>
+            <View
+              className={styles.uploadImageBtn}
+              onClick={() => {
+                setOrderActionDialog(<ProductImageUpload
+                  visible={true}
+                  orderId={order.order_uuid}
+                  productName={order.design_info?.word_info?.bracelet_name || ""}
+                  productImage={order.design_info?.image_url || ""}
+                  onClose={() => setOrderActionDialog(null)}
+                  onConfirm={onRefresh}
+                />)
+              }}
+            >
+              上传图片
+            </View>
+            <View
+              className={styles.callBtn}
+              onClick={() => {
+                const sessionId = order.session_id;
+                Taro.navigateTo({
+                  url: `${pageUrls.chatDesign}?session_id=${sessionId}`,
+                });
+              }}
+            >
+              沟通记录
+            </View>
+          </View>
+          {([OrderStatus.PendingShipment].includes(order.order_status)) && (<View
+            className={styles.completeBtn}
+            onClick={() => {
+              setOrderActionDialog(<WayBillForm
+                visible={true}
+                orderId={order.order_uuid}
+                onClose={() => setOrderActionDialog(null)}
+                submitCallback={onRefresh}
+              />);
+            }}
+          >
+            填写物流
+          </View>)}
+        </View>
+      )
+    }
+    if ([OrderStatus.AfterSale].includes(order.order_status) && order.after_sale_info?.after_sale_status === "refund_reviewing") {
+      return (
+        <View className={styles.orderActions}>
+          <View className={styles.actionButtons}>
+            <View
+              className={styles.callBtn}
+              onClick={() => onAgreeRefund(order)}
+            >
+              同意退款
+            </View>
+            <View
+              className={styles.orderCancelBtn}
+              onClick={() => {
+                Taro.showToast({
+                  title: "请联系客户撤单",
+                  icon: "none",
+                });
+              }}
+            >
+              联系客户撤单
+            </View>
+          </View>
+        </View>
+      )
+    }
+
   };
 
+  const showWayBillInfo = (order: Order) => {
+    if (order.order_details?.logistics_info && order.order_details?.logistics_info?.logistics_no) {
+      return true;
+    }
+    return false;
+  }
+
+  const onViewLogistics = (order: Order) => {
+    merchantApi.user.getWayBillToken(order.order_uuid).then((res: any) => {
+      const waybill_token = res.data.waybill_token;
+      console.log(waybill_token, logisticsPlugin?.openWaybillTracking, "waybill_token");
+      logisticsPlugin?.openWaybillTracking({
+        waybillToken: waybill_token,
+      });
+    });
+  }
+
   return (
-    <View>
+    <View style={{ height: "100%" }}>
       <ScrollView
         className={`${styles.orderListContainer} ${className}`}
         scrollY
@@ -252,15 +352,21 @@ export default function OrderList({
           </View>
         ) : (
           orders.map((order) => (
-            <View key={order.id} className={styles.orderCard}>
+            <View key={order.order_uuid} className={styles.orderCard}>
+              {showWayBillInfo(order) && (
+                <View className={styles.wayBillInfo} onClick={() => onViewLogistics(order)}>
+                  <View className={styles.wayBillNo}>{`快递单号：${order.order_details?.logistics_info?.logistics_no} ->`}</View>
+                  <View className={styles.wayBillStatus}>{order.order_details?.logistics_info?.waybill_status_text}</View>
+                </View>
+              )}
               <View className={styles.orderHeader}>
                 <View className={styles.orderStatus}>
                   <StatusBadge
-                    type={getStatusBadgeType(order.status)}
-                    text={formatOrderStatus(order.status)}
+                    type={getStatusBadgeType(order.order_status)}
+                    text={formatOrderStatus(order.order_status, order?.after_sale_info?.after_sale_status as AfterSaleStatus)}
                   />
                   <Text className={styles.orderNo}>
-                    订单号：{order.orderNo}
+                    订单号：{order.order_uuid}
                   </Text>
                 </View>
                 <View
@@ -270,20 +376,24 @@ export default function OrderList({
                   明细
                 </View>
               </View>
-
               <View className={styles.orderContent}>
                 <View className={styles.orderInfo}>
                   <Image
                     className={styles.orderImage}
-                    src={order.image}
+                    src={order.design_info?.image_url}
                     mode="aspectFill"
                     lazyLoad
-                    showMenuByLongpress={false}
+                    onClick={() => {
+                      Taro.previewImage({
+                        current: order.design_info?.image_url,
+                        urls: [order.design_info?.image_url],
+                      });
+                    }}
                   />
                   <View className={styles.orderDetails}>
                     {renderConnectInfo(order)}
                     {/* {order.userInfo?.nick_name || "微信用户"} */}
-                    <Text className={styles.orderTime}>{order.createTime}</Text>
+                    <Text className={styles.orderTime}>{order.created_at}</Text>
                   </View>
                 </View>
                 <Text className={styles.orderPrice}>
@@ -291,41 +401,35 @@ export default function OrderList({
                 </Text>
               </View>
 
-              {showActions &&
-                isGrab &&
-                order.status === OrderStatus.InService && (
-                  <View className={styles.orderDivider}></View>
-                )}
-
               {renderActionButtons(order)}
-              {detailData && (
-                <BeadOrderDialog
-                  visible
-                  orderNumber={detailData.orderNo}
-                  productName={
-                    detailData.braceletInfo?.word_info?.bracelet_name || ""
-                  }
-                  productCode={detailData.braceletInfo?.design_id || ""}
-                  totalQuantity={
-                    detailData.braceletInfo?.word_info?.bracelet_name || ""
-                  }
-                  budget={detailData.price.toString()}
-                  productImage={detailData.braceletInfo?.image_url || ""}
-                  materials={(detailData.beadsData || []).map((item: any) => {
-                    return {
-                      name: item.name,
-                      spec: item.size,
-                      quantity: item.quantity,
-                    };
-                  })}
-                  onClose={handleClose}
-                  onConfirm={console.log}
-                />
-              )}
             </View>
           ))
         )}
       </ScrollView>
+      {/* 订单明细 */}
+      {detailData && (
+        <BeadOrderDialog
+          visible
+          orderNumber={detailData.order_uuid}
+          productName={
+            detailData.design_info?.word_info?.bracelet_name || ""
+          }
+          productCode={detailData.design_info?.design_id || ""}
+          realImages={detailData.order_details?.actual_images || []}
+          certificateImages={detailData.order_details?.certificate_images || []}
+          budget={detailData.price.toString()}
+          productImage={detailData.design_info?.image_url || ""}
+          materials={(detailData.beadsData || []).map((item: any) => {
+            return {
+              name: item.name,
+              spec: item.size,
+              quantity: item.quantity,
+            };
+          })}
+          onClose={handleClose}
+          onConfirm={console.log}
+        />
+      )}
       {/* 联系用户弹窗 */}
       {contactDialogVisible && currentUserInfo && (
         <ContactUserDialog
@@ -334,7 +438,7 @@ export default function OrderList({
           onClose={handleCloseContactDialog}
         />
       )}
-      {productPriceForm}
-      </View>
+      {orderActionDialog}
+    </View>
   );
 }

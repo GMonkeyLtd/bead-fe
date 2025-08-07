@@ -26,7 +26,7 @@ export const OrderStatusMap = {
   [OrderStatus.InProgress]: "进行中",
   [OrderStatus.Negotiating]: "进行中",
   [OrderStatus.PendingPayment]: "待支付",
-  [OrderStatus.PendingShipment]: "已支付",
+  [OrderStatus.PendingShipment]: "待发货",
   [OrderStatus.Shipped]: "已发货",
   [OrderStatus.Received]: "已签收",
   [OrderStatus.Completed]: "已完成",
@@ -45,7 +45,7 @@ export enum AfterSaleStatus {
 export const AfterSaleStatusMap = {
   [AfterSaleStatus.Refunding]: "退款中",
   [AfterSaleStatus.Refunded]: "退款成功",
-  [AfterSaleStatus.RefundReviewing]: "待审核"
+  [AfterSaleStatus.RefundReviewing]: "退款待审核"
 }
 
 export const processingOrderStatus = [
@@ -58,9 +58,9 @@ export const cancelledOrderStatus = [
 ];
 
 
-export const formatOrderStatus = (status: OrderStatus, afterSaleStatus: AfterSaleStatus) => {
+export const formatOrderStatus = (status: OrderStatus, afterSaleStatus?: AfterSaleStatus) => {
   if (status === OrderStatus.AfterSale) {
-    return AfterSaleStatusMap[afterSaleStatus];
+    return afterSaleStatus ? AfterSaleStatusMap[afterSaleStatus] : '售后中';
   }
   return OrderStatusMap[status];
 };

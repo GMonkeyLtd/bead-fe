@@ -47,7 +47,7 @@ export interface PersonalizedGenerateResult {
   color: string;
   wuxing: string;
   english: string;
-  bead_diameter: number;
+  diameter: number;
 }
 
 export interface PersonalizedGenerate2Params {
@@ -106,14 +106,14 @@ export const userApi = {
   // 用户退出登录
   logout: () => http.post("/auth/logout"),
 
-  getOrderList: () => {
+  getOrderList: (params: any) => {
     // return new Promise((resolve) => {
     //   setTimeout(() => {
     //     resolve(orderList);
     //   }, 1000);
     // });
 
-    return http.post("/merchant/getorderlist", { page: 0, page_size: 100 });
+    return http.post("/merchant/getorderlist", params);
   },
 
   getDispatch: () => {
@@ -132,7 +132,7 @@ export const userApi = {
 
   getMerchantInfo: () => {
     return http.post("/merchant/getmerchantinfo");
-  },  
+  },
 
   // 微信充值
   recharge: (params: RechargeParams) =>
@@ -142,9 +142,9 @@ export const userApi = {
 
   // 查询充值记录
   getRechargeHistory: (page: number = 0, pageSize: number = 10) =>
-    http.post("/merchant/getrechargehistory", { 
-      page, 
-      page_size: pageSize 
+    http.post("/merchant/getrechargehistory", {
+      page,
+      page_size: pageSize
     }),
 
   // 充值结果查询
@@ -156,6 +156,32 @@ export const userApi = {
     http.post("/merchant/querypaymentstatus", { trade_uuid: tradeId }, {
       showLoading: false,
     }),
+  submitPrice: (orderId: string, price: number, imagesBase64: string[]) =>
+    http.post("/merchant/orders/payment", { order_uuid: orderId, price: price, actual_images_base64: imagesBase64 }),
+  updateOrderImages: (orderId: string, realImages: string[], certificateImages: string[]) => {
+    const params: any = {
+      order_uuid: orderId,
+    };
+    if (realImages.length > 0) {
+      params.actual_images_base64 = realImages;
+    }
+    if (certificateImages.length > 0) {
+      params.certificate_images_base64 = certificateImages;
+    }
+    return http.post("/merchant/orders/supplement_images", params);
+  },
+  submitWayBillId: (orderId: string, wayBillId: string, senderPhone: string) => {
+    return http.post("/merchant/orders/ship", { order_uuid: orderId, logistics_no: wayBillId, consignor_contact: senderPhone });
+  },
+  getWayBillToken: (orderId: string) => {
+    return http.post("/merchant/orders/waybill_token", { order_uuid: orderId });
+  },
+  agreeRefund: (orderId: string) => {
+    return http.post("/merchant/orders/agree_refund", { order_uuid: orderId });
+  },
+  getOrderStatusList: () => {
+    return http.post("/merchant/orders/status_count");
+  }
 };
 
 // 导出所有API

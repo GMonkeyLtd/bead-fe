@@ -8,7 +8,7 @@ import {
 
 export interface DotImageData {
   image_url: string;
-  bead_diameter?: number;
+  diameter?: number;
 }
 
 interface CircleRingConfig {
@@ -49,7 +49,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   // 生成唯一的结果ID
   const generateResultId = useCallback((dotsBgImageData: DotImageData[]) => {
     return dotsBgImageData
-      .map(item => `${item.image_url}_${item.bead_diameter || 'default'}`)
+      .map(item => `${item.image_url}_${item.diameter || 'default'}`)
       .join('|');
   }, []);
 
@@ -74,7 +74,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     const imageUrls = dotsBgImageData.map(item => item.image_url);
     
     if (isDifferentSize) {
-      const beadSizes = dotsBgImageData.map(item => item.bead_diameter || 10);
+      const beadSizes = dotsBgImageData.map(item => item.diameter || 10);
       return calculateBeadArrangementBySize(
         ringRadius,
         beadSizes,
