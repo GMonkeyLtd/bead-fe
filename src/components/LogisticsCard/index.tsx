@@ -91,7 +91,7 @@ const LogisticsCard: React.FC<LogisticsCardProps> = ({
                 <View className={styles.contactInfo}>
                     <Text className={styles.receiverName}>{address.userName}</Text>
                     <Text className={styles.phoneNumber}>
-                        {address.telNumber.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')}
+                        {address?.telNumber?.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')}
                     </Text>
                 </View>
             </View>

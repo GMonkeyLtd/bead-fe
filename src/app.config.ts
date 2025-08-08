@@ -15,7 +15,6 @@ export default defineAppConfig({
       root: 'pages-design',
       pages: [
         'quick-design/index',
-        // 'design/index',
         'custom-design/index'
       ]
     },
@@ -33,7 +32,7 @@ export default defineAppConfig({
       pages: [
         'order-detail/index',
         'order-list/index',
-        'order-dispatching/index',
+        // 'order-dispatching/index',
         'cancel-order/index',
       ]
     },

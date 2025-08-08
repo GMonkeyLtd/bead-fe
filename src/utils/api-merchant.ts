@@ -177,7 +177,11 @@ export const userApi = {
     return http.post("/merchant/orders/waybill_token", { order_uuid: orderId });
   },
   agreeRefund: (orderId: string) => {
-    return http.post("/merchant/orders/agree_refund", { order_uuid: orderId });
+    return http.post("/merchant/order_refund/review", {
+      order_uuid: orderId, 
+      action: "approve",
+      reason: "商家同意退款"
+    });
   },
   getOrderStatusList: () => {
     return http.post("/merchant/orders/status_count");

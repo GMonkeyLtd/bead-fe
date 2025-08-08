@@ -226,6 +226,22 @@ export default {
       }
     );
   },
+  regenerateDraft: (
+    params: {
+      session_id: string;
+      draft_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<DesignDraftResponse>(
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/regenerate`,
+      undefined,
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  },
 
   queryDesignProgress: (
     params: {

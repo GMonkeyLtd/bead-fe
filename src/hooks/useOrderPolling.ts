@@ -31,6 +31,8 @@ interface UseOrderPollingOptions {
   interval?: number; // 轮询间隔，默认3000ms
   onStatusChange?: (newStatus: OrderStatus) => void; // 状态变化回调
   shouldStopPolling?: (status: OrderStatus) => boolean; // 自定义停止条件
+  autoRedirect?: boolean; // 是否自动跳转，默认true
+  redirectUrl?: string; // 自定义跳转URL
 }
 
 interface UseOrderPollingReturn {
@@ -43,35 +45,39 @@ interface UseOrderPollingReturn {
 export const useOrderPolling = ({
   orderId,
   interval = 3000,
+  onStatusChange,
+  shouldStopPolling: customShouldStopPolling,
+  autoRedirect = true,
+  redirectUrl,
 }: UseOrderPollingOptions): UseOrderPollingReturn => {
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isPollingRef = useRef<boolean>(false);
   const [orderInfo, setOrderInfo] = useState<any>(null);
 
-  const shouldStopPolling = (status) =>
-    ![OrderStatus.PendingDispatch, OrderStatus.Dispatching].includes(status);
+  const defaultShouldStopPolling = (status) =>
+    ![OrderStatus.Negotiating, OrderStatus.InProgress].includes(status);
+
+  const shouldStopPolling = customShouldStopPolling || defaultShouldStopPolling;
 
   const queryOrder = useCallback(
     async (orderIdToQuery: string): Promise<boolean> => {
       try {
-        const res = await api.userHistory.getOrderById(orderIdToQuery, {
-          showLoading: false,
-        });
-        console.log("查询订单结果:", res);
+        const res = await api.userHistory.getOrderById(orderIdToQuery, { showLoading: false });
 
         // 根据实际 API 返回结构调整数据获取方式，使用类型断言
-        const orderData = res?.data?.orders?.[0] as any;
+        const orderData = (res?.data as any)?.orders?.[0] as any;
         setOrderInfo(orderData);
         const orderStatusStr = orderData?.order_status;
+
+        // 调用状态变化回调
+        if (onStatusChange && orderStatusStr !== undefined) {
+          onStatusChange(orderStatusStr);
+        }
 
         // 检查是否应该停止轮询
         if (orderStatusStr !== undefined && shouldStopPolling(orderStatusStr)) {
           console.log("订单状态已变更，停止轮询");
 
-          // 根据新状态决定跳转页面
-          Taro.redirectTo({
-            url: `${pageUrls.orderDetail}?orderId=${orderIdToQuery}`,
-          });
           return false; // 表示轮询应该停止
         }
 
@@ -81,7 +87,7 @@ export const useOrderPolling = ({
         return true; // 出错时继续轮询
       }
     },
-    []
+    [onStatusChange, shouldStopPolling, autoRedirect, redirectUrl]
   );
 
   const stopPolling = useCallback(() => {
@@ -117,18 +123,6 @@ export const useOrderPolling = ({
       }
     }, interval);
   }, [orderId, interval, queryOrder, stopPolling]);
-
-  // 自动开始和停止轮询
-  useEffect(() => {
-    if (orderId) {
-      startPolling();
-    }
-
-    // 清理函数：组件卸载时停止轮询
-    return () => {
-      stopPolling();
-    };
-  }, [orderId, startPolling, stopPolling]);
 
   return {
     startPolling,

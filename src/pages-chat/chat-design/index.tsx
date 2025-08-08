@@ -13,12 +13,11 @@ import TagList from "@/components/TagList";
 import { ChatMessagesRef } from "@/components/ChatMessages";
 import { pageUrls } from "@/config/page-urls";
 import { getRecommendTemplate } from "@/utils/utils";
-import userRecordSvg from "@/assets/icons/user-record.svg";
 
 const INPUT_HEIGHT = 30 + 24 + 10;
 const INPUT_RECOMMEND_HEIGHT = 30 + 30 + 24 + 16;
 
-const INIT_MESSAGE = "嚯，你终于来了，我是你的专属水晶疗愈师，可以叫我莉莉～"
+const INIT_MESSAGE = ["宝子！你终于来了，我是你的专属水晶疗愈师，可以叫我璞璞～", "我已经看到你的生辰啦，让我来给你详细分析一下📝"]
 
 const ChatDesign = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
@@ -59,7 +58,14 @@ const ChatDesign = () => {
           setTimeout(() => {
             chatMessagesRef.current?.scrollToBottom();
           }, 100);
-          waitTime = (messages[currentIndex].content?.length / 20) * 1000;
+          waitTime = (messages[currentIndex].content?.length / 15) * 1000;
+          if (messages[currentIndex].draft_id) {
+            waitTime = 3000;
+          } else {
+            if (waitTime < 2000) {
+              waitTime = 2000;
+            }
+          }
 
           // 2秒后显示下一条消息
           if (currentIndex + 1 < messages.length) {
@@ -96,7 +102,6 @@ const ChatDesign = () => {
     sex: number;
     is_lunar: boolean;
   }) => {
-    setIsDesigning(true);
 
     apiSession
       .createSession(
@@ -154,7 +159,15 @@ const ChatDesign = () => {
         .find((message) => message.role === "assistant");
       // 有历史会话
       if (!isFirst) {
-        setChatMessages(newMessages);
+        const newMessagesWithInit = [...INIT_MESSAGE.map((item, index) => ( 
+          {
+            message_id: Date.now().toString() + index,
+            role: "assistant",
+            content: item,
+            created_at: new Date().toISOString(),
+          }
+        )), ...newMessages];
+        setChatMessages(newMessagesWithInit);
         if (
           lastAssistantMessage?.recommends &&
           lastAssistantMessage.recommends.length > 0
@@ -179,14 +192,16 @@ const ChatDesign = () => {
       querySessionHistory(session_id);
     }
     if (year && month && day && hour && gender && isLunar) {
-      setChatMessages([
+      showMessagesSequentially(INIT_MESSAGE.map((item, index) => (
         {
-          message_id: Date.now().toString(),
+          message_id: Date.now().toString() + index,
           role: "assistant",
-          content: INIT_MESSAGE,
+          content: item,
           created_at: new Date().toISOString(),
-        },
-      ]);
+        })));
+        setTimeout(() => {
+          setIsDesigning(true);
+        }, 4000);
       initChat({
         birth_year: parseInt(year || "0") || 0,
         birth_month: parseInt(month || "0") || 0,
@@ -206,7 +221,7 @@ const ChatDesign = () => {
             src={LILI_AVATAR_IMAGE_URL} 
             className={styles.assistantAvatar}
           />
-          <Text className={styles.assistantName}>黎莉莉</Text>
+          <Text className={styles.assistantName}>璞璞</Text>
         </View>
         <View
           className={styles.designResetInfo}

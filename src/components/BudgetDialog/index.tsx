@@ -57,7 +57,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     }).then((res) => {
       const { order_uuid } = res?.data || {};
       Taro.navigateTo({
-        url: `${pageUrls.orderDispatching}?orderId=${order_uuid}`
+        url: `${pageUrls.orderDetail}?orderId=${order_uuid}`
       }).then(() => {
         onClose?.();
       });

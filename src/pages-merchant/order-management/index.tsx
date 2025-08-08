@@ -26,17 +26,25 @@ export default function OrderManagement() {
   const [orderStatusList, setOrderStatusList] = useState<any[]>([]);
 
   const getOrdersByStatus = (statusItem: any) => {
+    Taro.showLoading({
+      title: "加载中...",
+      mask: true,
+    });
     const status = statusItem.parent_status ? statusItem.parent_status : statusItem.status;
     const afterSaleStatus = statusItem.parent_status ? statusItem.status : null;
-    console.log(status, afterSaleStatus, 'statusItem');
     merchantApi.user.getOrderList({
       order_status: status,
       after_sale_status: afterSaleStatus,
       page: 0,
-      page_size: 100,
+      page_size: 4,
     }).then((res: any) => {
       const orders = res.data.orders || [];
       setOrders(orders);
+    }).catch((err) => {
+      console.log(err, 'err');
+    }).finally(() => {
+      Taro.hideLoading();
+      Taro.stopPullDownRefresh()
     });
   }
 
@@ -53,17 +61,17 @@ export default function OrderManagement() {
           Object.keys(res.data[key]).forEach((subKey) => {
             statusList.push(
               {
-              status: subKey,
-              status_text: formatOrderStatus(key as OrderStatus, subKey as AfterSaleStatus),
-              count: res.data[key][subKey],
-              parent_status: key,
-            });
+                status: subKey,
+                status_text: formatOrderStatus(key as OrderStatus, subKey as AfterSaleStatus),
+                count: res.data[key][subKey],
+                parent_status: key,
+              });
           });
         } else {
 
-        statusList.push({
-          status: key,
-          status_text: formatOrderStatus(key as OrderStatus),
+          statusList.push({
+            status: key,
+            status_text: formatOrderStatus(key as OrderStatus),
             count: res.data[key]
           });
         }
@@ -76,8 +84,6 @@ export default function OrderManagement() {
         title: "获取订单状态列表失败",
         icon: "none",
       });
-    } finally {
-      Taro.hideLoading();
     }
   };
 
@@ -110,7 +116,7 @@ export default function OrderManagement() {
       <OrderList
         orders={orders || []}
         loading={loading}
-        onRefresh={loadOrderStatusList}
+        // onRefresh={loadOrderStatusList}
         style={{
           height: "calc(100vh - 260px)",
         }}

@@ -2,9 +2,8 @@ import { View, Image, Canvas } from "@tarojs/components";
 import styles from "./index.module.scss";
 import Taro from "@tarojs/taro";
 import { BRACELET_BG_IMAGE_URL } from "@/config";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import apiSession, { BeadItem, BraceletDraft } from "@/utils/api-session";
-import { DotImageData } from "@/hooks/useCircleRingCanvas";
 import { CircleRingImage } from "../CircleRing";
 import {
   BRACELET_CARD_TEXTURE_IMAGE_URL,
@@ -14,13 +13,9 @@ import CrystalButton from "../CrystalButton";
 import rightArrowGoldenIcon from "@/assets/icons/right-arrow-golden.svg";
 import { pageUrls } from "@/config/page-urls";
 import { generateUUID } from "@/utils/uuid";
-import { useDesign } from "@/store/DesignContext";
 import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
-
-interface BraceletDraftWithImage extends BraceletDraft {
-  bracelet_image?: string;
-}
+import refreshIcon from "@/assets/icons/refresh.svg";
 
 export const BraceletDraftCard = ({
   sessionId,
@@ -29,6 +24,7 @@ export const BraceletDraftCard = ({
   draftData,
   shouldLoad = true, // 控制是否立即加载图像
   onImageLoaded,
+  canRegenerate = false,
 }: {
   sessionId?: string;
   draftId?: string;
@@ -36,15 +32,22 @@ export const BraceletDraftCard = ({
   draftData?: BraceletDraft;
   shouldLoad?: boolean; // 是否立即加载图像
   onImageLoaded?: () => void; // 图像加载完成回调
+  canRegenerate?: boolean;
 }) => {
   const { draft, startPolling, updateDraft } = usePollDraft({});
-  
+  const [isRegenerating, setIsRegenerating] = useState(false);
+
   // 为每个卡片实例生成唯一的canvasId，避免多个卡片共享同一个Canvas
   const uniqueCanvasId = useMemo(() => `bracelet-canvas-${draftId || generateUUID()}`, [draftId]);
-  
+
   // 控制Canvas的显示状态，生成完成后销毁
   const [showCanvas, setShowCanvas] = useState(true);
-  
+
+  // 使用ref来防止重复生成图像
+  const isGeneratingRef = useRef(false);
+  const generatedBraceletImageRef = useRef<string | null>(null);
+  const currentDraftRef = useRef<DraftData | null>(null);
+
   // 使用独立的CircleRing Canvas实例
   const { generateCircleRing, canvasProps, cleanupCanvas } = useCircleRingCanvas({
     canvasId: uniqueCanvasId,
@@ -52,6 +55,31 @@ export const BraceletDraftCard = ({
     isDifferentSize: true,
     fileType: "png"
   });
+
+  // 稳定化beads数组，避免不必要的重新渲染
+  const beadsForGeneration = useMemo(() => {
+    if (!draft?.beads?.length) return null;
+    return draft.beads.map(item => ({
+      image_url: item.image_url,
+      diameter: item.diameter,
+    }));
+  }, [draft?.beads]);
+
+  // 检查是否需要生成图像
+  const shouldGenerateImage = useMemo(() => {
+    return draft?.beads?.length && 
+           draft.beads.length > 0 && 
+           showCanvas && 
+           shouldLoad && 
+           !draft.bracelet_image && 
+           !isGeneratingRef.current &&
+           generatedBraceletImageRef.current !== draft.bracelet_image;
+  }, [draft?.beads?.length, draft?.bracelet_image, showCanvas, shouldLoad]);
+
+  // 更新currentDraftRef
+  useEffect(() => {
+    currentDraftRef.current = draft;
+  }, [draft]);
 
 
   useEffect(() => {
@@ -66,17 +94,25 @@ export const BraceletDraftCard = ({
   }, [sessionId, draftId, draftData]);
 
   useEffect(() => {
-    if (draft?.beads?.length && draft.beads.length > 0 && showCanvas && shouldLoad) {
+    console.log("draft", draft);
+    
+    // 防止重复生成的条件检查
+    if (shouldGenerateImage && beadsForGeneration) {
+      
+      isGeneratingRef.current = true;
+      
       // 使用本地的generateCircleRing而不是传入的generateBraceletImage
-      generateCircleRing(draft.beads.map(item => ({
-        image_url: item.image_url,
-        diameter: item.diameter,
-      }))).then((braceletImage) => {
+      generateCircleRing(beadsForGeneration).then((braceletImage) => {
         if (braceletImage) {
-          updateDraft({
-            ...draft,
-            bracelet_image: braceletImage,
-          } as DraftData);
+          generatedBraceletImageRef.current = braceletImage;
+          // 使用ref中的draft状态，避免依赖项变化
+          const currentDraft = currentDraftRef.current;
+          if (currentDraft) {
+            updateDraft({
+              ...currentDraft,
+              bracelet_image: braceletImage,
+            } as DraftData);
+          }
           // 图像生成完成后，隐藏Canvas以释放资源
           // setShowCanvas(false);
           // cleanupCanvas();
@@ -87,10 +123,12 @@ export const BraceletDraftCard = ({
         console.error("生成手串图像失败:", error);
         // 即使失败也要隐藏Canvas
         // setShowCanvas(false);
-        // cleanupCanvas();
+      }).finally(() => {
+        isGeneratingRef.current = false;
       });
+
     }
-  }, [draft, generateCircleRing, showCanvas, shouldLoad]);
+  }, [shouldGenerateImage, beadsForGeneration, generateCircleRing, updateDraft, onImageLoaded]);
 
   // 组件卸载时清理Canvas
   // useEffect(() => {
@@ -124,9 +162,8 @@ export const BraceletDraftCard = ({
       return;
     }
     Taro.redirectTo({
-      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
-        draft?.draft_id
-      }&imageUrl=${encodeURIComponent(draft?.bracelet_image)}`,
+      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${draft?.draft_id
+        }&imageUrl=${encodeURIComponent(draft?.bracelet_image)}`,
     });
   };
 
@@ -149,6 +186,25 @@ export const BraceletDraftCard = ({
       urls: [draft.bracelet_image],
     });
   };
+
+  const handleRegenerate = () => {
+    if (!canRegenerate || draft?.design_id || isRegenerating) {
+      return;
+    }
+    setIsRegenerating(true);
+    apiSession.regenerateDraft({
+      session_id: sessionId || "",
+      draft_id: draft?.draft_id || "",
+    }).then((res) => {
+      setTimeout(() => {
+        setIsRegenerating(false);
+        startPolling(sessionId || "", draft?.draft_id || "");
+      }, 2000);
+    }).catch((err) => {
+      console.error("重新设计失败:", err);
+      setIsRegenerating(false);
+    });
+  }
 
   return (
     <View
@@ -215,10 +271,14 @@ export const BraceletDraftCard = ({
                 </View>
               </View>
             ))}
+            {canRegenerate && !draft?.design_id && (<View className={styles.regenerateBtn} onClick={handleRegenerate}>
+              <Image src={refreshIcon} mode="widthFix" style={{ width: '16px', height: '16px' }} />
+              <View className={styles.regenerateBtnText}>{isRegenerating ? "设计中..." : "重新设计"}</View>
+            </View>)}
           </View>
           <View className={styles.braceletBgImageContainer} onClick={viewImage}>
             <CircleRingImage
-              imageUrl={draft.bracelet_image}
+              imageUrl={isRegenerating ? "" : draft.bracelet_image}
               size={140}
               backendSize={160}
               backgroundImage={BRACELET_BG_IMAGE_URL}

@@ -28,6 +28,7 @@ import CancelOrderDialog from "@/components/CancelOrderDialog";
 import payApi from "@/utils/api-pay";
 import JoinGroupChat from "@/components/JoinGroupChat";
 import JoinGroupQrcode from "@/components/JoinGroupChat/JoinGroupQrcode";
+import { useOrderPolling } from "@/hooks/useOrderPolling";
 
 enum PaymentStatus {
   Processing = 0,
@@ -37,7 +38,7 @@ enum PaymentStatus {
 }
 
 const OrderDetail: React.FC = () => {
-  const [order, setOrder] = useState<any>(null);
+  // const [order, setOrder] = useState<any>(null);
   const [address, setAddress] = useState<AddressInfo | undefined>(undefined);
   const [qrCodeVisible, setQrCodeVisible] = useState<boolean>(false);
   const [cancelDialogVisible, setCancelDialogVisible] =
@@ -46,35 +47,51 @@ const OrderDetail: React.FC = () => {
   const plugin = requirePlugin("logisticsPlugin");
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [showJoinGroupQrcode, setShowJoinGroupQrcode] = useState<boolean>(false);
+  const instance = Taro.getCurrentInstance();
+  const { orderId } = instance.router?.params || {};
+
+  const { orderInfo: order, startPolling: startOrderPolling, stopPolling: stopOrderPolling, isPolling: isOrderPolling } = useOrderPolling({
+    orderId: orderId,
+    interval: 5000, // 3秒轮询间隔
+    autoRedirect: false, // 禁用自动跳转
+    onStatusChange: (newStatus) => {
+      // 可以在这里添加状态变化时的额外逻辑
+    },
+  });
 
   const getOrderDetail = () => {
-    const instance = Taro.getCurrentInstance();
-    const params = instance.router?.params;
-    const orderId = params?.orderId;
-    console.log(orderId, "orderId");
-    api.userHistory.getOrderById(orderId || "").then((res) => {
-      const _order = res?.data?.orders?.[0];
-      // _order.order_status = OrderStatusEnum.PendingPayment;
-      // _order.after_sale_status = AfterSaleStatus.Refunded;
-      if (_order?.address) {
-        const newAddress = {
-          detailInfo: _order?.address?.detail_info,
-          provinceName: _order?.address?.province_name,
-          cityName: _order?.address?.city_name,
-          countyName: _order?.address?.county_name,
-          telNumber: _order?.address?.tel_number,
-          userName: _order?.address?.user_name,
-          nationalCode: _order?.address?.national_code,
-          postalCode: _order?.address?.postal_code,
-        };
-        setAddress(newAddress);
-      }
-      setOrder(_order);
-    });
-  };
+    console.log(isOrderPolling, "isOrderPolling, getOrderDetail");
+    if (!isOrderPolling) {
+      startOrderPolling();
+    }
+  }
+
+  useEffect(() => {
+    if (order?.address) {
+      const newAddress = {
+        detailInfo: order?.address?.detail_info,
+        provinceName: order?.address?.province_name,
+        cityName: order?.address?.city_name,
+        countyName: order?.address?.county_name,
+        telNumber: order?.address?.tel_number,
+        userName: order?.address?.user_name,
+        nationalCode: order?.address?.national_code,
+        postalCode: order?.address?.postal_code,
+      };
+      setAddress(newAddress);
+    }
+  }, [order?.address]);
+
+
 
   useEffect(() => {
     getOrderDetail();
+    return () => {
+      stopOrderPolling();
+      if (pollingTimerRef.current) {
+        clearInterval(pollingTimerRef.current);
+      }
+    }
   }, []);
 
   const orderStatus = order?.order_status;
@@ -117,7 +134,7 @@ const OrderDetail: React.FC = () => {
         order?.after_sale_status
       );
     }
-    return [OrderStatusEnum.Completed].includes(orderStatus);
+    return [OrderStatusEnum.Received, OrderStatusEnum.Completed].includes(orderStatus);
   }, [orderStatus]);
 
   const isSptCancel = useMemo(() => {
@@ -167,8 +184,8 @@ const OrderDetail: React.FC = () => {
     }
   }
 
-  const startPolling = () => {
-    console.log("开始轮询订单状态");
+  const startPollingPaymentStatus = () => {
+    console.log("开始轮询支付状态")
     if (pollingTimerRef.current) {
       clearInterval(pollingTimerRef.current);
     }
@@ -180,62 +197,48 @@ const OrderDetail: React.FC = () => {
     pollingTimerRef.current = setInterval(async () => {
       const shouldContinue = await queryPaymentStatus();
       if (!shouldContinue) {
+        Taro.showToast({
+          title: "支付成功",
+          icon: "success",
+        });
+        getOrderDetail();
         clearInterval(pollingTimerRef.current as NodeJS.Timeout);
       }
     }, 3000);
   };
 
-  const handleOnPurchase = () => {
-    if (addressLoading) {
-      return;
-    }
-    payApi.purchase({orderId: order?.order_uuid, amount: order?.price}).then((res) => {
-      const wxPayParams = res?.data;
-      startPolling();
-     Taro.requestPayment({
-      timeStamp: wxPayParams.timestamp,  // 秒级时间戳
-      nonceStr: wxPayParams.nonce_str,
-      package: wxPayParams.package, // 服务端返回
-      signType: wxPayParams.sign_type,
-      paySign: wxPayParams.pay_sign,
-      success: () => Taro.showToast({ title: '支付成功' }),
-      fail: (err) => console.error('支付失败', err)
-    });
-    })
-  };
-
   const onCancelOrRefund = useCallback((type: "cancel" | "refund", reason: string) => {
-      if (type === "cancel") {
-        userHistoryApi
-          .cancelOrder(order?.order_uuid, reason)
-          .then(() => {
-            Taro.showToast({
-              title: "取消订单成功",
-              icon: "success",
-            });
-            setCancelDialogVisible(false);
-            getOrderDetail();
-          })
-          .catch((error) => {
-            console.error('取消订单失败:', error)
-            Taro.showToast({
-              title: "取消订单失败",
-              icon: "none",
-            });
+    if (type === "cancel") {
+      userHistoryApi
+        .cancelOrder(order?.order_uuid, reason)
+        .then(() => {
+          Taro.showToast({
+            title: "取消订单成功",
+            icon: "success",
           });
-      } else {
-        payApi.applyRefund({ orderId: order?.order_uuid, reason }).then(() => {
           setCancelDialogVisible(false);
           getOrderDetail();
-        }).catch((error) => {
-          console.error('退款申请提交失败:', error)
+        })
+        .catch((error) => {
+          console.error('取消订单失败:', error)
           Taro.showToast({
-            title: "退款申请提交失败",
+            title: "取消订单失败",
             icon: "none",
           });
         });
-      }
-    }, [order?.order_uuid]);
+    } else {
+      payApi.applyRefund({ orderId: order?.order_uuid, reason }).then(() => {
+        setCancelDialogVisible(false);
+        getOrderDetail();
+      }).catch((error) => {
+        console.error('退款申请提交失败:', error)
+        Taro.showToast({
+          title: "退款申请提交失败",
+          icon: "none",
+        });
+      });
+    }
+  }, [order?.order_uuid]);
 
   const onWithDrawRefund = () => {
     payApi.withdrawRefund({ orderId: order?.order_uuid }).then(() => {
@@ -262,7 +265,8 @@ const OrderDetail: React.FC = () => {
   const onConfirmOrder = () => {
     payApi.confirmOrder({ order_id: order?.order_uuid }).then((res) => {
       const { transaction_id, merchant_id, merchant_trade_no } = res?.data;
-      console.log(transaction_id, merchant_id, merchant_trade_no,wx?.openBusinessView, "transaction_id, merchant_id, merchant_trade_no");
+      console.log(transaction_id, merchant_id, merchant_trade_no, "transaction_id, merchant_id, merchant_trade_no");
+      const wx = Taro.getWx();
       if (wx?.openBusinessView) {
         wx?.openBusinessView({
           businessType: "weappOrderConfirm",
@@ -273,11 +277,14 @@ const OrderDetail: React.FC = () => {
           },
           success() {
             console.log("success");
-            getOrderDetail();
+            payApi.confirmOrderCallback({ orderId: order?.order_uuid }).then(() => {
+              getOrderDetail();
+            }).then(() => {
+              getOrderDetail();
+            });
           },
           fail() {
             console.log("fail");
-            getOrderDetail();
           },
           complete() {
             getOrderDetail();
@@ -339,9 +346,8 @@ const OrderDetail: React.FC = () => {
     return null;
   };
 
-  const handleAddressChange = (_address: AddressInfo) => {
+  const handleAddressChange = (_address: AddressInfo, callback?: () => void) => {
     setAddressLoading(true);
-    setAddress(_address);
     payApi.addAddressToOrder({
       order_uuid: order?.order_uuid,
       detail_info: _address?.detailInfo,
@@ -352,13 +358,72 @@ const OrderDetail: React.FC = () => {
       user_name: _address?.userName,
       national_code: _address?.nationalCode,
       postal_code: _address?.postalCode,
+    }).then(() => {
+      setAddress(_address);
+      callback?.();
     }).catch((e) => {
-      console.error('error',e);
-    })
-    .finally(() => {
+      Taro.showToast({
+        title: e?.message || "添加地址失败",
+        icon: "none",
+      });
+      console.error('error', e);
+    }).finally(() => {
       setAddressLoading(false);
-    });
+    })
   };
+
+  const purchase = () => {
+    payApi.purchase({ orderId: order?.order_uuid, amount: order?.price }).then((res) => {
+      const wxPayParams = res?.data;
+      startPollingPaymentStatus();
+      Taro.requestPayment({
+        timeStamp: wxPayParams.timestamp,  // 秒级时间戳
+        nonceStr: wxPayParams.nonce_str,
+        package: wxPayParams.package, // 服务端返回
+        signType: wxPayParams.sign_type,
+        paySign: wxPayParams.pay_sign,
+        success: () => {
+          Taro.showToast({
+            title: '支付成功',
+            icon: 'success',
+            duration: 2000
+          });
+          // Taro.requestSubscribeMessage({
+          //   tmplIds: ['你的模板ID1', '你的模板ID2'] // 最多3个
+          // })
+        },
+        fail: (err) => console.error('支付失败', err)
+      });
+    })
+  }
+
+  const handleOnPurchase = () => {
+    console.log(addressLoading, address, "addressLoading");
+    if (addressLoading) {
+      return;
+    }
+    if (!address) {
+      Taro.showToast({
+        title: "请先添加收货地址",
+        icon: "none",
+        duration: 1000,
+      });
+      Taro.chooseAddress({
+        success: (result) => {
+          handleAddressChange(result, purchase);
+        }
+      });
+      return;
+    }
+    purchase();
+  };
+
+  const getProductImages = () => {
+    if (order?.actual_images?.length > 0 || order?.certificate_images?.length > 0) {
+      return [...(order?.actual_images || []), ...(order?.certificate_images || [])];
+    }
+    return order?.merchant_info?.transaction_history?.images_url || [];
+  }
 
   return (
     <CrystalContainer
@@ -418,9 +483,7 @@ const OrderDetail: React.FC = () => {
               )
             }
             productImages={
-              order?.product_photos?.images_url ||
-              order?.merchant_info?.transaction_history?.images_url ||
-              []
+              getProductImages()
             }
             imageUploadTime={order?.product_photos?.upload_time}
             onShowQrCode={() => {
@@ -445,19 +508,19 @@ const OrderDetail: React.FC = () => {
             orderAction={
               isSptCancel
                 ? {
-                    text: "取消订单",
-                    onClick: () => {
-                      setCancelDialogVisible(true);
-                    },
-                  }
+                  text: "取消订单",
+                  onClick: () => {
+                    setCancelDialogVisible(true);
+                  },
+                }
                 : isSptRefund
-                ? {
+                  ? {
                     text: "申请退款",
                     onClick: () => {
                       setCancelDialogVisible(true);
                     },
                   }
-                : undefined
+                  : undefined
             }
           />
         )}
@@ -476,34 +539,34 @@ const OrderDetail: React.FC = () => {
       {[OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating].includes(
         orderStatus
       ) && (
-        <View className="order-action-container">
-          <CrystalButton
-            onClick={() => setShowJoinGroupQrcode(true)}
-            text="社群"
-            prefixIcon={
-              <Image
-                src={shareDesignImage}
-                mode="widthFix"
-                style={{ width: "24px", height: "24px" }}
-              />
-            }
-            style={{ marginTop: "20px", marginLeft: "24px" }}
-          />
-          <CrystalButton
-            onClick={() => setQrCodeVisible(true)}
-            isPrimary
-            text="联系商家"
-            style={{ flex: 1, marginTop: "20px", marginRight: "24px" }}
-            prefixIcon={
-              <Image
-                src={createBeadImage}
-                mode="widthFix"
-                style={{ width: "24px", height: "24px" }}
-              />
-            }
-          />
-        </View>
-      )}
+          <View className="order-action-container">
+            <CrystalButton
+              onClick={() => setShowJoinGroupQrcode(true)}
+              text="社群"
+              prefixIcon={
+                <Image
+                  src={shareDesignImage}
+                  mode="widthFix"
+                  style={{ width: "24px", height: "24px" }}
+                />
+              }
+              style={{ marginTop: "20px", marginLeft: "24px" }}
+            />
+            <CrystalButton
+              onClick={() => setQrCodeVisible(true)}
+              isPrimary
+              text="联系商家"
+              style={{ flex: 1, marginTop: "20px", marginRight: "24px" }}
+              prefixIcon={
+                <Image
+                  src={createBeadImage}
+                  mode="widthFix"
+                  style={{ width: "24px", height: "24px" }}
+                />
+              }
+            />
+          </View>
+        )}
 
       <QrCodeDialog
         visible={qrCodeVisible}
@@ -516,7 +579,7 @@ const OrderDetail: React.FC = () => {
         visible={cancelDialogVisible}
         onClose={() => setCancelDialogVisible(false)}
         type={isSptRefund ? "refund" : "cancel"}
-        onConfirm={onCancelOrRefund }
+        onConfirm={onCancelOrRefund}
       />
 
       <JoinGroupQrcode

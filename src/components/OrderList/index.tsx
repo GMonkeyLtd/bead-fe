@@ -12,7 +12,7 @@ import {
 import BeadOrderDialog from "@/components/BeadOrderDialog";
 import ContactUserDialog from "@/components/ContactUserDialog";
 import phoneIcon from "@/assets/icons/phone.svg";
-import  merchantApi from "@/utils/api-merchant";
+import merchantApi from "@/utils/api-merchant";
 import { pageUrls } from "@/config/page-urls";
 import copyIcon from "@/assets/icons/copy.svg";
 import ProductPriceForm from "../ProductPriceForm";
@@ -224,21 +224,23 @@ export default function OrderList({
               取消
             </View>
           </View>
-          {[OrderStatus.Negotiating, OrderStatus.InProgress].includes(order.order_status) && (<View
-            className={styles.completeBtn}
-            onClick={() => {
-              setOrderActionDialog(<ProductPriceForm
-                visible={true}
-                orderNumber={order.order_uuid}
-                productName={order.design_info?.word_info?.bracelet_name || ""}
-                productImage={order.design_info?.image_url || ""}
-                onClose={() => setOrderActionDialog(null)}
-                onConfirm={onRefresh}
-              />);
-            }}
-          >
-            发起支付
-          </View>)}
+          <View className={styles.actionButtons}>
+            {[OrderStatus.Negotiating, OrderStatus.InProgress].includes(order.order_status) && (<View
+              className={styles.completeBtn}
+              onClick={() => {
+                setOrderActionDialog(<ProductPriceForm
+                  visible={true}
+                  orderNumber={order.order_uuid}
+                  productName={order.design_info?.word_info?.bracelet_name || ""}
+                  productImage={order.design_info?.image_url || ""}
+                  onClose={() => setOrderActionDialog(null)}
+                  onConfirm={onRefresh}
+                />);
+              }}
+            >
+              发起支付
+            </View>)}
+          </View>
         </View>
       );
     }
@@ -273,19 +275,38 @@ export default function OrderList({
               沟通记录
             </View>
           </View>
-          {([OrderStatus.PendingShipment].includes(order.order_status)) && (<View
-            className={styles.completeBtn}
-            onClick={() => {
-              setOrderActionDialog(<WayBillForm
-                visible={true}
-                orderId={order.order_uuid}
-                onClose={() => setOrderActionDialog(null)}
-                submitCallback={onRefresh}
-              />);
-            }}
-          >
-            填写物流
-          </View>)}
+          <View className={styles.actionButtons}>
+            {order?.order_details?.address_info && <View className={styles.callBtn} onClick={() => {
+              const addressInfo = order?.order_details?.address_info;
+              const addressInfoStr = `${addressInfo.userName}\n${addressInfo.telNumber}\n${addressInfo.provinceName}${addressInfo.cityName}${addressInfo.countyName}\n${addressInfo.detailInfo}`;
+              Taro.showModal({
+                title: "收货地址",
+                content: addressInfoStr,
+                success: (res) => {
+                  if (res.confirm) {
+                    Taro.setClipboardData({
+                      data: addressInfoStr,
+                    });
+                  }
+                }
+              });
+            }}>
+              收货地址
+            </View>}
+            {([OrderStatus.PendingShipment].includes(order.order_status)) && (<View
+              className={styles.completeBtn}
+              onClick={() => {
+                setOrderActionDialog(<WayBillForm
+                  visible={true}
+                  orderId={order.order_uuid}
+                  onClose={() => setOrderActionDialog(null)}
+                  submitCallback={onRefresh}
+                />);
+              }}
+            >
+              填写物流
+            </View>)}
+          </View>
         </View>
       )
     }
@@ -327,11 +348,14 @@ export default function OrderList({
   const onViewLogistics = (order: Order) => {
     merchantApi.user.getWayBillToken(order.order_uuid).then((res: any) => {
       const waybill_token = res.data.waybill_token;
-      console.log(waybill_token, logisticsPlugin?.openWaybillTracking, "waybill_token");
       logisticsPlugin?.openWaybillTracking({
         waybillToken: waybill_token,
       });
     });
+  }
+
+  const onScrollToLower = () => {
+    console.log('onScrollToLower');
   }
 
   return (
@@ -342,6 +366,7 @@ export default function OrderList({
         refresherEnabled={!!onRefresh}
         refresherTriggered={loading}
         onRefresherRefresh={onRefresh}
+        onScrollToLower={onScrollToLower}
         style={style}
       >
         {orders.length === 0 || loading ? (

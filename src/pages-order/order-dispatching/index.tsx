@@ -24,6 +24,7 @@ const OrderDispatching = () => {
   const { isPolling, orderInfo } = useOrderPolling({
     orderId: orderId,
     interval: 3000, // 3秒轮询间隔
+    autoRedirect: false, // 禁用自动跳转
     onStatusChange: (newStatus) => {
       console.log("订单状态变化:", newStatus);
       // 可以在这里添加状态变化时的额外逻辑

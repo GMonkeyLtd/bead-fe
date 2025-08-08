@@ -70,6 +70,8 @@ export default {
   }, config?: ApiConfig) => {
     return http.get<any>(`/user/orders/${params.order_id}/confirm_receipt`, undefined, config);
   },
+  confirmOrderCallback: (params: { orderId: string }, config?: ApiConfig) =>
+    http.get<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, undefined, config),
   confirmReceiptCallback: (params: { orderId: string }, config?: ApiConfig) =>
     http.get<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, undefined, config),
 };

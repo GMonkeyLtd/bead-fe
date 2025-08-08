@@ -93,7 +93,7 @@ const ContactPreference = () => {
         });
         const { order_uuid } = res?.data || {};
         Taro.redirectTo({
-          url: `${pageUrls.orderDispatching}?orderId=${order_uuid}`,
+          url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
         });
         return;
       }

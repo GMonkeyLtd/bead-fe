@@ -118,12 +118,12 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
   // 渲染价格或预算信息
   const renderPriceInfo = (order: OrderItem) => {
-    if (order.budget === undefined) {
-      return "参考价：不限";
+    if (order.status === OrderStatus.Negotiating || order.status === OrderStatus.InProgress) {
+      return `参考价：¥${order.budget?.toFixed(2) || 0}`;
+    } else {
+      return `实际价：¥${order.budget?.toFixed(2) || 0}`;
     }
-    return order.budget === 0
-      ? "参考价：不限"
-      : `参考价：¥${order.budget.toFixed(2)}`;
+   
   };
 
   return (
@@ -169,7 +169,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
               </View>
 
               {/* 价格信息 */}
-              <Text className={styles.orderPrice}>{renderPriceInfo(order)}</Text>
+              <Text className={`${styles.orderPrice} ${order.status === OrderStatus.Negotiating || order.status === OrderStatus.InProgress ? styles.referencePrice : ""}`}>{renderPriceInfo(order)}</Text>
             </View>
 
             {/* 分割线 */}

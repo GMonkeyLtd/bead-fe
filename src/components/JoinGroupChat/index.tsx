@@ -3,7 +3,7 @@ import { View, Text, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import styles from "./index.module.scss";
 import qrcodeIcon from "@/assets/icons/qrcode.svg";
-import { APP_QRCODE_IMAGE_URL, JOIN_GROUP_AVATAR_IMAGE_URL} from "@/config";
+import { APP_QRCODE_IMAGE_URL, JOIN_GROUP_AVATAR_IMAGE_URL, SERVICE_QRCODE_IMAGE_URL} from "@/config";
 import rightArrowIcon from "@/assets/icons/right-arrow.svg";
 import CrystalButton from "../CrystalButton";
 import giftIcon from "@/assets/icons/gift.svg";
@@ -97,6 +97,10 @@ const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
 
       {/* 二维码弹窗 */}
       <JoinGroupQrcode
+        groupInfo={{
+          name: "璞光集官方服务号",
+          qrCodeUrl: SERVICE_QRCODE_IMAGE_URL
+        }}
         showQRCode={showQRCode}
         onClose={handleQRCodeClose}
       />

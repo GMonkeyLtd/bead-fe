@@ -104,14 +104,14 @@ const ImageSlider: React.FC<ImageSliderProps> = ({
         </View>
       )}
       
-      {showGradientMask && (
+      {/* {showGradientMask && (
         <View 
           className="gradient-mask"
           style={{
             height: `${height}px`
           }}
         />
-      )}
+      )} */}
     </View>
   )
 }

@@ -29,12 +29,14 @@ const MessageItem = React.memo(({
   animationDelay = 0,
   shouldLoadImage = true,
   onImageLoaded,
+  isLatestDraft = false,
 }: {
   message: ChatMessageItem;
   sessionId: string;
   animationDelay?: number;
   shouldLoadImage?: boolean;
   onImageLoaded?: (messageId: string) => void;
+  isLatestDraft?: boolean;
 }) => {
   const messageStyle = {
     animationDelay: `${animationDelay}ms`,
@@ -55,6 +57,7 @@ const MessageItem = React.memo(({
           draftIndex={message.draft_index}
           shouldLoad={shouldLoadImage}
           onImageLoaded={() => onImageLoaded?.(message.message_id)}
+          canRegenerate={isLatestDraft}
         />
       )}
     </View>
@@ -139,6 +142,7 @@ export default forwardRef<
 
     // 使用 useMemo 缓存消息列表，避免不必要的重新渲染
     const messageItems = useMemo(() => {
+      const lastAssistantMessageWithDraft = messages.findLastIndex(message => message.role === "assistant" && message.draft_id);
       return messages.map((message, index) => {
         // 为新消息添加递增的动画延迟，让消息依次出现
         // 只有最近的消息才添加延迟，避免历史消息重复动画
@@ -148,6 +152,8 @@ export default forwardRef<
         
         // 计算是否应该立即加载图像
         const shouldLoadImage = getMessageLoadPriority(index, message.message_id);
+
+        const isLatestDraft = index === lastAssistantMessageWithDraft;
         
         return (
           <MessageItem
@@ -157,6 +163,7 @@ export default forwardRef<
             animationDelay={animationDelay}
             shouldLoadImage={shouldLoadImage}
             onImageLoaded={markMessageAsLoaded}
+            isLatestDraft={isLatestDraft}
           />
         );
       });

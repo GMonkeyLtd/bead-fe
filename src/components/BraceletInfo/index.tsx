@@ -36,10 +36,9 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
     Taro.setClipboardData({
       data: orderNumber,
       success: () => {
-        Taro.showModal({
+        Taro.showToast({
           title: '复制成功',
-          content: '图片链接已复制，您可以在浏览器中粘贴访问',
-          showCancel: false
+          icon: 'none',
         })
       }
     })

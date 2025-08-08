@@ -4,7 +4,6 @@ import Taro, { useDidHide } from "@tarojs/taro";
 import "./index.scss";
 import { generateApi } from "@/utils/api";
 import { imageToBase64 } from "@/utils/imageUtils";
-import { useDesign } from "@/store/DesignContext";
 import { GENERATING_MP4_IMAGE_URL, DESIGNING_IMAGE_URL } from "@/config";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
@@ -21,7 +20,11 @@ const progressTipText = (
     <View>当前高峰期，退出不影响进度</View>
     <View style={{ display: "flex", alignItems: "center", gap: 4 }}>
       <Text>稍后可以在</Text>
-      <View className="quick-design-loading-content-link">我的作品</View>
+      <View className="quick-design-loading-content-link" onClick={() => {
+        Taro.navigateTo({
+          url: pageUrls.userCenter,
+        });
+      }}>我的作品</View>
       <Text>中查看</Text>
     </View>
   </View>
@@ -50,8 +53,6 @@ const QuickDesign = () => {
   const [progressTip, setProgressTip] = useState(predictedTimeText);
   const timeRef = useRef<any>(null);
   const pollTimeRef = useRef<any>(null);
-
-  const { addDesignData, beadData } = useDesign();
 
   useDidHide(() => {
     if (cancelTokenForImage.current) {
@@ -121,7 +122,7 @@ const QuickDesign = () => {
     
     timeRef.current = setTimeout(() => {
       setProgressTip(progressTipText);
-    }, 10000);
+    }, 3000);
     
     if (sessionId && draftId && imageUrl) {
       quickDesignByDraft(sessionId, draftId, imageUrl);

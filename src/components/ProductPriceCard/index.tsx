@@ -81,8 +81,9 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
             gap={8}
             borderRadius={10}
             showGradientMask={true}
+            visibleCount={4}
           />
-          <View className={styles.imageFade}></View>
+          {productImages.length > 3 && <View className={styles.imageFade}></View>}
         </View>
       </View>)}
 

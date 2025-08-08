@@ -3,7 +3,6 @@ import CustomDesignRing, { CustomDesignRingRef } from "@/components/CustomDesign
 import { useCallback, useEffect, useState, useRef } from "react";
 import api, { beadsApi } from "@/utils/api";
 import PageContainer from "@/components/PageContainer";
-import { useDesign } from "@/store/DesignContext";
 import { pageUrls } from "@/config/page-urls";
 import apiSession, { BeadItem } from "@/utils/api-session";
 import { usePollDraft } from "@/hooks/usePollDraft";
@@ -19,13 +18,14 @@ const CustomDesign = () => {
 
   // 使用ref获取子组件状态
   const customDesignRef = useRef<CustomDesignRingRef>(null);
+  console.log(draft, 'draft')
 
   useEffect(() => {
 
     if (draftId && sessionId) {
       startPolling(sessionId, draftId);
     }
-  }, [draftId, sessionId, designId]);
+  }, [draftId, sessionId]);
 
   useEffect(() => {
     beadsApi.getBeadList({ showLoading: true }).then((res) => {
@@ -76,8 +76,14 @@ const CustomDesign = () => {
     if (!imageUrl || !sessionId || !draftId) {
       return;
     }
+    if (from === 'result' && !checkDeadsDataChanged(draft?.beads || [], editedBeads || [])) {
+      Taro.redirectTo({
+        url: `${pageUrls.result}?designBackendId=${designId}&imageUrl=${encodeURIComponent(imageUrl)}`,
+      });
+      return;
+    }
     const beads = editedBeads.map((item) => {
-      const _beadData = allBeadList?.find((_item) => _item.bead_id == item.bead_id);
+      const _beadData = allBeadList?.find((_item) => _item.id == item.id);
       return {
         ..._beadData,
         diameter: item.diameter,
@@ -127,6 +133,7 @@ const CustomDesign = () => {
       Taro.showActionSheet({
         itemList: from === 'chat' ? ['直接返回','保存并返回'] : ['直接返回'],
         success: function (res) {
+          console.log(res, 'res')
           if (res.tapIndex === 1) {
             onSaveAndBack(image_url, beads || []);
           } else {
@@ -157,9 +164,9 @@ const CustomDesign = () => {
     <PageContainer onBack={handleBack}>
       <CustomDesignRing
         ref={customDesignRef}
-        beads={(from === 'chat' ? draft?.beads : designData?.beads_info)?.map((item) => {
+        beads={(draft?.beads || [])?.map((item) => {
           return {
-            id: item.bead_id,
+            id: item.id,
             image_url: item.image_url,
             render_diameter: item.diameter * CUSTOM_RENDER_RATIO,
             diameter: item.diameter,
