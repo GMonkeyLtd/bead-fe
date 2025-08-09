@@ -21,7 +21,7 @@ const progressTipText = (
     <View style={{ display: "flex", alignItems: "center", gap: 4 }}>
       <Text>稍后可以在</Text>
       <View className="quick-design-loading-content-link" onClick={() => {
-        Taro.navigateTo({
+        Taro.redirectTo({
           url: pageUrls.userCenter,
         });
       }}>我的作品</View>

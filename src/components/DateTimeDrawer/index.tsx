@@ -9,14 +9,6 @@ interface DateTimeDrawerProps {
   visible: boolean;
   onClose: () => void;
   personalizeButtonText?: string;
-  onQuickCustomize?: (dateTime: {
-    year: number;
-    month: number;
-    day: number;
-    hour: number;
-    gender: number;
-    isLunar: boolean;
-  }) => void;
   onPersonalizeCustomize?: (dateTime: {
     year: number;
     month: number;
@@ -30,7 +22,6 @@ interface DateTimeDrawerProps {
 const DateTimeDrawer = ({
   visible,
   onClose,
-  onQuickCustomize,
   onPersonalizeCustomize,
   personalizeButtonText,
 }: DateTimeDrawerProps) => {
@@ -232,11 +223,6 @@ const DateTimeDrawer = ({
       gender: gender === "男" ? 1 : 0,
       isLunar: dateType === "农历",
     };
-  };
-
-  const handleQuickCustomize = () => {
-    const selectedDateTime = getTransformedData();
-    onQuickCustomize?.(selectedDateTime);
   };
 
   const handlePersonalizeCustomize = () => {

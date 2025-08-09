@@ -38,6 +38,7 @@ const QrCodeDialog: React.FC<QrCodeDialogProps> = ({
               src={qrCodeUrl}
               className={styles.qrCodeImage}
               mode="aspectFit"
+              showMenuByLongpress={true}
             />
           </View>
           

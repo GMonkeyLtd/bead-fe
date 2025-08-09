@@ -1,37 +1,63 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Image } from "@tarojs/components";
+import Taro, { useDidShow } from "@tarojs/taro";
 import BraceletList from "@/components/BraceletList";
-import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import UserInfoCard from "@/components/UserInfoCard";
-import Taro, { useDidShow } from "@tarojs/taro";
 import rightArrow from "@/assets/icons/right-arrow.svg";
 import TabBar from "@/components/TabBar";
-import { userHistoryApi, userApi, userDesignApi } from "@/utils/api";
+import { userApi, User } from "@/utils/api";
 import sessionApi from "@/utils/api-session";
 import MyWorkIcon from "@/assets/icons/my-work.svg";
 import { pageUrls } from "@/config/page-urls";
 import { DESIGN_PLACEHOLDER_IMAGE_URL } from "@/config";
+import { usePollDesign } from "@/hooks/usePollDesign";
+import styles from "./index.module.scss";
 
 const UserCenterPage: React.FC = () => {
-  const [showIncomeCard, setShowIncomeCard] = useState(false);
   const [designList, setDesignList] = useState<any[]>([]);
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const initPageData = async() => {
+  const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
+
+  useEffect(() => {
+    if (design?.design_id && design.image_url) {
+      setDesignList((prev) =>
+        prev.map((item) =>
+          item.id === design.design_id
+            ? { ...item, progress: 100, image: design.image_url } 
+            : item
+        )
+      );
+    }
+  }, [design]);
+
+  const initPageData = async () => {
     setLoading(true);
-    const userInfo = await userApi.getUserInfo({ showLoading: true });
-    setUserInfo(userInfo?.data);
+    const userInfoRes = await userApi.getUserInfo({ showLoading: true });
+    setUserInfo(userInfoRes?.data);
     const historyRes = await sessionApi.getDesignList({
       showLoading: true,
     });
     const designs = (historyRes?.data?.designs || []).map((item) => {
-        return {
-          id: item.design_id,
-          name: item.info.name,
-          image: item.image_url || DESIGN_PLACEHOLDER_IMAGE_URL,
-        };
+      return {
+        id: item.design_id,
+        progress: item.progress,
+        name: item.info.name,
+        image: item.image_url,
+        sessionId: item.session_id,
+        draftId: item.draft_id,
+      };
+    });
+
+    designs.forEach((item) => {
+      if (!item.image) {
+        item.image = DESIGN_PLACEHOLDER_IMAGE_URL;
+        getDesign({
+          designId: item.id,
+        });
+      }
     });
     setDesignList(designs);
     setLoading(false);
@@ -61,13 +87,10 @@ const UserCenterPage: React.FC = () => {
         <View className={styles.pageTopContainer}>
           {userInfo && !loading && (
             <UserInfoCard
-              userName={
-                userInfo?.nick_name?.slice(0, 10) ||
-                "微信用户" + Math.random().toString(36).substring(2, 15)
-              }
-              userSlogan="璞光集，好运气"
-              avatar={userInfo?.avatar_url} // 替换为实际头像URL
-              showAction={userInfo?.is_merchant}
+              userName={userInfo?.nick_name?.slice(0, 10) || '璞光集用户'}
+              userSlogan='璞光集，好运气'
+              avatar={userInfo?.avatar_url || ''}
+              showAction={Boolean((userInfo as any)?.is_merchant)}
               onActionClick={() => {
                 Taro.redirectTo({
                   url: pageUrls.merchantLogin,
@@ -78,24 +101,6 @@ const UserCenterPage: React.FC = () => {
 
           {/* 功能卡片区域 */}
           <View className={styles.featureCards}>
-            {/* 我的收益卡片 */}
-            {/* <View className={`${styles.featureCard} ${styles.incomeCard}`}>
-            <View className={styles.cardContent}>
-              <View className={styles.cardInfo}>
-                <View className={styles.cardTitle}>
-                  <Text className={styles.titleText}>我的收益</Text>
-                </View>
-                <View className={styles.cardValue}>
-                  <Text className={styles.valueText}>12.00</Text>
-                  <Text className={styles.unitText}>元</Text>
-                </View>
-              </View>
-              <View className={styles.withdrawBtn} onClick={handleWithdraw}>
-                <Text className={styles.withdrawText}>提现</Text>
-              </View>
-            </View>
-          </View> */}
-
             {/* 我的订单和编辑资料卡片容器 */}
             <View className={styles.featureCardsRow}>
               {/* 我的订单卡片 */}
@@ -109,10 +114,7 @@ const UserCenterPage: React.FC = () => {
                       <Text className={styles.titleText}>我的订单</Text>
                     </View>
                   </View>
-                  <Image
-                    src={rightArrow}
-                    style={{ width: "12px", height: "8px" }}
-                  />
+                  <Image src={rightArrow} style={{ width: "12px", height: "8px" }} />
                 </View>
               </View>
 
@@ -132,10 +134,7 @@ const UserCenterPage: React.FC = () => {
                       <Text className={styles.titleText}>编辑资料</Text>
                     </View>
                   </View>
-                  <Image
-                    src={rightArrow}
-                    style={{ width: "12px", height: "8px" }}
-                  />
+                  <Image src={rightArrow} style={{ width: "12px", height: "8px" }} />
                 </View>
               </View>
             </View>

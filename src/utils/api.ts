@@ -92,7 +92,7 @@ export const userApi = {
 
   // 获取用户信息
   getUserInfo: (config?: ApiConfig) =>
-    http.post<User>(
+    http.post<{ data: User }>(
       `/user/getuserinfo`,
       {},
       {

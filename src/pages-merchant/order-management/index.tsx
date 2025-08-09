@@ -77,8 +77,9 @@ export default function OrderManagement() {
         }
       })
       setOrderStatusList(statusList);
-      setActiveTab(statusList[0].status as OrderStatus);
-      getOrdersByStatus(statusList[0]);
+      const curStatus = statusList.find(item => item.status === activeTab) || statusList[0];
+      setActiveTab(curStatus.status as OrderStatus);
+      getOrdersByStatus(curStatus);
     } catch (error) {
       showToast({
         title: "获取订单状态列表失败",
@@ -116,7 +117,7 @@ export default function OrderManagement() {
       <OrderList
         orders={orders || []}
         loading={loading}
-        // onRefresh={loadOrderStatusList}
+        onRefresh={loadOrderStatusList}
         style={{
           height: "calc(100vh - 260px)",
         }}

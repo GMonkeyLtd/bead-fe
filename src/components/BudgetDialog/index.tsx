@@ -36,13 +36,13 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     const userData = await userApi.getUserInfo();
     const { default_contact, phone, wechat_id } = userData?.data || {};
     if (default_contact === 0 && !phone) {
-      Taro.navigateTo({
+      Taro.redirectTo({
         url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`
       });
       return;
     }
     if (default_contact === 1 && !wechat_id) {
-      Taro.navigateTo({
+      Taro.redirectTo({
         url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`
       });
       return;
@@ -56,7 +56,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
       price: referencePrice
     }).then((res) => {
       const { order_uuid } = res?.data || {};
-      Taro.navigateTo({
+      Taro.redirectTo({
         url: `${pageUrls.orderDetail}?orderId=${order_uuid}`
       }).then(() => {
         onClose?.();

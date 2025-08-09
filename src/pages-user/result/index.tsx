@@ -27,6 +27,7 @@ import BeadList from "@/components/BeadList";
 import MaterialSvg from "@/assets/icons/material.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import apiSession from "@/utils/api-session";
+import { usePollDesign } from "@/hooks/usePollDesign";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -47,6 +48,8 @@ const Result = () => {
   const [referencePrice, setReferencePrice] = useState<number>(0);
   const [designSessionId, setDesignSessionId] = useState<string>("");
   const [designDraftId, setDesignDraftId] = useState<string>("");
+  const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
+
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
   const { sessionId, from } = params || {};
@@ -57,14 +60,9 @@ const Result = () => {
     });
   };
 
-  const getDesignData = (designId: string) => {
-    apiSession.getDesignItem(parseInt(designId))
-      .then((res) => {
-        const { design_id, image_url, info, order_uuids, reference_price, session_id, draft_id } =
-          res?.data || {};
-        if (order_uuids?.length > 0) {
-          getOrderData(order_uuids);
-        }
+  const processDesignData = (designData) => {
+    const { design_id, image_url, info, reference_price, session_id, draft_id } =
+          designData || {};
         const {
           name,
           description,
@@ -83,29 +81,27 @@ const Result = () => {
         setReferencePrice(reference_price);
         setDesignSessionId(session_id);
         setDesignDraftId(draft_id);
-      })
-      .catch((err) => {
-        console.log(err, "err");
-        Taro.showToast({
-          title: "加载失败",
-          icon: "none",
-        });
-      });
-  };
+  }
+
+  useEffect(() => {
+    if (design?.order_uuids?.length) {
+      getOrderData(design.order_uuids);
+    }
+    if (design?.design_id) {
+      processDesignData(design);
+    }
+  }, [design]);
 
   const initData = () => {
     // 获取传入的图片URL参数
-
     if (params?.designBackendId) {
       const imageUrl = params?.imageUrl || "";
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
-      getDesignData(params?.designBackendId);
+      getDesign({
+        designId: params?.designBackendId,
+      })
     }
   };
-
-  useEffect(() => {
-    initData();
-  }, []);
 
   useDidShow(() => {
     initData();
@@ -124,10 +120,9 @@ const Result = () => {
   // 保存图片到相册
   const saveImage = async () => {
     setLoading(true);
-    Taro.showToast({
+    Taro.showLoading({
       title: "正在生成分享图...",
-      icon: "none",
-      duration: 3000,
+      mask: true,
     });
     try {
       const res = await Taro.request({
@@ -148,7 +143,7 @@ const Result = () => {
               id: item.id,
               name: item.name,
               wuxing: item.wuxing,
-              function: item.function,
+              function: item.func_summary,
               image_url: item.image_url,
             })),
           }
@@ -197,7 +192,7 @@ const Result = () => {
             return;
           }
         }
-
+        Taro.hideLoading();
         Taro.showToast({
           title: "保存中",
           icon: "loading",
@@ -450,7 +445,7 @@ const Result = () => {
       </View>
       <View className={styles.resultContentCardAction}>
         <CrystalButton
-          onClick={() => saveImage(shareImageUrl)}
+          onClick={() => saveImage()}
           text="分享"
           style={{ marginTop: "20px", marginLeft: "24px" }}
           prefixIcon={

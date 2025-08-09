@@ -23,7 +23,7 @@ export interface DraftData {
   bracelet_image?: string;
 }
 
-export const usePollDraft = ({ pollingInterval = 2000, maxRetries = 2, showLoading = false }) => {
+export const usePollDraft = ({ pollingInterval = 2000, maxRetries = 2, showLoading = false }) => {  
   const [draft, setDraft] = useState<DraftData | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,23 +32,33 @@ export const usePollDraft = ({ pollingInterval = 2000, maxRetries = 2, showLoadi
 
   // 轮询设计稿进度
   const startPolling = useCallback(
-    async (sessionId: string, draftId: string) => {
+    async (sessionId: string, draftId: string, byMerchant: boolean) => {
       setIsPolling(true);
       retryCountRef.current = 0;
 
       const pollDraft = async () => {
         try {
-          const response = (await apiSession.getDesignDraft(
-            {
-              session_id: sessionId,
-              draft_id: draftId,
-            },
-            { showError: false, showLoading }
-          )) as DesignDraftResponse;
+          let response = {};
+          if (byMerchant) {
+            response = (await apiSession.getDraftDetailByMerchant(
+              {
+                session_id: sessionId,
+                draft_id: draftId,
+              },
+              { showError: false, showLoading }
+            )) as DesignDraftResponse;
+          } else {
+            response = (await apiSession.getDesignDraft(
+              {
+                session_id: sessionId,
+                draft_id: draftId,
+              },
+              { showError: false, showLoading }
+            )) as DesignDraftResponse;
+          }
 
           if (response.code === 200 && response.data) {
             const draftData = response.data;
-
 
             if (draftData.progress === 100) {
               // 设计稿完成

@@ -30,6 +30,7 @@ const MessageItem = React.memo(({
   shouldLoadImage = true,
   onImageLoaded,
   isLatestDraft = false,
+  byMerchant = false,
 }: {
   message: ChatMessageItem;
   sessionId: string;
@@ -37,6 +38,7 @@ const MessageItem = React.memo(({
   shouldLoadImage?: boolean;
   onImageLoaded?: (messageId: string) => void;
   isLatestDraft?: boolean;
+  byMerchant?: boolean;
 }) => {
   const messageStyle = {
     animationDelay: `${animationDelay}ms`,
@@ -57,7 +59,8 @@ const MessageItem = React.memo(({
           draftIndex={message.draft_index}
           shouldLoad={shouldLoadImage}
           onImageLoaded={() => onImageLoaded?.(message.message_id)}
-          canRegenerate={isLatestDraft}
+          canRegenerate={isLatestDraft && !byMerchant}
+          byMerchant={byMerchant}
         />
       )}
     </View>
@@ -91,6 +94,7 @@ export default forwardRef<
     maxHeight?: string;
     autoScrollToBottom?: boolean;
     hasMoreMessages?: boolean;
+    byMerchant?: boolean;
   }
 >(
   (
@@ -101,6 +105,7 @@ export default forwardRef<
       maxHeight,
       autoScrollToBottom = true,
       hasMoreMessages = false,
+      byMerchant = false,
     },
     ref
   ) => {
@@ -164,6 +169,7 @@ export default forwardRef<
             shouldLoadImage={shouldLoadImage}
             onImageLoaded={markMessageAsLoaded}
             isLatestDraft={isLatestDraft}
+            byMerchant={byMerchant}     
           />
         );
       });

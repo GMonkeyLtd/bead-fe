@@ -85,9 +85,20 @@ export default function OrderList({
 
   const handleCancelOrder = (order: Order) => {
     // 跳转到取消订单页面，传递订单信息
-    Taro.navigateTo({
-      url: `${pageUrls.cancelOrder}?orderId=${order.order_uuid}&orderNo=${order.order_uuid}&price=${order.price}`,
-    });
+    merchantApi.user.cancelOrder(order.order_uuid).then((res: any) => {
+      if (res.code === 200) {
+        showToast({
+          title: "取消订单成功",
+          icon: "success",
+        });
+        onRefresh?.();
+      }
+    }).catch((err: any) => {
+      showToast({
+        title: err.message || "取消订单失败",
+        icon: "error",
+      });
+    })
   };
 
   const handleCompleteOrder = async (order: Order) => {
@@ -198,6 +209,21 @@ export default function OrderList({
     });
   }
 
+  const viewChatDetail = (order: Order) => {
+    const sessionId = order.design_info?.session_id;
+    console.log('merchant sessionId', sessionId)
+    if (!sessionId) {
+      showToast({
+        title: "该订单未查到沟通记录",
+        icon: "error",
+      });
+      return;
+    }
+    Taro.navigateTo({
+      url: `${pageUrls.chatDesign}?session_id=${sessionId}&is_merchant=true`,
+    });
+  }
+
   const renderActionButtons = (order: Order) => {
     if (!showActions) return null;
 
@@ -208,12 +234,7 @@ export default function OrderList({
           <View className={styles.actionButtons}>
             <View
               className={styles.callBtn}
-              onClick={() => {
-                const sessionId = order.session_id;
-                Taro.navigateTo({
-                  url: `${pageUrls.chatDesign}?session_id=${sessionId}`,
-                });
-              }}
+              onClick={() => viewChatDetail(order)}
             >
               沟通记录
             </View>
@@ -265,12 +286,7 @@ export default function OrderList({
             </View>
             <View
               className={styles.callBtn}
-              onClick={() => {
-                const sessionId = order.session_id;
-                Taro.navigateTo({
-                  url: `${pageUrls.chatDesign}?session_id=${sessionId}`,
-                });
-              }}
+              onClick={() => viewChatDetail(order)}
             >
               沟通记录
             </View>
@@ -363,9 +379,9 @@ export default function OrderList({
       <ScrollView
         className={`${styles.orderListContainer} ${className}`}
         scrollY
-        refresherEnabled={!!onRefresh}
-        refresherTriggered={loading}
-        onRefresherRefresh={onRefresh}
+        // refresherEnabled={!!onRefresh}
+        // refresherTriggered={loading}
+        // onRefresherRefresh={onRefresh}
         onScrollToLower={onScrollToLower}
         style={style}
       >

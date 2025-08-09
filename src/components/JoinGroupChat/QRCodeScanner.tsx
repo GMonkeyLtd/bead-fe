@@ -112,6 +112,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                 className={styles.qrCodeImage}
                 // onLongPress={handleLongPress}
                 onClick={handleSimplePreview}
+                showMenuByLongpress={true}
                 mode="aspectFit"
             />
             <Text className={styles.description}>{description}</Text>

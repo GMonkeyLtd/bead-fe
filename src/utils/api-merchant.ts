@@ -123,8 +123,8 @@ export const userApi = {
   grabOrder: (orderId: string) => {
     return http.post("/merchant/graborder", { order_uuid: orderId });
   },
-  cancelOrder: (orderId: string, imagesBase64: string[], reason: string) => {
-    return http.post("/merchant/cancelorder", { order_uuid: orderId, images_base64: imagesBase64, reason: reason });
+  cancelOrder: (orderId: string) => {
+    return http.post("/merchant/cancelorder", { order_uuid: orderId });
   },
   completeOrder: (orderId: string) => {
     return http.post("/merchant/finishorder", { order_uuid: orderId });

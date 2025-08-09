@@ -17,10 +17,14 @@ import { getRecommendTemplate } from "@/utils/utils";
 const INPUT_HEIGHT = 30 + 24 + 10;
 const INPUT_RECOMMEND_HEIGHT = 30 + 30 + 24 + 16;
 
-const INIT_MESSAGE = ["宝子！你终于来了，我是你的专属水晶疗愈师，可以叫我璞璞～", "我已经看到你的生辰啦，让我来给你详细分析一下📝"]
+const INIT_MESSAGE = [
+  "宝子！你终于来了，我是你的专属水晶疗愈师，可以叫我璞璞～",
+  "我已经看到你的生辰啦，让我来给你详细分析一下📝",
+];
 
 const ChatDesign = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
+  const byMerchant = params?.is_merchant === "true";
 
   const [isDesigning, setIsDesigning] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessageItem[]>([]);
@@ -102,7 +106,6 @@ const ChatDesign = () => {
     sex: number;
     is_lunar: boolean;
   }) => {
-
     apiSession
       .createSession(
         {
@@ -137,10 +140,21 @@ const ChatDesign = () => {
       });
   };
 
-  const querySessionHistory = (session_id: string, isFirst = false) => {
-    draftIndexRef.current = 1;
-    apiSession.getChatHistory({ session_id }).then((res) => {
-      const messages = res.data.messages || [];
+  const querySessionHistory = async (
+    session_id: string,
+    isFirst = false,
+    is_merchant?: boolean
+  ) => {
+    try {
+      draftIndexRef.current = 1;
+      let histroyRes = {};
+      if (is_merchant) {
+        histroyRes = await apiSession.getChatHistoryByMerchant({ session_id });
+      } else {
+        histroyRes = await apiSession.getChatHistory({ session_id });
+      }
+
+      const messages = histroyRes?.data?.messages || [];
       const messagesWithoutUserInfo = messages.filter(
         (message, index) => !(message.role == "user" && index === 0)
       );
@@ -159,14 +173,15 @@ const ChatDesign = () => {
         .find((message) => message.role === "assistant");
       // 有历史会话
       if (!isFirst) {
-        const newMessagesWithInit = [...INIT_MESSAGE.map((item, index) => ( 
-          {
+        const newMessagesWithInit = [
+          ...INIT_MESSAGE.map((item, index) => ({
             message_id: Date.now().toString() + index,
             role: "assistant",
             content: item,
             created_at: new Date().toISOString(),
-          }
-        )), ...newMessages];
+          })),
+          ...newMessages,
+        ];
         setChatMessages(newMessagesWithInit);
         if (
           lastAssistantMessage?.recommends &&
@@ -181,27 +196,31 @@ const ChatDesign = () => {
           lastAssistantMessage?.recommends || []
         );
       }
-    });
+    } catch (error) {
+      console.error("querySessionHistory error", error);
+    }
   };
 
   useEffect(() => {
     const { year, month, day, hour, gender, isLunar, session_id } =
       params || {};
     if (session_id) {
+      console.log('chat session_id', session_id, byMerchant)
       setSessionId(session_id);
-      querySessionHistory(session_id);
+      querySessionHistory(session_id, false, byMerchant);
     }
     if (year && month && day && hour && gender && isLunar) {
-      showMessagesSequentially(INIT_MESSAGE.map((item, index) => (
-        {
+      showMessagesSequentially(
+        INIT_MESSAGE.map((item, index) => ({
           message_id: Date.now().toString() + index,
           role: "assistant",
           content: item,
           created_at: new Date().toISOString(),
-        })));
-        setTimeout(() => {
-          setIsDesigning(true);
-        }, 4000);
+        }))
+      );
+      setTimeout(() => {
+        setIsDesigning(true);
+      }, 4000);
       initChat({
         birth_year: parseInt(year || "0") || 0,
         birth_month: parseInt(month || "0") || 0,
@@ -218,7 +237,7 @@ const ChatDesign = () => {
       <View className={styles.chatDesignHeader}>
         <View className={styles.assistantAvatarContainer}>
           <Image
-            src={LILI_AVATAR_IMAGE_URL} 
+            src={LILI_AVATAR_IMAGE_URL}
             className={styles.assistantAvatar}
           />
           <Text className={styles.assistantName}>璞璞</Text>
@@ -302,6 +321,7 @@ const ChatDesign = () => {
           isChatting={isDesigning}
           maxHeight={`calc(100% - ${spareHeight}px)`}
           sessionId={sessionId}
+          byMerchant={byMerchant}
         />
 
         {/* <BraceletDraftCard
@@ -311,65 +331,67 @@ const ChatDesign = () => {
           generateBraceletImage={generateBraceletImage}
         /> */}
 
-        <View className={styles.inputContainer}>
-          {recommendTags?.length > 0 && (
-            <TagList
-              tags={recommendTags?.map((item) => ({
-                id: item,
-                title: item,
-              }))}
-              onTagSelect={(tag) => {
-                if (!isDesigning) {
-                  handleSend(getRecommendTemplate(tag.title));
-                }
-                // setInputValue((prev) =>
-                //   !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
-                // );
-              }}
-              style={{
-                marginBottom: "10px",
-              }}
-            />
-          )}
-          <View className={styles.inputBottomContainer}>
-            {/* <View className={styles.chatRecordEnter}>
+        {!byMerchant && (
+          <View className={styles.inputContainer}>
+            {recommendTags?.length > 0 && (
+              <TagList
+                tags={recommendTags?.map((item) => ({
+                  id: item,
+                  title: item,
+                }))}
+                onTagSelect={(tag) => {
+                  if (!isDesigning) {
+                    handleSend(getRecommendTemplate(tag.title));
+                  }
+                  // setInputValue((prev) =>
+                  //   !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
+                  // );
+                }}
+                style={{
+                  marginBottom: "10px",
+                }}
+              />
+            )}
+            <View className={styles.inputBottomContainer}>
+              {/* <View className={styles.chatRecordEnter}>
               <Image
                 src={userRecordSvg}
                 style={{ width: "27px", height: "27px" }}
               />
             </View> */}
-            <View className={styles.inputWrapper}>
-              <Textarea
-                className={styles.messageInput}
-                value={inputValue}
-                placeholder="输入您的定制需求..."
-                placeholderStyle="color: #00000033;"
-                onInput={(e) => setInputValue(e.detail.value)}
-                onConfirm={handleSend}
-                autoHeight
-                adjustPosition={false}
-                // adjustKeyboardTo="bottom"
-                // onFocus={() => {
-                //   setKeyboardHeight(90);
-                // }}
-                // onBlur={() => {
-                //   setKeyboardHeight(0);
-                // }}
-                showConfirmBar={false}
-                confirmType="send"
-              />
-              <Image
-                src={
-                  !isEmptyMessage(inputValue) && !isDesigning
-                    ? activeSendSvg
-                    : sendSvg
-                }
-                style={{ width: "26px", height: "26px" }}
-                onClick={handleSend}
-              />
+              <View className={styles.inputWrapper}>
+                <Textarea
+                  className={styles.messageInput}
+                  value={inputValue}
+                  placeholder="输入您的定制需求..."
+                  placeholderStyle="color: #00000033;"
+                  onInput={(e) => setInputValue(e.detail.value)}
+                  onConfirm={handleSend}
+                  autoHeight
+                  adjustPosition={false}
+                  // adjustKeyboardTo="bottom"
+                  // onFocus={() => {
+                  //   setKeyboardHeight(90);
+                  // }}
+                  // onBlur={() => {
+                  //   setKeyboardHeight(0);
+                  // }}
+                  showConfirmBar={false}
+                  confirmType="send"
+                />
+                <Image
+                  src={
+                    !isEmptyMessage(inputValue) && !isDesigning
+                      ? activeSendSvg
+                      : sendSvg
+                  }
+                  style={{ width: "26px", height: "26px" }}
+                  onClick={handleSend}
+                />
+              </View>
             </View>
           </View>
-        </View>
+        )}
       </View>
     </PageContainer>
   );

@@ -98,21 +98,36 @@ export interface DesignDraftResponse extends BaseResponse {
   };
 }
 
-export interface DesignProgressResponse extends BaseResponse {
-  data: {
-    progress: number;
+export interface TDesign {
+  progress: number;
     image_url: string;
     design_id: string;
+    draft_id: string;
+    reference_price: number;
+    session_id: string;
+    user_id: number;
+    created_at: string;
+    updated_at: string;
     info: {
       name: string;
       description: string;
-      wuxing: string;
-      wishes: string;
-      spec: string;
+      wuxing: string[];
+      rizhu: string;
+      spec: {
+        wrist_size: number;
+        diameter: number;
+        count: number;
+        is_default: boolean;
+      };
+      wishes: string[];
       recommend_beads: BeadItem[];
       beads: BeadItem[];
     };
-  };
+    order_uuids?: string[];
+}
+
+export interface DesignProgressResponse extends BaseResponse {
+  data: TDesign;
 }
 
 export default {
@@ -331,5 +346,32 @@ export default {
         ...config,
       }
     )
-  }
+  },
+  // 商家端获取用户聊天历史
+  getChatHistoryByMerchant: (
+    params: {
+      session_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/merchant_query/sessions/${params.session_id}/history`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
+    );
+  },
+  // 商家端获取草稿详情
+  getDraftDetailByMerchant: (
+    params: {
+      session_id: string;
+      draft_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/merchant_query/sessions/${params.session_id}/drafts/${params.draft_id}`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
+    );
+  }  
 };

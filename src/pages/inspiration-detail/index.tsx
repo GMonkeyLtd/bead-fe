@@ -12,6 +12,7 @@ import createBeadImage from "@/assets/icons/create-bead.svg";
 import { getNavBarHeightAndTop, getSafeArea } from "@/utils/style-tools";
 import BraceletDetailDialog from "@/components/BraceletDetailDialog";
 import BeadList from "@/components/BeadList";
+import apiSession from "@/utils/api-session";
 
 interface BeadInfo {
   id: string;
@@ -69,7 +70,8 @@ const InspirationDetailPage: React.FC = () => {
 
   const getDesignData = async (designId: number) => {
     try {
-      const res = await userHistoryApi.getDesignById(designId);
+      const res = await apiSession.getDesignItem(designId);
+      console.log(res, "res");
       setDesignData(res.data);
     } catch (error) {
       console.error("获取设计数据失败:", error);
@@ -184,6 +186,7 @@ const InspirationDetailPage: React.FC = () => {
     );
   }
 
+
   return (
     <CrystalContainer showBack={true} showHome={false}>
       <ScrollView
@@ -244,11 +247,11 @@ const InspirationDetailPage: React.FC = () => {
           <View className={styles.titleSection}>
             <View className={styles.titleContainer}>
               <Text className={styles.title}>
-                {designData?.word_info?.bracelet_name}
+                {designData?.info?.name}
               </Text>
               <Text
                 className={styles.workNumber}
-              >{`NO.${designData?.id}`}</Text>
+              >{`NO.${designData?.design_id}`}</Text>
             </View>
             <View className={styles.likeContainer} onClick={handleCollectClick}>
               <Image
@@ -263,11 +266,11 @@ const InspirationDetailPage: React.FC = () => {
           {/* 正文区域 */}
           <View className={styles.descriptionSection}>
             <Text className={styles.description}>
-              {designData?.word_info?.recommendation_text}
+              {designData?.info?.description}
             </Text>
             {/* 珠子信息区域 */}
             <BeadList 
-              beads={designData?.word_info?.bead_ids_deduplication}
+              beads={designData?.info?.recommend_beads}
               />
             {/* 作者和时间 */}
             <View className={styles.workDetailContainer}>
@@ -316,11 +319,11 @@ const InspirationDetailPage: React.FC = () => {
         />
       </View>
 
-      {braceletDetailDialogShow && designData?.beads_info?.length > 0 && (
+      {braceletDetailDialogShow && designData?.info?.beads?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}
-          beads={designData?.beads_info}
-          title={designData?.word_info?.bracelet_name}
+          beads={designData?.info?.beads}
+          title={designData?.info?.name}
           onClose={() => setBraceletDetailDialogShow(false)}
         />
       )}
