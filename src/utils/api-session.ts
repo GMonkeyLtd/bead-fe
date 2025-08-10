@@ -64,12 +64,14 @@ export interface ChatMessageItem {
 
 export interface ChatResponse extends BaseResponse {
   data: {
-    session_id: string;
-    message_id: string;
-    role: "assistant" | "user";
-    content: string;
-    recommends: string[];
-    created_at: string;
+    messages: {
+      session_id: string;
+      message_id: string;
+      role: "assistant" | "user";
+      content: string;
+      recommends: string[];
+      created_at: string;
+    }[]
   };
 }
 
@@ -100,30 +102,30 @@ export interface DesignDraftResponse extends BaseResponse {
 
 export interface TDesign {
   progress: number;
-    image_url: string;
-    design_id: string;
-    draft_id: string;
-    reference_price: number;
-    session_id: string;
-    user_id: number;
-    created_at: string;
-    updated_at: string;
-    info: {
-      name: string;
-      description: string;
-      wuxing: string[];
-      rizhu: string;
-      spec: {
-        wrist_size: number;
-        diameter: number;
-        count: number;
-        is_default: boolean;
-      };
-      wishes: string[];
-      recommend_beads: BeadItem[];
-      beads: BeadItem[];
+  image_url: string;
+  design_id: string;
+  draft_id: string;
+  reference_price: number;
+  session_id: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  info: {
+    name: string;
+    description: string;
+    wuxing: string[];
+    rizhu: string;
+    spec: {
+      wrist_size: number;
+      diameter: number;
+      count: number;
+      is_default: boolean;
     };
-    order_uuids?: string[];
+    wishes: string[];
+    recommend_beads: BeadItem[];
+    beads: BeadItem[];
+  };
+  order_uuids?: string[];
 }
 
 export interface DesignProgressResponse extends BaseResponse {
@@ -373,5 +375,5 @@ export default {
       {},
       { cancelToken: config?.cancelToken, ...config }
     );
-  }  
+  }
 };

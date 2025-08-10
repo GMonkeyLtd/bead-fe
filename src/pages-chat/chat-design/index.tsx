@@ -62,12 +62,12 @@ const ChatDesign = () => {
           setTimeout(() => {
             chatMessagesRef.current?.scrollToBottom();
           }, 100);
-          waitTime = (messages[currentIndex].content?.length / 15) * 1000;
+          waitTime = (messages[currentIndex].content?.length / 10) * 1000;
           if (messages[currentIndex].draft_id) {
             waitTime = 3000;
           } else {
-            if (waitTime < 2000) {
-              waitTime = 2000;
+            if (waitTime < 3000) {
+              waitTime = 3000;
             }
           }
 
@@ -131,7 +131,7 @@ const ChatDesign = () => {
       })
       .catch((err) => {
         Taro.showToast({
-          title: "获取会话失败:" + JSON.stringify(err),
+          title: "获取会话失败:" + err.message,
           icon: "none",
         });
       })
@@ -220,7 +220,7 @@ const ChatDesign = () => {
       );
       setTimeout(() => {
         setIsDesigning(true);
-      }, 4000);
+      }, 6000);
       initChat({
         birth_year: parseInt(year || "0") || 0,
         birth_month: parseInt(month || "0") || 0,
@@ -279,7 +279,7 @@ const ChatDesign = () => {
       })
       .then((res) => {
         // 处理返回的消息，按照2秒一条的速度依次显示
-        const splitMessages = splitMessage(res.data);
+        const splitMessages = splitMessage(res.data?.messages || []);
         const processedMessages = splitMessages.map((message) => {
           if (message.draft_id) {
             message.draft_index = draftIndexRef.current;

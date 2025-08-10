@@ -60,7 +60,7 @@ export const splitMessage = (
   message: MessageItem | MessageItem[]
 ): MessageItem[] => {
   if (Array.isArray(message)) {
-    return message.flatMap((item: MessageItem) => splitMessageItem(item));
+    return [...message.flatMap((item: MessageItem) => splitMessageItem(item))];
   }
   return splitMessageItem(message);
 };
