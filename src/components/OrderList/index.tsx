@@ -39,7 +39,7 @@ export interface Order {
     after_sale_status: string;
     after_sale_status_text: string;
     pre_sales_status: string;
-  }
+  };
   beadsData?: any[];
   order_details?: any;
 }
@@ -85,20 +85,23 @@ export default function OrderList({
 
   const handleCancelOrder = (order: Order) => {
     // 跳转到取消订单页面，传递订单信息
-    merchantApi.user.cancelOrder(order.order_uuid).then((res: any) => {
-      if (res.code === 200) {
+    merchantApi.user
+      .cancelOrder(order.order_uuid)
+      .then((res: any) => {
+        if (res.code === 200) {
+          showToast({
+            title: "取消订单成功",
+            icon: "success",
+          });
+          onRefresh?.();
+        }
+      })
+      .catch((err: any) => {
         showToast({
-          title: "取消订单成功",
-          icon: "success",
+          title: err.message || "取消订单失败",
+          icon: "error",
         });
-        onRefresh?.();
-      }
-    }).catch((err: any) => {
-      showToast({
-        title: err.message || "取消订单失败",
-        icon: "error",
       });
-    })
   };
 
   const handleCompleteOrder = async (order: Order) => {
@@ -131,7 +134,7 @@ export default function OrderList({
         } else {
           acc.push({
             name: item?.name,
-            size: item?.bead_diameter + "mm",
+            size: item?.diameter + "mm",
             quantity: item?.quantity || 1,
           });
         }
@@ -149,69 +152,93 @@ export default function OrderList({
   const handleCopyOrderNumber = (orderNumber: string) => {
     Taro.setClipboardData({
       data: orderNumber,
-    })
-  }
+    });
+  };
 
   // 脱敏处理函数
-  const maskContactInfo = (contact: string, type: 'phone' | 'wechat') => {
-    if (!contact) return '';
+  const maskContactInfo = (contact: string, type: "phone" | "wechat") => {
+    if (!contact) return "";
 
-    if (type === 'phone') {
+    if (type === "phone") {
       // 手机号脱敏：前3位 + **** + 后4位
       if (contact.length >= 7) {
-        return `${contact.substring(0, 3)}****${contact.substring(contact.length - 4)}`;
+        return `${contact.substring(0, 3)}****${contact.substring(
+          contact.length - 4
+        )}`;
       }
       return contact;
     } else {
       // 微信号脱敏：前3位 + **** + 后4位
       if (contact.length >= 7) {
-        return `${contact.substring(0, 3)}****${contact.substring(contact.length - 4)}`;
+        return `${contact.substring(0, 3)}****${contact.substring(
+          contact.length - 4
+        )}`;
       }
       return contact;
     }
   };
 
   const renderConnectInfo = (order: Order) => {
-    let info = '', copyData = '';
+    let info = "",
+      copyData = "";
     if (order.user_info?.default_contact === 0) {
-      const phone = order.user_info?.phone || '';
-      const maskedPhone = maskContactInfo(phone, 'phone');
+      const phone = order.user_info?.phone || "";
+      const maskedPhone = maskContactInfo(phone, "phone");
       info = `电话：${maskedPhone}`;
       copyData = phone; // 复制时使用原始数据
     } else {
-      const wechat = order.user_info?.wechat_id || '';
-      const maskedWechat = maskContactInfo(wechat, 'wechat');
+      const wechat = order.user_info?.wechat_id || "";
+      const maskedWechat = maskContactInfo(wechat, "wechat");
       info = `微信：${maskedWechat}`;
       copyData = wechat; // 复制时使用原始数据
     }
     return (
-      <View className={styles.connectInfo} onClick={() => handleCopyOrderNumber(copyData)}>
+      <View
+        className={styles.connectInfo}
+        onClick={() => handleCopyOrderNumber(copyData)}
+      >
         <Text>{info}</Text>
-        <Image src={copyIcon} mode='aspectFit' className={styles.copyIcon} />
+        <Image src={copyIcon} mode="aspectFit" className={styles.copyIcon} />
       </View>
     );
   };
 
   const onAgreeRefund = (order: Order) => {
-    merchantApi.user.agreeRefund(order.order_uuid).then((res: any) => {
-      if (res.code === 200) {
+    merchantApi.user
+      .agreeRefund(order.order_uuid)
+      .then((res: any) => {
+        if (res.code === 200) {
+          showToast({
+            title: "同意退款成功",
+            icon: "success",
+          });
+          onRefresh?.();
+        }
+      })
+      .catch((err: any) => {
         showToast({
-          title: "同意退款成功",
+          title: "同意退款失败" + err.message,
+          icon: "none",
+        });
+      });
+  };
+
+  const submitPriceCb = () => {
+    Taro.requestSubscribeMessage({
+      tmplIds: ["IbbEPC2Jy7uSZn2TGuBj6Tu2KAMBHlDEAEiEztW8weM"],
+      success: (res) => {
+        Taro.showToast({
+          title: "订阅成功",
           icon: "success",
         });
         onRefresh?.();
-      }
-    }).catch((err: any) => {
-      showToast({
-        title: "同意退款失败" + err.message,
-        icon: "none",
-      });
+      },
     });
-  }
+  };
 
   const viewChatDetail = (order: Order) => {
     const sessionId = order.design_info?.session_id;
-    console.log('merchant sessionId', sessionId)
+    console.log("merchant sessionId", sessionId);
     if (!sessionId) {
       showToast({
         title: "该订单未查到沟通记录",
@@ -222,13 +249,19 @@ export default function OrderList({
     Taro.navigateTo({
       url: `${pageUrls.chatDesign}?session_id=${sessionId}&is_merchant=true`,
     });
-  }
+  };
 
   const renderActionButtons = (order: Order) => {
     if (!showActions) return null;
 
     // 2: 进行中、待支付
-    if ([OrderStatus.Negotiating, OrderStatus.InProgress, OrderStatus.PendingPayment].includes(order.order_status)) {
+    if (
+      [
+        OrderStatus.Negotiating,
+        OrderStatus.InProgress,
+        OrderStatus.PendingPayment,
+      ].includes(order.order_status)
+    ) {
       return (
         <View className={styles.orderActions}>
           <View className={styles.actionButtons}>
@@ -246,40 +279,56 @@ export default function OrderList({
             </View>
           </View>
           <View className={styles.actionButtons}>
-            {[OrderStatus.Negotiating, OrderStatus.InProgress].includes(order.order_status) && (<View
-              className={styles.completeBtn}
-              onClick={() => {
-                setOrderActionDialog(<ProductPriceForm
-                  visible={true}
-                  orderNumber={order.order_uuid}
-                  productName={order.design_info?.word_info?.bracelet_name || ""}
-                  productImage={order.design_info?.image_url || ""}
-                  onClose={() => setOrderActionDialog(null)}
-                  onConfirm={onRefresh}
-                />);
-              }}
-            >
-              发起支付
-            </View>)}
+            {[OrderStatus.Negotiating, OrderStatus.InProgress].includes(
+              order.order_status
+            ) && (
+              <View
+                className={styles.completeBtn}
+                onClick={() => {
+                  setOrderActionDialog(
+                    <ProductPriceForm
+                      visible={true}
+                      orderNumber={order.order_uuid}
+                      productName={
+                        order.design_info?.word_info?.bracelet_name || ""
+                      }
+                      productImage={order.design_info?.image_url || ""}
+                      onClose={() => setOrderActionDialog(null)}
+                      onConfirm={submitPriceCb}
+                    />
+                  );
+                }}
+              >
+                发起支付
+              </View>
+            )}
           </View>
         </View>
       );
     }
-    if ([OrderStatus.PendingShipment, OrderStatus.Shipped].includes(order.order_status)) {
+    if (
+      [OrderStatus.PendingShipment, OrderStatus.Shipped].includes(
+        order.order_status
+      )
+    ) {
       return (
         <View className={styles.orderActions}>
           <View className={styles.actionButtons}>
             <View
               className={styles.uploadImageBtn}
               onClick={() => {
-                setOrderActionDialog(<ProductImageUpload
-                  visible={true}
-                  orderId={order.order_uuid}
-                  productName={order.design_info?.word_info?.bracelet_name || ""}
-                  productImage={order.design_info?.image_url || ""}
-                  onClose={() => setOrderActionDialog(null)}
-                  onConfirm={onRefresh}
-                />)
+                setOrderActionDialog(
+                  <ProductImageUpload
+                    visible={true}
+                    orderId={order.order_uuid}
+                    productName={
+                      order.design_info?.word_info?.bracelet_name || ""
+                    }
+                    productImage={order.design_info?.image_url || ""}
+                    onClose={() => setOrderActionDialog(null)}
+                    onConfirm={onRefresh}
+                  />
+                );
               }}
             >
               上传图片
@@ -292,41 +341,53 @@ export default function OrderList({
             </View>
           </View>
           <View className={styles.actionButtons}>
-            {order?.order_details?.address_info && <View className={styles.callBtn} onClick={() => {
-              const addressInfo = order?.order_details?.address_info;
-              const addressInfoStr = `${addressInfo.userName}\n${addressInfo.telNumber}\n${addressInfo.provinceName}${addressInfo.cityName}${addressInfo.countyName}\n${addressInfo.detailInfo}`;
-              Taro.showModal({
-                title: "收货地址",
-                content: addressInfoStr,
-                success: (res) => {
-                  if (res.confirm) {
-                    Taro.setClipboardData({
-                      data: addressInfoStr,
-                    });
-                  }
-                }
-              });
-            }}>
-              收货地址
-            </View>}
-            {([OrderStatus.PendingShipment].includes(order.order_status)) && (<View
-              className={styles.completeBtn}
-              onClick={() => {
-                setOrderActionDialog(<WayBillForm
-                  visible={true}
-                  orderId={order.order_uuid}
-                  onClose={() => setOrderActionDialog(null)}
-                  submitCallback={onRefresh}
-                />);
-              }}
-            >
-              填写物流
-            </View>)}
+            {order?.order_details?.address && (
+              <View
+                className={styles.callBtn}
+                onClick={() => {
+                  const addressInfo = order?.order_details?.address;
+                  const addressInfoStr = `${addressInfo.userName}\n${addressInfo.telNumber}\n${addressInfo.provinceName}${addressInfo.cityName}${addressInfo.countyName}\n${addressInfo.detailInfo}`;
+                  Taro.showModal({
+                    title: "收货地址",
+                    content: addressInfoStr,
+                    success: (res) => {
+                      if (res.confirm) {
+                        Taro.setClipboardData({
+                          data: addressInfoStr,
+                        });
+                      }
+                    },
+                  });
+                }}
+              >
+                收货地址
+              </View>
+            )}
+            {[OrderStatus.PendingShipment].includes(order.order_status) && (
+              <View
+                className={styles.completeBtn}
+                onClick={() => {
+                  setOrderActionDialog(
+                    <WayBillForm
+                      visible={true}
+                      orderId={order.order_uuid}
+                      onClose={() => setOrderActionDialog(null)}
+                      submitCallback={onRefresh}
+                    />
+                  );
+                }}
+              >
+                填写物流
+              </View>
+            )}
           </View>
         </View>
-      )
+      );
     }
-    if ([OrderStatus.AfterSale].includes(order.order_status) && order.after_sale_info?.after_sale_status === "refund_reviewing") {
+    if (
+      [OrderStatus.AfterSale].includes(order.order_status) &&
+      order.after_sale_info?.after_sale_status === "refund_reviewing"
+    ) {
       return (
         <View className={styles.orderActions}>
           <View className={styles.actionButtons}>
@@ -349,17 +410,19 @@ export default function OrderList({
             </View>
           </View>
         </View>
-      )
+      );
     }
-
   };
 
   const showWayBillInfo = (order: Order) => {
-    if (order.order_details?.logistics_info && order.order_details?.logistics_info?.logistics_no) {
+    if (
+      order.order_details?.logistics_info &&
+      order.order_details?.logistics_info?.logistics_no
+    ) {
       return true;
     }
     return false;
-  }
+  };
 
   const onViewLogistics = (order: Order) => {
     merchantApi.user.getWayBillToken(order.order_uuid).then((res: any) => {
@@ -368,11 +431,11 @@ export default function OrderList({
         waybillToken: waybill_token,
       });
     });
-  }
+  };
 
   const onScrollToLower = () => {
-    console.log('onScrollToLower');
-  }
+    console.log("onScrollToLower");
+  };
 
   return (
     <View style={{ height: "100%" }}>
@@ -395,27 +458,48 @@ export default function OrderList({
           orders.map((order) => (
             <View key={order.order_uuid} className={styles.orderCard}>
               {showWayBillInfo(order) && (
-                <View className={styles.wayBillInfo} onClick={() => onViewLogistics(order)}>
-                  <View className={styles.wayBillNo}>{`快递单号：${order.order_details?.logistics_info?.logistics_no} ->`}</View>
-                  <View className={styles.wayBillStatus}>{order.order_details?.logistics_info?.waybill_status_text}</View>
+                <View
+                  className={styles.wayBillInfo}
+                  onClick={() => onViewLogistics(order)}
+                >
+                  <View
+                    className={styles.wayBillNo}
+                  >{`快递单号：${order.order_details?.logistics_info?.logistics_no} ->`}</View>
+                  <View className={styles.wayBillStatus}>
+                    {order.order_details?.logistics_info?.waybill_status_text}
+                  </View>
                 </View>
               )}
-              <View className={styles.orderHeader}>
-                <View className={styles.orderStatus}>
-                  <StatusBadge
-                    type={getStatusBadgeType(order.order_status)}
-                    text={formatOrderStatus(order.order_status, order?.after_sale_info?.after_sale_status as AfterSaleStatus)}
-                  />
-                  <Text className={styles.orderNo}>
-                    订单号：{order.order_uuid}
-                  </Text>
+              <View className={styles.orderInfoContainer}>
+                <View className={styles.orderHeader}>
+                  <View className={styles.orderStatus}>
+                    <StatusBadge
+                      type={getStatusBadgeType(order.order_status)}
+                      text={formatOrderStatus(
+                        order.order_status,
+                        order?.after_sale_info
+                          ?.after_sale_status as AfterSaleStatus
+                      )}
+                    />
+                    <Text className={styles.orderNo}>
+                      订单号：{order.order_uuid}
+                    </Text>
+                  </View>
+                  <View
+                    className={styles.detailBtn}
+                    onClick={() => handleOrderDetail(order)}
+                  >
+                    明细
+                  </View>
                 </View>
-                <View
-                  className={styles.detailBtn}
-                  onClick={() => handleOrderDetail(order)}
-                >
-                  明细
-                </View>
+                {order?.order_status === OrderStatus.AfterSale &&
+                  order?.remark && (
+                    <View className={styles.remark}>
+                      <Text
+                        className={styles.remarkText}
+                      >{`退款理由：${order.remark}`}</Text>
+                    </View>
+                  )}
               </View>
               <View className={styles.orderContent}>
                 <View className={styles.orderInfo}>
@@ -452,9 +536,7 @@ export default function OrderList({
         <BeadOrderDialog
           visible
           orderNumber={detailData.order_uuid}
-          productName={
-            detailData.design_info?.word_info?.bracelet_name || ""
-          }
+          productName={detailData.design_info?.word_info?.bracelet_name || ""}
           productCode={detailData.design_info?.design_id || ""}
           realImages={detailData.order_details?.actual_images || []}
           certificateImages={detailData.order_details?.certificate_images || []}

@@ -309,7 +309,7 @@ const ChatDesign = () => {
 
   return (
     <PageContainer
-      headerExtraContent={isDesigning ? "正在设计新方案..." : renderAssistant()}
+      headerExtraContent={isDesigning ? "正在分析中..." : renderAssistant()}
       showHome={false}
       onKeyboardHeightChange={handleKeyboardHeightChange}
     >

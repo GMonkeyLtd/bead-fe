@@ -8,7 +8,7 @@ const grayDomain = 'https://api-gray.gmonkey.top'
 // const domain = 'https://test.qianjunye.com'
 
 // 判断是否为开发环境
-const isTest = true
+const isTest = true;
 
 // 根据环境构建API基础URL
 const getBaseURL = () => {
@@ -135,9 +135,11 @@ const requestInterceptor = async (config: RequestConfig) => {
           Taro.redirectTo({
             url: pageUrls.merchantLogin,
           })
+        } else {
+          // 非商户端，跳转到登录页
+          AuthManager.login();
         }
-        // 可以选择抛出错误或者继续请求
-        // throw new Error('用户未登录');
+       
       }
     } catch (error) {
       console.error('获取认证信息失败:', error);

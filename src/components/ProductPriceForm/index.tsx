@@ -61,10 +61,17 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
         // 将图片转换为base64格式
         const base64Promises = res.tempFilePaths.map(async (filePath) => {
           try {
-            // 读取文件并转换为base64
+            // 压缩图片
+            const compressedRes = await Taro.compressImage({
+              src: filePath,
+              quality: 70, // 压缩质量，取值范围0-100
+            });
+            const compressedFilePath = compressedRes.tempFilePath;
+
+            // 读取压缩后的文件并转换为base64
             const fileRes = await new Promise<string>((resolve, reject) => {
               Taro.getFileSystemManager().readFile({
-                filePath: filePath,
+                filePath: compressedFilePath,
                 encoding: 'base64',
                 success: (res) => {
                   if (typeof res.data === 'string') {

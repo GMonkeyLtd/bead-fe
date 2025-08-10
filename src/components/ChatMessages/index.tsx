@@ -256,7 +256,7 @@ export default forwardRef<
         )}
         {isChatting && (
           <View className={styles.chatMessageItemContainer}>
-            <ChatLoading text="正在设计新方案..." />
+            <ChatLoading text="正在分析中..." />
           </View>
         )}
         <View

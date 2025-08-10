@@ -36,7 +36,7 @@ export default function OrderManagement() {
       order_status: status,
       after_sale_status: afterSaleStatus,
       page: 0,
-      page_size: 4,
+      page_size: 100,
     }).then((res: any) => {
       const orders = res.data.orders || [];
       setOrders(orders);

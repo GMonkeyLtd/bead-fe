@@ -160,6 +160,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.orderInfoContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
@@ -379,6 +385,13 @@
 }
 
 .orderTime {
+  font-size: 10px;
+  font-weight: 300;
+  color: rgba(31, 23, 34, 0.5);
+  opacity: 0.9;
+}
+
+.remark {
   font-size: 10px;
   font-weight: 300;
   color: rgba(31, 23, 34, 0.5);

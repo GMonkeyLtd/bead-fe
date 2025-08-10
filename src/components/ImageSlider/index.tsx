@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import Taro from '@tarojs/taro'
 import { Swiper, SwiperItem, Image, View } from '@tarojs/components'
 import './index.scss'
 
@@ -90,6 +91,12 @@ const ImageSlider: React.FC<ImageSliderProps> = ({
                   width: `${itemWidth}px`,
                   height: `${height}px`,
                   borderRadius: `${borderRadius}px`
+                }}
+                onClick={() => {
+                  Taro.previewImage({
+                    urls: images,
+                    current: image,
+                  })
                 }}
               />
             </View>

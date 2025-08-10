@@ -32,18 +32,17 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   const { keyboardHeight } = useKeyboardHeight();
 
   const handleConfirm = async () => {
-
     const userData = await userApi.getUserInfo();
     const { default_contact, phone, wechat_id } = userData?.data || {};
     if (default_contact === 0 && !phone) {
       Taro.redirectTo({
-        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`
+        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`,
       });
       return;
     }
     if (default_contact === 1 && !wechat_id) {
       Taro.redirectTo({
-        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`
+        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`,
       });
       return;
     }
@@ -51,21 +50,44 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
       onConfirm(referencePrice || 0);
       return;
     }
-    api.userHistory.createOrder({
-      design_id: parseInt(designNumber),
-      price: referencePrice
-    }).then((res) => {
-      const { order_uuid } = res?.data || {};
-      Taro.redirectTo({
-        url: `${pageUrls.orderDetail}?orderId=${order_uuid}`
-      }).then(() => {
-        onClose?.();
+
+    api.userHistory
+      .createOrder({
+        design_id: parseInt(designNumber),
+        price: referencePrice,
+      })
+      .then((res) => {
+        const { order_uuid } = res?.data || {};
+        Taro.getSetting({
+          success: (res) => {
+            console.log(res, 'res')
+          }
+        })
+        Taro.requestSubscribeMessage({
+          tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
+          complete:() => {
+            Taro.redirectTo({
+              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+            })
+          },
+          success: (res) => {
+            Taro.redirectTo({
+              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+            })
+          },
+          fail: () => Taro.redirectTo({
+              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+            })
+        });
       });
-    });
   };
 
   return (
-    <View className={`budget-dialog-overlay ${visible ? "visible" : ""}`} onClick={onClose} style={{ height: `calc(100vh - ${keyboardHeight}px)` }} >
+    <View
+      className={`budget-dialog-overlay ${visible ? "visible" : ""}`}
+      onClick={onClose}
+      style={{ height: `calc(100vh - ${keyboardHeight}px)` }}
+    >
       <View className="budget-dialog" onClick={(e) => e.stopPropagation()}>
         {/* 标题区域 */}
         <View className="budget-dialog-header">
