@@ -21,7 +21,8 @@ const OrderListDemo: React.FC = () => {
           productName: item.design_info?.word_info?.bracelet_name,
           orderImage: item.design_info?.image_url,
           budget: item.price || 0,
-          createTime: item.created_at
+          createTime: item.created_at,
+          afterSaleStatus: item.after_sale_status,
         }
       })
       setOrders(_orders);

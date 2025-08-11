@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image } from "@tarojs/components";
 import StatusBadge, { StatusBadgeType } from "@/components/StatusBadge";
-import { getStatusBadgeType, OrderStatus, OrderStatusMap } from "@/utils/orderUtils";
+import { AfterSaleStatus, formatOrderStatus, getStatusBadgeType, OrderStatus } from "@/utils/orderUtils";
 import phoneIcon from "@/assets/icons/phone.svg";
 import wechatIcon from "@/assets/icons/wechat.svg";
 import remarkIcon from "@/assets/icons/remark.svg";
@@ -20,6 +20,7 @@ export interface OrderItem {
   createTime: string;
   budget?: number; // 预算，用于显示"预算：不限"等
   merchantPhone?: string; // 商家电话
+  afterSaleStatus?: AfterSaleStatus;
 }
 
 interface OrderListProps {
@@ -53,9 +54,8 @@ const OrderListComp: React.FC<OrderListProps> = ({
   // };
 
   // 根据订单状态获取显示文本
-  const getStatusText = (status: OrderStatus): string => {
-
-    return OrderStatusMap[status];
+  const getStatusText = (status: OrderStatus, afterSaleStatus?: AfterSaleStatus): string => {
+    return formatOrderStatus(status, afterSaleStatus);
   };
 
   // 根据订单状态获取商家显示文本
@@ -139,7 +139,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
             <Text className={styles.orderNumber}>订单号：{order.orderNumber}</Text>
             <StatusBadge
               type={getStatusBadgeType(order.status)}
-              text={getStatusText(order.status)}
+              text={getStatusText(order.status, order.afterSaleStatus)}
             />
           </View>
 

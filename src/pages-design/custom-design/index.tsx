@@ -18,7 +18,6 @@ const CustomDesign = () => {
 
   // 使用ref获取子组件状态
   const customDesignRef = useRef<CustomDesignRingRef>(null);
-  console.log(draft, 'draft')
 
   useEffect(() => {
 

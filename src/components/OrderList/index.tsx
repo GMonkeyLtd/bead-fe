@@ -346,7 +346,7 @@ export default function OrderList({
                 className={styles.callBtn}
                 onClick={() => {
                   const addressInfo = order?.order_details?.address;
-                  const addressInfoStr = `${addressInfo.userName}\n${addressInfo.telNumber}\n${addressInfo.provinceName}${addressInfo.cityName}${addressInfo.countyName}\n${addressInfo.detailInfo}`;
+                  const addressInfoStr = `${addressInfo.user_name}\n${addressInfo.tel_number}\n${addressInfo.province_name}${addressInfo.city_name}${addressInfo.county_name}\n${addressInfo.detail_info}`;
                   Taro.showModal({
                     title: "收货地址",
                     content: addressInfoStr,
@@ -536,7 +536,7 @@ export default function OrderList({
         <BeadOrderDialog
           visible
           orderNumber={detailData.order_uuid}
-          productName={detailData.design_info?.word_info?.bracelet_name || ""}
+          productName={detailData.design_info?.word_info?.name || ""}
           productCode={detailData.design_info?.design_id || ""}
           realImages={detailData.order_details?.actual_images || []}
           certificateImages={detailData.order_details?.certificate_images || []}
@@ -551,6 +551,7 @@ export default function OrderList({
           })}
           onClose={handleClose}
           onConfirm={console.log}
+          wristSize={detailData.design_info?.word_info?.spec?.wrist_size || ""}
         />
       )}
       {/* 联系用户弹窗 */}

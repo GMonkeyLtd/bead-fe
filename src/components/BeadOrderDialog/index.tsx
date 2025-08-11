@@ -23,6 +23,7 @@ interface BeadOrderDialogProps {
   certificateImages: string[];
   onClose: () => void;
   onConfirm: () => void;
+  wristSize: string;
 }
 
 const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
@@ -37,11 +38,11 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
   materials,
   onClose,
   onConfirm,
+  wristSize,
 }) => {
   if (!visible) {
     return null;
   }
-
   const handleCopyOrderNumber = (orderNumber: string) => {
     Taro.setClipboardData({
       data: orderNumber,
@@ -80,17 +81,17 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
                 urls: [productImage],
               });
             }} />
-            <View className='product-info'>
-              <View className='product-details'>
-                <Text className='product-name'>{productName}</Text>
-                <Text className='product-code'>{`设计编号：${productCode}`}</Text>
-              </View>
-              {/* <Text className='product-quantity'>数量：{totalQuantity}</Text> */}
+            <View className='product-details'>
+              <Text className='product-name'>{productName}</Text>
+              <Text className='product-code'>{`设计编号：${productCode}`}</Text>
             </View>
           </View>
           <View className='budget-info'>
             <Text className='budget-text'>参考价：{budget}</Text>
           </View>
+        </View>
+        <View className='wrist-info'>
+          <Text className='wrist-text'>预估手围：{wristSize}cm</Text>
         </View>
 
         {/* 材料清单 */}

@@ -16,7 +16,6 @@ export const splitMessageItem = (message: MessageItem): MessageItem[] => {
   const guideTagIndex = contentParts.findIndex((part) =>
     part.includes(ASSISTANT_GUIDE_TAG)
   );
-  console.log(guideTagIndex, contentParts);
 
   const splitMessages = contentParts.map((part, index) => {
     let partContent = part;

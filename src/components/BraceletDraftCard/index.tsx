@@ -45,18 +45,14 @@ export const BraceletDraftCard = ({
     [draftId]
   );
 
-  // 控制Canvas的显示状态，生成完成后销毁
-  const [showCanvas, setShowCanvas] = useState(true);
-
   // 使用ref来防止重复生成图像
   const isGeneratingRef = useRef(false);
   const generatedBraceletImageRef = useRef<string | null>(null);
   const currentDraftRef = useRef<DraftData | null>(null);
 
   // 使用独立的CircleRing Canvas实例
-  const { generateCircleRing, canvasProps, cleanupCanvas } =
+  const { generateCircleRing } =
     useCircleRingCanvas({
-      canvasId: uniqueCanvasId,
       targetSize: 1024,
       isDifferentSize: true,
       fileType: "png",
@@ -76,13 +72,12 @@ export const BraceletDraftCard = ({
     return (
       draft?.beads?.length &&
       draft.beads.length > 0 &&
-      showCanvas &&
       shouldLoad &&
       !draft.bracelet_image &&
       !isGeneratingRef.current &&
       generatedBraceletImageRef.current !== draft.bracelet_image
     );
-  }, [draft?.beads?.length, draft?.bracelet_image, showCanvas, shouldLoad]);
+  }, [draft?.beads?.length, draft?.bracelet_image, shouldLoad]);
 
   // 更新currentDraftRef
   useEffect(() => {
@@ -101,7 +96,6 @@ export const BraceletDraftCard = ({
   }, [sessionId, draftId, draftData, byMerchant]);
 
   useEffect(() => {
-    console.log("draft", draft);
 
     // 防止重复生成的条件检查
     if (shouldGenerateImage && beadsForGeneration) {
@@ -243,30 +237,6 @@ export const BraceletDraftCard = ({
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* 隐藏的Canvas元素，用于绘制手串图像，生成完成后销毁 */}
-      {/* {showCanvas && ( */}
-      {/* <View style={{
-        width: canvasProps.style.width,
-        height: canvasProps.style.height,
-        visibility: "hidden",
-        position: "absolute",
-        top: "-999999px",
-        left: "-999999px",
-        zIndex: -100,
-      }}>
-          <Canvas
-            canvasId={canvasProps.canvasId}
-            id={canvasProps.id}
-            height={canvasProps.height}
-            width={canvasProps.width}
-            style={{
-              width: canvasProps.style.width,
-              height: canvasProps.style.height,
-              
-            }}
-          />
-      </View> */}
-      {/* )} */}
       <View className={styles.braceletDraftCardHeaderContainer}>
         <View
           className={styles.braceletDraftCardHeader}

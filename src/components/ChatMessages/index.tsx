@@ -44,7 +44,7 @@ const MessageItem = React.memo(({
     animationDelay: `${animationDelay}ms`,
   };
 
-  return message.role === "assistant" ? (
+  return ["assistant", 'system'].includes(message.role) ? (
     <View
       key={message.message_id}
       className={styles.chatMessageItemContainer}
@@ -147,7 +147,7 @@ export default forwardRef<
 
     // 使用 useMemo 缓存消息列表，避免不必要的重新渲染
     const messageItems = useMemo(() => {
-      const lastAssistantMessageWithDraft = messages.findLastIndex(message => message.role === "assistant" && message.draft_id);
+      const lastAssistantMessageWithDraft = messages.findLastIndex(message => message.draft_id);
       return messages.map((message, index) => {
         // 为新消息添加递增的动画延迟，让消息依次出现
         // 只有最近的消息才添加延迟，避免历史消息重复动画

@@ -49,7 +49,6 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
   showImages,
   isAfterSale,
 }) => {
-  console.log(name, productImages, 'productImages')
   return (
     <View className={styles.productPriceCard}>
       {/* 商家信息区域 */}

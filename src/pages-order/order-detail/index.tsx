@@ -304,15 +304,17 @@ const OrderDetail: React.FC = () => {
               merchant_trade_no,
               transaction_id,
             },
-            success() {
-              payApi
-                .confirmOrderCallback({ orderId: order?.order_uuid })
-                .then(() => {
-                  getOrderDetail();
-                })
-                .then(() => {
-                  getOrderDetail();
-                });
+            success(res) {
+              if (res.extraData.status === 'success') {
+                payApi
+                  .confirmOrderCallback({ orderId: order?.order_uuid })
+                  .then(() => {
+                    getOrderDetail();
+                  })
+                  .then(() => {
+                    getOrderDetail();
+                  });
+              }
             },
             fail() {
               console.log("fail");
@@ -553,19 +555,19 @@ const OrderDetail: React.FC = () => {
             orderAction={
               isSptCancel
                 ? {
-                    text: "取消订单",
-                    onClick: () => {
-                      setCancelDialogVisible(true);
-                    },
-                  }
+                  text: "取消订单",
+                  onClick: () => {
+                    setCancelDialogVisible(true);
+                  },
+                }
                 : isSptRefund
-                ? {
+                  ? {
                     text: "申请退款",
                     onClick: () => {
                       setCancelDialogVisible(true);
                     },
                   }
-                : undefined
+                  : undefined
             }
           />
         )}
@@ -584,34 +586,34 @@ const OrderDetail: React.FC = () => {
       {[OrderStatusEnum.InProgress, OrderStatusEnum.Negotiating].includes(
         orderStatus
       ) && (
-        <View className="order-action-container">
-          <CrystalButton
-            onClick={() => setShowJoinGroupQrcode(true)}
-            text="社群"
-            prefixIcon={
-              <Image
-                src={shareDesignImage}
-                mode="widthFix"
-                style={{ width: "24px", height: "24px" }}
-              />
-            }
-            style={{ marginTop: "20px", marginLeft: "24px" }}
-          />
-          <CrystalButton
-            onClick={() => setQrCodeVisible(true)}
-            isPrimary
-            text="联系商家"
-            style={{ flex: 1, marginTop: "20px", marginRight: "24px" }}
-            prefixIcon={
-              <Image
-                src={createBeadImage}
-                mode="widthFix"
-                style={{ width: "24px", height: "24px" }}
-              />
-            }
-          />
-        </View>
-      )}
+          <View className="order-action-container">
+            <CrystalButton
+              onClick={() => setShowJoinGroupQrcode(true)}
+              text="社群"
+              prefixIcon={
+                <Image
+                  src={shareDesignImage}
+                  mode="widthFix"
+                  style={{ width: "24px", height: "24px" }}
+                />
+              }
+              style={{ marginTop: "20px", marginLeft: "24px" }}
+            />
+            <CrystalButton
+              onClick={() => setQrCodeVisible(true)}
+              isPrimary
+              text="联系商家"
+              style={{ flex: 1, marginTop: "20px", marginRight: "24px" }}
+              prefixIcon={
+                <Image
+                  src={createBeadImage}
+                  mode="widthFix"
+                  style={{ width: "24px", height: "24px" }}
+                />
+              }
+            />
+          </View>
+        )}
 
       <QrCodeDialog
         visible={qrCodeVisible}
@@ -629,9 +631,9 @@ const OrderDetail: React.FC = () => {
 
       <JoinGroupQrcode
         groupInfo={{
-            name: "璞光集官方服务号",
-            qrCodeUrl: SERVICE_QRCODE_IMAGE_URL
-          }}
+          name: "璞光集官方服务号",
+          qrCodeUrl: SERVICE_QRCODE_IMAGE_URL
+        }}
         showQRCode={showJoinGroupQrcode}
         onClose={() => setShowJoinGroupQrcode(false)}
       />

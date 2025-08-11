@@ -24,6 +24,7 @@ const INIT_MESSAGE = [
 
 const ChatDesign = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
+  const { year, month, day, hour, gender, isLunar, session_id } = params || {};
   const byMerchant = params?.is_merchant === "true";
 
   const [isDesigning, setIsDesigning] = useState(false);
@@ -38,7 +39,7 @@ const ChatDesign = () => {
   const spareHeight = useMemo(() => {
     const inputHeight =
       recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
-    return inputHeight;
+    return inputHeight + 20;
   }, [recommendTags]);
 
   // 依次显示消息的函数
@@ -68,10 +69,11 @@ const ChatDesign = () => {
           } else {
             if (waitTime < 3000) {
               waitTime = 3000;
+            } else if (waitTime > 10000) {
+              waitTime = 8000;
             }
           }
 
-          // 2秒后显示下一条消息
           if (currentIndex + 1 < messages.length) {
             setTimeout(() => {
               currentIndex++;
@@ -140,13 +142,33 @@ const ChatDesign = () => {
       });
   };
 
+  const formatMessages = (messages: ChatMessageItem[]) => {
+    // 兼容以/n分割的场景
+    const splitMessages = splitMessage(messages);
+    const newMessages = splitMessages.map((message) => {
+      if (message.draft_id) {
+        message.draft_index = draftIndexRef.current;
+        draftIndexRef.current++;
+      }
+      return message;
+    });
+    // 获取newMessages中最后一个role为assistant的message
+    const lastMessageWithRecommends = newMessages
+      .slice()
+      .reverse()
+      .find((message) => message.recommends);
+    return {
+      messages: newMessages,
+      recommends: lastMessageWithRecommends?.recommends || [],
+    };
+  }
+
   const querySessionHistory = async (
     session_id: string,
     isFirst = false,
     is_merchant?: boolean
   ) => {
     try {
-      draftIndexRef.current = 1;
       let histroyRes = {};
       if (is_merchant) {
         histroyRes = await apiSession.getChatHistoryByMerchant({ session_id });
@@ -155,22 +177,12 @@ const ChatDesign = () => {
       }
 
       const messages = histroyRes?.data?.messages || [];
+      // 重置draftIndex
+      draftIndexRef.current = 1;
       const messagesWithoutUserInfo = messages.filter(
         (message, index) => !(message.role == "user" && index === 0)
       );
-      const splitMessages = splitMessage(messagesWithoutUserInfo);
-      const newMessages = splitMessages.map((message) => {
-        if (message.draft_id) {
-          message.draft_index = draftIndexRef.current;
-          draftIndexRef.current++;
-        }
-        return message;
-      });
-      // 获取newMessages中最后一个role为assistant的message
-      const lastAssistantMessage = newMessages
-        .slice()
-        .reverse()
-        .find((message) => message.role === "assistant");
+      const { messages: newMessages, recommends } = formatMessages(messagesWithoutUserInfo);
       // 有历史会话
       if (!isFirst) {
         const newMessagesWithInit = [
@@ -183,17 +195,12 @@ const ChatDesign = () => {
           ...newMessages,
         ];
         setChatMessages(newMessagesWithInit);
-        if (
-          lastAssistantMessage?.recommends &&
-          lastAssistantMessage.recommends.length > 0
-        ) {
-          setRecommendTags(lastAssistantMessage.recommends);
-        }
+        setRecommendTags(recommends || []);
       } else {
         // 无历史对话，都是新消息
         showMessagesSequentially(
           newMessages,
-          lastAssistantMessage?.recommends || []
+          recommends
         );
       }
     } catch (error) {
@@ -202,13 +209,13 @@ const ChatDesign = () => {
   };
 
   useEffect(() => {
-    const { year, month, day, hour, gender, isLunar, session_id } =
-      params || {};
     if (session_id) {
-      console.log('chat session_id', session_id, byMerchant)
       setSessionId(session_id);
       querySessionHistory(session_id, false, byMerchant);
     }
+  }, [byMerchant, session_id]);
+
+  useEffect(() => {
     if (year && month && day && hour && gender && isLunar) {
       showMessagesSequentially(
         INIT_MESSAGE.map((item, index) => ({
@@ -220,7 +227,7 @@ const ChatDesign = () => {
       );
       setTimeout(() => {
         setIsDesigning(true);
-      }, 6000);
+      }, 4000);
       initChat({
         birth_year: parseInt(year || "0") || 0,
         birth_month: parseInt(month || "0") || 0,
@@ -230,7 +237,7 @@ const ChatDesign = () => {
         is_lunar: isLunar === "true" ? true : false,
       });
     }
-  }, [params]);
+  }, [year, month, day, hour, gender, isLunar]);
 
   const renderAssistant = () => {
     return (
@@ -260,6 +267,7 @@ const ChatDesign = () => {
   const handleSend = async (tag) => {
     const content = inputValue || tag;
     if (isEmptyMessage(content) || isDesigning) return;
+    setRecommendTags([])
     setChatMessages((prev) => [
       ...prev,
       {
@@ -272,27 +280,39 @@ const ChatDesign = () => {
     chatMessagesRef.current?.scrollToBottom();
     setIsDesigning(true);
     setInputValue("");
-    apiSession
-      .chat({
-        session_id: sessionId,
-        message: content,
-      })
-      .then((res) => {
-        // 处理返回的消息，按照2秒一条的速度依次显示
-        const splitMessages = splitMessage(res.data?.messages || []);
-        const processedMessages = splitMessages.map((message) => {
-          if (message.draft_id) {
-            message.draft_index = draftIndexRef.current;
-            draftIndexRef.current++;
-          }
-          return message;
+
+    // 重试机制
+    const maxRetries = 0;
+    let retryCount = 0;
+    console.log(sessionId, '请求定制的sessionId')
+    const attemptRequest = async () => {
+      try {
+        const res = await apiSession.chat({
+          session_id: sessionId,
+          message: content,
         });
-        // 使用依次显示函数
-        showMessagesSequentially(processedMessages, res.data.recommends || []);
-      })
+        // 处理返回的消息，按照2秒一条的速度依次显示
+        const { messages: newMessages, recommends } = formatMessages(res.data?.messages || []);
+        showMessagesSequentially(newMessages, recommends);
+        return res;
+      } catch (err) {
+        retryCount++;
+        if (retryCount < maxRetries) {
+          console.log(`请求失败，第${retryCount}次重试...`);
+          // 等待1秒后重试
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return attemptRequest();
+        } else {
+          // 重试3次后仍未成功，抛出错误
+          throw new Error('哎呀～水晶能量场暂时波动中，请稍后再试');
+        }
+      }
+    };
+
+    attemptRequest()
       .catch((err) => {
         Taro.showToast({
-          title: "定制失败:" + JSON.stringify(err),
+          title: err.message,
           icon: "none",
         });
       })
@@ -381,7 +401,7 @@ const ChatDesign = () => {
                 />
                 <Image
                   src={
-                    !isEmptyMessage(inputValue) && !isDesigning
+                    !isEmptyMessage(inputValue) && !isDesigning && !hasMoreMessages
                       ? activeSendSvg
                       : sendSvg
                   }

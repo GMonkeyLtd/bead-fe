@@ -15,7 +15,6 @@ interface CircleRingConfig {
   targetSize?: number;   // 保存图片的尺寸
   isDifferentSize?: boolean;   // 是否区分珠子尺寸
   fileType?: "png" | "jpg" | "jpeg";   // 文件类型
-  canvasId?: string;    // canvas id
 }
 
 interface CircleRingResult {
@@ -36,9 +35,13 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   } = config;
 
   const canvas = useMemo(
-    () => Taro.createOffscreenCanvas({ type: '2d', width: targetSize, height: targetSize }),
+    () => {
+      return Taro.createOffscreenCanvas({ type: '2d', width: targetSize, height: targetSize })
+    },
     [targetSize]
   );
+
+  console.log(canvas, 'canvas')
 
   // 使用useRef存储结果，避免循环渲染
   const resultsRef = useRef<Map<string, CircleRingResult>>(new Map());

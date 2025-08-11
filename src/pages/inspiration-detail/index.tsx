@@ -325,6 +325,7 @@ const InspirationDetailPage: React.FC = () => {
           beads={designData?.info?.beads}
           title={designData?.info?.name}
           onClose={() => setBraceletDetailDialogShow(false)}
+          wristSize={designData?.info?.spec?.wrist_size}
         />
       )}
     </CrystalContainer>

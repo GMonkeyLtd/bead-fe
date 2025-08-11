@@ -33,7 +33,6 @@ const LogisticsCard: React.FC<LogisticsCardProps> = ({
     onViewLogistics,
 }) => {
 
-    console.log(address, 'address')
     const transformLogisticsStatus = (status: number) => {
         switch (status) {
             case 0:

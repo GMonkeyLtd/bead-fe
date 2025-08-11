@@ -71,7 +71,7 @@ export default {
     return http.get<any>(`/user/orders/${params.order_id}/confirm_receipt`, undefined, config);
   },
   confirmOrderCallback: (params: { orderId: string }, config?: ApiConfig) =>
-    http.get<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, undefined, config),
+    http.post<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, { success: true, }, config),
   confirmReceiptCallback: (params: { orderId: string }, config?: ApiConfig) =>
     http.get<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, undefined, config),
 };

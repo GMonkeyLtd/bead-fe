@@ -3,7 +3,7 @@ import http from "./request";
 
 export interface MessageItem {
   message_id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   created_at: string;
   draft_id?: string;
@@ -55,7 +55,7 @@ export interface CreateSessionResponse extends BaseResponse {
 
 export interface ChatMessageItem {
   message_id: string;
-  role: "assistant" | "user";
+  role: "assistant" | "user" | "system";
   content: string;
   created_at: string;
   draft_id?: string;
@@ -67,7 +67,7 @@ export interface ChatResponse extends BaseResponse {
     messages: {
       session_id: string;
       message_id: string;
-      role: "assistant" | "user";
+      role: "assistant" | "user" | "system";
       content: string;
       recommends: string[];
       created_at: string;
@@ -163,6 +163,7 @@ export default {
     },
     config?: ApiConfig
   ) => {
+    
     return http.post<ChatResponse>(
       `/user/sessions/${params.session_id}/chat`,
       { message: params.message },

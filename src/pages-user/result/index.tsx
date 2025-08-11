@@ -48,6 +48,7 @@ const Result = () => {
   const [referencePrice, setReferencePrice] = useState<number>(0);
   const [designSessionId, setDesignSessionId] = useState<string>("");
   const [designDraftId, setDesignDraftId] = useState<string>("");
+  const [braceletSpec, setBraceletSpec] = useState<any>({});
   const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
 
   const instance = Taro.getCurrentInstance();
@@ -69,6 +70,7 @@ const Result = () => {
           recommend_beads,
           rizhu,
           wuxing,
+          spec
         } = info;
         setBeadsInfo(info.beads);
         setImageUrl(image_url);
@@ -81,6 +83,7 @@ const Result = () => {
         setReferencePrice(reference_price);
         setDesignSessionId(session_id);
         setDesignDraftId(draft_id);
+        setBraceletSpec(spec);
   }
 
   useEffect(() => {
@@ -126,7 +129,7 @@ const Result = () => {
     });
     try {
       const res = await Taro.request({
-        url: 'https://api-gray.gmonkey.top/api/generate-share-poster',
+        url: 'https://api.gmonkey.top/api/generate-share-poster',
         method: "POST",
         header: {
           'Content-Type': 'application/json'
@@ -497,6 +500,7 @@ const Result = () => {
           beads={beadsInfo}
           title={braceletName}
           onClose={() => setBraceletDetailDialogShow(false)}
+          wristSize={braceletSpec?.wrist_size}
         />
       )}
     </View>
