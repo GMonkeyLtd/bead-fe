@@ -3,15 +3,18 @@ import { AuthManager } from './auth'
 import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
+
+
  const domain = 'https://api.gmonkey.top' 
 const grayDomain = 'https://api-gray.gmonkey.top'
 // const domain = 'https://test.qianjunye.com'
 
-// 判断是否为开发环境
-const isTest = true;
-
 // 根据环境构建API基础URL
 const getBaseURL = () => {
+  const accountInfo = Taro.getAccountInfoSync();
+
+  const isTest = accountInfo.miniProgram.envVersion !== 'release';
+  console.log("运行环境：", accountInfo.miniProgram.envVersion)
   const apiDomain = isTest ? grayDomain : domain
   const fullURL = apiDomain + '/api/v1'
   

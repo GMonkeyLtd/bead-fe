@@ -35,6 +35,10 @@ const ChatDesign = () => {
   const chatMessagesRef = useRef<ChatMessagesRef>(null);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const draftIndexRef = useRef(1);
+  
+  // 添加防重复执行的ref
+  const hasInitializedRef = useRef(false);
+  const hasShownInitMessagesRef = useRef(false);
 
   const spareHeight = useMemo(() => {
     const inputHeight =
@@ -156,7 +160,7 @@ const ChatDesign = () => {
     const lastMessageWithRecommends = newMessages
       .slice()
       .reverse()
-      .find((message) => message.recommends);
+      .find((message) => message.role !== "user");
     return {
       messages: newMessages,
       recommends: lastMessageWithRecommends?.recommends || [],
@@ -194,7 +198,7 @@ const ChatDesign = () => {
           })),
           ...newMessages,
         ];
-        setChatMessages(newMessagesWithInit);
+        setChatMessages(newMessagesWithInit as any);
         setRecommendTags(recommends || []);
       } else {
         // 无历史对话，都是新消息
@@ -209,14 +213,22 @@ const ChatDesign = () => {
   };
 
   useEffect(() => {
-    if (session_id) {
+    console.log('history useEffect')
+    if (session_id && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
       setSessionId(session_id);
       querySessionHistory(session_id, false, byMerchant);
     }
+  return () => {
+    console.log('history unmount')
+  }
   }, [byMerchant, session_id]);
 
   useEffect(() => {
-    if (year && month && day && hour && gender && isLunar) {
+    console.log('INIT useEffect', hasInitializedRef.current, year, month, day, hour, gender, isLunar)
+    if (year && month && day && hour && gender && isLunar && !hasShownInitMessagesRef.current) {
+      hasShownInitMessagesRef.current = true;
+      
       showMessagesSequentially(
         INIT_MESSAGE.map((item, index) => ({
           message_id: Date.now().toString() + index,
@@ -236,6 +248,9 @@ const ChatDesign = () => {
         sex: parseInt(gender || "0"),
         is_lunar: isLunar === "true" ? true : false,
       });
+    }
+    return () => {
+      console.log('INIT unmount')
     }
   }, [year, month, day, hour, gender, isLunar]);
 
@@ -266,7 +281,7 @@ const ChatDesign = () => {
   // 发送消息
   const handleSend = async (tag) => {
     const content = inputValue || tag;
-    if (isEmptyMessage(content) || isDesigning) return;
+    if (isEmptyMessage(content) || isDesigning || hasMoreMessages) return;
     setRecommendTags([])
     setChatMessages((prev) => [
       ...prev,

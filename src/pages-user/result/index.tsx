@@ -63,27 +63,27 @@ const Result = () => {
 
   const processDesignData = (designData) => {
     const { design_id, image_url, info, reference_price, session_id, draft_id } =
-          designData || {};
-        const {
-          name,
-          description,
-          recommend_beads,
-          rizhu,
-          wuxing,
-          spec
-        } = info;
-        setBeadsInfo(info.beads);
-        setImageUrl(image_url);
-        setBraceletName(name);
-        setBeadDescriptions(recommend_beads);
-        setDesignNo(design_id);
-        setBraceletDescription(description);
-        setRizhuInfo(rizhu || wuxing?.[0]);
-        setWuxingInfo(wuxing);
-        setReferencePrice(reference_price);
-        setDesignSessionId(session_id);
-        setDesignDraftId(draft_id);
-        setBraceletSpec(spec);
+      designData || {};
+    const {
+      name,
+      description,
+      recommend_beads,
+      rizhu,
+      wuxing,
+      spec
+    } = info;
+    setBeadsInfo(info.beads);
+    setImageUrl(image_url);
+    setBraceletName(name);
+    setBeadDescriptions(recommend_beads);
+    setDesignNo(design_id);
+    setBraceletDescription(description);
+    setRizhuInfo(rizhu || wuxing?.[0]);
+    setWuxingInfo(wuxing);
+    setReferencePrice(reference_price);
+    setDesignSessionId(session_id);
+    setDesignDraftId(draft_id);
+    setBraceletSpec(spec);
   }
 
   useEffect(() => {
@@ -275,9 +275,9 @@ const Result = () => {
       urls: [imageUrl],
     });
   };
-  
+
   const handleModifyDesign = () => {
-    Taro.navigateTo({
+    Taro.redirectTo({
       url: `${pageUrls.customDesign}?designId=${designNo}&sessionId=${designSessionId}&draftId=${designDraftId}&from=result`,
     });
   };
@@ -459,7 +459,7 @@ const Result = () => {
             />
           }
         />
-        <CrystalButton
+        {designSessionId && referencePrice && (<CrystalButton
           onClick={doCreate}
           isPrimary
           text="制作成品"
@@ -471,7 +471,7 @@ const Result = () => {
               style={{ width: "24px", height: "24px" }}
             />
           }
-        />
+        />)}
       </View>
       {budgetDialogShow && (
         <BudgetDialog

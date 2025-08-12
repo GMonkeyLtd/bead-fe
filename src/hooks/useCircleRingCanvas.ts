@@ -41,8 +41,6 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     [targetSize]
   );
 
-  console.log(canvas, 'canvas')
-
   // 使用useRef存储结果，避免循环渲染
   const resultsRef = useRef<Map<string, CircleRingResult>>(new Map());
   const processingQueueRef = useRef<Set<string>>(new Set());

@@ -12,7 +12,6 @@ const CustomDesign = () => {
   const [beadTypeMap, setBeadTypeMap] = useState<any>({});
   const [allBeadList, setAllBeadList] = useState<any[]>([]);
   const { draft, startPolling } = usePollDraft({ showLoading: true });
-  const [designData, setDesignData] = useState<any>({});
 
   const { draftId, sessionId, designId, from } = Taro.getCurrentInstance()?.router?.params || {};
 
@@ -30,9 +29,30 @@ const CustomDesign = () => {
     beadsApi.getBeadList({ showLoading: true }).then((res) => {
       const resData = res.data;
       setAllBeadList(resData);
+      
+      // 按id对珠子进行聚合
+      const aggregatedBeads = resData.reduce((acc: Record<string, any>, item: any) => {
+        const key = `${item.id}_${item.name}`;
+        if (acc[key]) {
+          acc[key].beadList.push(item);
+        } else {
+          acc[key] = {
+            id: item.id,
+            name: item.name,
+            wuxing: item.wuxing || [] ,
+            beadList: [item]
+          };
+        }
+        return acc;
+      }, {});
+      
+      // 转换为数组格式
+      const aggregatedBeadList = Object.values(aggregatedBeads);
+
       setBeadTypeMap(
-        resData.reduce((acc, item) => {
-          (item.wuxing || []).forEach((wuxingValue) => {
+        aggregatedBeadList.reduce((acc: Record<string, any[]>, item: any) => {
+          // 使用第一个item的wuxing属性
+          (item.wuxing || []).forEach((wuxingValue: string) => {
             if (acc[wuxingValue]) {
               acc[wuxingValue].push(item);
             } else {
@@ -75,18 +95,22 @@ const CustomDesign = () => {
     if (!imageUrl || !sessionId || !draftId) {
       return;
     }
-    if (from === 'result' && !checkDeadsDataChanged(draft?.beads || [], editedBeads || [])) {
+    if (from === 'result' && !checkDeadsDataChanged((draft as any)?.beads || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}&imageUrl=${encodeURIComponent(imageUrl)}`,
       });
       return;
     }
     const beads = editedBeads.map((item) => {
-      const _beadData = allBeadList?.find((_item) => _item.id == item.id);
+      // 优先使用allBeadList珠子库中的数据
+      let _beadData = allBeadList?.find((_item) => _item.id == item.id);
+      if (!_beadData) {
+        // 如果allBeadList中没有找到，则使用draft中的老数据
+        _beadData = draft?.beads?.find((_item) => _item.bead_id == item.id) || {};
+      }
       return {
         ..._beadData,
         diameter: item.diameter,
-        bead_id: item.bead_id,
       };
     })
 
@@ -124,7 +148,7 @@ const CustomDesign = () => {
 
   const handleBack = () => {
     const { image_url, beads } = getCustomDesignState();
-    const oldBeads = draft?.beads;
+    const oldBeads = (draft as any)?.beads;
    
     if (!checkDeadsDataChanged(oldBeads || [], beads || [])) {
       onDirectBack(image_url);
@@ -163,19 +187,17 @@ const CustomDesign = () => {
     <PageContainer onBack={handleBack}>
       <CustomDesignRing
         ref={customDesignRef}
-        beads={(draft?.beads || [])?.map((item) => {
+        beads={(draft?.beads || [])?.map((item: any) => {
           return {
-            id: item.id,
-            image_url: item.image_url,
+            ...item,
             render_diameter: item.diameter * CUSTOM_RENDER_RATIO,
-            diameter: item.diameter,
           };
         })}
         beadTypeMap={beadTypeMap}
         // 移除onChange回调
         // onChange={onChange}
         onOk={onCreate}
-        renderRatio={3}
+        renderRatio={CUSTOM_RENDER_RATIO}
       />
     </PageContainer>
   );

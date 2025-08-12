@@ -58,7 +58,6 @@ export const usePollDesign = (options?: UsePollDesignOptions) => {
 
   const getDesign = useCallback(
     async ({ designId }: { designId: string; }) => {
-      console.log('getDesign', designId)
       // 同一个 designId：取消旧请求与定时器，避免重复轮询
       clearTimer(designId);
       cancelRequest(designId);
@@ -81,6 +80,9 @@ export const usePollDesign = (options?: UsePollDesignOptions) => {
           clearTimer(designId);
           cancelRequest(designId);
           return true; // 停止轮询
+        } else if (!!res?.data?.design_id) {
+          // 更新文字
+          setDesign(res?.data);
         }
         return false; // 继续轮询
       };

@@ -48,7 +48,6 @@ const InspirationDetailPage: React.FC = () => {
 
   const [detail, setDetail] = useState<InspirationWord | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { height: navBarHeight } = getNavBarHeightAndTop();
   const getInspirationDetail = async (work_id) => {
     try {
@@ -90,7 +89,7 @@ const InspirationDetailPage: React.FC = () => {
   }
 
   useEffect(() => {
-    getData() 
+    getData()
     if (workId) {
       inspirationApi.viewWorkDetail({ work_id: workId })
     }
@@ -122,43 +121,43 @@ const InspirationDetailPage: React.FC = () => {
     });
   };
 
-    // 处理收藏点击
-    const handleCollectClick = (e: any) => {
-      e.stopPropagation();
-      if (detail?.is_collect) {
-        inspirationApi
-          .cancelCollectInspiration({ work_id: detail.work_id })
-          .then(() => {
-            Taro.showToast({
-              title: "取消收藏成功",
-              icon: "success",
-            });
-            getData();
-          })
-          .catch((err) => {
-            Taro.showToast({
-              title: "取消收藏失败",
-              icon: "none",
-            });
+  // 处理收藏点击
+  const handleCollectClick = (e: any) => {
+    e.stopPropagation();
+    if (detail?.is_collect) {
+      inspirationApi
+        .cancelCollectInspiration({ work_id: detail.work_id })
+        .then(() => {
+          Taro.showToast({
+            title: "取消收藏成功",
+            icon: "success",
           });
-      } else {
-        inspirationApi
-          .collectInspiration({ work_id: detail.work_id })
-          .then(() => {
-            Taro.showToast({
-              title: "收藏成功",
-              icon: "success",
-            });
-            getData();
-          })
-          .catch((err) => {
-            Taro.showToast({
-              title: "收藏失败",
-              icon: "none",
-            });
+          getData();
+        })
+        .catch((err) => {
+          Taro.showToast({
+            title: "取消收藏失败",
+            icon: "none",
           });
-      }
-    };
+        });
+    } else {
+      inspirationApi
+        .collectInspiration({ work_id: detail.work_id })
+        .then(() => {
+          Taro.showToast({
+            title: "收藏成功",
+            icon: "success",
+          });
+          getData();
+        })
+        .catch((err) => {
+          Taro.showToast({
+            title: "收藏失败",
+            icon: "none",
+          });
+        });
+    }
+  };
 
 
   const formatTime = (timestamp: string) => {
@@ -269,9 +268,9 @@ const InspirationDetailPage: React.FC = () => {
               {designData?.info?.description}
             </Text>
             {/* 珠子信息区域 */}
-            <BeadList 
+            <BeadList
               beads={designData?.info?.recommend_beads}
-              />
+            />
             {/* 作者和时间 */}
             <View className={styles.workDetailContainer}>
               <View className={styles.authorTimeSection}>
@@ -290,7 +289,7 @@ const InspirationDetailPage: React.FC = () => {
                   {formatTime(detail.created_at)}
                 </Text>
               </View>
-            <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 ></View>
+              <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 ></View>
             </View>
           </View>
         </View>
@@ -299,7 +298,7 @@ const InspirationDetailPage: React.FC = () => {
       {/* 底部按钮 */}
       <View className={styles.bottomBar}>
         {/* <View className={styles.separator} /> */}
-        <CrystalButton
+        {designData?.session_id && designData?.reference_price && (<CrystalButton
           onClick={() => {
             Taro.showToast({
               title: "敬请期待",
@@ -314,9 +313,9 @@ const InspirationDetailPage: React.FC = () => {
               style={{ width: "24px", height: "24px" }}
             />
           }
-          style={{ width: "220px", margin: "24px 0 24px",  }}
+          style={{ width: "220px", margin: "24px 0 24px", }}
           isPrimary={true}
-        />
+        />)}
       </View>
 
       {braceletDetailDialogShow && designData?.info?.beads?.length > 0 && (

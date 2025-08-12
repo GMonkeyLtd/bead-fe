@@ -12,7 +12,7 @@ import Taro from "@tarojs/taro";
 import { ImageCacheManager } from "@/utils/image-cache";
 import CrystalButton from "../CrystalButton";
 import "./CustomDesignRing.scss";
-import { computeBraceletLength } from "@/utils/cystal-tools";
+import { computeBraceletLength, calculateBeadArrangementBySize } from "@/utils/cystal-tools";
 import CircleRing, { CircleRingImage } from "../CircleRing";
 import { BEADS_SIZE_RENDER } from "@/config/beads";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
@@ -113,6 +113,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     isDifferentSize: true,
     fileType: "png",
   });
+  console.log(beads, 'beads')
 
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({
@@ -396,69 +397,13 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
     ringRadius: number
   ): Position[] {
     if (!dots.length) return [];
+    const positions = calculateBeadArrangementBySize(ringRadius, dots.map(dot => dot.render_diameter), { x: canvasSize / 2, y: canvasSize / 2 }, false);
 
-    const positions: Position[] = [];
-    const center = canvasSize / 2;
-
-    // 首先计算所有相邻珠子之间的角度
-    const angles: number[] = [];
-    let totalAngle = 0;
-
-    for (let i = 0; i < dots.length; i++) {
-      const j = (i + 1) % dots.length;
-      const r1 = dots[i].render_diameter / 2;
-      const r2 = dots[j].render_diameter / 2;
-      const L = r1 + r2 + spacing;
-
-      // 确保不会出现无效的计算
-      const sinValue = Math.min(1, L / (2 * ringRadius));
-      const theta = 2 * Math.asin(sinValue);
-
-      if (!isFinite(theta) || theta <= 0) {
-        // 如果计算出现问题，使用均匀分布作为备用方案
-        console.warn("角度计算异常，使用均匀分布");
-        const uniformAngle = (2 * Math.PI) / dots.length;
-        for (let k = 0; k < dots.length; k++) {
-          positions.push({
-            ...dots[k],
-            radius: dots[k].render_diameter / 2,
-            x: center + ringRadius * Math.cos(k * uniformAngle),
-            y: center + ringRadius * Math.sin(k * uniformAngle),
-            angle: k * uniformAngle,
-          });
-        }
-        return positions;
-      }
-
-      angles.push(theta);
-      totalAngle += theta;
-    }
-
-    // 如果总角度不等于2π，进行比例调整以避免重叠或间隙
-    const targetAngle = 2 * Math.PI;
-    const angleRatio = targetAngle / totalAngle;
-
-    // 重新分布角度，确保总和为2π
-    const adjustedAngles = angles.map((angle) => angle * angleRatio);
-
-    // 根据调整后的角度计算位置
-    let currentAngle = 0;
-    for (let i = 0; i < dots.length; i++) {
-      const radius = dots[i].render_diameter / 2;
-
-      positions.push({
-        ...dots[i],
-        radius: radius,
-        x: center + ringRadius * Math.cos(currentAngle),
-        y: center + ringRadius * Math.sin(currentAngle),
-        angle: currentAngle,
-      });
-
-      // 更新角度
-      currentAngle += adjustedAngles[i];
-    }
-
-    return positions;
+    const newDots = dots.map((item, index) => ({
+      ...item,
+      ...positions[index],
+    }))
+    return newDots as unknown as Position[];
   }
 
   // 优化：防抖Canvas绘制
@@ -679,13 +624,13 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   }, [selectedBeadIndex, dots, updateBeads]);
 
   const handleBeadClick = useCallback(
-    (bead: any, size: number) => {
+    (bead: any) => {
       
       const newDots = [...dots];
 
       if (selectedBeadIndex === -1) {
         
-        if (predictedLength + size * 0.1  > 23) {
+        if (predictedLength + bead.diameter * 0.1  > 23) {
           Taro.showToast({
             title: "哎呀，珠子有点多啦！一般手围建议不超过23cm噢。",
             icon: "none",
@@ -696,14 +641,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
        
         newDots.push({
           ...bead,
-          render_diameter: size * renderRatio,
-          diameter: size,
+          render_diameter: bead.diameter * renderRatio,
+          diameter: bead.diameter,
         });
       } else {
         newDots[selectedBeadIndex] = {
           ...bead,
-          render_diameter: size * renderRatio,
-          diameter: size,
+          render_diameter: bead.diameter * renderRatio,
+          diameter: bead.diameter,
         };
       }
       updateBeads(newDots);
@@ -725,7 +670,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
   }, [clearCanvasContext]);
 
   const renderBeads = () => {
-    const typeBeads = beadTypeMap[curWuxing];
+    const typeBeads = beadTypeMap[curWuxing] || [];
     if (!typeBeads || typeBeads.length === 0) return null;
     return (
       <View
@@ -747,10 +692,10 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
           // boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.1)",
         }}
       >
-        {typeBeads?.map((item: any) => {
+        {typeBeads?.map((typeBead: any) => {
           return (
             <View
-              key={item.id}
+              key={`${typeBead.id}-${typeBead.name}`}
               style={{
                 width: "100%",
                 height: "120px",
@@ -769,11 +714,11 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
                   alignItems: "center",
                 }}
               >
-                {BEADS_SIZE_RENDER.map((beadItem) => {
+                {typeBead.beadList.sort((a, b) => a.diameter - b.diameter).map((beadItem) => {
                   return (
                     <View
-                      key={`${item.id}-${beadItem.diameter}`}
-                      onClick={() => handleBeadClick(item, beadItem.diameter)}
+                      key={`${beadItem.name}-${beadItem.diameter}`}
+                      onClick={() => handleBeadClick(beadItem)}
                       style={{
                         flexShrink: 0,
                         width: "80px",
@@ -796,10 +741,10 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
                         }}
                       >
                         <Image
-                          src={item.image_url}
+                          src={beadItem.image_url}
                           style={{
-                            width: `${beadItem.render_diameter}px`,
-                            height: `${beadItem.render_diameter}px`,
+                            width: `${beadItem.diameter * renderRatio}px`,
+                            height: `${beadItem.diameter * renderRatio}px`,
                           }}
                         />
                       </View>
@@ -811,7 +756,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, {
                           marginTop: "4px",
                         }}
                       >
-                        {item.name}
+                        {beadItem.name}
                       </View>
                       <View
                         style={{
