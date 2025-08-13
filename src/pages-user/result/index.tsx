@@ -292,7 +292,6 @@ const Result = () => {
       }}
     >
       <AppHeader isWhite onBack={() => {
-        console.log(from, "from");
         if (from === "chat") {
           Taro.redirectTo({
             url: pageUrls.chatDesign + "?session_id=" + sessionId,

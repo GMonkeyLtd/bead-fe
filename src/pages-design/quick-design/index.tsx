@@ -173,7 +173,9 @@ const QuickDesign = () => {
       image_url: base64 as string,
     });
     if (res.data?.design_id) {
-      setProgressTip(progressTipText(res?.data?.design_id));
+      setTimeout(() => {
+        setProgressTip(progressTipText(res?.data?.design_id));
+      }, 3000);
       pollDesignProgress(sessionId, draftId, res.data?.design_id);
     }
   };
