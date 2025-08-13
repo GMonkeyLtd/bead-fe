@@ -25,24 +25,20 @@ const RingInfoDisplay: React.FC<RingInfoDisplayProps> = ({
   return (
     <View className="ring-info-display">
 
-      <View className="view-effect-container">
         <View
           className={`view-effect-button ${!imageUrl ? 'disabled' : ''}`}
           onClick={onAddAccessory}
         >
           添加配饰
         </View>
-      </View>
 
       {/* 查看效果按钮 */}
-      <View className="view-effect-container">
         <View
           className={`view-effect-button ${!imageUrl ? 'disabled' : ''}`}
           onClick={handleViewEffect}
         >
           查看效果
         </View>
-      </View>
     </View>
   );
 };

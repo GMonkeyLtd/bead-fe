@@ -2,7 +2,9 @@
   width: 100%;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 16px;
+  padding: 16px 20px 0 0;
 }
 
 .view-effect-container {
@@ -14,15 +16,23 @@
 }
 
 .view-effect-button {
-  border: 1px solid #f5d8be;
-  background: #e4c0a038;
-  border-radius: 8px;
-  padding: 4px 8px;
-  font-size: 14px;
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  padding: 10px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  border-radius: 100px;
+  background: #000;
+
+  color: #FFF;
+  text-align: center;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
   letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.2s ease;
 
   &.disabled {
     opacity: 0.5;
