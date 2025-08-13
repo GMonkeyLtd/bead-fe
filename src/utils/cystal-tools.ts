@@ -173,7 +173,7 @@ export const calculateBeadArrangementBySize = (
 ) => {
   // 参考CustomDesignRing的calcRingRadius计算方式
   // 先计算所有珠子的渲染直径总和
-  const totalRenderDiameter = beadSizeList.reduce((sum, size) => sum + size * 1.5, 0); // 按1.5倍计算渲染直径
+  const totalRenderDiameter = beadSizeList.reduce((sum, size) => sum + size, 0); // 按1.5倍计算渲染直径
 
   // 基于总渲染直径计算环半径（和CustomDesignRing保持一致）
   const calculatedRingRadius = totalRenderDiameter / (2 * Math.PI);
@@ -183,7 +183,7 @@ export const calculateBeadArrangementBySize = (
   const sizeRatio = targetRingRadius / calculatedRingRadius;
 
   // 计算缩放后的渲染直径列表
-  const scaledRenderDiameterList = beadSizeList.map((size) => size * 1.5 * sizeRatio);
+  const scaledRenderDiameterList = beadSizeList.map((size) => size * sizeRatio);
 
   // 使用和CustomDesignRing相同的计算逻辑
   const positions = calcPositionsWithRenderDiameter(scaledRenderDiameterList, center);

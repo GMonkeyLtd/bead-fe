@@ -1,0 +1,36 @@
+.ring-info-display {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.view-effect-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 16px 20px 0 0;
+}
+
+.view-effect-button {
+  border: 1px solid #f5d8be;
+  background: #e4c0a038;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 14px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:not(.disabled):hover {
+    background: #e4c0a060;
+    box-shadow: 0 2px 15px 0 rgba(0, 0, 0, 0.15);
+  }
+}

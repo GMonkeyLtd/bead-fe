@@ -289,7 +289,7 @@ const InspirationDetailPage: React.FC = () => {
                   {formatTime(detail.created_at)}
                 </Text>
               </View>
-              <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 ></View>
+              <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 &gt;</View>
             </View>
           </View>
         </View>

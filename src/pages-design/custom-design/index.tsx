@@ -1,5 +1,5 @@
 import Taro from "@tarojs/taro";
-import CustomDesignRing, { CustomDesignRingRef } from "@/components/CustomDesignRing";
+import CustomDesignRing, { CustomDesignRingRef } from "@/components/CustomDesignRing/CustomDesignRing";
 import { useCallback, useEffect, useState, useRef } from "react";
 import api, { beadsApi } from "@/utils/api";
 import PageContainer from "@/components/PageContainer";
@@ -189,8 +189,7 @@ const CustomDesign = () => {
         ref={customDesignRef}
         beads={(draft?.beads || [])?.map((item: any) => {
           return {
-            ...item,
-            render_diameter: item.diameter * CUSTOM_RENDER_RATIO,
+            ...item          
           };
         })}
         beadTypeMap={beadTypeMap}

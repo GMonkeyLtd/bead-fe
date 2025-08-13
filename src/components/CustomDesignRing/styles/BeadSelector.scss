@@ -1,0 +1,128 @@
+.bead-selector-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.wuxing-tabs {
+  width: 60px;
+  height: 100%;
+  background-color: #f5f5f5;
+  border-radius: 8px 0 0 8px;
+  padding: 12px 4px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.wuxing-tab {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background-color: #f5f5f5;
+  color: #333;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.active {
+    background-color: #fdf6eae8;
+    color: #333;
+    box-shadow: 0 2px 4px rgb(194 216 226);
+  }
+}
+
+.bead-count {
+  font-size: 10px;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+.bead-selector-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  padding: 0px 0px 24px 4px;
+  gap: 16px;
+  border-radius: 0 8px 8px 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.bead-type-section {
+  width: 100%;
+  height: 120px;
+}
+
+.bead-list-container {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 4px;
+  height: 100%;
+  align-items: center;
+  
+  /* 隐藏滚动条 - Webkit浏览器 */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* 隐藏滚动条 - Firefox */
+  scrollbar-width: none;
+  
+  /* 隐藏滚动条 - IE/Edge */
+  -ms-overflow-style: none;
+}
+
+.bead-item {
+  flex-shrink: 0;
+  width: 80px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bead-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 72px;
+  width: 72px;
+  background-color: #ffffff8a;
+  border-radius: 4px;
+}
+
+.bead-image {
+  object-fit: contain;
+}
+
+.bead-name {
+  font-size: 12px;
+  color: #333;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.bead-diameter {
+  font-size: 10px;
+  color: #8e7767;
+  text-align: center;
+}
+
+.hide-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
