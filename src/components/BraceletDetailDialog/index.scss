@@ -303,3 +303,27 @@
   border-radius: 0 0 50% 50%;
   box-sizing: border-box;
 }
+
+.bracelet-wrist-info {
+  padding: 0 24px 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  color: #5b4f40;
+ }
+
+.bracelet-wrist-info-title {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.2em;
+  opacity: 0.8;
+}
+
+.bracelet-wrist-info-value {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2em;
+  opacity: 0.8;
+}

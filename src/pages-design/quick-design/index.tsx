@@ -4,7 +4,6 @@ import Taro, { useDidHide } from "@tarojs/taro";
 import "./index.scss";
 import { generateApi } from "@/utils/api";
 import { imageToBase64 } from "@/utils/imageUtils";
-import { useDesign } from "@/store/DesignContext";
 import { GENERATING_MP4_IMAGE_URL, DESIGNING_IMAGE_URL } from "@/config";
 import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
@@ -16,30 +15,12 @@ const predictedTimeText = (
   <View className="quick-design-loading-content">渲染过程预计等待 20s</View>
 );
 
-const progressTipText = (
-  <View className="quick-design-loading-content">
-    <View>当前高峰期，退出不影响进度</View>
-    <View style={{ display: "flex", alignItems: "center", gap: 4 }}>
-      <Text>稍后可以在</Text>
-      <View className="quick-design-loading-content-link">我的作品</View>
-      <Text>中查看</Text>
-    </View>
-  </View>
-);
-
 const QuickDesign = () => {
   const [designing, setDesigning] = useState(true);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const params = Taro.getCurrentInstance()?.router?.params;
   const {
-    year,
-    month,
-    day,
-    hour,
-    gender,
-    isLunar,
-    beadDataId,
     draftId,
     imageUrl,
     sessionId,
@@ -48,10 +29,22 @@ const QuickDesign = () => {
   const cancelTokenForInfo = useRef<CancelToken | null>(null);
   const cancelPollDesignProgress = useRef<CancelToken | null>(null);
   const [progressTip, setProgressTip] = useState(predictedTimeText);
-  const timeRef = useRef<any>(null);
   const pollTimeRef = useRef<any>(null);
 
-  const { addDesignData, beadData } = useDesign();
+  const progressTipText = (designId: string) => (
+    <View className="quick-design-loading-content">
+      <View>当前高峰期，退出不影响进度</View>
+      <View style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <Text>稍后可以在</Text>
+        <View className="quick-design-loading-content-link" onClick={() => {
+          Taro.redirectTo({
+            url: `${pageUrls.result}?designBackendId=${designId}&from=chat&sessionId=${sessionId}`,
+          });
+        }}>我的作品</View>
+        <Text>中查看</Text>
+      </View>
+    </View>
+  );
 
   useDidHide(() => {
     if (cancelTokenForImage.current) {
@@ -81,20 +74,20 @@ const QuickDesign = () => {
         video.loop = true;
         video.autoplay = true;
         video.preload = 'auto';
-        
+
         video.onloadeddata = () => {
           setVideoLoaded(true);
           setTimeout(() => {
             setShowVideo(true);
           }, 300);
         };
-        
+
         video.onerror = () => {
           console.log('Video preload failed, using fallback');
           setVideoLoaded(false);
           setShowVideo(false);
         };
-        
+
         // 开始加载
         video.load();
       } else {
@@ -107,10 +100,10 @@ const QuickDesign = () => {
         }, 200);
       }
     };
-    
+
     // 延迟预加载，避免阻塞主线程
     setTimeout(preloadVideo, 100);
-    
+
     // 备用超时机制，防止永远不显示视频
     setTimeout(() => {
       if (!showVideo) {
@@ -118,20 +111,13 @@ const QuickDesign = () => {
         setShowVideo(true);
       }
     }, 3000);
-    
-    timeRef.current = setTimeout(() => {
-      setProgressTip(progressTipText);
-    }, 10000);
-    
+
     if (sessionId && draftId && imageUrl) {
       quickDesignByDraft(sessionId, draftId, imageUrl);
     }
 
 
     return () => {
-      if (timeRef.current) {
-        clearTimeout(timeRef.current);
-      }
       if (pollTimeRef.current) {
         clearTimeout(pollTimeRef.current);
       }
@@ -172,7 +158,7 @@ const QuickDesign = () => {
       }
       pollTimeRef.current = setTimeout(() => {
         pollDesignProgress(sessionId, draftId, designId);
-      }, 1000);
+      }, 3000);
     }
   };
 
@@ -187,6 +173,9 @@ const QuickDesign = () => {
       image_url: base64 as string,
     });
     if (res.data?.design_id) {
+      setTimeout(() => {
+        setProgressTip(progressTipText(res?.data?.design_id));
+      }, 3000);
       pollDesignProgress(sessionId, draftId, res.data?.design_id);
     }
   };
@@ -198,7 +187,7 @@ const QuickDesign = () => {
           <View className="quick-design-loading">
             <View className="loading-container">
               {/* 占位符图片 */}
-              <View 
+              <View
                 className={`loading-placeholder ${showVideo ? 'fade-out' : ''}`}
                 style={{
                   background: `linear-gradient(135deg, #f5f2f0 0%, #e8e2dd 100%), url(${DESIGNING_IMAGE_URL})`,
@@ -214,7 +203,7 @@ const QuickDesign = () => {
                   zIndex: 2
                 }}
               />
-              
+
               {/* 视频元素 */}
               <Video
                 src={GENERATING_MP4_IMAGE_URL}
@@ -268,7 +257,7 @@ const QuickDesign = () => {
               />
             </View>
             <View className="quick-design-loading-title">
-              渲染中
+              定制中
               <View className="quick-design-loading-title-dot">
                 <View className="quick-design-loading-title-dot-item">...</View>
               </View>

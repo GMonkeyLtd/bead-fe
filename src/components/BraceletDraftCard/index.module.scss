@@ -24,9 +24,11 @@
     font-size: 10px;
     font-style: normal;
     font-weight: 700;
-    line-height: 150%; /* 15px */
+    line-height: 150%;
+    /* 15px */
     letter-spacing: 1px;
   }
+
   .braceletDraftCardContentContainer {
     height: 100%;
     width: 100%;
@@ -95,6 +97,7 @@
   .braceletBeadImage {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
   }
 
   .braceletBeadInfoContainer {
@@ -137,33 +140,57 @@
       0px 3px 6px 0px rgba(217, 205, 199, 0.07);
   }
 
+  .regenerateBtn {
+    margin-top: 12px;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 44px;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 8px 12px;
+  }
+
+  .regenerateBtnText {
+    color: rgba(31, 23, 34, 0.60);
+    font-family: "Noto Sans SC";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 350;
+    line-height: 135%;
+  }
+
   .braceletDraftCardFooter {
     width: 100%;
     gap: 12px;
     border-top: 1px solid #e8e8e8;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     z-index: 1;
     padding-top: 20px;
   }
 
-   // 响应式调整
-    
-   @media (min-width: 400px) {
+  // 响应式调整
+
+  @media (min-width: 400px) {
     .braceletDraftCardContentContainer {
       padding: 36px 24px 20px;
     }
+
     .braceletBead {
       gap: 12px;
     }
+
     .braceletBeadInfoContainer {
       flex-direction: row;
       gap: 8px
     }
+
     .braceletName {
       font-size: 20px;
     }
+
     .braceletDraftCardFooter {
       gap: 24px;
     }

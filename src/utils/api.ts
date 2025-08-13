@@ -1,3 +1,4 @@
+import config from "../../config";
 import http, {
   setBaseURL,
   setIsMock,
@@ -35,9 +36,9 @@ export interface BaziParams {
   sex?: number;
 }
 
-export interface PersonalizedGenerateParams extends BaziParams {}
+export interface PersonalizedGenerateParams extends BaziParams { }
 
-export interface QuickGenerateParams extends BaziParams {}
+export interface QuickGenerateParams extends BaziParams { }
 
 export interface QuickGenerateByImageParams {
   image_base64: string[];
@@ -51,7 +52,7 @@ export interface PersonalizedGenerateResult {
   color: string;
   wuxing: string[];
   english: string;
-  bead_diameter: number;
+  diameter: number;
 }
 
 export interface PersonalizedGenerate2Params {
@@ -91,7 +92,7 @@ export const userApi = {
 
   // 获取用户信息
   getUserInfo: (config?: ApiConfig) =>
-    http.post<User>(
+    http.post<{ data: User }>(
       `/user/getuserinfo`,
       {},
       {
@@ -192,6 +193,35 @@ export const beadsApi = {
     ),
 };
 
+export const userDesignApi = {
+  getDesignList: (config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/designs`,
+      {},
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
+  },
+  getDesignItem: (designId: number, config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/designs/${designId}`,
+      {},
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
+  }
+}
+
 export const userHistoryApi = {
   getImageHistory: (config?: ApiConfig) =>
     http.get<PersonalizedGenerateResult[]>(
@@ -205,7 +235,7 @@ export const userHistoryApi = {
     ),
 
   getDesignById: (designId: number, config?: ApiConfig) =>
-    http.post<PersonalizedGenerateResult[]>(
+    http.post<{ data: any }>(
       `/user/getdesignitem`,
       {
         image_id: designId,
@@ -232,8 +262,8 @@ export const userHistoryApi = {
       ...config,
     }),
 
-  getOrderById: (orderId: string | string[], config?: ApiConfig) =>
-    http.post<{
+  getOrderById: (orderId: string | string[], config?: ApiConfig) => {
+    return http.post<{
       data: {
         any: [];
       };
@@ -245,7 +275,9 @@ export const userHistoryApi = {
         cancelToken: config?.cancelToken,
         ...config,
       }
-    ),
+    )
+  },
+
 
   getOrderList: (config?: ApiConfig) =>
     http.post<{
@@ -262,14 +294,14 @@ export const userHistoryApi = {
       }
     ),
 
-  cancelOrder: (orderId: string, config?: ApiConfig) =>
+  cancelOrder: (orderId: string, reason: string, config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
     }>(
       `/user/cancelorder`,
-      { order_uuid: orderId },
+      { order_uuid: orderId, reason },
       {
         showLoading: true,
         cancelToken: config?.cancelToken,

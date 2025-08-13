@@ -1,10 +1,9 @@
-import { DesignDraftResponse } from './api-session';
 import { ApiConfig } from "./api";
-import http, { setBaseURL, setIsMock, CancelToken } from "./request";
+import http from "./request";
 
 export interface MessageItem {
   message_id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   created_at: string;
   draft_id?: string;
@@ -56,7 +55,7 @@ export interface CreateSessionResponse extends BaseResponse {
 
 export interface ChatMessageItem {
   message_id: string;
-  role: "assistant" | "user";
+  role: "assistant" | "user" | "system";
   content: string;
   created_at: string;
   draft_id?: string;
@@ -65,12 +64,14 @@ export interface ChatMessageItem {
 
 export interface ChatResponse extends BaseResponse {
   data: {
-    session_id: string;
-    message_id: string;
-    role: "assistant" | "user";
-    content: string;
-    recommends: string[];
-    created_at: string;
+    messages: {
+      session_id: string;
+      message_id: string;
+      role: "assistant" | "user" | "system";
+      content: string;
+      recommends: string[];
+      created_at: string;
+    }[]
   };
 }
 
@@ -99,21 +100,36 @@ export interface DesignDraftResponse extends BaseResponse {
   };
 }
 
-export interface DesignProgressResponse extends BaseResponse {
-  data: {
-    progress: number;
-    image_url: string;
-    design_id: string;
-    info: {
-      name: string;
-      description: string;
-      wuxing: string;
-      wishes: string;
-      spec: string;
-      recommend_beads: BeadItem[];
-      beads: BeadItem[];
+export interface TDesign {
+  progress: number;
+  image_url: string;
+  design_id: string;
+  draft_id: string;
+  reference_price: number;
+  session_id: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  info: {
+    name: string;
+    description: string;
+    wuxing: string[];
+    rizhu: string;
+    spec: {
+      wrist_size: number;
+      diameter: number;
+      count: number;
+      is_default: boolean;
     };
+    wishes: string[];
+    recommend_beads: BeadItem[];
+    beads: BeadItem[];
   };
+  order_uuids?: string[];
+}
+
+export interface DesignProgressResponse extends BaseResponse {
+  data: TDesign;
 }
 
 export default {
@@ -147,6 +163,7 @@ export default {
     },
     config?: ApiConfig
   ) => {
+    
     return http.post<ChatResponse>(
       `/user/sessions/${params.session_id}/chat`,
       { message: params.message },
@@ -227,6 +244,22 @@ export default {
       }
     );
   },
+  regenerateDraft: (
+    params: {
+      session_id: string;
+      draft_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<DesignDraftResponse>(
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/regenerate`,
+      undefined,
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  },
 
   queryDesignProgress: (
     params: {
@@ -289,6 +322,59 @@ export default {
         cancelToken: config?.cancelToken,
         ...config,
       }
+    );
+  },
+  getDesignList: (config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/user/designs`,
+      undefined,
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
+  },
+  getDesignItem: (designId: number, config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/user/designs/${designId}`,
+      undefined,
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
+  },
+  // 商家端获取用户聊天历史
+  getChatHistoryByMerchant: (
+    params: {
+      session_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/merchant_query/sessions/${params.session_id}/history`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
+    );
+  },
+  // 商家端获取草稿详情
+  getDraftDetailByMerchant: (
+    params: {
+      session_id: string;
+      draft_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/merchant_query/sessions/${params.session_id}/drafts/${params.draft_id}`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
     );
   }
 };

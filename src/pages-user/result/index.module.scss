@@ -1,0 +1,335 @@
+.resultContainer {
+  position: relative;
+  box-sizing: border-box;
+  height: 100vh;
+  width: 100vw;
+  font-family: "Source Han Serif CN", "SimSun", "宋体", serif;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    /* 背景图设置 */
+    background: var(--bg-image) center/cover;
+
+    /* 确保模糊层在内容之下 */
+    z-index: -1;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background: linear-gradient(
+      180deg,
+      rgba(191, 170, 142, 0.3),
+      rgba(252, 245, 240, 0.6) 50%,
+      #fffcfa 90%
+    );
+    backdrop-filter: blur(48px);
+    /* 确保渐变层在模糊背景之上，内容之下 */
+    z-index: -1;
+  }
+}
+
+.resultContentContainer {
+  padding: 24px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  align-content: space-between;
+  box-sizing: border-box;
+}
+
+.resultContentBgImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  opacity: 0.2;
+}
+
+.resultContentCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: linear-gradient(white, white) padding-box,
+    linear-gradient(180deg, #aeaba836 0, #ffffffb8 75%, #ffffff52 100%)
+      border-box;
+  border: 4px solid transparent;
+  box-sizing: border-box;
+}
+
+.resultContentCardImage {
+  position: relative;
+  width: 100%;
+  height: 256px;
+  flex-shrink: 0;
+  border-radius: 6px 6px 0 0;
+  background: var(--bg-image) center/cover;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, #ffffff00 80%, #ffffff 100%);
+  }
+}
+
+.logoImageContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 23px;
+  width: 48px;
+  border-radius: 0px 6px 0px 10px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.6) 100%
+    ),
+    rgba(0, 0, 0, 0.07);
+  backdrop-filter: blur(2px);
+}
+
+.logoImage {
+  width: 48px;
+}
+
+.expendImage {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  bottom: 20px;
+  right: 20px;
+}
+
+.resultContentCardTextContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 24px;
+}
+
+.resultContentCardText {
+  position: relative;
+  width: 100%;
+  color: #1f1722;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.resultContentCardSubtitle {
+  font-weight: 300;
+  font-size: 11px;
+  line-height: 135%;
+  letter-spacing: 0px;
+  margin-bottom: 10px;
+  margin-top: -20px;
+}
+
+.resultContentCardTextTitle {
+  font-weight: 400;
+  font-size: 40px;
+  letter-spacing: 2px;
+  font-family: "GlobalFont", "SimSun", "宋体", serif;
+}
+
+.resultContentCardTextTitleContainer {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 8px;
+}
+
+.braceletLengthInfoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding-bottom: 16px;
+}
+
+.braceletLengthInfoCountContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.braceletLengthInfoCount {
+  font-family: "PingFang SC", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1em;
+  text-align: bottom;
+  color: #1f1722;
+}
+
+.braceletLengthInfoUnit {
+  font-family: "PingFang SC", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1em;
+  text-align: bottom;
+  color: #1f1722;
+}
+
+.braceletLengthInfoSizeContainer {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.2em;
+  text-align: center;
+  color: #1f1722;
+  opacity: 0.9;
+}
+
+.resultContentCenterContainer {
+  display: flex;
+  height: 164px;
+  align-items: flex-start;
+  padding-bottom: 12px 24px;
+  gap: 32px;
+}
+
+.resultContentCenterText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.resultContentBraceletDescription {
+  color: #1f1722;
+  text-align: justify;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 135%;
+}
+
+.resultContentWearTips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resultContentWearTipsTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.resultContentWearTipsTitle {
+  color: #1f1722;
+  text-align: justify;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 135%;
+  letter-spacing: 1px;
+}
+
+.beadDescriptionContainer {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.resultContentWuxingDisplayContainer {
+  width: 64;
+  flex: 0;
+}
+
+.beadDescriptionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.beadTitle {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.beadDescription {
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 100%;
+  padding-left: 24px;
+}
+
+.beadShareQrcode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.beadShareQrcodeText {
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 100%;
+  letter-spacing: 1px;
+}
+
+.resultContentCardAction {
+  box-sizing: border-box;
+  height: 120px;
+  width: 100%;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+  padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  box-shadow: 0px -5px 14px 0px rgba(0, 0, 0, 0.1);
+}
+
+.resultOrderListContainer {
+  margin-top: 20px;
+}
+
+.resultOrderListTitle {
+  color: #1f1722;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  margin: 0 10px 10px 10px;
+} 

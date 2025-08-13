@@ -11,6 +11,7 @@ interface BraceletCardProps {
   quantity: number;
   price: number;
   productImage: string;
+  showPrice?: boolean;
   onMoreClick?: () => void;
   className?: string;
   orderAction?: {
@@ -28,16 +29,16 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
   productImage,
   className = "",
   orderAction,
+  showPrice = false,
 }) => {
 
   const handleCopyImageUrl = (orderNumber: string) => {
     Taro.setClipboardData({
       data: orderNumber,
       success: () => {
-        Taro.showModal({
+        Taro.showToast({
           title: '复制成功',
-          content: '图片链接已复制，您可以在浏览器中粘贴访问',
-          showCancel: false
+          icon: 'none',
         })
       }
     })
@@ -85,9 +86,13 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
         </View>
 
         {/* 价格 */}
-        <View className="price-section">
-          <Text className="price">¥{price.toFixed(2)}</Text>
-        </View>
+        {showPrice &&
+          <View className="price-section">
+            <View className="price-label">
+              <View className="price-label-text">参考价：</View>
+              <Text className="price">¥{price.toFixed(2)}</Text>
+            </View>
+          </View>}
       </View>
     </View>
   );
@@ -110,19 +115,19 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
 }) => {
 
   const beadsData = (beads || [])?.reduce((acc: any[], item: any) => {
-    const existingBead = acc.find(bead => bead.name === item?.name && bead.size === item?.bead_diameter);
+    const existingBead = acc.find(bead => bead.name === item?.name && bead.size === item?.diameter);
     if (existingBead) {
       existingBead.quantity += item?.quantity || 1;
     } else {
-      acc.push({  
+      acc.push({
         name: item?.name,
-        size: item?.bead_diameter,
+        size: item?.diameter,
         quantity: item?.quantity || 1,
       });
     }
     return acc;
   }, []);
-  
+
   return (
     <View className={`bead-detail-list ${className}`}>
       {/* 表头 */}
@@ -152,6 +157,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
 
 export interface BraceletInfoProps extends BraceletCardProps {
   beads?: BeadItem[];
+  showPrice?: boolean;
   style?: React.CSSProperties;
 }
 const BraceletInfo: React.FC<BraceletInfoProps> = ({
@@ -161,6 +167,7 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
   quantity,
   price,
   productImage,
+  showPrice = false,
   style = {},
   beads,
   orderAction,
@@ -183,9 +190,10 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
         price={price}
         productImage={productImage}
         orderAction={orderAction}
+        showPrice={showPrice}
       />
 
-      {beads?.length > 0 && <BeadDetailList beads={beads} />}
+      {beads && beads?.length > 0 && <BeadDetailList beads={beads} />}
     </View>
   );
 };

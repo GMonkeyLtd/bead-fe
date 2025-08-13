@@ -15,7 +15,6 @@ export default defineAppConfig({
       root: 'pages-design',
       pages: [
         'quick-design/index',
-        // 'design/index',
         'custom-design/index'
       ]
     },
@@ -33,7 +32,7 @@ export default defineAppConfig({
       pages: [
         'order-detail/index',
         'order-list/index',
-        'order-dispatching/index',
+        // 'order-dispatching/index',
         'cancel-order/index',
       ]
     },
@@ -61,5 +60,13 @@ export default defineAppConfig({
     backgroundColor: '#F4F1EE',
     enablePullDownRefresh: false
   },
-
+  requiredPrivateInfos: [
+    "chooseAddress"
+  ],
+  plugins: {
+    "logisticsPlugin": {
+      "version": "2.3.0",
+      "provider": "wx9ad912bf20548d92"
+    }
+  }
 })

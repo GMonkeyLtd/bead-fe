@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import PageContainer from "@/components/PageContainer";
 import apiSession, { ChatMessageItem } from "@/utils/api-session";
 import styles from "./index.module.scss";
-import { ASSISTANT_AVATAR_IMAGE_URL } from "@/config";
+import { LILI_AVATAR_IMAGE_URL } from "@/config";
 import ChatMessages from "@/components/ChatMessages";
 import sendSvg from "@/assets/icons/send.svg";
 import { isEmptyMessage, splitMessage } from "@/utils/messageFormatter";
@@ -13,13 +13,19 @@ import TagList from "@/components/TagList";
 import { ChatMessagesRef } from "@/components/ChatMessages";
 import { pageUrls } from "@/config/page-urls";
 import { getRecommendTemplate } from "@/utils/utils";
-import userRecordSvg from "@/assets/icons/user-record.svg";
 
 const INPUT_HEIGHT = 30 + 24 + 10;
 const INPUT_RECOMMEND_HEIGHT = 30 + 30 + 24 + 16;
 
+const INIT_MESSAGE = [
+  "宝子！你终于来了，我是你的专属水晶疗愈师，可以叫我璞璞～",
+  "我已经看到你的生辰啦，让我来给你详细分析一下📝",
+];
+
 const ChatDesign = () => {
   const params = Taro.getCurrentInstance()?.router?.params;
+  const { year, month, day, hour, gender, isLunar, session_id } = params || {};
+  const byMerchant = params?.is_merchant === "true";
 
   const [isDesigning, setIsDesigning] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessageItem[]>([]);
@@ -29,11 +35,15 @@ const ChatDesign = () => {
   const chatMessagesRef = useRef<ChatMessagesRef>(null);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const draftIndexRef = useRef(1);
+  
+  // 添加防重复执行的ref
+  const hasInitializedRef = useRef(false);
+  const hasShownInitMessagesRef = useRef(false);
 
   const spareHeight = useMemo(() => {
     const inputHeight =
       recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
-    return inputHeight;
+    return inputHeight + 20;
   }, [recommendTags]);
 
   // 依次显示消息的函数
@@ -57,9 +67,17 @@ const ChatDesign = () => {
           setTimeout(() => {
             chatMessagesRef.current?.scrollToBottom();
           }, 100);
-          waitTime = (messages[currentIndex].content?.length / 20) * 1000;
+          waitTime = (messages[currentIndex].content?.length / 10) * 1000;
+          if (messages[currentIndex].draft_id) {
+            waitTime = 3000;
+          } else {
+            if (waitTime < 3000) {
+              waitTime = 3000;
+            } else if (waitTime > 10000) {
+              waitTime = 8000;
+            }
+          }
 
-          // 2秒后显示下一条消息
           if (currentIndex + 1 < messages.length) {
             setTimeout(() => {
               currentIndex++;
@@ -94,8 +112,6 @@ const ChatDesign = () => {
     sex: number;
     is_lunar: boolean;
   }) => {
-    setIsDesigning(true);
-
     apiSession
       .createSession(
         {
@@ -121,7 +137,7 @@ const ChatDesign = () => {
       })
       .catch((err) => {
         Taro.showToast({
-          title: "获取会话失败:" + JSON.stringify(err),
+          title: "获取会话失败:" + err.message,
           icon: "none",
         });
       })
@@ -130,51 +146,100 @@ const ChatDesign = () => {
       });
   };
 
-  const querySessionHistory = (session_id: string, isFirst = false) => {
-    draftIndexRef.current = 1;
-    apiSession.getChatHistory({ session_id }).then((res) => {
-      const messages = res.data.messages || [];
+  const formatMessages = (messages: ChatMessageItem[]) => {
+    // 兼容以/n分割的场景
+    const splitMessages = splitMessage(messages);
+    const newMessages = splitMessages.map((message) => {
+      if (message.draft_id) {
+        message.draft_index = draftIndexRef.current;
+        draftIndexRef.current++;
+      }
+      return message;
+    });
+    // 获取newMessages中最后一个role为assistant的message
+    const lastMessageWithRecommends = newMessages
+      .slice()
+      .reverse()
+      .find((message) => message.role !== "user");
+    return {
+      messages: newMessages,
+      recommends: lastMessageWithRecommends?.recommends || [],
+    };
+  }
+
+  const querySessionHistory = async (
+    session_id: string,
+    isFirst = false,
+    is_merchant?: boolean
+  ) => {
+    try {
+      let histroyRes = {};
+      if (is_merchant) {
+        histroyRes = await apiSession.getChatHistoryByMerchant({ session_id });
+      } else {
+        histroyRes = await apiSession.getChatHistory({ session_id });
+      }
+
+      const messages = histroyRes?.data?.messages || [];
+      // 重置draftIndex
+      draftIndexRef.current = 1;
       const messagesWithoutUserInfo = messages.filter(
         (message, index) => !(message.role == "user" && index === 0)
       );
-      const splitMessages = splitMessage(messagesWithoutUserInfo);
-      const newMessages = splitMessages.map((message) => {
-        if (message.draft_id) {
-          message.draft_index = draftIndexRef.current;
-          draftIndexRef.current++;
-        }
-        return message;
-      });
-      // 获取newMessages中最后一个role为assistant的message
-      const lastAssistantMessage = newMessages
-        .slice()
-        .reverse()
-        .find((message) => message.role === "assistant");
+      const { messages: newMessages, recommends } = formatMessages(messagesWithoutUserInfo);
+      // 有历史会话
       if (!isFirst) {
-        setChatMessages(newMessages);
-        if (
-          lastAssistantMessage?.recommends &&
-          lastAssistantMessage.recommends.length > 0
-        ) {
-          setRecommendTags(lastAssistantMessage.recommends);
-        }
+        const newMessagesWithInit = [
+          ...INIT_MESSAGE.map((item, index) => ({
+            message_id: Date.now().toString() + index,
+            role: "assistant",
+            content: item,
+            created_at: new Date().toISOString(),
+          })),
+          ...newMessages,
+        ];
+        setChatMessages(newMessagesWithInit as any);
+        setRecommendTags(recommends || []);
       } else {
+        // 无历史对话，都是新消息
         showMessagesSequentially(
           newMessages,
-          lastAssistantMessage?.recommends || []
+          recommends
         );
       }
-    });
+    } catch (error) {
+      console.error("querySessionHistory error", error);
+    }
   };
 
   useEffect(() => {
-    const { year, month, day, hour, gender, isLunar, session_id } =
-      params || {};
-    if (session_id) {
+    console.log('history useEffect')
+    if (session_id && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
       setSessionId(session_id);
-      querySessionHistory(session_id);
+      querySessionHistory(session_id, false, byMerchant);
     }
-    if (year && month && day && hour && gender && isLunar) {
+  return () => {
+    console.log('history unmount')
+  }
+  }, [byMerchant, session_id]);
+
+  useEffect(() => {
+    console.log('INIT useEffect', hasInitializedRef.current, year, month, day, hour, gender, isLunar)
+    if (year && month && day && hour && gender && isLunar && !hasShownInitMessagesRef.current) {
+      hasShownInitMessagesRef.current = true;
+      
+      showMessagesSequentially(
+        INIT_MESSAGE.map((item, index) => ({
+          message_id: Date.now().toString() + index,
+          role: "assistant",
+          content: item,
+          created_at: new Date().toISOString(),
+        }))
+      );
+      setTimeout(() => {
+        setIsDesigning(true);
+      }, 4000);
       initChat({
         birth_year: parseInt(year || "0") || 0,
         birth_month: parseInt(month || "0") || 0,
@@ -184,17 +249,20 @@ const ChatDesign = () => {
         is_lunar: isLunar === "true" ? true : false,
       });
     }
-  }, [params]);
+    return () => {
+      console.log('INIT unmount')
+    }
+  }, [year, month, day, hour, gender, isLunar]);
 
   const renderAssistant = () => {
     return (
       <View className={styles.chatDesignHeader}>
         <View className={styles.assistantAvatarContainer}>
           <Image
-            src={ASSISTANT_AVATAR_IMAGE_URL}
+            src={LILI_AVATAR_IMAGE_URL}
             className={styles.assistantAvatar}
           />
-          <Text className={styles.assistantName}>黎莉莉</Text>
+          <Text className={styles.assistantName}>璞璞</Text>
         </View>
         <View
           className={styles.designResetInfo}
@@ -213,7 +281,8 @@ const ChatDesign = () => {
   // 发送消息
   const handleSend = async (tag) => {
     const content = inputValue || tag;
-    if (isEmptyMessage(content) || isDesigning) return;
+    if (isEmptyMessage(content) || isDesigning || hasMoreMessages) return;
+    setRecommendTags([])
     setChatMessages((prev) => [
       ...prev,
       {
@@ -226,27 +295,39 @@ const ChatDesign = () => {
     chatMessagesRef.current?.scrollToBottom();
     setIsDesigning(true);
     setInputValue("");
-    apiSession
-      .chat({
-        session_id: sessionId,
-        message: content,
-      })
-      .then((res) => {
-        // 处理返回的消息，按照2秒一条的速度依次显示
-        const splitMessages = splitMessage(res.data);
-        const processedMessages = splitMessages.map((message) => {
-          if (message.draft_id) {
-            message.draft_index = draftIndexRef.current;
-            draftIndexRef.current++;
-          }
-          return message;
+
+    // 重试机制
+    const maxRetries = 0;
+    let retryCount = 0;
+    console.log(sessionId, '请求定制的sessionId')
+    const attemptRequest = async () => {
+      try {
+        const res = await apiSession.chat({
+          session_id: sessionId,
+          message: content,
         });
-        // 使用依次显示函数
-        showMessagesSequentially(processedMessages, res.data.recommends || []);
-      })
+        // 处理返回的消息，按照2秒一条的速度依次显示
+        const { messages: newMessages, recommends } = formatMessages(res.data?.messages || []);
+        showMessagesSequentially(newMessages, recommends);
+        return res;
+      } catch (err) {
+        retryCount++;
+        if (retryCount < maxRetries) {
+          console.log(`请求失败，第${retryCount}次重试...`);
+          // 等待1秒后重试
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return attemptRequest();
+        } else {
+          // 重试3次后仍未成功，抛出错误
+          throw new Error('哎呀～水晶能量场暂时波动中，请稍后再试');
+        }
+      }
+    };
+
+    attemptRequest()
       .catch((err) => {
         Taro.showToast({
-          title: "定制失败:" + JSON.stringify(err),
+          title: err.message,
           icon: "none",
         });
       })
@@ -263,7 +344,7 @@ const ChatDesign = () => {
 
   return (
     <PageContainer
-      headerExtraContent={isDesigning ? "正在设计新方案..." : renderAssistant()}
+      headerExtraContent={isDesigning ? "正在分析中..." : renderAssistant()}
       showHome={false}
       onKeyboardHeightChange={handleKeyboardHeightChange}
     >
@@ -275,6 +356,7 @@ const ChatDesign = () => {
           isChatting={isDesigning}
           maxHeight={`calc(100% - ${spareHeight}px)`}
           sessionId={sessionId}
+          byMerchant={byMerchant}
         />
 
         {/* <BraceletDraftCard
@@ -284,65 +366,67 @@ const ChatDesign = () => {
           generateBraceletImage={generateBraceletImage}
         /> */}
 
-        <View className={styles.inputContainer}>
-          {recommendTags?.length > 0 && (
-            <TagList
-              tags={recommendTags?.map((item) => ({
-                id: item,
-                title: item,
-              }))}
-              onTagSelect={(tag) => {
-                if (!isDesigning) {
-                  handleSend(getRecommendTemplate(tag.title));
-                }
-                // setInputValue((prev) =>
-                //   !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
-                // );
-              }}
-              style={{
-                marginBottom: "10px",
-              }}
-            />
-          )}
-          <View className={styles.inputBottomContainer}>
-            <View className={styles.chatRecordEnter}>
+        {!byMerchant && (
+          <View className={styles.inputContainer}>
+            {recommendTags?.length > 0 && (
+              <TagList
+                tags={recommendTags?.map((item) => ({
+                  id: item,
+                  title: item,
+                }))}
+                onTagSelect={(tag) => {
+                  if (!isDesigning) {
+                    handleSend(getRecommendTemplate(tag.title));
+                  }
+                  // setInputValue((prev) =>
+                  //   !isEmptyMessage(prev) ? prev + "，" + tag.title : tag.title
+                  // );
+                }}
+                style={{
+                  marginBottom: "10px",
+                }}
+              />
+            )}
+            <View className={styles.inputBottomContainer}>
+              {/* <View className={styles.chatRecordEnter}>
               <Image
                 src={userRecordSvg}
                 style={{ width: "27px", height: "27px" }}
               />
-            </View>
-            <View className={styles.inputWrapper}>
-              <Textarea
-                className={styles.messageInput}
-                value={inputValue}
-                placeholder="输入您的定制需求..."
-                placeholderStyle="color: #00000033;"
-                onInput={(e) => setInputValue(e.detail.value)}
-                onConfirm={handleSend}
-                autoHeight
-                adjustPosition={false}
-                // adjustKeyboardTo="bottom"
-                // onFocus={() => {
-                //   setKeyboardHeight(90);
-                // }}
-                // onBlur={() => {
-                //   setKeyboardHeight(0);
-                // }}
-                showConfirmBar={false}
-                confirmType="send"
-              />
-              <Image
-                src={
-                  !isEmptyMessage(inputValue) && !isDesigning
-                    ? activeSendSvg
-                    : sendSvg
-                }
-                style={{ width: "26px", height: "26px" }}
-                onClick={handleSend}
-              />
+            </View> */}
+              <View className={styles.inputWrapper}>
+                <Textarea
+                  className={styles.messageInput}
+                  value={inputValue}
+                  placeholder="输入您的定制需求..."
+                  placeholderStyle="color: #00000033;"
+                  onInput={(e) => setInputValue(e.detail.value)}
+                  onConfirm={handleSend}
+                  autoHeight
+                  adjustPosition={false}
+                  // adjustKeyboardTo="bottom"
+                  // onFocus={() => {
+                  //   setKeyboardHeight(90);
+                  // }}
+                  // onBlur={() => {
+                  //   setKeyboardHeight(0);
+                  // }}
+                  showConfirmBar={false}
+                  confirmType="send"
+                />
+                <Image
+                  src={
+                    !isEmptyMessage(inputValue) && !isDesigning && !hasMoreMessages
+                      ? activeSendSvg
+                      : sendSvg
+                  }
+                  style={{ width: "26px", height: "26px" }}
+                  onClick={handleSend}
+                />
+              </View>
             </View>
           </View>
-        </View>
+        )}
       </View>
     </PageContainer>
   );

@@ -32,6 +32,8 @@ const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
               className="bracelet-image"
               src={item.image}
               mode="aspectFill"
+              lazyLoad
+              fadeIn={false}
             />
           </View>
           <View className="bracelet-info">

@@ -67,13 +67,13 @@ const TAB_BAR_ITEMS = [
 ];
 
 const TAB_BAR_ITEMS_MERCHANT = [
-  {
-    key: "grab-orders",
-    icon: grabOrdersIcon,
-    iconActive: grabOrdersActiveIcon,
-    text: "接单",
-    path: pageUrls.merchantGrabOrders,
-  },
+  // {
+  //   key: "grab-orders",
+  //   icon: grabOrdersIcon,
+  //   iconActive: grabOrdersActiveIcon,
+  //   text: "接单",
+  //   path: pageUrls.merchantGrabOrders,
+  // },
   {
     key: "order-list",
     icon: orderListIcon,
@@ -139,7 +139,7 @@ const TabBar: React.FC<TabBarProps> = ({
             onClick={() => handleTabClick(item)}
           >
             <Image
-              src={isActive ? item.iconActive : theme === TabBarTheme.LIGHT ? item.iconDark : item.icon}
+              src={isActive ? item.iconActive : theme === TabBarTheme.LIGHT ? item.iconDark || item.icon : item.icon}
               className={styles.tabIcon}
             />
             <View

@@ -1,0 +1,282 @@
+
+
+.joinGroupChat {
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0px 3px 6px 0px rgba(217, 205, 199, 0.07),
+    1px 10px 10px 0px rgba(83, 73, 68, 0.03),
+    4px 40px 16px 0px rgba(0, 0, 0, 0),
+    7px 63px 18px 0px rgba(0, 0, 0, 0),
+    inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.43);
+  padding: 10px 16px 20px;
+  box-sizing: border-box;
+  gap: 10px;
+}
+
+.groupInfoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.memberAvatars {
+  display: flex;
+  justify-content: flex-end;
+  gap: -8px;
+  position: relative;
+}
+
+.memberAvatar {
+  width: 47px;
+  height: 21px;
+}
+
+.groupDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.groupName {
+  font-family: 'Source Han Serif CN', serif;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.35em;
+  color: #1F1722;
+  background: linear-gradient(135deg, #B49677 0%, #1F2A37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.rightArrowIcon {
+  width: 16px;
+  height: 10px;
+}
+
+.featuresSection {
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
+  gap: 10px;
+  padding: 12px 0px;
+}
+
+.featureItem {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.featureIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #FFFBF5;
+  border: 1px solid #F9F0E3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.featureText {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.35em;
+  color: #1F1722;
+  text-align: center;
+}
+
+.bottomSection {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: -8px;
+}
+
+.couponTag {
+  position: absolute;
+  top: -8px;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 1px 4px;
+  border-radius: 7px 0;
+  background: linear-gradient(152deg, #FFB787 21.56%, #CD2421 130.38%), #FFF;
+}
+
+.couponText {
+  font-family: 'Source Han Serif CN', serif;
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.437em;
+  color: #FFFFFF;
+  text-align: center;
+}
+
+.joinButton {
+  width: 100%;
+  height: 38px;
+  background: linear-gradient(180deg, #282724 0%, #000000 100%);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 
+    inset 0px -4px 16px rgba(0, 0, 0, 0.3),
+    inset 0px -2px 6px rgba(255, 255, 255, 0.75);
+  padding: 4px 13px;
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 
+      inset 0px -2px 8px rgba(0, 0, 0, 0.4),
+      inset 0px -1px 3px rgba(255, 255, 255, 0.5);
+  }
+}
+
+.buttonReflection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.74) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 100px 100px 0 0;
+  filter: blur(12px);
+}
+
+.buttonContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 0px 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.joinText {
+  font-family: 'Source Han Serif CN', serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.437em;
+  letter-spacing: 28.57%;
+  background: linear-gradient(135deg, #FFF0DE 0%, #FFE4B5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+}
+
+// 二维码弹窗样式
+.qrCodeOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+}
+
+.qrCodeDialog {
+  width: 280px;
+  background: #F5F2EF;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+}
+
+.qrCodeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.qrCodeTitle {
+  font-family: 'Source Han Serif CN', serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.437;
+  color: #1F1722;
+}
+
+.closeButton {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.closeIcon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+}
+
+.qrCodeContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.qrCodeImage {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  border: 1px solid #D2C5B7;
+  background: #FFFFFF;
+}
+
+.qrCodeTip {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(31, 23, 34, 0.7);
+  text-align: center;
+} 

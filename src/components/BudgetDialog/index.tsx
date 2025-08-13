@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Input, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./index.scss";
@@ -6,6 +6,7 @@ import CrystalButton from "../CrystalButton";
 import rightArrowGolden from "@/assets/icons/right-arrow-golden.svg";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import api, { userApi } from "@/utils/api";
+import payApi from "@/utils/api-pay";
 import { pageUrls } from "@/config/page-urls";
 
 interface BudgetDialogProps {
@@ -15,6 +16,7 @@ interface BudgetDialogProps {
   productImage?: string;
   onClose?: () => void;
   onConfirm?: (budget: number) => void;
+  referencePrice?: number;
 }
 
 const BudgetDialog: React.FC<BudgetDialogProps> = ({
@@ -24,54 +26,68 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   productImage,
   onConfirm,
   onClose,
+  referencePrice,
+  onModifyDesign,
 }) => {
-  const [budget, setBudget] = useState<string>('');
   const { keyboardHeight } = useKeyboardHeight();
 
-
   const handleConfirm = async () => {
-
     const userData = await userApi.getUserInfo();
     const { default_contact, phone, wechat_id } = userData?.data || {};
     if (default_contact === 0 && !phone) {
-      Taro.navigateTo({
-        url: `${pageUrls.contactPreference}?budget=${budget}&designId=${designNumber}`
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`,
       });
       return;
-    } 
+    }
     if (default_contact === 1 && !wechat_id) {
-      Taro.navigateTo({
-        url: `${pageUrls.contactPreference}?budget=${budget}&designId=${designNumber}`
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`,
       });
       return;
     }
-    const budgetValue = parseFloat(budget) || 0;
     if (onConfirm) {
-      onConfirm(budgetValue);
+      onConfirm(referencePrice || 0);
       return;
     }
-    api.userHistory.createOrder({
-      design_id: parseInt(designNumber),
-      price: budgetValue
-    }).then((res) => {
-      const { order_uuid } = res?.data || {};
-      Taro.navigateTo({
-        url: `${pageUrls.orderDispatching}?orderId=${order_uuid}`
-      }).then(() => {
-        onClose?.();
-      });
-    });
-  };
 
-  const handleBudgetChange = (e: any) => {
-    const value = e.detail.value;
-    // 只允许数字和小数点
-    const numericValue = value.replace(/[^\d.]/g, "");
-    setBudget(numericValue);
+    api.userHistory
+      .createOrder({
+        design_id: parseInt(designNumber),
+        price: referencePrice,
+      })
+      .then((res) => {
+        const { order_uuid } = res?.data || {};
+        Taro.getSetting({
+          success: (res) => {
+            console.log(res, 'res')
+          }
+        })
+        Taro.requestSubscribeMessage({
+          tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
+          complete:() => {
+            Taro.redirectTo({
+              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+            })
+          },
+          success: (res) => {
+            Taro.redirectTo({
+              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+            })
+          },
+          fail: () => Taro.redirectTo({
+              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+            })
+        });
+      });
   };
 
   return (
-    <View className={`budget-dialog-overlay ${visible ? "visible" : ""}`} onClick={onClose} style={{ height: `calc(100vh - ${keyboardHeight}px)` }} >
+    <View
+      className={`budget-dialog-overlay ${visible ? "visible" : ""}`}
+      onClick={onClose}
+      style={{ height: `calc(100vh - ${keyboardHeight}px)` }}
+    >
       <View className="budget-dialog" onClick={(e) => e.stopPropagation()}>
         {/* 标题区域 */}
         <View className="budget-dialog-header">
@@ -92,20 +108,13 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               <View className="budget-dialog-budget-section">
                 <View className="budget-dialog-budget-input-area">
                   <View className="budget-dialog-budget-header">
-                    <Text className="budget-dialog-budget-label">我的预算</Text>
+                    <Text className="budget-dialog-budget-label">参考价</Text>
                   </View>
-                  <View className="budget-dialog-budget-input-wrapper">
-                    <Input
-                      className="budget-dialog-input"
-                      value={budget}
-                      onInput={handleBudgetChange}
-                      type="digit"
-                      placeholder="0.00"
-                      focus={true}
-                      // placeholderClass="budget-input-placeholder"
-                      // placeholderTextColor="red"
-                      placeholderStyle="color: #00000033;"
-                    />
+                  <View className="budget-dialog-budget-price-wrapper">
+                    <View className="budget-dialog-budget-input-value">
+                      {referencePrice}
+                    </View>
+                    <View className="budget-dialog-budget-input-unit">RMB</View>
                   </View>
                 </View>
 
@@ -125,7 +134,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               <View className="budget-dialog-notice">
                 <View className="budget-dialog-divider" />
                 <Text className="budget-dialog-notice-text">
-                  预算只用于算法匹配，价格商家不可见，非最终到手价。
+                  参考价格只是系统根据当前市场估算的结果，非最终到手价。
                 </Text>
               </View>
             </View>
@@ -133,19 +142,24 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
         </View>
 
         {/* 确认按钮 */}
-        <View style={{ display: "flex", justifyContent: "center" }}>
-          <CrystalButton
-            style={{ width: "220px", height: "46px", margin: "36px 0 0" }}
-            onClick={handleConfirm}
-            text="确认"
-            icon={
-              <Image
-                src={rightArrowGolden}
-                style={{ width: "16px", height: "10px" }}
-              />
-            }
-            isPrimary
-          />
+        <View className="budget-dialog-button-wrapper">
+          <View style={{ display: "flex", justifyContent: "center" }}>
+            <CrystalButton
+              style={{ width: "220px", height: "46px" }}
+              onClick={handleConfirm}
+              text="确认"
+              icon={
+                <Image
+                  src={rightArrowGolden}
+                  style={{ width: "16px", height: "10px" }}
+                />
+              }
+              isPrimary
+            />
+          </View>
+          <View className="budget-dialog-button-link" onClick={onModifyDesign}>
+            修改定制方案
+          </View>
         </View>
       </View>
     </View>

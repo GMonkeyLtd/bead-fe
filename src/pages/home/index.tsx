@@ -55,38 +55,6 @@ const Home = () => {
     setShowDateTimeDrawer(false);
   };
 
-  const handleQuickCustomize = ({
-    year,
-    month,
-    day,
-    hour,
-    gender,
-    isLunar,
-  }: {
-    year: number;
-    month: number;
-    day: number;
-    hour: number;
-    gender: number;
-    isLunar: boolean;
-  }) => {
-    Taro.redirectTo({
-      url:
-        pageUrls.quickDesign + "?year=" +
-        year +
-        "&month=" +
-        month +
-        "&day=" +
-        day +
-        "&hour=" +
-        hour +
-        "&gender=" +
-        gender +
-        "&isLunar=" +
-        isLunar,
-    });
-  };
-
   const handlePersonalizeCustomize = ({
     year,
     month,
@@ -193,9 +161,9 @@ const Home = () => {
                       />
                     }
                   />
-                  <View className="crystal-link-text">
-                      产看我的档案
-                  </View>
+                  {/* <View className="crystal-link-text"> */}
+                      {/* 产看我的档案 */}
+                  {/* </View> */}
                 </View>
               </View>
             </View>
@@ -204,7 +172,6 @@ const Home = () => {
       </Swiper>
       <TabBar theme={TabBarTheme.DARK} />
       <DateTimeDrawer
-        onQuickCustomize={handleQuickCustomize}
         onPersonalizeCustomize={handlePersonalizeCustomize}
         visible={showDateTimeDrawer}
         onClose={handleDrawerClose}

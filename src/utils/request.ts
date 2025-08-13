@@ -4,16 +4,19 @@ import { MerchantAuthManager } from './auth-merchant'
 import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
 
-const domain = 'https://api.gmonkey.top'
-// const domain = 'https://test.qianjunye.com'
 
-// 判断是否为开发环境
-const isTest = false
+ const domain = 'https://api.gmonkey.top' 
+const grayDomain = 'https://api-gray.gmonkey.top'
+// const domain = 'https://test.qianjunye.com'
 
 // 根据环境构建API基础URL
 const getBaseURL = () => {
-  const basePath = isTest ? '/test_api/v1' : '/api/v1'
-  const fullURL = domain + basePath
+  const accountInfo = Taro.getAccountInfoSync();
+
+  const isTest = accountInfo.miniProgram.envVersion !== 'release';
+  console.log("运行环境：", accountInfo.miniProgram.envVersion)
+  const apiDomain = isTest ? grayDomain : domain
+  const fullURL = apiDomain + '/api/v1'
   
   console.log('Backend url: ', fullURL)
   return fullURL
@@ -135,9 +138,11 @@ const requestInterceptor = async (config: RequestConfig) => {
           Taro.redirectTo({
             url: pageUrls.merchantLogin,
           })
+        } else {
+          // 非商户端，跳转到登录页
+          AuthManager.login();
         }
-        // 可以选择抛出错误或者继续请求
-        // throw new Error('用户未登录');
+       
       }
     } catch (error) {
       console.error('获取认证信息失败:', error);
@@ -182,6 +187,10 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
       AuthManager.clearAuth();
       reject(new Error('登录已过期，请重新登录'));
     } else {
+      if (data.error) {
+        reject(new Error(data.error))
+        return
+      }
       // 其他HTTP错误
       let errorMessage = '网络请求失败'
       switch (statusCode) {
@@ -193,12 +202,6 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
           break
         case 404:
           errorMessage = '请求的资源不存在'
-          break
-        case 500:
-          errorMessage = '服务器内部错误'
-          break
-        case 503:
-          errorMessage = '服务暂不可用'
           break
       }
       reject(new Error(errorMessage))
@@ -294,13 +297,13 @@ const request = async <T = any>(config: RequestConfig): Promise<T> => {
       // 显示错误提示
       if (config.showError !== false) {
         Taro.showToast({
-          title: '出错啦～' + JSON.stringify(error),
+          title: '操作失败:' + error.message,
           icon: 'none',
           duration: 5000,
         })
       }
 
-      throw JSON.stringify(error)+ finalConfig.url
+      throw error;
     }
   }
   

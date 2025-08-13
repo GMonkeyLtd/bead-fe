@@ -5,6 +5,7 @@ import { OrderStatus } from "@/utils/orderUtils";
 import OrderListComp, { OrderItem } from "@/components/OrderListComp";
 import api from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
+import PageContainer from "@/components/PageContainer";
 
 const OrderListDemo: React.FC = () => {
   const [orders, setOrders] = useState<OrderItem[]>([]);
@@ -17,9 +18,11 @@ const OrderListDemo: React.FC = () => {
           orderNumber: item.order_uuid,
           status: item.order_status,
           merchantName: item.merchant_info?.name,
+          productName: item.design_info?.word_info?.bracelet_name,
           orderImage: item.design_info?.image_url,
           budget: item.price || 0,
           createTime: item.created_at,
+          afterSaleStatus: item.after_sale_status,
         }
       })
       setOrders(_orders);
@@ -45,25 +48,15 @@ const OrderListDemo: React.FC = () => {
   };
 
   const handleItemClick = (order: OrderItem) => {
-    if ([OrderStatus.Dispatching, OrderStatus.PendingDispatch].includes(order.status)) {
-      Taro.navigateTo({
-        url: `${pageUrls.orderDispatching}?orderId=${order.id}`,
-      });
-    } else {
-      Taro.navigateTo({
-        url: `${pageUrls.orderDetail}?orderId=${order.id}`,
-      });
-    }
-    // 跳转到订单详情页
+    Taro.navigateTo({
+      url: `${pageUrls.orderDetail}?orderId=${order.id}`,
+    });
   };
 
   return (
-    <View
+    <PageContainer
       className="crystal-common-container"
-      style={{
-        background: "#F4F1EE",
-        height: "100%",
-      }}
+      headerExtraContent="订单列表"
     >
       <View
         style={{
@@ -82,7 +75,7 @@ const OrderListDemo: React.FC = () => {
           onItemClick={handleItemClick}
         />
       </View>
-    </View>
+    </PageContainer>
   );
 };
 
