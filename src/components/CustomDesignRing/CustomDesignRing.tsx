@@ -11,7 +11,7 @@ import Taro from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
 import BeadSelector from "../CrystalSelector/BeadSelector";
-import RingCanvasRenderer from "./RingCanvasRenderer";
+import MovableBeadRenderer from "./MovableBeadRenderer";
 import RingOperationControls from "./RingOperationControls";
 import RingInfoDisplay from "./RingInfoDisplay";
 import CUSTOM_CRYSTAL_BACKEND_IMAGE from "@/assets/images/custom-crystal-backend.png";
@@ -338,6 +338,31 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     setCreateFlag(true);
   }, []);
 
+  // 处理珠子拖拽结束
+  const handleBeadDragEnd = useCallback(async (beadIndex: number, newX: number, newY: number) => {
+    if (!positionManagerRef.current) return;
+
+    try {
+      await positionManagerRef.current.dragBeadToPosition(beadIndex, newX, newY);
+      const state = positionManagerRef.current.getState();
+      setPositionManagerState(state);
+      
+      // 显示拖拽成功提示
+      Taro.showToast({
+        title: "珠子位置已调整",
+        icon: "success",
+        duration: 1000,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        Taro.showToast({
+          title: error.message || "拖拽失败",
+          icon: "none",
+        });
+      }
+    }
+  }, []);
+
   // 清理资源
   useEffect(() => {
     return () => {
@@ -380,18 +405,18 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             }}
           >
             {/* <Image className="custom-crystal-backend" src={CUSTOM_CRYSTAL_BACKEND_IMAGE} style={{ width: `${canvasSize}px`, height: `${canvasSize}px` }} /> */}
-            <RingCanvasRenderer
+            <MovableBeadRenderer
               style={{
                 position: "absolute",
                 top: 0,
-                left: 0
+                left: 0,
               }}
               beads={positionManagerState.beads}
               selectedBeadIndex={positionManagerState.selectedBeadIndex}
-              canvasId={canvasId}
               canvasSize={canvasSize}
               onBeadSelect={handleBeadSelect}
               onBeadDeselect={handleBeadDeselect}
+              onBeadDragEnd={handleBeadDragEnd}
             />
           </View>
 
