@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
-import { View, Image } from "@tarojs/components";
+import { View, Image, Text } from "@tarojs/components";
 import "./styles/BeadSelector.scss";
+import CategorySelector from "./CategorySelector";
 
 interface Bead {
   id?: string | number;
@@ -31,15 +32,36 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   onWuxingChange,
   onBeadClick,
 }) => {
-  const allWuxing = useMemo(() => Object.keys(beadTypeMap), [beadTypeMap]);
+  const allWuxing = useMemo(() => {
+    const wuxingKeys = Object.keys(beadTypeMap);
+    // 添加"精选"作为第一个选项
+    return [...wuxingKeys];
+  }, [beadTypeMap]);
 
   const handleBeadClick = useCallback((bead: Bead) => {
     onBeadClick(bead);
   }, [predictedLength, onBeadClick]);
 
+  const handleWuxingChange = useCallback((wuxing: string) => {
+    if (wuxing === '精选') {
+      // 精选模式：显示所有珠子
+      onWuxingChange('all');
+    } else {
+      onWuxingChange(wuxing);
+    }
+  }, [onWuxingChange]);
+
   const renderBeads = () => {
-    const typeBeads = beadTypeMap[currentWuxing] || [];
+    let typeBeads;
+    if (currentWuxing === 'all' || currentWuxing === '精选') {
+      // 精选模式：显示所有珠子
+      typeBeads = Object.values(beadTypeMap).flat();
+    } else {
+      typeBeads = beadTypeMap[currentWuxing] || [];
+    }
+
     if (!typeBeads || typeBeads.length === 0) return null;
+    console.log('typeBeads', typeBeads);
 
     return (
       <View
@@ -78,27 +100,36 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
           </View>
         ))}
       </View>
-    );
+    )
   };
 
   return (
     <View className="bead-selector-container">
-      {/* 左侧纵向Tab选择器 */}
+      <CategorySelector />
+      {/* 水平Tab选择器 */}
       <View className="wuxing-tabs">
-        {allWuxing.map((wuxing) => (
-          <View
-            key={wuxing}
-            className={`wuxing-tab ${currentWuxing === wuxing ? 'active' : ''}`}
-            onClick={() => onWuxingChange(wuxing)}
-          >
-            {wuxing}
-            {beadTypeMap[wuxing] && beadTypeMap[wuxing].length > 0 && (
-              <View className="bead-count">
-                ({beadTypeMap[wuxing].length}个)
-              </View>
-            )}
-          </View>
-        ))}
+        {allWuxing.map((wuxing) => {
+          const isActive = (wuxing === '精选' && currentWuxing === 'all') ||
+            (wuxing === currentWuxing && wuxing !== '精选');
+          const beadCount = wuxing === '精选' ?
+            Object.values(beadTypeMap).reduce((total, beads) => total + beads.length, 0) :
+            (beadTypeMap[wuxing] ? beadTypeMap[wuxing].length : 0);
+
+          return (
+            <View
+              key={wuxing}
+              className={`wuxing-tab ${isActive ? 'active' : ''}`}
+              onClick={() => handleWuxingChange(wuxing)}
+            >
+              {wuxing}
+              {beadCount > 0 && (
+                <Text className="bead-count">
+                  ({beadCount})
+                </Text>
+              )}
+            </View>
+          );
+        })}
       </View>
       {renderBeads()}
     </View>

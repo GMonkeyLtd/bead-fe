@@ -6,14 +6,15 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { View } from "@tarojs/components";
+import { View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
-import BeadSelector from "./BeadSelector";
+import BeadSelector from "../CrystalSelector/BeadSelector";
 import RingCanvasRenderer from "./RingCanvasRenderer";
 import RingOperationControls from "./RingOperationControls";
 import RingInfoDisplay from "./RingInfoDisplay";
+import CUSTOM_CRYSTAL_BACKEND_IMAGE from "@/assets/images/custom-crystal-backend.png";
 import "./styles/CustomDesignRing.scss";
 
 interface Bead {
@@ -103,7 +104,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     try {
       const windowInfo = Taro.getWindowInfo();
       const { height: safeHeight } = windowInfo.safeArea || { height: 0 };
-      const predictSize = safeHeight * 0.5 - 16 - 45 - 46;
+      const predictSize = safeHeight * 0.5 - 16 - 45 - 46 - 16;
       setCanvasSize(!size && predictSize ? predictSize : size || 400);
     } catch (error) {
       console.warn("Failed to get window info:", error);
@@ -116,7 +117,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   useEffect(() => {
     const allWuxing = Object.keys(beadTypeMap);
     if (allWuxing.length > 0) {
-      setCurrentWuxing(allWuxing[0]);
+      setCurrentWuxing(allWuxing[0]); // 默认选择"土"模式
     }
   }, [beadTypeMap]);
 
@@ -357,6 +358,40 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           height: `${canvasSize + 16 + 45 + 46}px`,
         }}
       >
+        <View className="custom-design-ring-top-content">
+          {/* Canvas渲染器 */}
+          <View
+            style={{
+              position: "relative",
+              height: `${canvasSize}px`,
+              width: `${canvasSize}px`,
+            }}
+          >
+            {/* <Image className="custom-crystal-backend" src={CUSTOM_CRYSTAL_BACKEND_IMAGE} style={{ width: `${canvasSize}px`, height: `${canvasSize}px` }} /> */}
+            <RingCanvasRenderer
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0
+              }}
+              beads={positionManagerState.beads}
+              selectedBeadIndex={positionManagerState.selectedBeadIndex}
+              canvasId={canvasId}
+              canvasSize={canvasSize}
+              onBeadSelect={handleBeadSelect}
+              onBeadDeselect={handleBeadDeselect}
+            />         
+           </View>
+
+          {/* 操作控制 */}
+          <RingOperationControls
+            selectedBeadIndex={positionManagerState.selectedBeadIndex}
+            onClockwiseMove={handleClockwiseMove}
+            onCounterclockwiseMove={handleCounterclockwiseMove}
+            onDelete={handleDelete}
+          />
+        </View>
+
         {/* 信息显示 */}
         <RingInfoDisplay
           imageUrl={imageUrl}
@@ -367,45 +402,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             image_url: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/%E9%85%8D%E9%A5%B0.png',
             diameter: 4,
           })}
-        />
-
-        {/* Canvas渲染器 */}
-        <View
-          style={{
-            width: "100%",
-            position: "relative",
-            height: `${canvasSize}px`,
-          }}
-        >
-          {/* 手围信息 */}
-          <View className="wrist-size-info">
-            <View className="wrist-size-label">适合手围:</View>
-            <View className="wrist-size-value">
-              {`${positionManagerState.predictedLength}cm ~ ${positionManagerState.predictedLength + 0.5}cm`}
-            </View>
-          </View>
-          <RingCanvasRenderer
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0
-            }}
-            beads={positionManagerState.beads}
-            selectedBeadIndex={positionManagerState.selectedBeadIndex}
-            canvasId={canvasId}
-            canvasSize={canvasSize}
-            onBeadSelect={handleBeadSelect}
-            onBeadDeselect={handleBeadDeselect}
-          />
-
-        </View>
-
-        {/* 操作控制 */}
-        <RingOperationControls
-          selectedBeadIndex={positionManagerState.selectedBeadIndex}
-          onClockwiseMove={handleClockwiseMove}
-          onCounterclockwiseMove={handleCounterclockwiseMove}
-          onDelete={handleDelete}
         />
       </View>
 

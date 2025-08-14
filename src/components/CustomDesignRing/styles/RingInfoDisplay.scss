@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 16px;
-  padding: 16px 20px 0 0;
+  padding: 0 28px 0 0;
 }
 
 .view-effect-container {
@@ -25,22 +25,24 @@
   border-radius: 100px;
   background: #000;
 
-  color: #FFF;
-  text-align: center;
-  font-family: "Noto Sans SC";
-  font-size: 12px;
+  font-family: "Source Han Serif CN";
+  font-size: 13px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: normal;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  color: #FFE4B5;
 
   &.disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
 
-  &:not(.disabled):hover {
-    background: #e4c0a060;
-    box-shadow: 0 2px 15px 0 rgba(0, 0, 0, 0.15);
-  }
+.custom-crystal-backend {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  
 }

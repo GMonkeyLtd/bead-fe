@@ -184,7 +184,7 @@ const CustomDesign = () => {
   }, []);
 
   return (
-    <PageContainer onBack={handleBack}>
+    <PageContainer onBack={handleBack} headerExtraContent="编辑台">
       <CustomDesignRing
         ref={customDesignRef}
         beads={(draft?.beads || [])?.map((item: any) => {
