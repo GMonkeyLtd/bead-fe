@@ -177,6 +177,71 @@ export class BeadPositionManager {
   }
 
   /**
+   * 拖拽珠子到新位置
+   */
+  async dragBeadToPosition(beadIndex: number, newX: number, newY: number): Promise<void> {
+    if (beadIndex < 0 || beadIndex >= this.state.beads.length) {
+      throw new Error("无效的珠子索引");
+    }
+
+    // 验证拖拽位置
+    const validation = this.calculator.validateDragPosition(this.state.beads, beadIndex, newX, newY);
+    
+    if (!validation.isValid) {
+      if (validation.adjustedPosition) {
+        // 使用调整后的位置
+        newX = validation.adjustedPosition.x;
+        newY = validation.adjustedPosition.y;
+        
+        // 显示调整提示
+        Taro.showToast({
+          title: validation.message || "位置已自动调整",
+          icon: "none",
+          duration: 2000,
+        });
+      } else {
+        throw new Error(validation.message || "拖拽位置无效");
+      }
+    }
+
+    // 调整所有珠子的位置，保持圆环形状
+    const adjustedBeads = this.calculator.adjustBeadPositionsAfterDrag(
+      this.state.beads,
+      beadIndex,
+      newX,
+      newY
+    );
+
+    // 更新状态
+    this.setState({
+      beads: adjustedBeads,
+      beadStatus: "success",
+    });
+  }
+
+  /**
+   * 重新计算珠子位置以保持圆环形状
+   */
+  private async recalculateBeadPositions(beads: Position[]): Promise<void> {
+    try {
+      // 使用计算器重新计算所有珠子的位置
+      const recalculatedPositions = this.calculator.calculateBeadPositions(beads);
+      
+      // 计算预测长度
+      const predictedLength = this.calculator.calculatePredictedLength(beads);
+      
+      this.setState({
+        beads: recalculatedPositions,
+        predictedLength,
+        beadStatus: "success",
+      });
+    } catch (error) {
+      console.error("重新计算珠子位置失败:", error);
+      this.setState({ beadStatus: "error" });
+    }
+  }
+
+  /**
    * 获取珠子信息
    */
   getBeadArrayInfo() {

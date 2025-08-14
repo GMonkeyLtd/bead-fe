@@ -1,0 +1,36 @@
+.birthplace-picker {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 30rpx;
+  border-bottom: 1px solid #f5f5f5;
+
+  &__label {
+    width: 180rpx;
+    font-size: 28rpx;
+    color: #333;
+    line-height: 1;
+  }
+
+  &__input {
+    flex: 1;
+    position: relative;
+    padding: 10rpx 0;
+    min-height: 40rpx;
+    font-size: 28rpx;
+    color: #333;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  &__arrow {
+    margin-left: 16rpx;
+    color: #ccc;
+    font-size: 32rpx;
+  }
+
+  .placeholder {
+    color: #999;
+  }
+}

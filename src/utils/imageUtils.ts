@@ -26,8 +26,9 @@ export async function compressImage(filePath: string, options: CompressOptions =
 export async function imageToBase64(
   filePath: string, 
   needPrefix = true,
-  compress = true,
-  compressOptions?: CompressOptions
+  compress = false,
+  compressOptions?: CompressOptions,
+  format: 'jpeg' | 'png' = 'png'
 ) {
   try {
     const finalFilePath = compress 
@@ -40,7 +41,7 @@ export async function imageToBase64(
         encoding: "base64",
         success: (res) => {
           const base64 = needPrefix
-            ? `data:image/jpeg;base64,${res.data}`
+            ? `data:image/${format};base64,${res.data}`
             : res.data;
           resolve(base64);
         },

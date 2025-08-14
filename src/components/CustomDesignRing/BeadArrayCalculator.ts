@@ -193,6 +193,132 @@ export class BeadArrayCalculator {
   }
 
   /**
+   * 验证拖拽位置是否有效
+   */
+  validateDragPosition(
+    beads: Position[], 
+    dragBeadIndex: number, 
+    newX: number, 
+    newY: number
+  ): { isValid: boolean; message?: string; adjustedPosition?: { x: number; y: number } } {
+    if (dragBeadIndex < 0 || dragBeadIndex >= beads.length) {
+      return { isValid: false, message: "无效的珠子索引" };
+    }
+
+    const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
+    const maxRadius = this.config.canvasSize * 0.4;
+    const minRadius = Math.max(...beads.map(b => b.render_diameter / 2)) * 1.5;
+
+    // 计算新位置相对于圆心的距离
+    const deltaX = newX - center.x;
+    const deltaY = newY - center.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    // 检查是否在合理范围内
+    if (distance < minRadius) {
+      const adjustedX = center.x + (deltaX / distance) * minRadius;
+      const adjustedY = center.y + (deltaY / distance) * minRadius;
+      return {
+        isValid: false,
+        message: "位置太靠近中心，已自动调整",
+        adjustedPosition: { x: adjustedX, y: adjustedY }
+      };
+    }
+
+    if (distance > maxRadius) {
+      const adjustedX = center.x + (deltaX / distance) * maxRadius;
+      const adjustedY = center.y + (deltaY / distance) * maxRadius;
+      return {
+        isValid: false,
+        message: "位置超出边界，已自动调整",
+        adjustedPosition: { x: adjustedX, y: adjustedY }
+      };
+    }
+
+    // 检查是否与其他珠子重叠
+    for (let i = 0; i < beads.length; i++) {
+      if (i === dragBeadIndex) continue;
+      
+      const bead = beads[i];
+      const beadDistance = Math.sqrt(
+        Math.pow(newX - bead.x, 2) + Math.pow(newY - bead.y, 2)
+      );
+      
+      const minDistance = (beads[dragBeadIndex].render_diameter + bead.render_diameter) / 2 + this.config.spacing;
+      
+      if (beadDistance < minDistance) {
+        return {
+          isValid: false,
+          message: "位置与其他珠子重叠，请选择其他位置"
+        };
+      }
+    }
+
+    return { isValid: true };
+  }
+
+  /**
+   * 调整拖拽后的珠子位置，保持圆环形状
+   */
+  adjustBeadPositionsAfterDrag(
+    beads: Position[], 
+    dragBeadIndex: number, 
+    newX: number, 
+    newY: number
+  ): Position[] {
+    if (dragBeadIndex < 0 || dragBeadIndex >= beads.length) {
+      return beads;
+    }
+
+    const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
+    
+    // 计算拖拽珠子的新角度
+    const deltaX = newX - center.x;
+    const deltaY = newY - center.y;
+    const newAngle = Math.atan2(deltaY, deltaX);
+    
+    // 创建新的珠子数组
+    const newBeads = [...beads];
+    const draggedBead = { ...newBeads[dragBeadIndex] };
+    
+    // 更新拖拽珠子的位置
+    draggedBead.x = newX;
+    draggedBead.y = newY;
+    draggedBead.angle = newAngle;
+    newBeads[dragBeadIndex] = draggedBead;
+
+    // 重新计算其他珠子的位置，保持圆环形状
+    const otherBeads = beads.filter((_, index) => index !== dragBeadIndex);
+    
+    // 将Position转换为Bead格式进行计算
+    const otherBeadsForCalculation = otherBeads.map(bead => ({
+      id: bead.id,
+      image_url: bead.image_url,
+      render_diameter: bead.render_diameter,
+      diameter: bead.diameter,
+    }));
+    
+    // 计算其他珠子的新位置
+    const otherPositions = this.calculateBeadPositions(otherBeadsForCalculation);
+    
+    // 将其他珠子的新位置应用到数组中，保持原有的imageData等属性
+    otherPositions.forEach((pos, index) => {
+      const originalIndex = index >= dragBeadIndex ? index + 1 : index;
+      if (originalIndex < newBeads.length) {
+        newBeads[originalIndex] = { 
+          ...newBeads[originalIndex], 
+          x: pos.x,
+          y: pos.y,
+          angle: pos.angle,
+          radius: pos.radius,
+        };
+      }
+    });
+
+    return newBeads;
+  }
+
+  /**
    * 获取珠子状态信息
    */
   getBeadArrayInfo(beads: Bead[]) {

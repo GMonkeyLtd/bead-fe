@@ -51,6 +51,7 @@ export interface CustomDesignRingRef {
 
 interface CustomDesignRingProps {
   beads: Bead[];
+  wuxing: string[];
   canvasId?: string;
   size?: number;
   spacing?: number;
@@ -66,6 +67,7 @@ interface CustomDesignRingProps {
  */
 const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(({
   beads = [],
+  wuxing = [],
   canvasId = "custom-circle-canvas",
   size,
   spacing = 0,
@@ -348,6 +350,16 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   return (
     <View className="custom-design-ring-container">
       {/* 顶部内容区域 */}
+      <View className="custom-design-ring-tip-container">
+        <View className="custom-design-ring-tip-content-container">
+          <View className="custom-design-ring-tip-content-prefix">
+            璞璞：
+          </View>
+          <View className="custom-design-ring-tip-content">
+            {`喜用【${wuxing?.join('')}】，当前手串适用手围${positionManagerState.predictedLength}cm ~ ${positionManagerState.predictedLength + 0.5}cm`}
+          </View>
+        </View>
+      </View>
       <View
         className="custom-design-ring-top-container"
         style={{
@@ -380,8 +392,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
               canvasSize={canvasSize}
               onBeadSelect={handleBeadSelect}
               onBeadDeselect={handleBeadDeselect}
-            />         
-           </View>
+            />
+          </View>
 
           {/* 操作控制 */}
           <RingOperationControls

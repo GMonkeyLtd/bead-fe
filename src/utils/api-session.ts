@@ -376,5 +376,21 @@ export default {
       {},
       { cancelToken: config?.cancelToken, ...config }
     );
+  },
+  uploadDraftImage: (
+    params: {
+      session_id: string;
+      draft_id: string;
+      image_base64: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<any>(
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/image`,
+      {
+        image_base64: params.image_base64,
+      },
+      { cancelToken: config?.cancelToken, ...config }
+    );
   }
 };

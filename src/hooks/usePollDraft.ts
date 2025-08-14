@@ -21,6 +21,7 @@ export interface DraftData {
   updated_at: string;
   design_id?: string;
   bracelet_image?: string;
+  image_url?: string;
 }
 
 export const usePollDraft = ({ pollingInterval = 2000, maxRetries = 2, showLoading = false }) => {  

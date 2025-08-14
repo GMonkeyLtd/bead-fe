@@ -7,6 +7,7 @@
   box-sizing: border-box;
   position: relative;
 }
+
 .custom-design-ring-top-container {
   display: flex;
   flex-direction: column;
@@ -15,7 +16,7 @@
   height: 60%;
   box-sizing: border-box;
   position: relative;
-  // background: linear-gradient(180deg, #f5f7fa00 80%, #d8d8d9 100%);
+  background: linear-gradient(180deg, #f5f7fa00 80%, #d8d8d9 100%);
   padding-bottom: 16px;
   flex: 0;
 
@@ -43,7 +44,7 @@
 }
 
 .custom-design-ring-bottom-container {
-  background-color: #fff;
+  // background-color: #fff;
   display: flex;
   align-items: center;
   height: 50%;
@@ -57,15 +58,15 @@
 // 隐藏滚动条样式
 .hide-scrollbar {
   -webkit-overflow-scrolling: touch;
-  
+
   // Webkit浏览器 (Chrome, Safari, Edge)
   &::-webkit-scrollbar {
     display: none;
   }
-  
+
   // Firefox
   scrollbar-width: none;
-  
+
   // IE/Edge
   -ms-overflow-style: none;
 }
@@ -90,4 +91,37 @@
 .wrist-size-value {
   font-size: 12px;
   color: #333;
+}
+
+.custom-design-ring-tip-container {
+  width: 100%;
+  padding: 10px 20px;
+  box-sizing: border-box;
+}
+
+.custom-design-ring-tip-content-container {
+  padding: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.61);
+}
+
+.custom-design-ring-tip-content-prefix {
+  color: #FF8551;
+  font-family: "Noto Sans SC";
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.custom-design-ring-tip-content {
+  color: #000;
+  font-family: "Noto Sans SC";
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }

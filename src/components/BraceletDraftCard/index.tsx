@@ -16,6 +16,7 @@ import { generateUUID } from "@/utils/uuid";
 import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import refreshIcon from "@/assets/icons/refresh.svg";
+import { imageToBase64 } from "@/utils/imageUtils";
 
 export const BraceletDraftCard = ({
   sessionId,
@@ -38,6 +39,7 @@ export const BraceletDraftCard = ({
 }) => {
   const { draft, startPolling, updateDraft } = usePollDraft({});
   const [isRegenerating, setIsRegenerating] = useState(false);
+ 
 
   // 为每个卡片实例生成唯一的canvasId，避免多个卡片共享同一个Canvas
   const uniqueCanvasId = useMemo(
@@ -74,6 +76,7 @@ export const BraceletDraftCard = ({
       draft.beads.length > 0 &&
       shouldLoad &&
       !draft.bracelet_image &&
+      !draft.image_url &&
       !isGeneratingRef.current &&
       generatedBraceletImageRef.current !== draft.bracelet_image
     );
@@ -95,6 +98,17 @@ export const BraceletDraftCard = ({
     startPolling(sessionId, draftId, byMerchant);
   }, [sessionId, draftId, draftData, byMerchant]);
 
+  const uploadDraftImage = async (braceletImage: string) => {
+    const imageBase64 = await imageToBase64(braceletImage, false);
+    apiSession.uploadDraftImage({
+      session_id: sessionId || "",
+      draft_id: draft?.draft_id || "",
+      image_base64: imageBase64 as string,
+    }, { showError: false}).catch((err) => {
+      console.error("上传手串图像失败:", err);
+    });
+  }
+
   useEffect(() => {
 
     // 防止重复生成的条件检查
@@ -113,6 +127,9 @@ export const BraceletDraftCard = ({
                 ...currentDraft,
                 bracelet_image: braceletImage,
               } as DraftData);
+            }
+            if (braceletImage && sessionId && draft?.draft_id) {
+              uploadDraftImage(braceletImage);
             }
             // 图像生成完成后，隐藏Canvas以释放资源
             // setShowCanvas(false);
@@ -169,13 +186,13 @@ export const BraceletDraftCard = ({
       });
       return;
     }
-    if (!draft?.bracelet_image) {
+    if (!draft?.bracelet_image && !draft?.image_url) {
       return;
     }
     Taro.redirectTo({
       url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
         draft?.draft_id
-      }&imageUrl=${encodeURIComponent(draft?.bracelet_image)}`,
+      }&imageUrl=${encodeURIComponent(draft?.image_url || draft?.bracelet_image)}`,
     });
   };
 
@@ -195,13 +212,13 @@ export const BraceletDraftCard = ({
   };
 
   const viewImage = () => {
-    if (!draft.bracelet_image) {
+    if (!draft.bracelet_image && !draft.image_url) {
       return;
     }
 
     Taro.previewImage({
-      current: draft.bracelet_image,
-      urls: [draft.bracelet_image],
+      current: draft.image_url || draft.bracelet_image || "",
+      urls: [draft.image_url || draft.bracelet_image || ""],
     });
   };
 
@@ -285,7 +302,7 @@ export const BraceletDraftCard = ({
           </View>
           <View className={styles.braceletBgImageContainer} onClick={viewImage}>
             <CircleRingImage
-              imageUrl={isRegenerating ? "" : draft.bracelet_image}
+              imageUrl={isRegenerating ? "" : draft.image_url || draft.bracelet_image || ""}
               size={140}
               backendSize={160}
               backgroundImage={BRACELET_BG_IMAGE_URL}

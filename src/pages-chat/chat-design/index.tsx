@@ -67,12 +67,12 @@ const ChatDesign = () => {
           setTimeout(() => {
             chatMessagesRef.current?.scrollToBottom();
           }, 100);
-          waitTime = (messages[currentIndex].content?.length / 10) * 1000;
+          waitTime = (messages[currentIndex].content?.length / 15) * 1000;
           if (messages[currentIndex].draft_id) {
             waitTime = 3000;
           } else {
-            if (waitTime < 3000) {
-              waitTime = 3000;
+            if (waitTime < 2000) {
+              waitTime = 2000;
             } else if (waitTime > 10000) {
               waitTime = 8000;
             }

@@ -12,12 +12,14 @@ import { AuthManager } from "@/utils/auth";
 import { pageUrls } from "@/config/page-urls";
 import TabBar, { TabBarTheme } from "@/components/TabBar";
 import apiSession from "@/utils/api-session";
+import { areaList } from '@vant/area-data'
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
   const [lastSessionId, setLastSessionId] = useState("");
   const instance = Taro.getCurrentInstance();
   const { newSession } = instance.router?.params || {};
+  console.log("areaList", areaList);
 
   useEffect(() => {
     AuthManager.clearAuth();

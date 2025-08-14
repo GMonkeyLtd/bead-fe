@@ -186,6 +186,7 @@ const CustomDesign = () => {
   return (
     <PageContainer onBack={handleBack} headerExtraContent="编辑台">
       <CustomDesignRing
+        wuxing={(draft as any)?.wuxing || []}
         ref={customDesignRef}
         beads={(draft?.beads || [])?.map((item: any) => {
           return {
