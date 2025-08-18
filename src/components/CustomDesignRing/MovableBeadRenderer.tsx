@@ -45,6 +45,14 @@ interface MovableBeadRendererProps {
   onBeadSelect: (index: number) => void;
   onBeadDeselect: () => void;
   onBeadDragEnd: (beadIndex: number, newX: number, newY: number) => void;
+  onPreviewInsertPosition?: (beadIndex: number, newX: number, newY: number) => {
+    isValid: boolean;
+    insertIndex?: number;
+    cursorX?: number;
+    cursorY?: number;
+    insertionType?: 'nearest-beads' | 'sector-based';
+    message?: string;
+  };
   style?: React.CSSProperties;
 }
 
@@ -54,6 +62,7 @@ const Bead = React.memo(
     bead,
     index,
     isSelected,
+    notSelected,
     dragState,
     handleDragStart,
     handleDragMove,
@@ -63,6 +72,7 @@ const Bead = React.memo(
     bead: Position;
     index: number;
     isSelected: boolean;
+    notSelected: boolean;
     dragState: {
       isDragging: boolean;
       dragBeadIndex: number;
@@ -81,7 +91,7 @@ const Bead = React.memo(
         {/* 可拖拽的珠子 */}
         <MovableView
           className={`bead-movable ${
-            isSelected ? "selected" : ""
+            isSelected ? "selected" : notSelected ? "not-selected" : ""
           } ${
             dragState.isDragging && dragState.dragBeadIndex === index
               ? "dragging"
@@ -133,6 +143,7 @@ const Bead = React.memo(
     if (
       prevProps.index !== nextProps.index ||
       prevProps.isSelected !== nextProps.isSelected ||
+      prevProps.notSelected !== nextProps.notSelected ||
       prevBead.id !== nextBead.id ||
       prevBead.image_url !== nextBead.image_url ||
       prevBead.radius !== nextBead.radius
@@ -162,11 +173,6 @@ const Bead = React.memo(
       return false; // 需要重新渲染
     }
     
-    // 确保选中状态变化时能够重新渲染（解决样式持久化问题）
-    if (prevProps.isSelected !== nextProps.isSelected) {
-      return false; // 需要重新渲染
-    }
-    
     return true; // 不需要重新渲染
   }
 );
@@ -182,9 +188,10 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
   onBeadSelect,
   onBeadDeselect,
   onBeadDragEnd,
+  onPreviewInsertPosition,
   style,
 }) => {
-  // 拖拽状态管理
+  // 拖拽状态管理（增强版，支持插入预览）
   const [dragState, setDragState] = useState<{
     isDragging: boolean;
     dragBeadIndex: number;
@@ -193,6 +200,14 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     currentX: number;
     currentY: number;
     originalPosition?: { x: number; y: number };
+    // 插入预览相关
+    previewCursor?: {
+      isVisible: boolean;
+      x: number;
+      y: number;
+      insertIndex: number;
+      insertionType: 'nearest-beads' | 'sector-based';
+    };
   }>({
     isDragging: false,
     dragBeadIndex: -1,
@@ -201,6 +216,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     currentX: 0,
     currentY: 0,
     originalPosition: undefined,
+    previewCursor: undefined,
   });
 
   // 珠子位置状态 - 用于内部管理珠子位置
@@ -277,13 +293,14 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         currentX: currentBead.x,
         currentY: currentBead.y,
         originalPosition: { x: currentBead.x, y: currentBead.y },
+        previewCursor: undefined, // 确保开始时清除预览光标
       });
 
     },
     [selectedBeadIndex, onBeadSelect, beadPositions]
   );
 
-  // 处理拖拽中 - 只更新拖拽状态，避免频繁更新珠子位置
+  // 处理拖拽中 - 更新拖拽状态并预览插入位置
   const handleDragMove = useCallback(
     throttle((e: any, beadIndex: number) => {
       if (!dragState.isDragging || dragState.dragBeadIndex !== beadIndex)
@@ -294,15 +311,30 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
       const actualX = (e.detail.x || 0) + bead.radius;
       const actualY = (e.detail.y || 0) + bead.radius;
 
-      // 只更新拖拽状态中的当前位置，不立即更新珠子位置
-      // 这样可以避免拖拽过程中的状态冲突和抖动
+      // 预览插入位置
+      let previewCursor: typeof dragState.previewCursor = undefined;
+      if (onPreviewInsertPosition) {
+        const previewResult = onPreviewInsertPosition(beadIndex, actualX, actualY);
+        if (previewResult.isValid && previewResult.cursorX !== undefined && previewResult.cursorY !== undefined) {
+          previewCursor = {
+            isVisible: true,
+            x: previewResult.cursorX,
+            y: previewResult.cursorY,
+            insertIndex: previewResult.insertIndex || 0,
+            insertionType: previewResult.insertionType || 'nearest-beads'
+          };
+        }
+      }
+
+      // 更新拖拽状态（包含预览信息）
       setDragState(prev => ({
         ...prev,
         currentX: actualX,
         currentY: actualY,
+        previewCursor
       }));
     }, 16), // 减少节流时间，提高响应性
-    [dragState.isDragging, dragState.dragBeadIndex, beadPositions]
+    [dragState.isDragging, dragState.dragBeadIndex, beadPositions, onPreviewInsertPosition]
   );
 
   // 处理拖拽结束
@@ -342,7 +374,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         if (moveDistance < 10) {
           console.log(moveDistance, "👆 判定为点击，不进行重排序");
           
-          // 重置拖拽状态
+          // 重置拖拽状态（包含预览光标）
           setDragState({
             isDragging: false,
             dragBeadIndex: -1,
@@ -351,6 +383,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
             currentX: 0,
             currentY: 0,
             originalPosition: undefined,
+            previewCursor: undefined,
           });
           return;
         }
@@ -377,7 +410,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         }
       }
 
-      // 重置拖拽状态
+      // 重置拖拽状态（清除预览）
       setDragState({
         isDragging: false,
         dragBeadIndex: -1,
@@ -386,6 +419,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         currentX: 0,
         currentY: 0,
         originalPosition: undefined,
+        previewCursor: undefined,
       });
 
       // 移除立即同步机制，让useEffect处理状态同步
@@ -401,7 +435,6 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
       width: `${canvasSize}px`,
       height: `${canvasSize}px`,
       position: "relative" as const,
-      backgroundColor: "rgba(245, 241, 237, 0.3)", // 添加背景色便于调试
     }),
     [canvasSize]
   );
@@ -421,6 +454,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
               bead={bead}
               index={index}
               isSelected={index === selectedBeadIndex}
+              notSelected={selectedBeadIndex !== -1 && index !== selectedBeadIndex}
               dragState={dragState}
               handleDragStart={handleDragStart}
               handleDragMove={handleDragMove}
@@ -428,6 +462,26 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
               handleBeadSelect={handleBeadSelect}
             />
           ))}
+          
+          {/* 插入位置预览光标 */}
+          {dragState.previewCursor?.isVisible && dragState.previewCursor.insertionType === 'sector-based' && (
+            <View
+              className={`insertion-cursor ${dragState.previewCursor.insertionType}`}
+              style={{
+                position: 'absolute',
+                left: dragState.previewCursor.x, // 调整偏移量以适应新的尺寸 (6px/2 + 10px border = 13px)
+                top: dragState.previewCursor.y,
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(247, 240, 229)',
+                border: `10px solid rgba(195, 129, 71)`,
+                zIndex: 100,
+                pointerEvents: 'none',
+                animation: 'pulse 1s infinite'
+              }}
+            />
+          )}
         </MovableArea>
       </View>
     </View>

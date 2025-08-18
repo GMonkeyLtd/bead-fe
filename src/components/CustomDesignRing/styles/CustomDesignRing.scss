@@ -97,31 +97,93 @@
   width: 100%;
   padding: 10px 20px;
   box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
 }
 
 .custom-design-ring-tip-content-container {
-  padding: 10px;
+  padding: 0px 10px;
   display: flex;
-  align-items: flex-start;
+  border-radius: 2px 15px 15px 15px;
+  align-items: center;
+  height: 40px;
   gap: 4px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.61);
+  background: #FBF7F5;
+  box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.04);
+  flex: 1;
 }
 
-.custom-design-ring-tip-content-prefix {
-  color: #FF8551;
-  font-family: "Noto Sans SC";
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-}
 
 .custom-design-ring-tip-content {
-  color: #000;
+  color: rgba(31, 23, 34, 0.90);
   font-family: "Noto Sans SC";
-  font-size: 11px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 350;
+  line-height: normal;
+}
+
+.custom-design-ring-wrist-length-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.custom-design-ring-wrist-length-content-prefix {
+  color: #625A4F;
+
+  text-align: center;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+}
+
+.custom-design-ring-wrist-length-content-value {
+  color: #625A4F;
+  text-align: center;
+  font-family: "Helvetica Neue";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.custom-design-ring-lili-avatar {
+  width: 28px;
+  height: 28px;
+}
+
+.view-effect-button {
+  display: inline-flex;
+  padding: 10px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  border-radius: 100px;
+  background: #000;
+
+  font-family: "Source Han Serif CN";
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 2px;
+  color: #FFE4B5;
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }

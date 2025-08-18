@@ -303,6 +303,24 @@ export class BeadPositionManager {
   }
 
   /**
+   * 预览插入位置（用于拖拽时的实时预览）
+   */
+  previewInsertionPosition(
+    beadIndex: number, 
+    newX: number, 
+    newY: number
+  ): { 
+    isValid: boolean; 
+    insertIndex?: number; 
+    cursorX?: number;
+    cursorY?: number;
+    insertionType?: 'nearest-beads' | 'sector-based';
+    message?: string;
+  } {
+    return this.calculator.previewInsertionPosition(this.state.beads, beadIndex, newX, newY);
+  }
+
+  /**
    * 设置状态
    */
   private setState(partialState: Partial<BeadPositionManagerState>): void {

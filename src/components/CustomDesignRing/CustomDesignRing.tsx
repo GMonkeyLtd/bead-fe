@@ -6,15 +6,15 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { View } from "@tarojs/components";
+import { View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
 import BeadSelector from "../CrystalSelector/BeadSelector";
 import MovableBeadRenderer from "./MovableBeadRenderer";
 import RingOperationControls from "./RingOperationControls";
-import RingInfoDisplay from "./RingInfoDisplay";
 import "./styles/CustomDesignRing.scss";
+import { LILI_AVATAR_IMAGE_URL } from "@/config";
 
 interface Bead {
   image_url: string;
@@ -340,7 +340,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     if (!positionManagerRef.current) return;
 
     try {
-      const result = await positionManagerRef.current.dragBeadToPosition(beadIndex, newX, newY);
+      await positionManagerRef.current.dragBeadToPosition(beadIndex, newX, newY);
       const state = positionManagerRef.current.getState();
       setPositionManagerState(state);
 
@@ -353,6 +353,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         });
       }
     }
+  }, []);
+
+  // 处理插入位置预览
+  const handlePreviewInsertPosition = useCallback((beadIndex: number, newX: number, newY: number) => {
+    if (!positionManagerRef.current) {
+      return { isValid: false, message: "位置管理器未初始化" };
+    }
+
+    return positionManagerRef.current.previewInsertionPosition(beadIndex, newX, newY);
   }, []);
 
   // 清理资源
@@ -370,11 +379,20 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       <View className="custom-design-ring-tip-container">
         <View className="custom-design-ring-tip-content-container">
           <View className="custom-design-ring-tip-content-prefix">
-            璞璞：
+            <Image
+              src={LILI_AVATAR_IMAGE_URL}
+              className="custom-design-ring-lili-avatar"
+            />
           </View>
           <View className="custom-design-ring-tip-content">
-            {`喜用【${wuxing?.join('')}】，当前手串适用手围${positionManagerState.predictedLength}cm ~ ${positionManagerState.predictedLength + 0.5}cm`}
+            {`你的喜用神为【${wuxing?.join('')}】`}
           </View>
+        </View>
+        <View
+          className={`view-effect-button ${!imageUrl ? 'disabled' : ''}`}
+          onClick={handleViewEffect}
+        >
+          查看效果
         </View>
       </View>
       <View
@@ -384,7 +402,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           flexDirection: "column",
           alignItems: "center",
           width: "100%",
-          height: `${canvasSize + 16 + 45 + 46}px`,
+          height: `${canvasSize + 48}px`,
         }}
       >
         <View className="custom-design-ring-top-content">
@@ -396,6 +414,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
               width: `${canvasSize}px`,
             }}
           >
+            <View className="custom-design-ring-wrist-length-container">
+              <View className="custom-design-ring-wrist-length-content-prefix">
+                适合手围：
+              </View>
+              <View className="custom-design-ring-wrist-length-content-value">
+                {positionManagerState.predictedLength} ~ {positionManagerState.predictedLength + 0.5}cm
+              </View>
+            </View>
             {/* <Image className="custom-crystal-backend" src={CUSTOM_CRYSTAL_BACKEND_IMAGE} style={{ width: `${canvasSize}px`, height: `${canvasSize}px` }} /> */}
             <MovableBeadRenderer
               style={{
@@ -409,7 +435,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
               onBeadSelect={handleBeadSelect}
               onBeadDeselect={handleBeadDeselect}
               onBeadDragEnd={handleBeadDragEnd}
+              onPreviewInsertPosition={handlePreviewInsertPosition}
             />
+
           </View>
 
           {/* 操作控制 */}
@@ -420,18 +448,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             onDelete={handleDelete}
           />
         </View>
-
-        {/* 信息显示 */}
-        <RingInfoDisplay
-          imageUrl={imageUrl}
-          onViewEffect={handleViewEffect}
-          onAddAccessory={() => handleBeadClick({
-            id: 'accessory',
-            name: '配饰',
-            image_url: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/%E9%85%8D%E9%A5%B0.png',
-            diameter: 4,
-          })}
-        />
       </View>
 
       {/* 底部珠子选择器 */}

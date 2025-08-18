@@ -56,7 +56,6 @@
     }
     
     .category-name {
-      font-family: 'Noto Sans SC', sans-serif;
       font-weight: 400;
       font-size: 12px;
       line-height: 1.2em;
@@ -64,6 +63,8 @@
       color: rgba(0, 0, 0, 0.6);
       transition: color 0.3s ease;
       white-space: nowrap;
+      font-family: "Source Han Serif CN", sans-serif;
+
     }
   }
 }
