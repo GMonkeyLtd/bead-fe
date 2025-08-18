@@ -228,7 +228,9 @@ export class BeadArrayCalculator {
   }
 
   /**
-   * 检测拖拽的珠子是否落在两个珠子之间
+   * 检测拖拽的珠子应该插入的位置（智能双策略算法）
+   * 策略1：如果拖拽点接近现有珠子，插入到最近的两个相邻珠子之间
+   * 策略2：如果拖拽点在圆环内的空旷区域，基于扇形区域计算插入位置
    */
   detectInsertionBetweenBeads(
     beads: Position[], 
@@ -246,108 +248,233 @@ export class BeadArrayCalculator {
       return { shouldInsert: false, message: "无效的珠子索引" };
     }
 
-    // const dragBead = beads[dragBeadIndex]; // 暂时不需要
-    
     // 过滤掉被拖拽的珠子，获取其他珠子
     const otherBeads = beads
       .map((bead, index) => ({ ...bead, originalIndex: index }))
       .filter((_, index) => index !== dragBeadIndex);
     
-    // console.log("📍 其他珠子数量", otherBeads.length);
-    
-    if (otherBeads.length < 2) {
+    if (otherBeads.length < 1) {
       console.log("❌ 珠子数量不足");
       return { shouldInsert: false, message: "珠子数量不足，无法插入" };
     }
 
-    // 简化策略：找到离拖拽位置最近的两个珠子
+    // 计算画布中心和圆环参数
+    const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
+    const ringRadius = this.config.targetRadius || this.calculateRingRadius(beads);
+    
+    // 计算拖拽点与所有珠子的距离
     const distances = otherBeads.map(bead => ({
       bead,
       distance: Math.sqrt(Math.pow(newX - bead.x, 2) + Math.pow(newY - bead.y, 2))
     })).sort((a, b) => a.distance - b.distance);
 
     const closestBead = distances[0].bead;
-    const secondClosestBead = distances[1].bead;
+    const closestDistance = distances[0].distance;
     
-    // console.log("🎯 最近的两个珠子", {
-    //   closest: { index: closestBead.originalIndex, distance: distances[0].distance },
-    //   secondClosest: { index: secondClosestBead.originalIndex, distance: distances[1].distance }
-    // });
+    // 定义判断阈值
+    const beadProximityThreshold = Math.max(closestBead.radius * 1.5, 40); // 珠子邻近阈值
+    const dragFromCenterDistance = Math.sqrt(Math.pow(newX - center.x, 2) + Math.pow(newY - center.y, 2));
+    
+    console.log("🎯 拖拽分析", {
+      closestDistance,
+      beadProximityThreshold,
+      dragFromCenterDistance,
+      ringRadius,
+      closestBeadIndex: closestBead.originalIndex
+    });
 
-    // 检查这两个珠子是否相邻（在数组中的索引相差1，或者一个是0一个是最后一个）
-    const originalArrayLength = beads.length; // 原始数组长度
+    // 策略选择：根据拖拽点位置决定使用哪种计算方式
+    if (closestDistance <= beadProximityThreshold) {
+      // 策略1：拖拽点接近现有珠子，使用最近珠子插入算法
+      console.log("🔍 使用策略1：最近珠子插入");
+      return this.calculateNearestBeadInsertion(beads, dragBeadIndex, newX, newY, otherBeads, distances);
+    } else if (dragFromCenterDistance <= ringRadius * 1.3) {
+      // 策略2：拖拽点在圆环内但不接近珠子，使用扇形区域插入算法
+      console.log("🔍 使用策略2：扇形区域插入");
+      return this.calculateSectorBasedInsertion(beads, dragBeadIndex, newX, newY, center, otherBeads);
+    } else {
+      // 拖拽点超出有效范围
+      return { shouldInsert: false, message: "拖拽位置超出有效范围" };
+    }
+  }
+
+  /**
+   * 策略1：基于最近珠子的插入计算
+   */
+  private calculateNearestBeadInsertion(
+    beads: Position[], 
+    dragBeadIndex: number, 
+    _newX: number, 
+    _newY: number,
+    otherBeads: any[],
+    distances: any[]
+  ): { shouldInsert: boolean; insertIndex?: number; message?: string } {
+    
+    if (otherBeads.length < 2) {
+      // 如果只有一个其他珠子，直接插入到它前面或后面
+      const targetBead = otherBeads[0];
+      let insertIndex = targetBead.originalIndex;
+      
+      // 如果拖拽的珠子原本在目标位置之前，需要调整插入索引
+      if (dragBeadIndex < insertIndex) {
+        insertIndex--;
+      }
+      
+      return {
+        shouldInsert: true,
+        insertIndex,
+        message: `珠子将插入到第${insertIndex}个位置`
+      };
+    }
+
+    const closestBead = distances[0].bead;
+    const secondClosestBead = distances[1].bead;
+
+    // 检查最近的两个珠子是否相邻
+    const originalArrayLength = beads.length;
     const lastOriginalIndex = originalArrayLength - 1;
     const isAdjacent = Math.abs(closestBead.originalIndex - secondClosestBead.originalIndex) === 1 ||
       (Math.max(closestBead.originalIndex, secondClosestBead.originalIndex) === lastOriginalIndex &&
        Math.min(closestBead.originalIndex, secondClosestBead.originalIndex) === 0);
-    
+
     if (!isAdjacent) {
-      console.log("❌ 最近的两个珠子不相邻");
-      return { shouldInsert: false, message: "请拖拽到相邻的两个珠子之间" };
+      // 如果最近的两个珠子不相邻，选择距离最近的珠子，插入到它的邻近位置
+      const targetBead = closestBead;
+      let insertIndex = targetBead.originalIndex;
+      
+      // 简单策略：插入到最近珠子的后面
+      insertIndex = targetBead.originalIndex + 1;
+      if (dragBeadIndex < insertIndex) {
+        insertIndex--;
+      }
+      
+      return {
+        shouldInsert: true,
+        insertIndex,
+        message: `珠子将插入到第${insertIndex}个位置（靠近最近珠子）`
+      };
     }
 
-    // 检查拖拽位置是否足够靠近 - 放宽距离要求
-    const maxAllowedDistance = 50; // 放宽距离阈值
-    
-    // 如果最近的珠子距离太远，说明拖拽位置不合理
-    if (distances[0].distance > maxAllowedDistance) {
-      console.log("❌ 拖拽位置距离最近的珠子太远", {
-        distance: distances[0].distance,
-        maxAllowed: maxAllowedDistance
-      });
-      return { shouldInsert: false, message: "请拖拽到更接近珠子的位置" };
-    }
-    
-    // 检查前两个珠子的距离总和是否合理
-    const totalDistance = distances[0].distance + distances[1].distance;
-    const maxTotalDistance = 300; // 总距离阈值
-    if (totalDistance > maxTotalDistance) {
-      console.log("❌ 拖拽位置距离两个珠子总距离太远", {
-        totalDistance,
-        maxTotalDistance
-      });
-      return { shouldInsert: false, message: "请拖拽到两个珠子之间的区域" };
-    }
-
-    // 计算插入位置
-    // 特殊情况：如果两个珠子分别是第一个（0）和最后一个，插入到第0个位置
+    // 计算插入位置（相邻珠子之间）
     const isFirstLastAdjacent = (closestBead.originalIndex === 0 && secondClosestBead.originalIndex === lastOriginalIndex) ||
                                (secondClosestBead.originalIndex === 0 && closestBead.originalIndex === lastOriginalIndex);
     
     let insertIndex: number;
     
     if (isFirstLastAdjacent) {
-      // console.log("🔄 检测到第一个和最后一个珠子相邻，插入到第0个位置");
       insertIndex = 0;
-      // 如果拖拽的珠子原本就在第0个位置，不需要移动
       if (dragBeadIndex === 0) {
         return { shouldInsert: false, message: "珠子已在目标位置" };
       }
     } else {
-      // 正常情况：插入到两个相邻珠子之间
       const firstIndex = Math.min(closestBead.originalIndex, secondClosestBead.originalIndex);
       insertIndex = firstIndex + 1;
       
-      // 如果拖拽的珠子原本在插入位置之前，需要调整插入索引
       if (dragBeadIndex < insertIndex) {
         insertIndex--;
       }
     }
-    
-    // console.log("✅ 检测到可插入位置", {
-    //   insertIndex,
-    //   between: [closestBead.originalIndex, secondClosestBead.originalIndex],
-    //   dragBeadIndex,
-    //   isFirstLastAdjacent
-    // });
-    
-    const message = `珠子将插入到第${insertIndex}个位置`;
-    console.log("插入的位置：", insertIndex);
-    
+
     return {
       shouldInsert: true,
-      insertIndex: insertIndex,
-      message
+      insertIndex,
+      message: `珠子将插入到第${insertIndex}个位置（相邻珠子间）`
+    };
+  }
+
+  /**
+   * 策略2：基于扇形区域的插入计算
+   */
+  private calculateSectorBasedInsertion(
+    _beads: Position[], 
+    dragBeadIndex: number, 
+    newX: number, 
+    newY: number,
+    center: { x: number; y: number },
+    otherBeads: any[]
+  ): { shouldInsert: boolean; insertIndex?: number; message?: string } {
+    
+    // 计算拖拽点相对于圆心的角度
+    const dragAngle = Math.atan2(newY - center.y, newX - center.x);
+    
+    // 标准化角度到 [0, 2π) 范围
+    const normalizeDragAngle = dragAngle >= 0 ? dragAngle : dragAngle + 2 * Math.PI;
+    
+    // 计算每个珠子的角度并按角度排序
+    const beadAngles = otherBeads.map(bead => {
+      const beadAngle = Math.atan2(bead.y - center.y, bead.x - center.x);
+      const normalizedBeadAngle = beadAngle >= 0 ? beadAngle : beadAngle + 2 * Math.PI;
+      return {
+        ...bead,
+        angle: normalizedBeadAngle
+      };
+    }).sort((a, b) => a.angle - b.angle);
+
+    // 找到拖拽点应该插入的扇形区域
+    let insertIndex = 0;
+    
+    for (let i = 0; i < beadAngles.length; i++) {
+      const currentBead = beadAngles[i];
+      const nextBead = beadAngles[(i + 1) % beadAngles.length];
+      
+      const currentAngle = currentBead.angle;
+      let nextAngle = nextBead.angle;
+      
+      // 处理跨越0度的情况
+      if (nextAngle < currentAngle) {
+        nextAngle += 2 * Math.PI;
+      }
+      
+      // 检查拖拽角度是否在当前扇形区域内
+      let dragInSector = false;
+      if (i === beadAngles.length - 1) {
+        // 最后一个扇形区域，可能跨越0度
+        dragInSector = (normalizeDragAngle >= currentAngle) || (normalizeDragAngle <= nextBead.angle);
+      } else {
+        dragInSector = (normalizeDragAngle >= currentAngle && normalizeDragAngle <= nextAngle);
+      }
+      
+      if (dragInSector) {
+        // 找到对应的原始索引位置
+        insertIndex = nextBead.originalIndex;
+        
+        // 如果拖拽的珠子原本在插入位置之前，需要调整插入索引
+        if (dragBeadIndex < insertIndex) {
+          insertIndex--;
+        }
+        
+        break;
+      }
+    }
+    
+    // 特殊处理：如果没有找到合适的扇形，插入到角度最接近的位置
+    if (insertIndex === 0 && beadAngles.length > 0) {
+      let minAngleDiff = Infinity;
+      let bestInsertIndex = 0;
+      
+      for (let i = 0; i < beadAngles.length; i++) {
+        const beadAngle = beadAngles[i].angle;
+        let angleDiff = Math.abs(normalizeDragAngle - beadAngle);
+        
+        // 考虑圆形的连续性
+        angleDiff = Math.min(angleDiff, 2 * Math.PI - angleDiff);
+        
+        if (angleDiff < minAngleDiff) {
+          minAngleDiff = angleDiff;
+          bestInsertIndex = beadAngles[i].originalIndex;
+        }
+      }
+      
+      insertIndex = bestInsertIndex;
+      if (dragBeadIndex < insertIndex) {
+        insertIndex--;
+      }
+    }
+
+    return {
+      shouldInsert: true,
+      insertIndex,
+      message: `珠子将插入到第${insertIndex}个位置（基于扇形区域）`
     };
   }
 
