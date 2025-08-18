@@ -15,6 +15,8 @@ import MovableBeadRenderer from "./MovableBeadRenderer";
 import RingOperationControls from "./RingOperationControls";
 import "./styles/CustomDesignRing.scss";
 import { LILI_AVATAR_IMAGE_URL } from "@/config";
+import { AccessoryType } from "@/utils/api-session";
+import { AccessoryItem } from "@/utils/api-session";
 
 interface Bead {
   image_url: string;
@@ -54,6 +56,7 @@ interface CustomDesignRingProps {
   canvasId?: string;
   size?: number;
   spacing?: number;
+  accessoryTypeMap?: Record<AccessoryType, AccessoryItem[]>;  
   beadTypeMap?: Record<string, BeadType[]>;
   renderRatio?: number;
   onOk?: (imageUrl: string, editedBeads: Bead[]) => void;
@@ -69,12 +72,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   wuxing = [],
   size,
   spacing = 0,
+  accessoryTypeMap = {},
   beadTypeMap = {},
   renderRatio = 2,
   onOk,
 }, ref) => {
   const [canvasSize, setCanvasSize] = useState<number>(0);
   const [currentWuxing, setCurrentWuxing] = useState<string>("");
+  const [currentAccessoryType, setCurrentAccessoryType] = useState<AccessoryType | ''>("");  
   const [imageUrl, setImageUrl] = useState<string>("");
   const [createFlag, setCreateFlag] = useState<boolean>(false);
 
@@ -224,12 +229,11 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     diameter: number;
   }) => {
     if (!positionManagerRef.current) return;
-
     try {
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,
-        render_diameter: bead.diameter * renderRatio,
+        render_diameter: bead.frontType === 'accessory' ? bead.width : bead.diameter,
       };
 
       if (positionManagerState.selectedBeadIndex === -1) {
@@ -454,11 +458,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       {/* 底部珠子选择器 */}
       <View className="custom-design-ring-bottom-container">
         <BeadSelector
+          accessoryTypeMap={accessoryTypeMap}
           beadTypeMap={beadTypeMap}
           currentWuxing={currentWuxing}
+          currentAccessoryType={currentAccessoryType}
           renderRatio={renderRatio}
           predictedLength={positionManagerState.predictedLength}
           onWuxingChange={handleWuxingChange}
+          onAccessoryTypeChange={setCurrentAccessoryType}
           onBeadClick={handleBeadClick}
         />
       </View>

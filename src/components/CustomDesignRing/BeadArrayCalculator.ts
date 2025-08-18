@@ -97,17 +97,16 @@ export class BeadArrayCalculator {
     if (!beads.length) return [];
     const ringRadius = this.config.targetRadius || this.calculateRingRadius(beads);
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
-
     const positions = calculateBeadArrangementBySize(
       ringRadius,
-      beads.map(bead => bead.diameter),
+      beads.map(bead => bead.render_diameter),
       center,
       false
     );
 
     return beads.map((bead, index) => {
       // 确保 render_diameter 存在且有效
-      const validRenderDiameter = bead.render_diameter || bead.diameter * (this.config.renderRatio || 2);
+      const validRenderDiameter = bead.render_diameter || bead.render_diameter * (this.config.renderRatio || 2);
       const validDiameter = bead.diameter || 10; // 默认直径
 
       // 尝试从现有位置中找到匹配的珠子（基于id和image_url匹配）
@@ -147,14 +146,12 @@ export class BeadArrayCalculator {
       // 添加到末尾
       newBeads.push({
         ...newBead,
-        render_diameter: newBead.diameter * this.config.renderRatio,
         diameter: newBead.diameter,
       });
     } else {
       // 替换选中的珠子
       newBeads[selectedIndex] = {
         ...newBead,
-        render_diameter: newBead.diameter * this.config.renderRatio,
         diameter: newBead.diameter,
       };
     }

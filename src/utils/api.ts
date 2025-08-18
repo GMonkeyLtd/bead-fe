@@ -1,4 +1,5 @@
 import config from "../../config";
+import { AccessoryItem } from "./api-session";
 import http, {
   setBaseURL,
   setIsMock,
@@ -191,6 +192,16 @@ export const beadsApi = {
         ...config,
       }
     ),
+  getAccessories: (config?: ApiConfig) => 
+     http.get<{ data: AccessoryItem[] }>(
+      "/user/accessories",
+      {},
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    )
 };
 
 export const userDesignApi = {

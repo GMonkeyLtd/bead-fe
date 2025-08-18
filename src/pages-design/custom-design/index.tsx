@@ -4,13 +4,15 @@ import { useCallback, useEffect, useState, useRef } from "react";
 import api, { beadsApi } from "@/utils/api";
 import PageContainer from "@/components/PageContainer";
 import { pageUrls } from "@/config/page-urls";
-import apiSession, { BeadItem } from "@/utils/api-session";
+import apiSession, { AccessoryItem, BeadItem } from "@/utils/api-session";
 import { usePollDraft } from "@/hooks/usePollDraft";
 import { CUSTOM_RENDER_RATIO } from "@/config/beads";
 
 const CustomDesign = () => {
   const [beadTypeMap, setBeadTypeMap] = useState<any>({});
   const [allBeadList, setAllBeadList] = useState<any[]>([]);
+  const [accessoryList, setAccessoryList] = useState<any[]>([]);
+  const [accessoryTypeMap, setAccessoryTypeMap] = useState<any>({});
   const { draft, startPolling } = usePollDraft({ showLoading: true });
 
   const { draftId, sessionId, designId, from } = Taro.getCurrentInstance()?.router?.params || {};
@@ -25,9 +27,13 @@ const CustomDesign = () => {
     }
   }, [draftId, sessionId]);
 
-  useEffect(() => {
+  const getBeads = () => {
     beadsApi.getBeadList({ showLoading: true }).then((res) => {
       const resData = res.data;
+
+      (resData || []).forEach((item: any) => {
+        item.frontType = 'crystal';
+      })
       setAllBeadList(resData);
       
       // 按id对珠子进行聚合
@@ -63,6 +69,33 @@ const CustomDesign = () => {
         }, {})
       );
     });
+  }
+
+  const getAccessories = () => {
+    beadsApi.getAccessories({ showLoading: true }).then((res) => {
+      const resData: AccessoryItem[] = res.data || [];
+      (resData || []).forEach((item: any) => {
+        item.frontType = 'accessory';
+      })
+      console.log('getAccessories', resData);
+      // 按类型聚合
+      const aggregatedAccessories = resData.reduce((acc: Record<string, AccessoryItem[]>, item: AccessoryItem) => {
+        if (acc[item.type]) {
+          acc[item.type].push(item);
+        } else {
+          acc[item.type] = [item];
+        }
+        return acc;
+      }, {});
+      console.log('aggregatedAccessories', aggregatedAccessories);
+      setAccessoryList(resData || []);
+      setAccessoryTypeMap(aggregatedAccessories);
+    });
+  } 
+
+  useEffect(() => {
+    getBeads();
+    getAccessories();
   }, []);
 
   const checkDeadsDataChanged = (_oldBeads: any[], _newBeads: any[]) => {
@@ -71,13 +104,15 @@ const CustomDesign = () => {
     }
     const oldBeads = _oldBeads?.map((item) => {
       return {
-        id: item.id || item.bead_id,
+        id: item.id,
+        width: item.width || 0,
         diameter: item.diameter,
       };
     });
     const newBeads = _newBeads?.map((item) => {
       return {
         id: item.id,
+        width: item.width || 0,
         diameter: item.diameter,
       };
     });
@@ -187,6 +222,7 @@ const CustomDesign = () => {
     <PageContainer onBack={handleBack} headerExtraContent="编辑台">
       <CustomDesignRing
         wuxing={(draft as any)?.wuxing || []}
+        accessoryTypeMap={accessoryTypeMap}
         ref={customDesignRef}
         beads={(draft?.beads || [])?.map((item: any) => {
           return {

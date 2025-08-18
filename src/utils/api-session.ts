@@ -29,6 +29,31 @@ export interface BeadItem {
   func_summary: string;
 }
 
+export enum AccessoryType {
+  GeHuan = 1,
+  GeZhu = 2,
+  SuiXing = 3,
+  PaoHuan = 4
+}
+
+export const AccessoryFormatMap = {
+  [AccessoryType.GeHuan]: '隔环',
+  [AccessoryType.GeZhu]: '隔珠',
+  [AccessoryType.SuiXing]: '随形',
+  [AccessoryType.PaoHuan]: '跑环',
+}
+
+export interface AccessoryItem {
+  id: string;
+  type: AccessoryType;
+  image_url: string;
+  name: string;
+  width: number;
+  diameter: number;
+  quality: number;
+  shape: number;
+}
+
 export interface BraceletDraft {
   session_id: string;
   draft_id: string;

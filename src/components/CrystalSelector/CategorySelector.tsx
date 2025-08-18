@@ -16,14 +16,14 @@ export interface CrystalCategory {
 interface CrystalCategorySelectorProps {
   categories?: CrystalCategory[];
   selectedCategory?: string;
-  onCategoryChange?: (categoryId: string) => void;
+  onCategoryChange?: (categoryKey: string) => void;
   className?: string;
 }
 
 const CrystalCategorySelector: React.FC<CrystalCategorySelectorProps> = ({
   categories = [
     { id: 'crystal', name: '水晶', icon: crystalIcon, activeIcon: crystalActiveIcon },
-    { id: 'accessory', name: '配饰', icon: accessoryIcon, activeIcon: accessoryActiveIcon },
+    { id: 'accessories', name: '配饰', icon: accessoryIcon, activeIcon: accessoryActiveIcon },
   ],
   selectedCategory = 'crystal',
   onCategoryChange,
