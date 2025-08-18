@@ -22,7 +22,7 @@ export const SWIPER_DATA: SwiperItem[] = [
       id: 2,
       title: "水晶手串新灵感",
       subtitle: "CRYSTAL", 
-      description: "源头晶品，匠心专属",
+      description: "定制属于你的光",
       backgroundVideo: "https://zhuluoji.cn-sh2.ufileos.com/resources/home-vidio.mp4",
       type: 'video',
       contentColor: '#fff'

@@ -6,7 +6,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { View, Image } from "@tarojs/components";
+import { View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
@@ -14,7 +14,6 @@ import BeadSelector from "../CrystalSelector/BeadSelector";
 import MovableBeadRenderer from "./MovableBeadRenderer";
 import RingOperationControls from "./RingOperationControls";
 import RingInfoDisplay from "./RingInfoDisplay";
-import CUSTOM_CRYSTAL_BACKEND_IMAGE from "@/assets/images/custom-crystal-backend.png";
 import "./styles/CustomDesignRing.scss";
 
 interface Bead {
@@ -68,13 +67,11 @@ interface CustomDesignRingProps {
 const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(({
   beads = [],
   wuxing = [],
-  canvasId = "custom-circle-canvas",
   size,
   spacing = 0,
   beadTypeMap = {},
   renderRatio = 2,
   onOk,
-  onChange,
 }, ref) => {
   const [canvasSize, setCanvasSize] = useState<number>(0);
   const [currentWuxing, setCurrentWuxing] = useState<string>("");
@@ -315,7 +312,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     if (!positionManagerRef.current) return;
 
     try {
-      const res = await positionManagerRef.current.removeBead();
+      await positionManagerRef.current.removeBead();
       const state = positionManagerRef.current.getState();
       setPositionManagerState(state);
     } catch (error) {
@@ -343,21 +340,16 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     if (!positionManagerRef.current) return;
 
     try {
-      await positionManagerRef.current.dragBeadToPosition(beadIndex, newX, newY);
+      const result = await positionManagerRef.current.dragBeadToPosition(beadIndex, newX, newY);
       const state = positionManagerRef.current.getState();
       setPositionManagerState(state);
-      
-      // 显示拖拽成功提示
-      Taro.showToast({
-        title: "珠子位置已调整",
-        icon: "success",
-        duration: 1000,
-      });
+
     } catch (error) {
       if (error instanceof Error) {
         Taro.showToast({
           title: error.message || "拖拽失败",
           icon: "none",
+          duration: 2500,
         });
       }
     }

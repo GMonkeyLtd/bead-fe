@@ -1,18 +1,16 @@
 import React, {
   useCallback,
   useEffect,
-  useRef,
   useMemo,
   useState,
+  startTransition,
 } from "react";
 import {
   View,
   MovableArea,
   MovableView,
   Image,
-  Text,
 } from "@tarojs/components";
-import Taro from "@tarojs/taro";
 import { Position } from "./BeadArrayCalculator";
 import "./styles/MovableBeadRenderer.scss";
 
@@ -55,48 +53,46 @@ const Bead = React.memo(
   ({
     bead,
     index,
-    selectedBeadIndex,
+    isSelected,
     dragState,
     handleDragStart,
     handleDragMove,
     handleDragEnd,
     handleBeadSelect,
-    getBeadMovableStyle,
-    getBeadImageStyle,
   }: {
     bead: Position;
     index: number;
-    selectedBeadIndex: number;
+    isSelected: boolean;
     dragState: {
       isDragging: boolean;
       dragBeadIndex: number;
       startX: number;
       startY: number;
+      currentX: number;
+      currentY: number;
     };
     handleDragStart: (e: any, index: number) => void;
     handleDragMove: (e: any, index: number) => void;
     handleDragEnd: (e: any, index: number) => void;
     handleBeadSelect: (index: number) => void;
-    getBeadMovableStyle: (bead: Position, index: number) => React.CSSProperties;
-    getBeadImageStyle: (bead: Position) => React.CSSProperties;
   }) => {
     return (
-      <View key={bead.id || index} className="bead-wrapper">
+      <View key={bead.uniqueKey} className="bead-wrapper">
         {/* 可拖拽的珠子 */}
         <MovableView
           className={`bead-movable ${
-            index === selectedBeadIndex ? "selected" : ""
+            isSelected ? "selected" : ""
           } ${
             dragState.isDragging && dragState.dragBeadIndex === index
               ? "dragging"
               : ""
           }`}
-          // 统一使用style属性而不是单独的x和y属性，避免冲突
+          // 统一使用x和y属性定位，避免与style冲突
+          x={bead.x - bead.radius}
+          y={bead.y - bead.radius}
           style={{
             width: 2 * bead.radius,
             height: 2 * bead.radius,
-            left: bead.x - bead.radius,
-            top: bead.y - bead.radius,
           }}
           direction="all"
           inertia={false}
@@ -107,12 +103,15 @@ const Bead = React.memo(
           onTouchCancel={(e) => handleDragEnd(e, index)}
           onClick={(e) => {
             e.stopPropagation();
-            handleBeadSelect(index);
+            // 只有在非拖拽状态下才处理点击选择，避免拖拽结束时重复选择
+            if (!dragState.isDragging) {
+              handleBeadSelect(index);
+            }
           }}
         >
-          {(bead.imageData || bead.image_url) && (
+          {bead.image_url && (
             <Image
-              src={bead.imageData || bead.image_url}
+              src={bead.image_url}
               style={{
                 // transformOrigin: "center center",
                 width: '100%',
@@ -124,6 +123,51 @@ const Bead = React.memo(
         </MovableView>
       </View>
     );
+  },
+  // 添加自定义比较函数，只有关键属性变化时才重新渲染
+  (prevProps, nextProps) => {
+    const prevBead = prevProps.bead;
+    const nextBead = nextProps.bead;
+    
+    // 检查基本属性是否变化
+    if (
+      prevProps.index !== nextProps.index ||
+      prevProps.isSelected !== nextProps.isSelected ||
+      prevBead.id !== nextBead.id ||
+      prevBead.image_url !== nextBead.image_url ||
+      prevBead.radius !== nextBead.radius
+    ) {
+      return false; // 需要重新渲染
+    }
+    
+    // 检查位置是否有明显变化（使用容差）
+    if (
+      Math.abs(prevBead.x - nextBead.x) > 1 ||
+      Math.abs(prevBead.y - nextBead.y) > 1 ||
+      Math.abs(prevBead.angle - nextBead.angle) > 0.05
+    ) {
+      return false; // 需要重新渲染
+    }
+    
+    // 检查拖拽状态是否影响当前珠子
+    const prevDragState = prevProps.dragState;
+    const nextDragState = nextProps.dragState;
+    const currentIndex = nextProps.index;
+    
+    if (
+      prevDragState.isDragging !== nextDragState.isDragging ||
+      prevDragState.dragBeadIndex !== nextDragState.dragBeadIndex ||
+      (prevDragState.dragBeadIndex === currentIndex || nextDragState.dragBeadIndex === currentIndex)
+    ) {
+      return false; // 需要重新渲染
+    }
+    
+    // 确保选中状态变化时能够重新渲染（解决样式持久化问题）
+    if (prevProps.isSelected !== nextProps.isSelected) {
+      return false; // 需要重新渲染
+    }
+    
+    return true; // 不需要重新渲染
   }
 );
 
@@ -146,20 +190,59 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     dragBeadIndex: number;
     startX: number;
     startY: number;
+    currentX: number;
+    currentY: number;
+    originalPosition?: { x: number; y: number };
   }>({
     isDragging: false,
     dragBeadIndex: -1,
     startX: 0,
     startY: 0,
+    currentX: 0,
+    currentY: 0,
+    originalPosition: undefined,
   });
 
-  // 珠子位置状态
+  // 珠子位置状态 - 用于内部管理珠子位置
   const [beadPositions, setBeadPositions] = useState<Position[]>(beads);
-
-  // 更新珠子位置
+  
+  // 初始化珠子位置
   useEffect(() => {
-    setBeadPositions(beads);
-  }, [beads]);
+    if (beads.length > 0 && beadPositions.length === 0) {
+      setBeadPositions([...beads]);
+    }
+  }, [beads, beadPositions.length]);
+
+  // 更新珠子位置 - 确保与props保持同步，增加防抖机制
+  useEffect(() => {
+    // console.log("📥 更新珠子位置", {
+    //   newBeads: beads.length,
+    //   currentBeads: beadPositions.length,
+    //   isDragging: dragState.isDragging
+    // });
+    
+    // 只有在不拖拽时才更新位置，避免拖拽中的冲突
+    if (!dragState.isDragging && beads.length > 0) {
+      // 检查是否需要更新 - 比较关键位置信息
+      const needsUpdate = beads.length !== beadPositions.length || 
+        beads.some((bead, index) => {
+          const currentBead = beadPositions[index];
+          return !currentBead || 
+            bead.uniqueKey !== currentBead.uniqueKey || 
+            Math.abs(bead.x - currentBead.x) > 2 || // 增加容差，减少微小变化导致的更新
+            Math.abs(bead.y - currentBead.y) > 2 ||
+            Math.abs(bead.angle - currentBead.angle) > 0.1;
+        });
+      
+      if (needsUpdate) {
+        console.log("🔄 珠子位置发生变化，更新显示位置");
+        // 使用 startTransition 进行非紧急更新，避免阻塞用户交互
+        startTransition(() => {
+          setBeadPositions([...beads]); // 使用展开运算符确保触发重新渲染
+        });
+      }
+    }
+  }, [beads, dragState.isDragging, beadPositions]);
 
   // 处理珠子选择
   const handleBeadSelect = useCallback(
@@ -172,56 +255,127 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
   // 处理拖拽开始
   const handleDragStart = useCallback(
     (e: any, beadIndex: number) => {
+      const currentBead = beadPositions[beadIndex];
+      // 选择被拖拽的珠子
+      if (!currentBead) {
+        console.warn("⚠️ 无法获取珠子信息，跳过拖拽", { beadIndex, beadPositionsLength: beadPositions.length });
+        return;
+      }
+      
+      // 拖拽开始时先选中当前珠子
+      if (selectedBeadIndex !== beadIndex) {
+        onBeadSelect(beadIndex);
+      }
+      
+      console.log("🚀 拖拽开始", { beadIndex, bead: currentBead });
+      
       setDragState({
         isDragging: true,
         dragBeadIndex: beadIndex,
         startX: e.detail.x || 0,
         startY: e.detail.y || 0,
+        currentX: currentBead.x,
+        currentY: currentBead.y,
+        originalPosition: { x: currentBead.x, y: currentBead.y },
       });
 
-      // 选择被拖拽的珠子
-      if (selectedBeadIndex !== beadIndex) {
-        onBeadSelect(beadIndex);
-      }
     },
-    [selectedBeadIndex, onBeadSelect]
+    [selectedBeadIndex, onBeadSelect, beadPositions]
   );
 
-  // 处理拖拽中 - 使用节流优化
+  // 处理拖拽中 - 只更新拖拽状态，避免频繁更新珠子位置
   const handleDragMove = useCallback(
     throttle((e: any, beadIndex: number) => {
       if (!dragState.isDragging || dragState.dragBeadIndex !== beadIndex)
         return;
 
-      // 更新珠子位置
-      const newX = e.detail.x || 0;
-      const newY = e.detail.y || 0;
+      // 计算实际坐标：MovableView的坐标 + 珠子半径偏移
+      const bead = beadPositions[beadIndex];
+      const actualX = (e.detail.x || 0) + bead.radius;
+      const actualY = (e.detail.y || 0) + bead.radius;
 
-      // 直接更新当前珠子的位置，避免每次都映射整个数组
-      setBeadPositions((prev) => {
-        const newPositions = [...prev];
-        newPositions[beadIndex] = {
-          ...newPositions[beadIndex],
-          x: newX,
-          y: newY,
-        };
-        return newPositions;
-      });
-    }, 50),
-    [dragState.isDragging, dragState.dragBeadIndex]
+      // 只更新拖拽状态中的当前位置，不立即更新珠子位置
+      // 这样可以避免拖拽过程中的状态冲突和抖动
+      setDragState(prev => ({
+        ...prev,
+        currentX: actualX,
+        currentY: actualY,
+      }));
+    }, 16), // 减少节流时间，提高响应性
+    [dragState.isDragging, dragState.dragBeadIndex, beadPositions]
   );
 
   // 处理拖拽结束
   const handleDragEnd = useCallback(
-    (e: any, beadIndex: number) => {
+    async (e: any, beadIndex: number) => {
       if (!dragState.isDragging || dragState.dragBeadIndex !== beadIndex)
         return;
 
-      const finalX = e.detail.x || 0;
-      const finalY = e.detail.y || 0;
+      // 计算最终位置：优先使用拖拽状态中的位置，备用事件位置
+      const bead = beadPositions[beadIndex];
+      let finalX = dragState.currentX;
+      let finalY = dragState.currentY;
+      
+      // 如果状态中没有位置信息，从事件中计算
+      if (finalX === 0 && finalY === 0 && e.detail) {
+        finalX = (e.detail.x || 0) + bead.radius;
+        finalY = (e.detail.y || 0) + bead.radius;
+      }
+      
+      console.log("🎯 拖拽结束事件", {
+        beadIndex,
+        finalX,
+        finalY,
+        fromState: { x: dragState.currentX, y: dragState.currentY },
+        fromEvent: { x: e.detail?.x, y: e.detail?.y },
+        originalPos: dragState.originalPosition
+      });
 
-      // 调用拖拽结束回调
-      onBeadDragEnd(beadIndex, finalX, finalY);
+      const originalPos = dragState.originalPosition;
+      if (originalPos) {
+        const moveDistance = Math.sqrt(
+          Math.pow(finalX - originalPos.x, 2) + Math.pow(finalY - originalPos.y, 2)
+        );
+        
+        
+        // 如果移动距离太小，认为是点击而不是拖拽
+        if (moveDistance < 10) {
+          console.log(moveDistance, "👆 判定为点击，不进行重排序");
+          
+          // 重置拖拽状态
+          setDragState({
+            isDragging: false,
+            dragBeadIndex: -1,
+            startX: 0,
+            startY: 0,
+            currentX: 0,
+            currentY: 0,
+            originalPosition: undefined,
+          });
+          return;
+        }
+
+        
+        // 等待拖拽处理完成，确保状态更新完毕
+        try {
+          await onBeadDragEnd(beadIndex, finalX, finalY);
+          console.log("✅ 拖拽处理完成");
+        } catch (error) {
+          console.error("❌ 拖拽处理失败:", error);
+          // 如果拖拽失败，恢复原始位置
+          setBeadPositions(prevPositions => {
+            const restoredPositions = [...prevPositions];
+            if (restoredPositions[beadIndex] && originalPos) {
+              restoredPositions[beadIndex] = {
+                ...restoredPositions[beadIndex],
+                x: originalPos.x,
+                y: originalPos.y
+              };
+            }
+            return restoredPositions;
+          });
+        }
+      }
 
       // 重置拖拽状态
       setDragState({
@@ -229,15 +383,17 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         dragBeadIndex: -1,
         startX: 0,
         startY: 0,
+        currentX: 0,
+        currentY: 0,
+        originalPosition: undefined,
       });
-    },
-    [dragState.isDragging, dragState.dragBeadIndex, onBeadDragEnd]
-  );
 
-  console.log("beadPositions", beadPositions);
-  console.log("beads prop", beads);
-  console.log("canvasSize", canvasSize);
-  console.log("selectedBeadIndex", selectedBeadIndex);
+      // 移除立即同步机制，让useEffect处理状态同步
+      // 这样可以避免重复的状态更新导致的抖动
+      console.log("🔄 拖拽结束，等待状态自然同步");
+    },
+    [dragState.isDragging, dragState.dragBeadIndex, dragState.currentX, dragState.currentY, dragState.originalPosition, onBeadDragEnd, beadPositions.length, beads]
+  );
 
   // 计算MovableArea的尺寸和位置
   const movableAreaStyle = useMemo(
@@ -250,93 +406,8 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     [canvasSize]
   );
 
-  // 计算珠子的MovableView样式
-  const getBeadMovableStyle = useCallback(
-    (bead: Position, index: number) => {
-      const isSelected = index === selectedBeadIndex;
-      const isDragging =
-        dragState.isDragging && dragState.dragBeadIndex === index;
-
-      // 调试信息 - 输出原始坐标和计算后的坐标
-      const calculatedX = Math.round(bead.x - bead.radius);
-      const calculatedY = Math.round(bead.y - bead.radius);
-
-      // 添加额外的调试信息 - 验证坐标是否在画布范围内
-      if (
-        calculatedX < 0 ||
-        calculatedX + bead.radius * 2 > canvasSize ||
-        calculatedY < 0 ||
-        calculatedY + bead.radius * 2 > canvasSize
-      ) {
-        console.warn(`Bead ${index} is outside canvas bounds!`);
-      }
-
-      return {
-        width: `${bead.radius * 2}px`,
-        height: `${bead.radius * 2}px`,
-        x: calculatedX,
-        y: calculatedY,
-        zIndex: isSelected ? 10 : isDragging ? 9 : 1,
-        transform: `rotate(${bead.angle + Math.PI / 2}rad)`,
-        transition: isDragging ? "none" : "all 0.3s ease",
-        // backgroundColor: 'rgba(255, 0, 0, 0.2)', // 添加背景色便于调试
-      };
-    },
-    [
-      selectedBeadIndex,
-      dragState.isDragging,
-      dragState.dragBeadIndex,
-      canvasSize,
-    ]
-  );
-
-  // 计算珠子的图片样式
-  const getBeadImageStyle = useCallback(
-    (bead: Position) => ({
-      width: "100%",
-      height: "100%",
-      objectFit: "cover" as const,
-      display: "block", // 确保图片显示
-    }),
-    []
-  );
-
-  // 计算选中珠子的边框样式
-  const getSelectedBeadStyle = useCallback(
-    (bead: Position, index: number) => {
-      if (index !== selectedBeadIndex) return {};
-
-      return {
-        position: "absolute" as const,
-        left: `${bead.x - bead.radius - 4}px`,
-        top: `${bead.y - bead.radius - 4}px`,
-        width: `${bead.radius * 2 + 8}px`,
-        height: `${bead.radius * 2 + 8}px`,
-        border: "3px solid #FF6B35",
-        borderRadius: "50%",
-        pointerEvents: "none" as const,
-        zIndex: 11,
-      };
-    },
-    [selectedBeadIndex]
-  );
-
   return (
     <View className="movable-bead-container" style={style}>
-      {/* 拖拽提示 */}
-      {/* {dragState.isDragging && (
-        <View className='drag-hint visible'>
-          拖拽中... 松开手指完成调整
-        </View>
-      )} */}
-
-      {/* 触摸提示 */}
-      {/* {!dragState.isDragging && beads.length > 0 && (
-        <View className='touch-hint'>
-          💡 拖拽珠子可调整位置
-        </View>
-      )} */}
-
       <View className="canvas-wrapper">
         <MovableArea
           className="movable-area"
@@ -346,36 +417,17 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
           {/* 绘制珠子 */}
           {beadPositions.map((bead, index) => (
             <Bead
-              key={bead.id || index}
+              key={bead.uniqueKey}
               bead={bead}
               index={index}
-              selectedBeadIndex={selectedBeadIndex}
+              isSelected={index === selectedBeadIndex}
               dragState={dragState}
               handleDragStart={handleDragStart}
               handleDragMove={handleDragMove}
               handleDragEnd={handleDragEnd}
               handleBeadSelect={handleBeadSelect}
-              getBeadMovableStyle={getBeadMovableStyle}
-              getBeadImageStyle={getBeadImageStyle}
             />
           ))}
-
-          {/* 测试用的珠子 - 临时添加用于调试 */}
-          {/* {beadPositions.length === 0 && (
-            <View className="bead-wrapper">
-              <MovableView
-                className="bead-movable test-bead"
-                x={218}
-                y={145}
-                style={{}}
-                direction="all"
-                inertia={false}
-                outOfBounds={false}
-              >
-                <Image src='https://zhuluoji.cn-sh2.ufileos.com/beads0807/%E9%BB%84%E8%83%B6%E8%8A%B1.webp' />
-              </MovableView>
-            </View>
-          )} */}
         </MovableArea>
       </View>
     </View>

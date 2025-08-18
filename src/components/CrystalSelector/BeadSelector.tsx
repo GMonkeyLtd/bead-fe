@@ -61,7 +61,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
     }
 
     if (!typeBeads || typeBeads.length === 0) return null;
-    console.log('typeBeads', typeBeads);
 
     return (
       <View

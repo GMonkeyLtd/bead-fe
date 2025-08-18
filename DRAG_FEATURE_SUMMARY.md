@@ -164,3 +164,4 @@ const adjustedBeads = this.calculator.adjustBeadPositionsAfterDrag(
 ## 总结
 
 通过这次功能扩展，珠子手串DIY组件的交互性得到了显著提升。用户现在可以通过直观的拖拽操作来调整珠子位置，实现了更灵活、更自然的手串设计体验。整个实现过程充分考虑了性能优化、用户体验和代码可维护性，为后续功能扩展奠定了良好的基础。
+

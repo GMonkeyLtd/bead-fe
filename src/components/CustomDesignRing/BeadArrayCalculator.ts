@@ -1,5 +1,15 @@
 import { computeBraceletLength, calculateBeadArrangementBySize } from "@/utils/cystal-tools";
 
+/**
+ * 生成唯一的珠子key
+ * 格式: bead_{timestamp}_{index}_{random}
+ */
+export function generateUniqueBeadKey(index: number): string {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substr(2, 6);
+  return `bead_${timestamp}_${index}_${random}`;
+}
+
 export interface Bead {
   id?: string | number;
   image_url: string;
@@ -13,6 +23,7 @@ export interface Position extends Bead {
   angle: number;
   radius: number;
   imageData?: string; // 可选，因为可能还没有处理图片
+  uniqueKey: string; // 唯一标识符，用于React key和精确识别珠子
 }
 
 export interface BeadArrayCalculatorConfig {
@@ -79,8 +90,10 @@ export class BeadArrayCalculator {
 
   /**
    * 计算每个珠子的圆心坐标
+   * @param beads 珠子数组
+   * @param existingPositions 现有的位置数组（用于保持uniqueKey的连续性）
    */
-  calculateBeadPositions(beads: Bead[]): Position[] {
+  calculateBeadPositions(beads: Bead[], existingPositions?: Position[]): Position[] {
     if (!beads.length) return [];
     const ringRadius = this.config.targetRadius || this.calculateRingRadius(beads);
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
@@ -92,14 +105,36 @@ export class BeadArrayCalculator {
       false
     );
 
-    return beads.map((bead, index) => ({
-      ...bead,
-      x: positions[index]?.x || 0,
-      y: positions[index]?.y || 0,
-      angle: positions[index]?.angle || 0,
-      radius: positions[index]?.radius || 0,
-      imageData: bead.image_url, // 使用image_url作为初始值
-    }));
+    return beads.map((bead, index) => {
+      // 确保 render_diameter 存在且有效
+      const validRenderDiameter = bead.render_diameter || bead.diameter * (this.config.renderRatio || 2);
+      const validDiameter = bead.diameter || 10; // 默认直径
+      
+      // 尝试从现有位置中找到匹配的珠子（基于id和image_url匹配）
+      const existingPosition = existingPositions?.find(
+        pos => pos.id === bead.id && pos.image_url === bead.image_url
+      );
+      
+      const position = {
+        ...bead,
+        render_diameter: validRenderDiameter,
+        diameter: validDiameter,
+        x: positions[index]?.x || 0,
+        y: positions[index]?.y || 0,
+        angle: positions[index]?.angle || 0,
+        radius: positions[index]?.radius || validRenderDiameter / 2,
+        imageData: bead.image_url, // 使用image_url作为初始值
+        uniqueKey: existingPosition?.uniqueKey || generateUniqueBeadKey(index), // 优先使用现有key，否则生成新key
+      };
+      
+      // console.log(`📍 珠子位置计算 ${index}`, {
+      //   original: bead,
+      //   calculated: position,
+      //   reusingKey: !!existingPosition?.uniqueKey
+      // });
+      
+      return position;
+    });
   }
 
   /**
@@ -193,18 +228,200 @@ export class BeadArrayCalculator {
   }
 
   /**
-   * 验证拖拽位置是否有效
+   * 检测拖拽的珠子是否落在两个珠子之间
+   */
+  detectInsertionBetweenBeads(
+    beads: Position[], 
+    dragBeadIndex: number, 
+    newX: number, 
+    newY: number
+  ): { 
+    shouldInsert: boolean; 
+    insertIndex?: number; 
+    message?: string;
+  } {
+    
+    if (dragBeadIndex < 0 || dragBeadIndex >= beads.length) {
+      console.log("❌ 无效的珠子索引");
+      return { shouldInsert: false, message: "无效的珠子索引" };
+    }
+
+    // const dragBead = beads[dragBeadIndex]; // 暂时不需要
+    
+    // 过滤掉被拖拽的珠子，获取其他珠子
+    const otherBeads = beads
+      .map((bead, index) => ({ ...bead, originalIndex: index }))
+      .filter((_, index) => index !== dragBeadIndex);
+    
+    // console.log("📍 其他珠子数量", otherBeads.length);
+    
+    if (otherBeads.length < 2) {
+      console.log("❌ 珠子数量不足");
+      return { shouldInsert: false, message: "珠子数量不足，无法插入" };
+    }
+
+    // 简化策略：找到离拖拽位置最近的两个珠子
+    const distances = otherBeads.map(bead => ({
+      bead,
+      distance: Math.sqrt(Math.pow(newX - bead.x, 2) + Math.pow(newY - bead.y, 2))
+    })).sort((a, b) => a.distance - b.distance);
+
+    const closestBead = distances[0].bead;
+    const secondClosestBead = distances[1].bead;
+    
+    // console.log("🎯 最近的两个珠子", {
+    //   closest: { index: closestBead.originalIndex, distance: distances[0].distance },
+    //   secondClosest: { index: secondClosestBead.originalIndex, distance: distances[1].distance }
+    // });
+
+    // 检查这两个珠子是否相邻（在数组中的索引相差1，或者一个是0一个是最后一个）
+    const originalArrayLength = beads.length; // 原始数组长度
+    const lastOriginalIndex = originalArrayLength - 1;
+    const isAdjacent = Math.abs(closestBead.originalIndex - secondClosestBead.originalIndex) === 1 ||
+      (Math.max(closestBead.originalIndex, secondClosestBead.originalIndex) === lastOriginalIndex &&
+       Math.min(closestBead.originalIndex, secondClosestBead.originalIndex) === 0);
+    
+    if (!isAdjacent) {
+      console.log("❌ 最近的两个珠子不相邻");
+      return { shouldInsert: false, message: "请拖拽到相邻的两个珠子之间" };
+    }
+
+    // 检查拖拽位置是否足够靠近 - 放宽距离要求
+    const maxAllowedDistance = 50; // 放宽距离阈值
+    
+    // 如果最近的珠子距离太远，说明拖拽位置不合理
+    if (distances[0].distance > maxAllowedDistance) {
+      console.log("❌ 拖拽位置距离最近的珠子太远", {
+        distance: distances[0].distance,
+        maxAllowed: maxAllowedDistance
+      });
+      return { shouldInsert: false, message: "请拖拽到更接近珠子的位置" };
+    }
+    
+    // 检查前两个珠子的距离总和是否合理
+    const totalDistance = distances[0].distance + distances[1].distance;
+    const maxTotalDistance = 300; // 总距离阈值
+    if (totalDistance > maxTotalDistance) {
+      console.log("❌ 拖拽位置距离两个珠子总距离太远", {
+        totalDistance,
+        maxTotalDistance
+      });
+      return { shouldInsert: false, message: "请拖拽到两个珠子之间的区域" };
+    }
+
+    // 计算插入位置
+    // 特殊情况：如果两个珠子分别是第一个（0）和最后一个，插入到第0个位置
+    const isFirstLastAdjacent = (closestBead.originalIndex === 0 && secondClosestBead.originalIndex === lastOriginalIndex) ||
+                               (secondClosestBead.originalIndex === 0 && closestBead.originalIndex === lastOriginalIndex);
+    
+    let insertIndex: number;
+    
+    if (isFirstLastAdjacent) {
+      // console.log("🔄 检测到第一个和最后一个珠子相邻，插入到第0个位置");
+      insertIndex = 0;
+      // 如果拖拽的珠子原本就在第0个位置，不需要移动
+      if (dragBeadIndex === 0) {
+        return { shouldInsert: false, message: "珠子已在目标位置" };
+      }
+    } else {
+      // 正常情况：插入到两个相邻珠子之间
+      const firstIndex = Math.min(closestBead.originalIndex, secondClosestBead.originalIndex);
+      insertIndex = firstIndex + 1;
+      
+      // 如果拖拽的珠子原本在插入位置之前，需要调整插入索引
+      if (dragBeadIndex < insertIndex) {
+        insertIndex--;
+      }
+    }
+    
+    // console.log("✅ 检测到可插入位置", {
+    //   insertIndex,
+    //   between: [closestBead.originalIndex, secondClosestBead.originalIndex],
+    //   dragBeadIndex,
+    //   isFirstLastAdjacent
+    // });
+    
+    const message = `珠子将插入到第${insertIndex}个位置`;
+    console.log("插入的位置：", insertIndex);
+    
+    return {
+      shouldInsert: true,
+      insertIndex: insertIndex,
+      message
+    };
+  }
+
+  /**
+   * 重新排列珠子数组（拖拽重排序）
+   */
+  reorderBeads(beads: Position[], fromIndex: number, toIndex: number): Position[] {
+    if (fromIndex < 0 || fromIndex >= beads.length || toIndex < 0 || toIndex >= beads.length) {
+      return beads;
+    }
+
+    const newBeads = [...beads];
+    const [movedBead] = newBeads.splice(fromIndex, 1);
+    newBeads.splice(toIndex, 0, movedBead);
+    
+    return newBeads;
+  }
+
+  /**
+   * 重新计算已有Position数组的坐标（保持其他属性不变）
+   */
+  recalculatePositions(positions: Position[]): Position[] {
+    if (!positions.length) return [];
+    
+    const ringRadius = this.config.targetRadius || this.calculateRingRadius(positions);
+    const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
+    
+    const newCoordinates = calculateBeadArrangementBySize(
+      ringRadius,
+      positions.map(pos => pos.diameter),
+      center,
+      false
+    );
+
+    return positions.map((position, index) => ({
+      ...position,
+      x: newCoordinates[index]?.x || 0,
+      y: newCoordinates[index]?.y || 0,
+      angle: newCoordinates[index]?.angle || 0,
+      radius: newCoordinates[index]?.radius || position.radius,
+    }));
+  }
+
+  /**
+   * 验证拖拽位置是否有效（更新后的版本）
    */
   validateDragPosition(
     beads: Position[], 
     dragBeadIndex: number, 
     newX: number, 
     newY: number
-  ): { isValid: boolean; message?: string; adjustedPosition?: { x: number; y: number } } {
+  ): { 
+    isValid: boolean; 
+    message?: string; 
+    shouldInsert?: boolean;
+    insertIndex?: number;
+    adjustedPosition?: { x: number; y: number };
+  } {
     if (dragBeadIndex < 0 || dragBeadIndex >= beads.length) {
       return { isValid: false, message: "无效的珠子索引" };
     }
 
+    // 首先检查是否可以插入到两个珠子之间
+    const insertionResult = this.detectInsertionBetweenBeads(beads, dragBeadIndex, newX, newY);
+    if (insertionResult.shouldInsert) {
+      return {
+        isValid: true,
+        shouldInsert: true,
+        insertIndex: insertionResult.insertIndex,
+        message: insertionResult.message
+      };
+    }
+
+    // 如果不能插入，则检查基本的边界和重叠验证
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
     const maxRadius = this.config.canvasSize * 0.4;
     const minRadius = Math.max(...beads.map(b => b.render_diameter / 2)) * 1.5;
@@ -215,27 +432,14 @@ export class BeadArrayCalculator {
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     // 检查是否在合理范围内
-    if (distance < minRadius) {
-      const adjustedX = center.x + (deltaX / distance) * minRadius;
-      const adjustedY = center.y + (deltaY / distance) * minRadius;
+    if (distance < minRadius || distance > maxRadius) {
       return {
         isValid: false,
-        message: "位置太靠近中心，已自动调整",
-        adjustedPosition: { x: adjustedX, y: adjustedY }
+        message: "拖拽失败：位置不在有效范围内，珠子已恢复原位置"
       };
     }
 
-    if (distance > maxRadius) {
-      const adjustedX = center.x + (deltaX / distance) * maxRadius;
-      const adjustedY = center.y + (deltaY / distance) * maxRadius;
-      return {
-        isValid: false,
-        message: "位置超出边界，已自动调整",
-        adjustedPosition: { x: adjustedX, y: adjustedY }
-      };
-    }
-
-    // 检查是否与其他珠子重叠
+    // 检查是否与其他珠子重叠（但不在插入范围内）
     for (let i = 0; i < beads.length; i++) {
       if (i === dragBeadIndex) continue;
       
@@ -249,12 +453,16 @@ export class BeadArrayCalculator {
       if (beadDistance < minDistance) {
         return {
           isValid: false,
-          message: "位置与其他珠子重叠，请选择其他位置"
+          message: "拖拽失败：位置与其他珠子重叠，珠子已恢复原位置"
         };
       }
     }
 
-    return { isValid: true };
+    // 如果到达这里，说明位置有效但不是插入操作，这种情况下也认为是失败
+    return {
+      isValid: false,
+      message: "拖拽失败：珠子只能插入到其他珠子之间，已恢复原位置"
+    };
   }
 
   /**

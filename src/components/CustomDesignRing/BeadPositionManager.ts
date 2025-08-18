@@ -1,6 +1,5 @@
 import { BeadArrayCalculator, Bead, Position } from "./BeadArrayCalculator";
 import { ImageCacheManager } from "@/utils/image-cache";
-import Taro from "@tarojs/taro";
 
 export interface BeadPositionManagerConfig {
   canvasSize: number;
@@ -24,14 +23,12 @@ export interface BeadPositionManagerState {
  */
 export class BeadPositionManager {
   private calculator: BeadArrayCalculator;
-  private config: BeadPositionManagerConfig;
   private state: BeadPositionManagerState;
   private imageProcessCache: Map<string, string>;
   private positionCache: Map<string, Position[]>;
   private isProcessing: boolean = false;
 
   constructor(config: BeadPositionManagerConfig) {
-    this.config = config;
     this.calculator = new BeadArrayCalculator(config);
     this.state = {
       beads: [],
@@ -63,8 +60,8 @@ export class BeadPositionManager {
       // 处理图片
       const processedBeads = await this.processImages(beads);
       
-      // 计算位置
-      const positions = this.calculator.calculateBeadPositions(processedBeads);
+      // 计算位置，传递现有位置信息以保持uniqueKey连续性
+      const positions = this.calculator.calculateBeadPositions(processedBeads, this.state.beads);
       
       // 计算预测长度
       const predictedLength = this.calculator.calculatePredictedLength(processedBeads);
@@ -177,69 +174,87 @@ export class BeadPositionManager {
   }
 
   /**
-   * 拖拽珠子到新位置
+   * 拖拽珠子到新位置（支持重排序）
    */
-  async dragBeadToPosition(beadIndex: number, newX: number, newY: number): Promise<void> {
+  async dragBeadToPosition(beadIndex: number, newX: number, newY: number): Promise<{ success: boolean; message: string }> {
     if (beadIndex < 0 || beadIndex >= this.state.beads.length) {
       throw new Error("无效的珠子索引");
     }
 
-    // 验证拖拽位置
-    const validation = this.calculator.validateDragPosition(this.state.beads, beadIndex, newX, newY);
-    
-    if (!validation.isValid) {
-      if (validation.adjustedPosition) {
-        // 使用调整后的位置
-        newX = validation.adjustedPosition.x;
-        newY = validation.adjustedPosition.y;
-        
-        // 显示调整提示
-        Taro.showToast({
-          title: validation.message || "位置已自动调整",
-          icon: "none",
-          duration: 2000,
-        });
-      } else {
-        throw new Error(validation.message || "拖拽位置无效");
-      }
-    }
+    // 保存原始位置用于回退
+    const originalBeads = [...this.state.beads];
+    console.log('开始拖拽计算 => 拖拽index，原始位置', beadIndex, originalBeads);
+    const originalSelectedIndex = this.state.selectedBeadIndex;
 
-    // 调整所有珠子的位置，保持圆环形状
-    const adjustedBeads = this.calculator.adjustBeadPositionsAfterDrag(
-      this.state.beads,
-      beadIndex,
-      newX,
-      newY
-    );
-
-    // 更新状态
-    this.setState({
-      beads: adjustedBeads,
-      beadStatus: "success",
-    });
-  }
-
-  /**
-   * 重新计算珠子位置以保持圆环形状
-   */
-  private async recalculateBeadPositions(beads: Position[]): Promise<void> {
     try {
-      // 使用计算器重新计算所有珠子的位置
-      const recalculatedPositions = this.calculator.calculateBeadPositions(beads);
       
-      // 计算预测长度
-      const predictedLength = this.calculator.calculatePredictedLength(beads);
+      // 验证拖拽位置
+      const validation = this.calculator.validateDragPosition(this.state.beads, beadIndex, newX, newY);
       
-      this.setState({
-        beads: recalculatedPositions,
-        predictedLength,
-        beadStatus: "success",
-      });
+      
+      if (validation.isValid && validation.shouldInsert && validation.insertIndex !== undefined) {
+        
+        // 情况1：可以插入到两个珠子之间
+        const reorderedBeads = this.calculator.reorderBeads(this.state.beads, beadIndex, validation.insertIndex);
+        
+        
+        // 重新计算位置 - 使用专门的方法保持Position属性完整
+        const newPositions = this.calculator.recalculatePositions(reorderedBeads);
+        
+        console.log("🔄 重排序后的珠子", newPositions);
+        // 计算新的选中索引
+        let newSelectedIndex = validation.insertIndex;
+        
+        console.log("📍 新的选中索引", newSelectedIndex);
+        
+        // 更新状态
+        this.setState({
+          beads: newPositions,
+          selectedBeadIndex: newSelectedIndex,
+          predictedLength: this.calculator.calculatePredictedLength(reorderedBeads),
+          beadStatus: "success",
+        });
+
+        return {
+          success: true,
+          message: validation.message || "珠子位置已调整"
+        };
+      } else {
+        console.log("❌ 无法插入，恢复原位置", { 
+          isValid: validation.isValid, 
+          shouldInsert: validation.shouldInsert, 
+          insertIndex: validation.insertIndex 
+        });
+        
+        // 情况2：拖拽失败，恢复原位置
+        this.setState({
+          beads: originalBeads,
+          selectedBeadIndex: originalSelectedIndex,
+          beadStatus: "success",
+        });
+
+        return {
+          success: false,
+          message: validation.message || "拖拽失败，珠子已恢复原位置"
+        };
+      }
     } catch (error) {
-      console.error("重新计算珠子位置失败:", error);
-      this.setState({ beadStatus: "error" });
+      // 发生错误时恢复原状态
+      this.setState({
+        beads: originalBeads,
+        selectedBeadIndex: originalSelectedIndex,
+        beadStatus: "error",
+      });
+
+      console.error("拖拽处理失败:", error);
+      return {
+        success: false,
+        message: "拖拽处理失败，珠子已恢复原位置"
+      };
     }
   }
+
+
 
   /**
    * 获取珠子信息
