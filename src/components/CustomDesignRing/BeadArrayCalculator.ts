@@ -174,9 +174,11 @@ export class BeadArrayCalculator {
     newBeads.splice(selectedIndex, 1);
 
     // 调整选中索引
-    const newSelectedIndex = newBeads.length > 0
-      ? Math.min(selectedIndex, newBeads.length - 1)
-      : -1;
+    // const newSelectedIndex = newBeads.length > 0
+    //   ? Math.min(selectedIndex, newBeads.length - 1)
+    //   : -1;
+    // 删除后置空选中态
+    const newSelectedIndex = -1;
 
     return { newBeads, newSelectedIndex };
   }

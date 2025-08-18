@@ -58,7 +58,7 @@ export class BeadPositionManager {
 
     try {
       // 处理图片
-      const processedBeads = await this.processImages(beads);
+      const processedBeads = beads;// await this.processImages(beads);
       
       // 计算位置，传递现有位置信息以保持uniqueKey连续性
       const positions = this.calculator.calculateBeadPositions(processedBeads, this.state.beads);
@@ -169,7 +169,8 @@ export class BeadPositionManager {
       newBead,
       this.state.selectedBeadIndex
     );
-
+    // 替换选中索引
+    this.setState({ selectedBeadIndex: -1 });
     await this.setBeads(newBeads);
   }
 

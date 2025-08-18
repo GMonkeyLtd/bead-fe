@@ -439,6 +439,10 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     [canvasSize]
   );
 
+  const handleContainerClick = (e) => {
+    e.stopPropagation();
+  }
+
   return (
     <View className="movable-bead-container" style={style}>
       <View className="canvas-wrapper">

@@ -404,6 +404,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           width: "100%",
           height: `${canvasSize + 48}px`,
         }}
+        onClick={handleBeadDeselect}
       >
         <View className="custom-design-ring-top-content">
           {/* Canvas渲染器 */}
