@@ -2,6 +2,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   startTransition,
 } from "react";
@@ -149,7 +150,8 @@ const Bead = React.memo(
       prevProps.notSelected !== nextProps.notSelected ||
       prevBead.id !== nextBead.id ||
       prevBead.image_url !== nextBead.image_url ||
-      prevBead.radius !== nextBead.radius
+      prevBead.radius !== nextBead.radius ||
+      prevBead.uniqueKey !== nextBead.uniqueKey // 添加uniqueKey检查，确保强制重绘时能触发
     ) {
       return false; // 需要重新渲染
     }
@@ -241,6 +243,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     // });
     
     // 只有在不拖拽时才更新位置，避免拖拽中的冲突
+    // 但是当拖拽状态刚结束时需要立即同步，确保恢复生效
     if (!dragState.isDragging && beads.length > 0) {
       // 检查是否需要更新 - 比较关键位置信息
       const needsUpdate = beads.length !== beadPositions.length || 
@@ -398,18 +401,28 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
           console.log("✅ 拖拽处理完成");
         } catch (error) {
           console.error("❌ 拖拽处理失败:", error);
-          // 如果拖拽失败，恢复原始位置
-          setBeadPositions(prevPositions => {
-            const restoredPositions = [...prevPositions];
-            if (restoredPositions[beadIndex] && originalPos) {
-              restoredPositions[beadIndex] = {
-                ...restoredPositions[beadIndex],
-                x: originalPos.x,
-                y: originalPos.y
-              };
-            }
-            return restoredPositions;
-          });
+          // 如果拖拽失败，立即恢复原始位置
+          if (originalPos) {
+            console.log("🔄 立即恢复珠子到原始位置", { beadIndex, originalPos });
+            setBeadPositions(prevPositions => {
+              const restoredPositions = [...prevPositions];
+              if (restoredPositions[beadIndex]) {
+                // 重新生成uniqueKey来强制触发Bead组件重绘
+                const newUniqueKey = `${restoredPositions[beadIndex].id}_${Date.now()}_restored`;
+                restoredPositions[beadIndex] = {
+                  ...restoredPositions[beadIndex],
+                  x: originalPos.x,
+                  y: originalPos.y,
+                  // 确保角度也恢复
+                  angle: restoredPositions[beadIndex].angle || 0,
+                  // 重新生成uniqueKey强制重绘
+                  uniqueKey: newUniqueKey
+                };
+                console.log("✅ 珠子位置已恢复，新uniqueKey:", newUniqueKey, restoredPositions[beadIndex]);
+              }
+              return restoredPositions;
+            });
+          }
         }
       }
 
@@ -442,9 +455,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     [canvasSize]
   );
 
-  const handleContainerClick = (e) => {
-    e.stopPropagation();
-  }
+
 
   return (
     <View className="movable-bead-container" style={style}>

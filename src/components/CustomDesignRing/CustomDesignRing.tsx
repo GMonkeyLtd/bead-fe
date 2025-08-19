@@ -314,17 +314,27 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     if (!positionManagerRef.current) return;
 
     try {
-      await positionManagerRef.current.dragBeadToPosition(beadIndex, newX, newY);
+      const result = await positionManagerRef.current.dragBeadToPosition(beadIndex, newX, newY);
       const state = positionManagerRef.current.getState();
       setPositionManagerState(state);
 
+      // 如果拖拽失败，抛出错误以触发MovableBeadRenderer中的恢复逻辑
+      if (!result.success) {
+        throw new Error(result.message || "拖拽失败");
+      }
+
     } catch (error) {
       if (error instanceof Error) {
-        Taro.showToast({
-          title: error.message || "拖拽失败",
-          icon: "none",
-          duration: 2500,
-        });
+        // 确保错误信息已经显示过Toast，避免重复显示
+        if (!error.message.includes("拖拽失败")) {
+          Taro.showToast({
+            title: error.message || "拖拽失败",
+            icon: "none",
+            duration: 2500,
+          });
+        }
+        // 重新抛出错误，让MovableBeadRenderer处理位置恢复
+        throw error;
       }
     }
   }, []);

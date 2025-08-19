@@ -579,36 +579,23 @@ export class BeadArrayCalculator {
       return { isValid: false, message: "无效的珠子索引" };
     }
 
-    // 首先检查是否可以插入到两个珠子之间
-    const insertionResult = this.detectInsertionBetweenBeads(beads, dragBeadIndex, newX, newY);
-    if (insertionResult.shouldInsert) {
-      return {
-        isValid: true,
-        shouldInsert: true,
-        insertIndex: insertionResult.insertIndex,
-        message: insertionResult.message
-      };
-    }
-
-    // 如果不能插入，则检查基本的边界和重叠验证
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
     const maxRadius = this.config.canvasSize * 0.4;
-    const minRadius = Math.max(...beads.map(b => b.render_diameter / 2)) * 1.5;
+    const minRadius = Math.max(...beads.map(b => (b.render_diameter || b.diameter) / 2)) * 1.5;
 
     // 计算新位置相对于圆心的距离
     const deltaX = newX - center.x;
     const deltaY = newY - center.y;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-    // 检查是否在合理范围内
-    if (distance < minRadius || distance > maxRadius) {
-      return {
-        isValid: false,
-        message: "拖拽失败：位置不在有效范围内，珠子已恢复原位置"
-      };
-    }
-
-    // 检查是否与其他珠子重叠（但不在插入范围内）
+    // 1. 首先检查是否在手串圆环有效范围内
+    const isInRingArea = distance >= minRadius && distance <= maxRadius;
+    
+    // 2. 检查是否覆盖在其他珠子上
+    const draggedBead = beads[dragBeadIndex];
+    let isOverBead = false;
+    let overBeadIndex = -1;
+    
     for (let i = 0; i < beads.length; i++) {
       if (i === dragBeadIndex) continue;
 
@@ -617,20 +604,148 @@ export class BeadArrayCalculator {
         Math.pow(newX - bead.x, 2) + Math.pow(newY - bead.y, 2)
       );
 
-      const minDistance = (beads[dragBeadIndex].render_diameter + bead.render_diameter) / 2 + this.config.spacing;
+      // 检查是否覆盖在珠子上（使用较大的容差来判断覆盖）
+      const overlapThreshold = ((draggedBead.render_diameter || draggedBead.diameter) + (bead.render_diameter || bead.diameter)) / 4;
+      if (beadDistance <= overlapThreshold) {
+        isOverBead = true;
+        overBeadIndex = i;
+        break;
+      }
+    }
 
-      if (beadDistance < minDistance) {
+    // 3. 如果既不在圆环内也不覆盖珠子，则无效
+    if (!isInRingArea && !isOverBead) {
+      return {
+        isValid: false,
+        message: "拖拽失败：请将珠子拖拽到手串圆环内或其他珠子上"
+      };
+    }
+
+    // 4. 如果覆盖在珠子上，检查是否可以插入到两个珠子之间
+    if (isOverBead) {
+      const insertionResult = this.detectInsertionBetweenBeads(beads, dragBeadIndex, newX, newY);
+      if (insertionResult.shouldInsert) {
         return {
-          isValid: false,
-          message: "拖拽失败：位置与其他珠子重叠，珠子已恢复原位置"
+          isValid: true,
+          shouldInsert: true,
+          insertIndex: insertionResult.insertIndex,
+          message: insertionResult.message
+        };
+      } else {
+        // 如果覆盖在珠子上但不能插入，尝试找到最近的有效插入位置
+        const nearestInsertionResult = this.findNearestValidInsertionPosition(beads, dragBeadIndex, newX, newY);
+        if (nearestInsertionResult.isValid) {
+          return {
+            isValid: true,
+            shouldInsert: true,
+            insertIndex: nearestInsertionResult.insertIndex,
+            message: "自动调整到最近的有效插入位置"
+          };
+        }
+      }
+    }
+
+    // 5. 如果在圆环内，检查是否可以插入到两个珠子之间
+    if (isInRingArea) {
+      const insertionResult = this.detectInsertionBetweenBeads(beads, dragBeadIndex, newX, newY);
+      if (insertionResult.shouldInsert) {
+        return {
+          isValid: true,
+          shouldInsert: true,
+          insertIndex: insertionResult.insertIndex,
+          message: insertionResult.message
         };
       }
     }
 
-    // 如果到达这里，说明位置有效但不是插入操作，这种情况下也认为是失败
+    // 6. 检查是否在合理范围内但不能插入的情况
+    if (distance < minRadius || distance > maxRadius) {
+      return {
+        isValid: false,
+        message: "拖拽失败：位置不在有效范围内，珠子已恢复原位置"
+      };
+    }
+
+    // 7. 如果到达这里，说明位置在有效范围内但不是插入操作
     return {
       isValid: false,
       message: "拖拽失败：珠子只能插入到其他珠子之间，已恢复原位置"
+    };
+  }
+
+  /**
+   * 找到最近的有效插入位置
+   */
+  findNearestValidInsertionPosition(
+    beads: Position[],
+    dragBeadIndex: number,
+    newX: number,
+    newY: number
+  ): {
+    isValid: boolean;
+    insertIndex?: number;
+    message?: string;
+  } {
+    const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
+    
+    // 计算拖拽位置的角度
+    const dragAngle = Math.atan2(newY - center.y, newX - center.x);
+    let normalizedDragAngle = dragAngle < 0 ? dragAngle + 2 * Math.PI : dragAngle;
+
+    // 找到所有可能的插入位置，并计算它们与拖拽位置的角度距离
+    const insertionCandidates: Array<{
+      index: number;
+      angle: number;
+      distance: number;
+    }> = [];
+    
+    for (let i = 0; i <= beads.length; i++) {
+      if (i === dragBeadIndex || i === dragBeadIndex + 1) continue;
+      
+      // 计算这个插入位置的理论角度
+      const totalBeads = beads.length;
+      const angleStep = (2 * Math.PI) / totalBeads;
+      
+      let insertAngle: number;
+      if (i === 0) {
+        // 插入到第一个位置
+        insertAngle = 0;
+      } else if (i === totalBeads) {
+        // 插入到最后一个位置
+        insertAngle = (totalBeads - 1) * angleStep;
+      } else {
+        // 插入到中间位置
+        insertAngle = (i - 0.5) * angleStep;
+      }
+      
+      // 计算角度距离
+      let angleDiff = Math.abs(normalizedDragAngle - insertAngle);
+      if (angleDiff > Math.PI) {
+        angleDiff = 2 * Math.PI - angleDiff;
+      }
+      
+      insertionCandidates.push({
+        index: i,
+        angle: insertAngle,
+        distance: angleDiff
+      });
+    }
+    
+    // 按角度距离排序，找到最近的位置
+    insertionCandidates.sort((a, b) => a.distance - b.distance);
+    
+    if (insertionCandidates.length > 0) {
+      const nearestCandidate = insertionCandidates[0];
+      return {
+        isValid: true,
+        insertIndex: nearestCandidate.index,
+        message: `自动调整到最近的插入位置 (位置 ${nearestCandidate.index})`
+      };
+    }
+    
+    return {
+      isValid: false,
+      message: "无法找到有效的插入位置"
     };
   }
 
