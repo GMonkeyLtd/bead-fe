@@ -248,14 +248,6 @@ export class BeadArrayCalculator {
     const beadProximityThreshold = Math.max(closestBead.radius * 1.5, 40); // 珠子邻近阈值
     const dragFromCenterDistance = Math.sqrt(Math.pow(newX - center.x, 2) + Math.pow(newY - center.y, 2));
 
-    console.log("🎯 拖拽分析", {
-      closestDistance,
-      beadProximityThreshold,
-      dragFromCenterDistance,
-      ringRadius,
-      closestBeadIndex: closestBead.originalIndex
-    });
-
     // 策略选择：根据拖拽点位置决定使用哪种计算方式
     if (closestDistance <= beadProximityThreshold) {
       // 策略1：拖拽点接近现有珠子，使用最近珠子插入算法

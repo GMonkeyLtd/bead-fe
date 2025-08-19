@@ -226,6 +226,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
 
   // 珠子位置状态 - 用于内部管理珠子位置
   const [beadPositions, setBeadPositions] = useState<Position[]>(beads);
+  console.log(selectedBeadIndex, 'selectedBeadIndex')
   
   // 初始化珠子位置
   useEffect(() => {
@@ -283,14 +284,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         console.warn("⚠️ 无法获取珠子信息，跳过拖拽", { beadIndex, beadPositionsLength: beadPositions.length });
         return;
       }
-      
-      // 拖拽开始时先选中当前珠子
-      if (selectedBeadIndex !== beadIndex) {
-        onBeadSelect(beadIndex);
-      }
-      
-      console.log("🚀 拖拽开始", { beadIndex, bead: currentBead });
-      
+            
       setDragState({
         isDragging: true,
         dragBeadIndex: beadIndex,
@@ -343,6 +337,28 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     [dragState.isDragging, dragState.dragBeadIndex, beadPositions, onPreviewInsertPosition]
   );
 
+  const resetBeadPosition = useCallback((originalPos: { x: number; y: number }, beadIndex: number) => {
+    if (originalPos) {
+      setBeadPositions(prevPositions => {
+        const restoredPositions = [...prevPositions];
+        if (restoredPositions[beadIndex]) {
+          // 重新生成uniqueKey来强制触发Bead组件重绘
+          const newUniqueKey = `${restoredPositions[beadIndex].id}_${Date.now()}_restored`;
+          restoredPositions[beadIndex] = {
+            ...restoredPositions[beadIndex],
+            x: originalPos.x,
+            y: originalPos.y,
+            // 确保角度也恢复
+            angle: restoredPositions[beadIndex].angle || 0,
+            // 重新生成uniqueKey强制重绘
+            uniqueKey: newUniqueKey
+          };
+        }
+        return restoredPositions;
+      });
+    }
+  }, [beadPositions]);
+
   // 处理拖拽结束
   const handleDragEnd = useCallback(
     async (e: any, beadIndex: number) => {
@@ -379,22 +395,13 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         // 如果移动距离太小，认为是点击而不是拖拽
         if (moveDistance < 10) {
           console.log(moveDistance, "👆 判定为点击，不进行重排序");
-          
-          // 重置拖拽状态（包含预览光标）
-          setDragState({
-            isDragging: false,
-            dragBeadIndex: -1,
-            startX: 0,
-            startY: 0,
-            currentX: 0,
-            currentY: 0,
-            originalPosition: undefined,
-            previewCursor: undefined,
-          });
+          resetBeadPosition(originalPos, beadIndex);
+          // 拖拽结束时先选中当前珠子
+          onBeadSelect(beadIndex);
           return;
         }
 
-        
+        console.log('continue')
         // 等待拖拽处理完成，确保状态更新完毕
         try {
           await onBeadDragEnd(beadIndex, finalX, finalY);
@@ -403,25 +410,8 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
           console.error("❌ 拖拽处理失败:", error);
           // 如果拖拽失败，立即恢复原始位置
           if (originalPos) {
-            console.log("🔄 立即恢复珠子到原始位置", { beadIndex, originalPos });
-            setBeadPositions(prevPositions => {
-              const restoredPositions = [...prevPositions];
-              if (restoredPositions[beadIndex]) {
-                // 重新生成uniqueKey来强制触发Bead组件重绘
-                const newUniqueKey = `${restoredPositions[beadIndex].id}_${Date.now()}_restored`;
-                restoredPositions[beadIndex] = {
-                  ...restoredPositions[beadIndex],
-                  x: originalPos.x,
-                  y: originalPos.y,
-                  // 确保角度也恢复
-                  angle: restoredPositions[beadIndex].angle || 0,
-                  // 重新生成uniqueKey强制重绘
-                  uniqueKey: newUniqueKey
-                };
-                console.log("✅ 珠子位置已恢复，新uniqueKey:", newUniqueKey, restoredPositions[beadIndex]);
-              }
-              return restoredPositions;
-            });
+            resetBeadPosition(originalPos, beadIndex);
+            return;
           }
         }
       }
@@ -437,10 +427,6 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         originalPosition: undefined,
         previewCursor: undefined,
       });
-
-      // 移除立即同步机制，让useEffect处理状态同步
-      // 这样可以避免重复的状态更新导致的抖动
-      console.log("🔄 拖拽结束，等待状态自然同步");
     },
     [dragState.isDragging, dragState.dragBeadIndex, dragState.currentX, dragState.currentY, dragState.originalPosition, onBeadDragEnd, beadPositions.length, beads]
   );
