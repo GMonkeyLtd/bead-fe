@@ -2,7 +2,6 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   startTransition,
 } from "react";
@@ -68,7 +67,6 @@ const Bead = React.memo(
     handleDragStart,
     handleDragMove,
     handleDragEnd,
-    handleBeadSelect,
   }: {
     bead: Position;
     index: number;
@@ -85,7 +83,6 @@ const Bead = React.memo(
     handleDragStart: (e: any, index: number) => void;
     handleDragMove: (e: any, index: number) => void;
     handleDragEnd: (e: any, index: number) => void;
-    handleBeadSelect: (index: number) => void;
   }) => {
     return (
       <View key={bead.uniqueKey} className="bead-wrapper">
@@ -116,10 +113,6 @@ const Bead = React.memo(
           onTouchCancel={(e) => handleDragEnd(e, index)}
           onClick={(e) => {
             e.stopPropagation();
-            // 只有在非拖拽状态下才处理点击选择，避免拖拽结束时重复选择
-            if (!dragState.isDragging) {
-              handleBeadSelect(index);
-            }
           }}
         >
           {bead.image_url && (
@@ -205,6 +198,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     currentX: number;
     currentY: number;
     originalPosition?: { x: number; y: number };
+    touchStartTime?: number; // 添加触摸开始时间，用于区分点击和拖拽
     // 插入预览相关
     previewCursor?: {
       isVisible: boolean;
@@ -221,12 +215,12 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     currentX: 0,
     currentY: 0,
     originalPosition: undefined,
+    touchStartTime: undefined,
     previewCursor: undefined,
   });
 
   // 珠子位置状态 - 用于内部管理珠子位置
   const [beadPositions, setBeadPositions] = useState<Position[]>(beads);
-  console.log(selectedBeadIndex, 'selectedBeadIndex')
   
   // 初始化珠子位置
   useEffect(() => {
@@ -267,13 +261,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     }
   }, [beads, dragState.isDragging, beadPositions]);
 
-  // 处理珠子选择
-  const handleBeadSelect = useCallback(
-    (index: number) => {
-      onBeadSelect(index);
-    },
-    [onBeadSelect]
-  );
+
 
   // 处理拖拽开始
   const handleDragStart = useCallback(
@@ -293,6 +281,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         currentX: currentBead.x,
         currentY: currentBead.y,
         originalPosition: { x: currentBead.x, y: currentBead.y },
+        touchStartTime: Date.now(), // 记录触摸开始时间
         previewCursor: undefined, // 确保开始时清除预览光标
       });
 
@@ -391,12 +380,24 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
           Math.pow(finalX - originalPos.x, 2) + Math.pow(finalY - originalPos.y, 2)
         );
         
-        
         // 如果移动距离太小，认为是点击而不是拖拽
-        if (moveDistance < 10) {
+        if (moveDistance < 2) {
           console.log(moveDistance, "👆 判定为点击，不进行重排序");
-          resetBeadPosition(originalPos, beadIndex);
-          // 拖拽结束时先选中当前珠子
+          
+          // 重置拖拽状态
+          setDragState({
+            isDragging: false,
+            dragBeadIndex: -1,
+            startX: 0,
+            startY: 0,
+            currentX: 0,
+            currentY: 0,
+            originalPosition: undefined,
+            touchStartTime: undefined,
+            previewCursor: undefined,
+          });
+          
+          // 点击选中珠子（不需要resetBeadPosition，因为位置没有真正改变）
           onBeadSelect(beadIndex);
           return;
         }
@@ -425,6 +426,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         currentX: 0,
         currentY: 0,
         originalPosition: undefined,
+        touchStartTime: undefined,
         previewCursor: undefined,
       });
     },
@@ -463,7 +465,6 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
               handleDragStart={handleDragStart}
               handleDragMove={handleDragMove}
               handleDragEnd={handleDragEnd}
-              handleBeadSelect={handleBeadSelect}
             />
           ))}
           
