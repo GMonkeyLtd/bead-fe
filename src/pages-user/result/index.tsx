@@ -75,7 +75,7 @@ const Result = () => {
     setBeadsInfo(info.beads);
     setImageUrl(image_url);
     setBraceletName(name);
-    setBeadDescriptions(recommend_beads);
+    setBeadDescriptions(recommend_beads.filter((item) => !!item.wuxing));
     setDesignNo(design_id);
     setBraceletDescription(description);
     setRizhuInfo(rizhu || wuxing?.[0]);

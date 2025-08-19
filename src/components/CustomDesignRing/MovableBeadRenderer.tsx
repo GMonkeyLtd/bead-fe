@@ -11,7 +11,7 @@ import {
   MovableView,
   Image,
 } from "@tarojs/components";
-import { Position } from "./BeadArrayCalculator";
+import { Position } from "../../../types/crystal";
 import "./styles/MovableBeadRenderer.scss";
 
 // 添加节流函数
@@ -99,10 +99,10 @@ const Bead = React.memo(
           }`}
           // 统一使用x和y属性定位，避免与style冲突
           x={bead.x - bead.radius}
-          y={bead.y - bead.height}
+          y={bead.y - bead.scale_height}
           style={{
             width: 2 * bead.radius,
-            height: 2 * bead.height,
+            height: 2 * bead.scale_height,
             // @ts-ignore
             '--rotation': `rotate(${bead.angle + Math.PI / 2}rad)`,
           }}

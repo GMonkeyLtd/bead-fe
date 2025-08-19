@@ -40,13 +40,6 @@ export const BraceletDraftCard = ({
   const { draft, startPolling, updateDraft } = usePollDraft({});
   const [isRegenerating, setIsRegenerating] = useState(false);
  
-
-  // 为每个卡片实例生成唯一的canvasId，避免多个卡片共享同一个Canvas
-  const uniqueCanvasId = useMemo(
-    () => `bracelet-canvas-${draftId || generateUUID()}`,
-    [draftId]
-  );
-
   // 使用ref来防止重复生成图像
   const isGeneratingRef = useRef(false);
   const generatedBraceletImageRef = useRef<string | null>(null);
@@ -56,7 +49,6 @@ export const BraceletDraftCard = ({
   const { generateCircleRing } =
     useCircleRingCanvas({
       targetSize: 1024,
-      isDifferentSize: true,
       fileType: "png",
     });
 
@@ -66,6 +58,7 @@ export const BraceletDraftCard = ({
     return draft.beads.map((item) => ({
       image_url: item.image_url,
       diameter: item.diameter,
+      width: item.width,
     }));
   }, [draft?.beads]);
 
@@ -114,7 +107,6 @@ export const BraceletDraftCard = ({
     // 防止重复生成的条件检查
     if (shouldGenerateImage && beadsForGeneration) {
       isGeneratingRef.current = true;
-
       // 使用本地的generateCircleRing而不是传入的generateBraceletImage
       generateCircleRing(beadsForGeneration)
         .then((braceletImage) => {
@@ -272,7 +264,7 @@ export const BraceletDraftCard = ({
           <View className={styles.braceletDetailContainer}>
             <View className={styles.braceletName}>{draft.name}</View>
             <View className={styles.braceletBeads}></View>
-            {beadsInfo?.map((bead) => (
+            {beadsInfo?.filter((bead) => !!bead.func_summary)?.map((bead) => (
               <View className={styles.braceletBead} key={bead.name}>
                 <Image
                   src={bead.image_url}

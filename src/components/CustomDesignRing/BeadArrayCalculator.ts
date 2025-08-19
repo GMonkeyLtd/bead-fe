@@ -1,4 +1,5 @@
 import { computeBraceletLength, calculateBeadArrangementBySize } from "@/utils/cystal-tools";
+import { Bead, Position } from "../../../types/crystal";
 
 /**
  * 生成唯一的珠子key
@@ -10,22 +11,6 @@ export function generateUniqueBeadKey(index: number): string {
   return `bead_${timestamp}_${index}_${random}`;
 }
 
-export interface Bead {
-  id?: string | number;
-  image_url: string;
-  render_diameter: number; // 渲染直径
-  diameter: number; // 珠子直径
-}
-
-export interface Position extends Bead {
-  x: number;
-  y: number;
-  angle: number;
-  height: number;
-  radius: number;
-  imageData?: string; // 可选，因为可能还没有处理图片
-  uniqueKey: string; // 唯一标识符，用于React key和精确识别珠子
-}
 
 export interface BeadArrayCalculatorConfig {
   canvasSize: number;
@@ -53,12 +38,11 @@ export class BeadArrayCalculator {
   calculatePredictedLength(beads: Bead[]): number {
     if (beads.length === 0) return 0;
     // 转换为computeBraceletLength期望的格式
-    console.log(beads, 'beads')
     const beadsForCalculation = beads.map(bead => ({
       diameter: bead.diameter,
-      render_diameter: bead.width || bead.diameter,
+      width: bead.width,
     })) as any; // 临时类型断言，避免类型不匹配
-    return computeBraceletLength(beadsForCalculation, "render_diameter");
+    return computeBraceletLength(beadsForCalculation, "width");
   }
 
   /**
@@ -71,7 +55,7 @@ export class BeadArrayCalculator {
 
     // 计算所有珠子的总直径和总间距
     const totalBeadDiameter = beads.reduce(
-      (sum, b) => sum + b.render_diameter,
+      (sum, b) => sum + b.width,
       0
     );
     const totalSpacing = beads.length * spacing; // n个珠子需要n个间距
@@ -81,7 +65,7 @@ export class BeadArrayCalculator {
     const baseRadius = totalArcLen / (2 * Math.PI);
 
     // 确保最小半径，避免珠子过度拥挤
-    const maxBeadRadius = Math.max(...beads.map((b) => b.render_diameter / 2));
+    const maxBeadRadius = Math.max(...beads.map((b) => b.width / 2));
     const minRingRadius = maxBeadRadius * 2; // 至少是最大珠子直径的1倍
 
     // 限制最大半径，避免在小画布上显示过大
@@ -95,37 +79,26 @@ export class BeadArrayCalculator {
    * @param beads 珠子数组
    * @param existingPositions 现有的位置数组（用于保持uniqueKey的连续性）
    */
-  calculateBeadPositions(beads: Bead[], existingPositions?: Position[]): Position[] {
+  calculateBeadPositions(beads: Bead[], _existingPositions?: Position[]): Position[] {
     if (!beads.length) return [];
     const ringRadius = this.config.targetRadius || this.calculateRingRadius(beads);
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
     const positions = calculateBeadArrangementBySize(
       ringRadius,
-      beads.map(bead => ({ width: bead.render_diameter, height: bead.diameter })),
+      beads.map(bead => ({ width: bead.width, diameter: bead.diameter })),
       center,
       false
     );
 
     return beads.map((bead, index) => {
-      // 确保 render_diameter 存在且有效
-      const validRenderDiameter = bead.render_diameter || bead.render_diameter * (this.config.renderRatio || 2);
-      const validDiameter = bead.diameter || 10; // 默认直径
-
-      // 尝试从现有位置中找到匹配的珠子（基于id和image_url匹配）
-      const existingPosition = existingPositions?.find(
-        pos => pos.id === bead.id && pos.image_url === bead.image_url
-      );
 
       const position = {
         ...bead,
-        render_diameter: validRenderDiameter,
-        diameter: validDiameter,
         x: positions[index]?.x || 0,
         y: positions[index]?.y || 0,
         angle: positions[index]?.angle || 0,
-        height: positions[index]?.height || validDiameter,
-        radius: positions[index]?.radius || validRenderDiameter / 2,
-        imageData: bead.image_url, // 使用image_url作为初始值
+        radius: positions[index]?.radius ,
+        scale_height: positions[index]?.scale_height,
         uniqueKey: generateUniqueBeadKey(index), // 优先使用现有key，否则生成新key
       };
 
@@ -149,13 +122,11 @@ export class BeadArrayCalculator {
       // 添加到末尾
       newBeads.push({
         ...newBead,
-        diameter: newBead.diameter,
       });
     } else {
       // 替换选中的珠子
       newBeads[selectedIndex] = {
         ...newBead,
-        diameter: newBead.diameter,
       };
     }
 
@@ -531,7 +502,7 @@ export class BeadArrayCalculator {
    */
   private calculateInsertionCursorPosition(
     beads: Position[],
-    dragBeadIndex: number,
+    _dragBeadIndex: number,
     insertIndex: number
   ): { x: number; y: number } {
 
@@ -547,11 +518,6 @@ export class BeadArrayCalculator {
     };
 
   }
-
-
-
-
-
 
   /**
    * 重新排列珠子数组（拖拽重排序）
@@ -579,7 +545,7 @@ export class BeadArrayCalculator {
 
     const newCoordinates = calculateBeadArrangementBySize(
       ringRadius,
-      positions.map(pos => ({ width: pos.render_diameter, height: pos.diameter })),
+      positions.map(pos => ({ width: pos.width, diameter: pos.diameter })),
       center,
       false
     );
@@ -589,8 +555,8 @@ export class BeadArrayCalculator {
       x: newCoordinates[index]?.x || 0,
       y: newCoordinates[index]?.y || 0,
       angle: newCoordinates[index]?.angle || 0,
-      height: newCoordinates[index]?.height || position.height,
-      radius: newCoordinates[index]?.radius || position.radius,
+      scale_height: newCoordinates[index]?.scale_height || 0,
+      radius: newCoordinates[index]?.radius || 0,
     }));
   }
 
@@ -707,6 +673,7 @@ export class BeadArrayCalculator {
       image_url: bead.image_url,
       render_diameter: bead.render_diameter,
       diameter: bead.diameter,
+      width: bead.width,
     }));
 
     // 计算其他珠子的新位置
@@ -722,6 +689,7 @@ export class BeadArrayCalculator {
           y: pos.y,
           angle: pos.angle,
           radius: pos.radius,
+          scale_height: pos.scale_height,
         };
       }
     });

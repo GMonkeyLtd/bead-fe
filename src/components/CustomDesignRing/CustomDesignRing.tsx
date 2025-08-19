@@ -17,14 +17,7 @@ import "./styles/CustomDesignRing.scss";
 import { LILI_AVATAR_IMAGE_URL } from "@/config";
 import { AccessoryType } from "@/utils/api-session";
 import { AccessoryItem } from "@/utils/api-session";
-
-interface Bead {
-  image_url: string;
-  render_diameter: number; // 渲染直径
-  diameter: number; // 珠子直径
-  id?: string | number;
-  name?: string; // 可选名称字段
-}
+import { Bead } from "../../../types/crystal";
 
 interface BeadType {
   name: string;
@@ -81,7 +74,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [currentWuxing, setCurrentWuxing] = useState<string>("");
   const [currentAccessoryType, setCurrentAccessoryType] = useState<AccessoryType | ''>("");  
   const [imageUrl, setImageUrl] = useState<string>("");
-  const [createFlag, setCreateFlag] = useState<boolean>(false);
 
   // 使用珠子位置管理器
   const positionManagerRef = useRef<BeadPositionManager | null>(null);
@@ -99,7 +91,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
   const { generateCircleRing } = useCircleRingCanvas({
     targetSize: 1024,
-    isDifferentSize: true,
     fileType: "png",
   });
 
@@ -172,6 +163,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       const dotImageData = positionManagerState.beads.map(dot => ({
         image_url: dot.image_url,
         diameter: dot.diameter,
+        width: dot.width,
       }));
 
       generateCircleRing(dotImageData).then((imageUrl) => {
@@ -182,41 +174,25 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   }, [positionManagerState.beads, generateCircleRing]);
 
   // 处理查看效果
-  useEffect(() => {
-    if (imageUrl && createFlag) {
-      setCreateFlag(false);
+  const handleViewEffect = useCallback(() => {
+    if (imageUrl) {
       onOk?.(
         imageUrl,
-        positionManagerState.beads.map((item) => ({
-          id: item.id,
-          image_url: item.image_url,
-          diameter: item.diameter,
-          render_diameter: item.render_diameter,
-        }))
+        positionManagerState.beads
       );
     }
-  }, [imageUrl, createFlag, positionManagerState.beads, onOk]);
+  }, [imageUrl, positionManagerState.beads, onOk]);
 
   // 暴露方法给父组件
   useImperativeHandle(ref, () => ({
     getState: () => ({
       imageUrl,
-      beads: positionManagerState.beads.map((item) => ({
-        id: item.id,
-        image_url: item.image_url,
-        diameter: item.diameter,
-        render_diameter: item.render_diameter,
-      })),
+      beads: positionManagerState.beads,
       predictedLength: positionManagerState.predictedLength,
       selectedBeadIndex: positionManagerState.selectedBeadIndex,
     }),
     getImageUrl: () => imageUrl,
-    getBeads: () => positionManagerState.beads.map((item) => ({
-      id: item.id,
-      image_url: item.image_url,
-      diameter: item.diameter,
-      render_diameter: item.render_diameter,
-    })),
+    getBeads: () => positionManagerState.beads,
     getPredictedLength: () => positionManagerState.predictedLength,
     getSelectedBeadIndex: () => positionManagerState.selectedBeadIndex,
   }), [imageUrl, positionManagerState.beads, positionManagerState.predictedLength, positionManagerState.selectedBeadIndex]);
@@ -233,7 +209,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,
-        render_diameter: bead.frontType === 'accessory' ? bead.width : bead.diameter,
       };
 
       if (positionManagerState.selectedBeadIndex === -1) {
@@ -332,11 +307,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   // 处理五行类型变化
   const handleWuxingChange = useCallback((wuxing: string) => {
     setCurrentWuxing(wuxing);
-  }, []);
-
-  // 处理查看效果
-  const handleViewEffect = useCallback(() => {
-    setCreateFlag(true);
   }, []);
 
   // 处理珠子拖拽结束

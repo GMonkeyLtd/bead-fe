@@ -77,7 +77,6 @@ const CustomDesign = () => {
       (resData || []).forEach((item: any) => {
         item.frontType = 'accessory';
       })
-      console.log('getAccessories', resData);
       // 按类型聚合
       const aggregatedAccessories = resData.reduce((acc: Record<string, AccessoryItem[]>, item: AccessoryItem) => {
         if (acc[item.type]) {
@@ -87,7 +86,6 @@ const CustomDesign = () => {
         }
         return acc;
       }, {});
-      console.log('aggregatedAccessories', aggregatedAccessories);
       setAccessoryList(resData || []);
       setAccessoryTypeMap(aggregatedAccessories);
     });
@@ -116,6 +114,7 @@ const CustomDesign = () => {
         diameter: item.diameter,
       };
     });
+    console.log(oldBeads, newBeads, 'oldBeads, newBeads')
     return JSON.stringify(oldBeads) !== JSON.stringify(newBeads);
   }
 
@@ -130,6 +129,11 @@ const CustomDesign = () => {
     if (!imageUrl || !sessionId || !draftId) {
       return;
     }
+    // const result = getCustomDesignState();
+    // 将result返回的图片预览
+    // Taro.previewImage({
+    //   urls: [result.image_url || ''],
+    // })
     if (from === 'result' && !checkDeadsDataChanged((draft as any)?.beads || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}&imageUrl=${encodeURIComponent(imageUrl)}`,
@@ -138,21 +142,24 @@ const CustomDesign = () => {
     }
     const beads = editedBeads.map((item) => {
       // 优先使用allBeadList珠子库中的数据
-      let _beadData = (item.frontType === 'crystal' ? allBeadList : accessoryList)?.find((_item) => _item.id == item.id);
+      let _beadData = null;
+      if (item.frontType) {
+        _beadData = (item.frontType === 'crystal' ? allBeadList : accessoryList)?.find((_item) => _item.id == item.id);
+      }
       if (!_beadData) {
         // 如果allBeadList中没有找到，则使用draft中的老数据
-        _beadData = draft?.beads?.find((_item) => _item.bead_id == item.id) || {};
+        _beadData = draft?.beads?.find((_item) => _item.bead_id == item.id) || item;
       }
       const newBeadData = {
-        ..._beadData,
+        ...(_beadData || {}),
         diameter: item.diameter,
       };
       // 删除newBeadData中的frontType
       delete newBeadData.frontType;
-      delete newBeadData.render_diameter;
+      delete newBeadData.scale_height;
+      delete newBeadData.uniqueKey;
       return newBeadData;
     })
-
     apiSession.saveDraft({
       session_id: sessionId,
       beads,
@@ -230,7 +237,8 @@ const CustomDesign = () => {
         ref={customDesignRef}
         beads={(draft?.beads || [])?.map((item: any) => {
           return {
-            ...item          
+            ...item,
+            width: item.width || item.diameter,
           };
         })}
         beadTypeMap={beadTypeMap}

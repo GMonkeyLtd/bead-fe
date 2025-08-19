@@ -2,18 +2,17 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Taro from "@tarojs/taro";
 import { ImageCacheManager } from "@/utils/image-cache";
 import {
-  calculateBeadArrangement,
   calculateBeadArrangementBySize,
 } from "@/utils/cystal-tools";
 
 export interface DotImageData {
   image_url: string;
   diameter?: number;
+  width?: number;
 }
 
 interface CircleRingConfig {
   targetSize?: number;   // 保存图片的尺寸
-  isDifferentSize?: boolean;   // 是否区分珠子尺寸
   fileType?: "png" | "jpg" | "jpeg";   // 文件类型
 }
 
@@ -30,7 +29,6 @@ interface CircleRingResult {
 export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   const {
     targetSize = 1024,
-    isDifferentSize = false,
     fileType = "png",
   } = config;
 
@@ -57,7 +55,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   // 处理图片下载
   const processImages = useCallback(async (dotsBgImageData: DotImageData[]) => {
     const imageUrls = dotsBgImageData.map(item => item.image_url);
-    
+
     try {
       const processedPaths = await ImageCacheManager.processImagePaths(imageUrls);
       return dotsBgImageData.map((item, index) => {
@@ -72,19 +70,13 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
 
   // 计算珠子排列
   const calculateBeads = useCallback((dotsBgImageData: DotImageData[]) => {
-    const imageUrls = dotsBgImageData.map(item => item.image_url);
-    
-    if (isDifferentSize) {
-      const beadSizes = dotsBgImageData.map(item => ({ width: item.diameter, height: item.diameter }));
+      const beadSizes = dotsBgImageData.map(item => ({ width: item.width || item.diameter || 10, diameter: item.diameter || 10 }));
       return calculateBeadArrangementBySize(
         ringRadius,
         beadSizes,
         { x: ringRadius, y: ringRadius }
       );
-    } else {
-      return calculateBeadArrangement(ringRadius, imageUrls.length);
-    }
-  }, [ringRadius, isDifferentSize]);
+  }, [ringRadius]);
 
   // 绘制Canvas内容
   const drawCanvas = useCallback(async (
@@ -95,28 +87,28 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
       try {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
         ctx.clearRect(0, 0, targetSize, targetSize);
-        
+
         // 顺序绘制珠子，确保圆形排列正确
         for (let index = 0; index < dots.length; index++) {
           const dot = dots[index];
-          const { x, y, radius, angle } = beads[index];
-          
+          const { x, y, radius, angle, scale_height } = beads[index];
+
           // 保存当前Canvas状态
           ctx.save();
-          
+
           // 移动到珠子中心
           ctx.translate(x, y);
-          
+
           // 旋转珠子，使孔线指向圆心
           ctx.rotate(angle + Math.PI / 2);
 
           // 1. 先把网络背景图下载到本地
           const bgImg = canvas.createImage();
           await new Promise<void>(r => { bgImg.onload = r; bgImg.src = dot; });
-          
+
           // 绘制珠子（以珠子中心为原点）
-          ctx.drawImage(bgImg as any, -radius, -radius, radius * 2, radius * 2);
-          
+          ctx.drawImage(bgImg as any, -radius, -scale_height, radius * 2, scale_height * 2);
+
           // 恢复Canvas状态
           ctx.restore();
         }
@@ -151,7 +143,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     }
 
     const resultId = generateResultId(dotsBgImageData);
-    
+
     // 检查是否已经在处理中
     if (processingQueueRef.current.has(resultId)) {
       return resultsRef.current.get(resultId)?.imageUrl || null;
@@ -173,13 +165,13 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     try {
       // 1. 处理图片下载
       const processedDots = await processImages(dotsBgImageData);
-      
+
       // 2. 计算珠子排列
       const beads = calculateBeads(dotsBgImageData);
-      
+
       // 3. 绘制Canvas
       const imageUrl = await drawCanvas(processedDots, beads);
-      
+
       // 4. 更新结果
       resultsRef.current.set(resultId, {
         imageUrl,

@@ -58,14 +58,9 @@ export class BeadPositionManager {
 
     try {
       // 处理图片
-      const processedBeads = beads.map(bead => ({
-        ...bead,
-        render_diameter: bead.frontType === 'accessory' ? bead.width : bead.diameter
-      }))
-      console.log(processedBeads, 'processedBeads')
+      const processedBeads = [ ...beads ]
       // 计算位置，传递现有位置信息以保持uniqueKey连续性
       const positions = this.calculator.calculateBeadPositions(processedBeads, this.state.beads);
-      console.log(positions, 'positions')
       
       // 计算预测长度
       const predictedLength = this.calculator.calculatePredictedLength(processedBeads);
