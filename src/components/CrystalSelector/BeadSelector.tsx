@@ -198,7 +198,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
             <View
               key={accType}
               className={`wuxing-tab ${isActive ? "active" : ""}`}
-              onClick={() => onAccessoryChange(accType as AccessoryType)}
+              onClick={() =>  onAccessoryTypeChange(accType as AccessoryType)}
             >
               {AccessoryFormatMap[accType]}
               {beadCount > 0 && (

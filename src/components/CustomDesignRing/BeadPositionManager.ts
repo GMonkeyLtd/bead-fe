@@ -208,14 +208,12 @@ export class BeadPositionManager {
         
         console.log("🔄 重排序后的珠子", newPositions);
         // 计算新的选中索引
-        let newSelectedIndex = validation.insertIndex;
-        
-        console.log("📍 新的选中索引", newSelectedIndex);
-        
+        // let newSelectedIndex = validation.insertIndex;
+              
         // 更新状态
         this.setState({
           beads: newPositions,
-          selectedBeadIndex: newSelectedIndex,
+          selectedBeadIndex: -1,
           predictedLength: this.calculator.calculatePredictedLength(reorderedBeads),
           beadStatus: "success",
         });

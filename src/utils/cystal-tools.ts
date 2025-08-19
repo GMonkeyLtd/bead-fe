@@ -87,24 +87,25 @@ interface Position {
   y: number;
   angle: number;
   radius: number;
+  height: number;
   index?: string | number;
 }
 // 计算每个珠子的圆心坐标 - 使用渲染直径（和CustomDesignRing保持一致）
 export const calcPositionsWithRenderDiameter = (
-  renderDiameterList: number[],
+  renderDiameterList: {width: number, height: number}[],
   // 圆心坐标
   center: { x: number, y: number }
 ) => {
 
 
   // 1. 总周长 = 所有珠子直径之和
-  const circumference = renderDiameterList.reduce((s, d) => s + d, 0);
+  const circumference = renderDiameterList.reduce((s, d) => s + d.width, 0);
 
   // 2. 根据周长求大圆直径
   const bigDiameter = circumference / Math.PI;
 
   // 3. 计算每颗珠子所占角度
-  const angles = renderDiameterList.map(d => d / circumference * 360);
+  const angles = renderDiameterList.map(d => d.width / circumference * 360);
 
   // 4. 计算每颗珠子圆心坐标
   const positions: Position[] = [];
@@ -116,7 +117,8 @@ export const calcPositionsWithRenderDiameter = (
     const midDeg = currentDeg + halfAngle;    // 珠子中心角度
     const rad = midDeg * Math.PI / 180;       // 转弧度
     positions.push({
-      radius: d / 2,
+      radius: d.width / 2,
+      height: d.height / 2,
       x: center.x + radius * Math.cos(rad),
       y: center.y + radius * Math.sin(rad),
       angle: rad,
@@ -167,13 +169,13 @@ export const calcPositionsWithBeadSize = (
 
 export const calculateBeadArrangementBySize = (
   ringRadius: number,
-  beadSizeList: number[],
+  beadSizeList: {width: number, height: number}[],
   center: { x: number, y: number },
   needScale: boolean = true
 ) => {
   // 参考CustomDesignRing的calcRingRadius计算方式
   // 先计算所有珠子的渲染直径总和
-  const totalRenderDiameter = beadSizeList.reduce((sum, size) => sum + size, 0); // 按1.5倍计算渲染直径
+  const totalRenderDiameter = beadSizeList.reduce((sum, size) => sum + size.width, 0); // 按1.5倍计算渲染直径
 
   // 基于总渲染直径计算环半径（和CustomDesignRing保持一致）
   const calculatedRingRadius = totalRenderDiameter / (2 * Math.PI);
@@ -183,7 +185,7 @@ export const calculateBeadArrangementBySize = (
   const sizeRatio = targetRingRadius / calculatedRingRadius;
 
   // 计算缩放后的渲染直径列表
-  const scaledRenderDiameterList = beadSizeList.map((size) => size * sizeRatio);
+  const scaledRenderDiameterList = beadSizeList.map((size) => ({width: size.width * sizeRatio, height: size.height * sizeRatio}));
 
   // 使用和CustomDesignRing相同的计算逻辑
   const positions = calcPositionsWithRenderDiameter(scaledRenderDiameterList, center);

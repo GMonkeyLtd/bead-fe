@@ -21,6 +21,7 @@ export interface Position extends Bead {
   x: number;
   y: number;
   angle: number;
+  height: number;
   radius: number;
   imageData?: string; // 可选，因为可能还没有处理图片
   uniqueKey: string; // 唯一标识符，用于React key和精确识别珠子
@@ -52,11 +53,12 @@ export class BeadArrayCalculator {
   calculatePredictedLength(beads: Bead[]): number {
     if (beads.length === 0) return 0;
     // 转换为computeBraceletLength期望的格式
+    console.log(beads, 'beads')
     const beadsForCalculation = beads.map(bead => ({
       diameter: bead.diameter,
-      render_diameter: bead.render_diameter,
+      render_diameter: bead.width || bead.diameter,
     })) as any; // 临时类型断言，避免类型不匹配
-    return computeBraceletLength(beadsForCalculation, "diameter");
+    return computeBraceletLength(beadsForCalculation, "render_diameter");
   }
 
   /**
@@ -99,7 +101,7 @@ export class BeadArrayCalculator {
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
     const positions = calculateBeadArrangementBySize(
       ringRadius,
-      beads.map(bead => bead.render_diameter),
+      beads.map(bead => ({ width: bead.render_diameter, height: bead.diameter })),
       center,
       false
     );
@@ -121,9 +123,10 @@ export class BeadArrayCalculator {
         x: positions[index]?.x || 0,
         y: positions[index]?.y || 0,
         angle: positions[index]?.angle || 0,
+        height: positions[index]?.height || validDiameter,
         radius: positions[index]?.radius || validRenderDiameter / 2,
         imageData: bead.image_url, // 使用image_url作为初始值
-        uniqueKey: existingPosition?.uniqueKey || generateUniqueBeadKey(index), // 优先使用现有key，否则生成新key
+        uniqueKey: generateUniqueBeadKey(index), // 优先使用现有key，否则生成新key
       };
 
       // console.log(`📍 珠子位置计算 ${index}`, {
@@ -576,7 +579,7 @@ export class BeadArrayCalculator {
 
     const newCoordinates = calculateBeadArrangementBySize(
       ringRadius,
-      positions.map(pos => pos.diameter),
+      positions.map(pos => ({ width: pos.render_diameter, height: pos.diameter })),
       center,
       false
     );
@@ -586,6 +589,7 @@ export class BeadArrayCalculator {
       x: newCoordinates[index]?.x || 0,
       y: newCoordinates[index]?.y || 0,
       angle: newCoordinates[index]?.angle || 0,
+      height: newCoordinates[index]?.height || position.height,
       radius: newCoordinates[index]?.radius || position.radius,
     }));
   }

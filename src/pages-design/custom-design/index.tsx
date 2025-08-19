@@ -138,15 +138,19 @@ const CustomDesign = () => {
     }
     const beads = editedBeads.map((item) => {
       // 优先使用allBeadList珠子库中的数据
-      let _beadData = allBeadList?.find((_item) => _item.id == item.id);
+      let _beadData = (item.frontType === 'crystal' ? allBeadList : accessoryList)?.find((_item) => _item.id == item.id);
       if (!_beadData) {
         // 如果allBeadList中没有找到，则使用draft中的老数据
         _beadData = draft?.beads?.find((_item) => _item.bead_id == item.id) || {};
       }
-      return {
+      const newBeadData = {
         ..._beadData,
         diameter: item.diameter,
       };
+      // 删除newBeadData中的frontType
+      delete newBeadData.frontType;
+      delete newBeadData.render_diameter;
+      return newBeadData;
     })
 
     apiSession.saveDraft({

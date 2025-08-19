@@ -75,7 +75,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     const imageUrls = dotsBgImageData.map(item => item.image_url);
     
     if (isDifferentSize) {
-      const beadSizes = dotsBgImageData.map(item => item.diameter || 10);
+      const beadSizes = dotsBgImageData.map(item => ({ width: item.diameter, height: item.diameter }));
       return calculateBeadArrangementBySize(
         ringRadius,
         beadSizes,

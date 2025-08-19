@@ -99,10 +99,12 @@ const Bead = React.memo(
           }`}
           // 统一使用x和y属性定位，避免与style冲突
           x={bead.x - bead.radius}
-          y={bead.y - bead.radius}
+          y={bead.y - bead.height}
           style={{
             width: 2 * bead.radius,
-            height: 2 * bead.radius,
+            height: 2 * bead.height,
+            // @ts-ignore
+            '--rotation': `rotate(${bead.angle + Math.PI / 2}rad)`,
           }}
           direction="all"
           inertia={false}
@@ -122,6 +124,7 @@ const Bead = React.memo(
           {bead.image_url && (
             <Image
               src={bead.image_url}
+              className="movable-bead-image"
               style={{
                 // transformOrigin: "center center",
                 width: '100%',
@@ -251,7 +254,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         });
       
       if (needsUpdate) {
-        console.log("🔄 珠子位置发生变化，更新显示位置");
+        console.log("🔄 珠子位置发生变化，更新显示位置", beads);
         // 使用 startTransition 进行非紧急更新，避免阻塞用户交互
         startTransition(() => {
           setBeadPositions([...beads]); // 使用展开运算符确保触发重新渲染
