@@ -235,6 +235,7 @@ const CustomDesign = () => {
         wuxing={(draft as any)?.wuxing || []}
         accessoryTypeMap={accessoryTypeMap}
         ref={customDesignRef}
+        size={300}
         beads={(draft?.beads || [])?.map((item: any) => {
           return {
             ...item,

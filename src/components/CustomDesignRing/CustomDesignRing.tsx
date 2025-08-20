@@ -6,7 +6,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { View, Image } from "@tarojs/components";
+import { View, Image, MovableArea } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
@@ -49,7 +49,7 @@ interface CustomDesignRingProps {
   canvasId?: string;
   size?: number;
   spacing?: number;
-  accessoryTypeMap?: Record<AccessoryType, AccessoryItem[]>;  
+  accessoryTypeMap?: Record<AccessoryType, AccessoryItem[]>;
   beadTypeMap?: Record<string, BeadType[]>;
   renderRatio?: number;
   onOk?: (imageUrl: string, editedBeads: Bead[]) => void;
@@ -72,7 +72,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 }, ref) => {
   const [canvasSize, setCanvasSize] = useState<number>(0);
   const [currentWuxing, setCurrentWuxing] = useState<string>("");
-  const [currentAccessoryType, setCurrentAccessoryType] = useState<AccessoryType | ''>("");  
+  const [currentAccessoryType, setCurrentAccessoryType] = useState<AccessoryType | ''>("");
   const [imageUrl, setImageUrl] = useState<string>("");
 
   // 使用珠子位置管理器
@@ -96,11 +96,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
   // 初始化画布尺寸
   useEffect(() => {
+    if (size) {
+      setCanvasSize(size);
+      return;
+    }
     try {
       const windowInfo = Taro.getWindowInfo();
       const { height: safeHeight } = windowInfo.safeArea || { height: 0 };
       const predictSize = safeHeight * 0.5 - 16 - 45 - 46 - 16;
-      setCanvasSize(!size && predictSize ? predictSize : size || 400);
+      setCanvasSize(predictSize ? predictSize : size || 400);
     } catch (error) {
       console.warn("Failed to get window info:", error);
       const fallbackSize = 400;
@@ -304,6 +308,33 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     }
   }, []);
 
+  // 处理拖拽删除
+  const handleBeadDelete = useCallback(async (beadIndex: number) => {
+    if (!positionManagerRef.current) return;
+
+    try {
+      // 先选中要删除的珠子，然后删除
+      positionManagerRef.current.selectBead(beadIndex);
+      await positionManagerRef.current.removeBead();
+      const state = positionManagerRef.current.getState();
+      setPositionManagerState(state);
+
+      Taro.showToast({
+        title: "删除成功",
+        icon: "success",
+        duration: 1500,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        Taro.showToast({
+          title: error.message || "删除失败",
+          icon: "none",
+          duration: 2000,
+        });
+      }
+    }
+  }, []);
+
   // 处理五行类型变化
   const handleWuxingChange = useCallback((wuxing: string) => {
     setCurrentWuxing(wuxing);
@@ -379,9 +410,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           查看效果
         </View>
       </View>
-      <View
+        <View 
         className="custom-design-ring-top-container"
-        style={{
+          style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -400,55 +431,55 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             }}
           >
             <View className="custom-design-ring-wrist-length-container">
-              <View className="custom-design-ring-wrist-length-content-prefix">
-                适合手围：
-              </View>
-              <View className="custom-design-ring-wrist-length-content-value">
-                {positionManagerState.predictedLength} ~ {positionManagerState.predictedLength + 0.5}cm
-              </View>
-            </View>
+          <View className="custom-design-ring-wrist-length-content-prefix">
+            适合手围：
+          </View>
+          <View className="custom-design-ring-wrist-length-content-value">
+            {positionManagerState.predictedLength} ~ {positionManagerState.predictedLength + 0.5}cm
+          </View>
+        </View>
             {/* <Image className="custom-crystal-backend" src={CUSTOM_CRYSTAL_BACKEND_IMAGE} style={{ width: `${canvasSize}px`, height: `${canvasSize}px` }} /> */}
-            <MovableBeadRenderer
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-              }}
-              beads={positionManagerState.beads}
-              selectedBeadIndex={positionManagerState.selectedBeadIndex}
-              canvasSize={canvasSize}
-              onBeadSelect={handleBeadSelect}
-              onBeadDeselect={handleBeadDeselect}
-              onBeadDragEnd={handleBeadDragEnd}
-              onPreviewInsertPosition={handlePreviewInsertPosition}
-            />
+        <MovableBeadRenderer
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+          beads={positionManagerState.beads}
+          selectedBeadIndex={positionManagerState.selectedBeadIndex}
+          canvasSize={canvasSize}
+          onBeadSelect={handleBeadSelect}
+          onBeadDeselect={handleBeadDeselect}
+          onBeadDragEnd={handleBeadDragEnd}
+          onPreviewInsertPosition={handlePreviewInsertPosition}
+        />
 
           </View>
 
-          {/* 操作控制 */}
-          <RingOperationControls
-            selectedBeadIndex={positionManagerState.selectedBeadIndex}
-            onClockwiseMove={handleClockwiseMove}
-            onCounterclockwiseMove={handleCounterclockwiseMove}
-            onDelete={handleDelete}
+            {/* 操作控制 */}
+            <RingOperationControls
+              selectedBeadIndex={positionManagerState.selectedBeadIndex}
+              onClockwiseMove={handleClockwiseMove}
+              onCounterclockwiseMove={handleCounterclockwiseMove}
+              onDelete={handleDelete}
+            />
+          </View>
+        </View>
+
+        {/* 底部珠子选择器 */}
+      <View className="custom-design-ring-bottom-container">
+          <BeadSelector
+            accessoryTypeMap={accessoryTypeMap as Record<AccessoryType, AccessoryItem[]>}
+            beadTypeMap={beadTypeMap}
+            currentWuxing={currentWuxing}
+            currentAccessoryType={currentAccessoryType}
+            renderRatio={renderRatio}
+            predictedLength={positionManagerState.predictedLength}
+            onWuxingChange={handleWuxingChange}
+            onAccessoryTypeChange={setCurrentAccessoryType}
+            onBeadClick={handleBeadClick}
           />
         </View>
-      </View>
-
-      {/* 底部珠子选择器 */}
-      <View className="custom-design-ring-bottom-container">
-        <BeadSelector
-          accessoryTypeMap={accessoryTypeMap}
-          beadTypeMap={beadTypeMap}
-          currentWuxing={currentWuxing}
-          currentAccessoryType={currentAccessoryType}
-          renderRatio={renderRatio}
-          predictedLength={positionManagerState.predictedLength}
-          onWuxingChange={handleWuxingChange}
-          onAccessoryTypeChange={setCurrentAccessoryType}
-          onBeadClick={handleBeadClick}
-        />
-      </View>
     </View>
   );
 });

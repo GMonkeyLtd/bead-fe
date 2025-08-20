@@ -157,9 +157,9 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               isPrimary
             />
           </View>
-          <View className="budget-dialog-button-link" onClick={onModifyDesign}>
+          {onModifyDesign && (<View className="budget-dialog-button-link" onClick={onModifyDesign}>
             修改定制方案
-          </View>
+          </View>)}
         </View>
       </View>
     </View>

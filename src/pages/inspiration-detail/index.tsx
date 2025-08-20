@@ -13,6 +13,7 @@ import { getNavBarHeightAndTop, getSafeArea } from "@/utils/style-tools";
 import BraceletDetailDialog from "@/components/BraceletDetailDialog";
 import BeadList from "@/components/BeadList";
 import apiSession from "@/utils/api-session";
+import BudgetDialog from "@/components/BudgetDialog";
 
 interface BeadInfo {
   id: string;
@@ -45,7 +46,7 @@ const InspirationDetailPage: React.FC = () => {
   const { workId, designId } = router.params || {};
   const [designData, setDesignData] = useState<any>(null);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
-
+  const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [detail, setDetail] = useState<InspirationWord | null>(null);
   const [loading, setLoading] = useState(true);
   const { height: navBarHeight } = getNavBarHeightAndTop();
@@ -192,7 +193,7 @@ const InspirationDetailPage: React.FC = () => {
         className={styles.container}
         scrollY
         style={{
-          height: `calc(100vh - ${navBarHeight + 246}px)`,
+          height: `calc(100vh - ${navBarHeight + 154}px)`,
         }}
       >
         {/* 主图片区域 */}
@@ -269,7 +270,7 @@ const InspirationDetailPage: React.FC = () => {
             </Text>
             {/* 珠子信息区域 */}
             <BeadList
-              beads={designData?.info?.recommend_beads}
+              beads={designData?.info?.recommend_beads?.filter((item) => !!item.func_summary)}
             />
             {/* 作者和时间 */}
             <View className={styles.workDetailContainer}>
@@ -299,12 +300,7 @@ const InspirationDetailPage: React.FC = () => {
       <View className={styles.bottomBar}>
         {/* <View className={styles.separator} /> */}
         {designData?.session_id && designData?.reference_price && (<CrystalButton
-          onClick={() => {
-            Taro.showToast({
-              title: "敬请期待",
-              icon: "none",
-            });
-          }}
+          onClick={() => setBudgetDialogShow(true)}
           text="制作同款"
           icon={
             <Image
@@ -325,6 +321,17 @@ const InspirationDetailPage: React.FC = () => {
           title={designData?.info?.name}
           onClose={() => setBraceletDetailDialogShow(false)}
           wristSize={designData?.info?.spec?.wrist_size}
+        />
+      )}
+       {budgetDialogShow && (
+        <BudgetDialog
+          visible={budgetDialogShow}
+          title={designData?.info?.name}
+          designNumber={designData?.design_id}
+          productImage={detail.cover_url}
+          onClose={() => setBudgetDialogShow(false)}
+          referencePrice={designData?.reference_price}
+          // onModifyDesign={handleModifyDesign}
         />
       )}
     </CrystalContainer>
