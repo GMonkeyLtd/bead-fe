@@ -118,7 +118,8 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
   // 渲染价格或预算信息
   const renderPriceInfo = (order: OrderItem) => {
-    if (order.status === OrderStatus.Negotiating || order.status === OrderStatus.InProgress) {
+    console.log(order, 'order')
+    if (!order.communityInfo && (order.status === OrderStatus.Negotiating || order.status === OrderStatus.InProgress)) {
       return `参考价：¥${order.budget?.toFixed(2) || 0}`;
     } else {
       return `实际价：¥${order.budget?.toFixed(2) || 0}`;

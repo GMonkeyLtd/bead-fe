@@ -75,5 +75,5 @@ export default {
   confirmReceiptCallback: (params: { orderId: string }, config?: ApiConfig) =>
     http.get<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, undefined, config),
   buySameProduct: (params: { word_id: string }, config?: ApiConfig) =>
-    http.post<any>(`/community/${params.word_id}/buy`, undefined, config),
+    http.post<any>(`/user/community/${params.word_id}/buy`, undefined, config),
 };
