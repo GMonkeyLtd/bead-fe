@@ -7,6 +7,7 @@ import { pageUrls } from "@/config/page-urls";
 import apiSession, { AccessoryItem, BeadItem } from "@/utils/api-session";
 import { usePollDraft } from "@/hooks/usePollDraft";
 import { CUSTOM_RENDER_RATIO } from "@/config/beads";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 const CustomDesign = () => {
   const [beadTypeMap, setBeadTypeMap] = useState<any>({});
@@ -14,87 +15,55 @@ const CustomDesign = () => {
   const [accessoryList, setAccessoryList] = useState<any[]>([]);
   const [accessoryTypeMap, setAccessoryTypeMap] = useState<any>({});
   const { draft, startPolling } = usePollDraft({ showLoading: true });
-
   const { draftId, sessionId, designId, from } = Taro.getCurrentInstance()?.router?.params || {};
 
   // 使用ref获取子组件状态
   const customDesignRef = useRef<CustomDesignRingRef>(null);
 
-  useEffect(() => {
+  // 使用无限滚动hook获取sku列表
+  const {
+    data: skuList,
+    loading: skuLoading,
+    error: skuError,
+    hasMore: skuHasMore,
+    refresh: refreshSkuList,
+    loadMore: loadMoreSku,
+  } = useInfiniteScroll<any>({
+    listKey: "skuList",
+    initialPage: 1,
+    pageSize: 100,
+    fetchData: useCallback(async (page: number, pageSize: number) => {
+      const res = await beadsApi.getSkuList({ page, size: pageSize }, { showLoading: false });
+      const resData = res.data?.items || [];
+      const totalCount = res.data?.total || 0;
+      return {
+        data: resData,
+        hasMore: resData.length + (page - 1) * pageSize < totalCount,
+        total: totalCount,
+      };
+    }, [beadsApi]),
+    queryItem: useCallback(async (item: any) => {
+      // 这里可以根据需要实现单个item的查询逻辑
+      return item;
+    }, []),
+    enabled: true,
+  });
 
+  useEffect(() => {
     if (draftId && sessionId) {
       startPolling(sessionId, draftId);
     }
   }, [draftId, sessionId]);
 
-  const getBeads = () => {
-    beadsApi.getBeadList({ showLoading: true }).then((res) => {
-      const resData = res.data;
-
-      (resData || []).forEach((item: any) => {
-        item.frontType = 'crystal';
-      })
-      setAllBeadList(resData);
-      
-      // 按id对珠子进行聚合
-      const aggregatedBeads = resData.reduce((acc: Record<string, any>, item: any) => {
-        const key = `${item.id}_${item.name}`;
-        if (acc[key]) {
-          acc[key].beadList.push(item);
-        } else {
-          acc[key] = {
-            id: item.id,
-            name: item.name,
-            wuxing: item.wuxing || [] ,
-            beadList: [item]
-          };
-        }
-        return acc;
-      }, {});
-      
-      // 转换为数组格式
-      const aggregatedBeadList = Object.values(aggregatedBeads);
-
-      setBeadTypeMap(
-        aggregatedBeadList.reduce((acc: Record<string, any[]>, item: any) => {
-          // 使用第一个item的wuxing属性
-          (item.wuxing || []).forEach((wuxingValue: string) => {
-            if (acc[wuxingValue]) {
-              acc[wuxingValue].push(item);
-            } else {
-              acc[wuxingValue] = [item];
-            }
-          })
-          return acc;
-        }, {})
-      );
-    });
-  }
-
-  const getAccessories = () => {
-    beadsApi.getAccessories({ showLoading: true }).then((res) => {
-      const resData: AccessoryItem[] = res.data || [];
-      (resData || []).forEach((item: any) => {
-        item.frontType = 'accessory';
-      })
-      // 按类型聚合
-      const aggregatedAccessories = resData.reduce((acc: Record<string, AccessoryItem[]>, item: AccessoryItem) => {
-        if (acc[item.type]) {
-          acc[item.type].push(item);
-        } else {
-          acc[item.type] = [item];
-        }
-        return acc;
-      }, {});
-      setAccessoryList(resData || []);
-      setAccessoryTypeMap(aggregatedAccessories);
-    });
-  } 
+  useEffect(() => {
+    if (skuHasMore) {
+      loadMoreSku()
+    } 
+  }, [skuHasMore, skuList]);
 
   useEffect(() => {
-    getBeads();
-    getAccessories();
-  }, []);
+    refreshSkuList();
+  }, [refreshSkuList]);
 
   const checkDeadsDataChanged = (_oldBeads: any[], _newBeads: any[]) => {
     if (!_oldBeads || !_newBeads || _oldBeads?.length !== _newBeads?.length) {
@@ -213,7 +182,6 @@ const CustomDesign = () => {
           console.log(res.errMsg)
         }
       })
-
     }
   }
 

@@ -192,10 +192,20 @@ export const beadsApi = {
         ...config,
       }
     ),
-  getAccessories: (config?: ApiConfig) => 
-     http.get<{ data: AccessoryItem[] }>(
+  getAccessories: (config?: ApiConfig) =>
+    http.get<{ data: AccessoryItem[] }>(
       "/user/accessories",
       {},
+      {
+        showLoading: false,
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
+  getSkuList: (params?: { page?: number; size?: number }, config?: ApiConfig) =>
+    http.get<{ data: any[]; total_count?: number }>(
+      "/sku",
+      params,
       {
         showLoading: false,
         cancelToken: config?.cancelToken,

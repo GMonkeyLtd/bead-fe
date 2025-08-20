@@ -52,11 +52,11 @@ export function useInfiniteScroll<T = any>({
   // 加载数据
   const loadData = useCallback(async (pageNum: number, isRefresh = false) => {
     if (isLoadingRef.current || (!hasMore && !isRefresh)) return;
+    console.log('loadData', isLoadingRef.current, !hasMore, isRefresh)
 
     isLoadingRef.current = true;
     setLoading(true);
     setError(null);
-
     try {
       const result = await fetchData(pageNum, pageSize);
       
@@ -82,7 +82,7 @@ export function useInfiniteScroll<T = any>({
 
   // 加载更多
   const loadMore = useCallback(() => {
-    console.log(pageRef.current, 'loadMore', listKey) // 使用pageRef.current来打印当前页码
+    console.log(!isLoadingRef.current, hasMore, enabled, pageRef.current, 'loadMore', listKey) // 使用pageRef.current来打印当前页码
     if (!isLoadingRef.current && hasMore && enabled) {
       loadData(pageRef.current); // 使用pageRef.current确保使用最新页码
     }

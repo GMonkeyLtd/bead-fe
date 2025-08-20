@@ -46,7 +46,7 @@ const InspirationDetailPage: React.FC = () => {
   const { workId, designId } = router.params || {};
   const [designData, setDesignData] = useState<any>(null);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
-  const [budgetDialogShow, setBudgetDialogShow] = useState(false);
+  const [budgetDialogShow, setBudgetDialogShow] = useState(true);
   const [detail, setDetail] = useState<InspirationWord | null>(null);
   const [loading, setLoading] = useState(true);
   const { height: navBarHeight } = getNavBarHeightAndTop();
@@ -332,6 +332,7 @@ const InspirationDetailPage: React.FC = () => {
           onClose={() => setBudgetDialogShow(false)}
           referencePrice={designData?.reference_price}
           // onModifyDesign={handleModifyDesign}
+          isSameProduct
         />
       )}
     </CrystalContainer>
