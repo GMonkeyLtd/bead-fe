@@ -482,6 +482,7 @@ const OrderDetail: React.FC = () => {
         <OrderStatus
           status={orderStatus}
           afterSaleStatus={order?.after_sale_status}
+          isSame={order?.community_info}
         />
       </View>
       <View
@@ -552,6 +553,7 @@ const OrderDetail: React.FC = () => {
             showPrice={showReferencePrice(orderStatus)}
             productImage={order?.design_info?.image_url}
             beads={order?.design_info?.beads_info || []}
+            isSameBuy={order?.community_info}
             orderAction={
               isSptCancel
                 ? {
@@ -647,8 +649,10 @@ export default OrderDetail;
 const OrderStatus: React.FC<{
   status: OrderStatusEnum;
   afterSaleStatus: AfterSaleStatus;
-}> = ({ status, afterSaleStatus }) => {
+  isSame: boolean;
+}> = ({ status, afterSaleStatus, isSame }) => {
   const orderStatusTip = getOrderStatusTip(status, afterSaleStatus);
+  const orderStatusDescription = getOrderStatusDescription(status, afterSaleStatus);
   return (
     <View className="order-status">
       <View
@@ -660,7 +664,7 @@ const OrderStatus: React.FC<{
         }}
       >
         <Text className="order-status-title">
-          {getOrderStatusDescription(status, afterSaleStatus)}
+          {isSame ? orderStatusDescription.replace('定制', '商品'): orderStatusDescription}
         </Text>
         <StatusBadge
           type={getStatusBadgeType(status)}
