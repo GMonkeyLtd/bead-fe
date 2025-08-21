@@ -23,6 +23,7 @@ const OrderListDemo: React.FC = () => {
           budget: item.price || 0,
           createTime: item.created_at,
           afterSaleStatus: item.after_sale_status,
+          communityInfo: item.community_info,
         }
       })
       setOrders(_orders);

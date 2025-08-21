@@ -33,8 +33,56 @@
   padding-bottom: 48px;
 }
 
+/* 同款制作提示条样式 */
+.budget-dialog-promo-banner {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  background: #FFF1E6;
+  border-bottom: 1px solid #FBD8BC;
+  border-radius: 8px 8px 0 0;
+}
+
+.budget-dialog-promo-icon {
+  width: 20px;
+  height: 20px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-right: 8px;
+}
+
+.budget-dialog-promo-icon-gradient {
+  width: 17.7px;
+  height: 17.7px;
+  background: linear-gradient(180deg, rgba(255, 197, 138, 1) 0%, rgba(255, 109, 25, 1) 100%);
+  border-radius: 50%;
+}
+
+.budget-dialog-promo-text {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #92561A;
+}
+
 .budget-input-placeholder {
   color: rgba(0, 0, 0, 0.7);
+}
+
+.budget-dialog-promo-discount {
+  color: #FF6D19;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  line-height: 1;
+  margin-left: 2px;
 }
 
 .budget-dialog-header {
@@ -50,7 +98,9 @@
 
 .budget-dialog-title-group {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 8px;
 }
 
 .budget-dialog-main-title {
@@ -60,7 +110,7 @@
   letter-spacing: 2px;
   color: #1f1722;
   opacity: 0.9;
-  text-align: center;
+  line-height: 1;
 }
 
 .budget-dialog-subtitle {
@@ -70,6 +120,25 @@
   line-height: 1.35em;
   letter-spacing: 1px;
   color: #1f1722;
+}
+
+/* 限时上架标签样式 */
+.budget-dialog-limited-tag {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px 6px;
+  background: #FF6D19;
+  border-radius: 2px;
+  gap: 10px;
+}
+
+.budget-dialog-limited-text {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1.35em;
+  color: #FFFFFF;
 }
 
 .budget-dialog-content {
@@ -109,7 +178,7 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 8px;
-  flex: 1;
+  padding: 8px 0;
 }
 
 .budget-dialog-budget-header {
@@ -131,17 +200,22 @@
   display: flex;
   flex-direction: row;
   gap: 10px;
-  padding: 8px 0;
   align-items: flex-end;
+
+  &.same-product {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
 }
 
 .budget-dialog-budget-input-value {
   color: #1F1722;
-  font-family: "Source Han Serif CN" serif;
+
+  font-family: "Source Han Serif CN";
   font-size: 32px;
   font-style: normal;
   font-weight: 500;
-  line-height: normal;
   line-height: 1;
 }
 
@@ -152,6 +226,23 @@
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+}
+
+.budget-dialog-budget-section-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.budget-dialog-original-price-text {
+  color: #1F1722;
+
+  font-family: "Noto Sans SC";
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 350;
+  line-height: normal;
+  text-decoration-line: line-through;
 }
 
 .budget-dialog-unlimited-text {
@@ -223,4 +314,21 @@
   text-decoration-thickness: auto;
   text-underline-offset: auto;
   text-underline-position: from-font;
+}
+
+.creator-info-container {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.80);
+  text-align: center;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.creator-nickname  {
+  font-weight: 500;
 }

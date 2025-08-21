@@ -4,7 +4,7 @@ import Taro, { useRouter } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import LazyImage from "@/components/LazyImage";
-import { inspirationApi, InspirationWord, userHistoryApi } from "@/utils/api";
+import api, { inspirationApi, InspirationWord, userHistoryApi } from "@/utils/api";
 import CollectIcon from "@/assets/icons/collect.svg";
 import CollectedIcon from "@/assets/icons/collect-active.svg";
 import CrystalButton from "@/components/CrystalButton";
@@ -14,6 +14,8 @@ import BraceletDetailDialog from "@/components/BraceletDetailDialog";
 import BeadList from "@/components/BeadList";
 import apiSession from "@/utils/api-session";
 import BudgetDialog from "@/components/BudgetDialog";
+import apiPay from "@/utils/api-pay";
+import { pageUrls } from "@/config/page-urls";
 
 interface BeadInfo {
   id: string;
@@ -33,6 +35,8 @@ interface InspirationDetail {
   images: string[];
   likes_count: number;
   created_at: string;
+  final_price: number;
+  original_price: number;
   user: {
     user_id: string;
     nick_name: string;
@@ -46,7 +50,7 @@ const InspirationDetailPage: React.FC = () => {
   const { workId, designId } = router.params || {};
   const [designData, setDesignData] = useState<any>(null);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
-  const [budgetDialogShow, setBudgetDialogShow] = useState(true);
+  const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [detail, setDetail] = useState<InspirationWord | null>(null);
   const [loading, setLoading] = useState(true);
   const { height: navBarHeight } = getNavBarHeightAndTop();
@@ -186,6 +190,34 @@ const InspirationDetailPage: React.FC = () => {
     );
   }
 
+  const handlePurchase = () => {
+    apiPay.buySameProduct({ word_id: detail.work_id }).then((res) => {
+      const { order_uuid } = res?.data || {};
+        Taro.getSetting({ 
+          success: (res) => {
+            console.log(res, 'res')
+          }
+        })
+        Taro.requestSubscribeMessage({
+          tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
+          entityIds: [order_uuid], // 添加必需的 entityIds 参数
+          complete: () => {
+            Taro.redirectTo({
+              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+            })
+          },
+          success: () => {
+            Taro.redirectTo({
+              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+            })
+          },
+          fail: () => Taro.redirectTo({
+            url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+          })
+        });
+    })
+  }
+
 
   return (
     <CrystalContainer showBack={true} showHome={false}>
@@ -300,7 +332,9 @@ const InspirationDetailPage: React.FC = () => {
       <View className={styles.bottomBar}>
         {/* <View className={styles.separator} /> */}
         {designData?.session_id && designData?.reference_price && (<CrystalButton
-          onClick={() => setBudgetDialogShow(true)}
+          onClick={() => {
+            setBudgetDialogShow(true)
+          }}
           text="制作同款"
           icon={
             <Image
@@ -313,7 +347,21 @@ const InspirationDetailPage: React.FC = () => {
           isPrimary={true}
         />)}
       </View>
-
+      {budgetDialogShow && (
+        <BudgetDialog
+          visible={budgetDialogShow}
+          title={designData?.info?.name}
+          designNumber={designData?.design_id}
+          productImage={detail.cover_url}
+          onClose={() => setBudgetDialogShow(false)}
+          referencePrice={detail?.final_price}
+          originalPrice={detail?.original_price}
+          // onModifyDesign={handleModifyDesign}
+          isSameProduct={true}
+          creatorName={detail.user.nick_name}
+          onConfirm={handlePurchase}
+        />
+      )}
       {braceletDetailDialogShow && designData?.info?.beads?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}
