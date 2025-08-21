@@ -16,7 +16,7 @@ function isNetworkUrl(url: string): boolean {
 /**
  * 下载网络图片到本地临时文件
  */
-async function downloadNetworkImage(url: string): Promise<string> {
+export async function downloadNetworkImage(url: string): Promise<string> {
   try {
     const downloadResult = await Taro.downloadFile({
       url: url,
@@ -48,6 +48,11 @@ export async function compressImage(filePath: string, options: CompressOptions =
     console.error("压缩图片失败:", err);
     return filePath; // 如果压缩失败，返回原图
   }
+}
+
+export async function getImageInfo(imageUrl: string) {
+  const tempFilePath = await downloadNetworkImage(imageUrl);
+  return Taro.getImageInfo({ src: tempFilePath });
 }
 
 export async function imageToBase64(

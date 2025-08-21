@@ -11,7 +11,7 @@ import {
   MovableView,
   Image,
 } from "@tarojs/components";
-import { Position } from "../../../types/crystal";
+import { BeadWithPosition, Position } from "../../../types/crystal";
 import "./styles/MovableBeadRenderer.scss";
 
 // 添加节流函数
@@ -68,7 +68,7 @@ const Bead = React.memo(
     handleDragMove,
     handleDragEnd,
   }: {
-    bead: Position;
+    bead: BeadWithPosition;
     index: number;
     isSelected: boolean;
     notSelected: boolean;
@@ -96,10 +96,10 @@ const Bead = React.memo(
               : ""
           }`}
           // 统一使用x和y属性定位，避免与style冲突
-          x={bead.x - bead.radius}
+          x={bead.x - bead.scale_width}
           y={bead.y - bead.scale_height}
           style={{
-            width: 2 * bead.radius,
+            width: 2 * bead.scale_width,
             height: 2 * bead.scale_height,
             // @ts-ignore
             '--rotation': `rotate(${bead.angle + Math.PI / 2}rad)`,
@@ -121,10 +121,10 @@ const Bead = React.memo(
               className="movable-bead-image"
               style={{
                 // transformOrigin: "center center",
-                width: '100%',
                 height: '100%',
                 transform: "rotate(" + (bead.angle + Math.PI / 2) + "rad)",
               }}
+              mode="aspectFit"
             />
           )}
         </MovableView>
@@ -143,7 +143,7 @@ const Bead = React.memo(
       prevProps.notSelected !== nextProps.notSelected ||
       prevBead.id !== nextBead.id ||
       prevBead.image_url !== nextBead.image_url ||
-      prevBead.radius !== nextBead.radius ||
+      prevBead.scale_width !== nextBead.scale_width ||
       prevBead.uniqueKey !== nextBead.uniqueKey // 添加uniqueKey检查，确保强制重绘时能触发
     ) {
       return false; // 需要重新渲染
@@ -252,7 +252,6 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         });
       
       if (needsUpdate) {
-        console.log("🔄 珠子位置发生变化，更新显示位置", beads);
         // 使用 startTransition 进行非紧急更新，避免阻塞用户交互
         startTransition(() => {
           setBeadPositions([...beads]); // 使用展开运算符确保触发重新渲染
@@ -297,8 +296,8 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
 
       // 计算实际坐标：MovableView的坐标 + 珠子半径偏移
       const bead = beadPositions[beadIndex];
-      const actualX = (e.detail.x || 0) + bead.radius;
-      const actualY = (e.detail.y || 0) + bead.radius;
+      const actualX = (e.detail.x || 0) + bead.scale_width;
+      const actualY = (e.detail.y || 0) + bead.scale_height;
 
       // 预览插入位置
       let previewCursor: typeof dragState.previewCursor = undefined;
@@ -361,8 +360,8 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
       
       // 如果状态中没有位置信息，从事件中计算
       if (finalX === 0 && finalY === 0 && e.detail) {
-        finalX = (e.detail.x || 0) + bead.radius;
-        finalY = (e.detail.y || 0) + bead.radius;
+        finalX = (e.detail.x || 0) + bead.scale_width;
+        finalY = (e.detail.y || 0) + bead.scale_height;
       }
       
       console.log("🎯 拖拽结束事件", {

@@ -16,7 +16,7 @@ export const calculateDotLocation = (
 
 // 计算每个珠子的圆心坐标 - 使用渲染直径（和CustomDesignRing保持一致）
 export const calcPositionsWithRenderDiameter = (
-  renderDiameterList: { width: number, scale_width: number, diameter: number, scale_height: number }[],
+  renderDiameterList: { render_width: number, scale_width: number, render_diameter: number, scale_height: number }[],
   // 圆心坐标
   center: { x: number, y: number }
 ) => {
@@ -41,9 +41,7 @@ export const calcPositionsWithRenderDiameter = (
     const midDeg = currentDeg + halfAngle;    // 珠子中心角度
     const rad = midDeg * Math.PI / 180;       // 转弧度
     positions.push({
-      width: d.width,
-      diameter: d.diameter,
-      radius: d.scale_width / 2,
+      scale_width: d.scale_width / 2,
       scale_height: d.scale_height / 2,
       x: center.x + radius * Math.cos(rad),
       y: center.y + radius * Math.sin(rad),
@@ -57,13 +55,13 @@ export const calcPositionsWithRenderDiameter = (
 
 export const calculateBeadArrangementBySize = (
   ringRadius: number,
-  beadSizeList: { width: number, diameter: number }[],
+  beadSizeList: { ratioBeadWidth: number, beadDiameter: number }[],
   center: { x: number, y: number },
   needScale: boolean = true
 ) => {
   // 参考CustomDesignRing的calcRingRadius计算方式
   // 先计算所有珠子的渲染直径总和
-  const totalRenderDiameter = beadSizeList.reduce((sum, size) => sum + size.width, 0); // 按1.5倍计算渲染直径
+  const totalRenderDiameter = beadSizeList.reduce((sum, size) => sum + size.ratioBeadWidth, 0); // 按1.5倍计算渲染直径
 
   // 基于总渲染直径计算环半径（和CustomDesignRing保持一致）
   const calculatedRingRadius = totalRenderDiameter / (2 * Math.PI);
@@ -73,7 +71,7 @@ export const calculateBeadArrangementBySize = (
   const sizeRatio = targetRingRadius / calculatedRingRadius;
 
   // 计算缩放后的渲染直径列表
-  const scaledRenderDiameterList = beadSizeList.map((size) => ({ width: size.width, scale_width: size.width * sizeRatio, diameter: size.diameter, scale_height: size.diameter * sizeRatio }));
+  const scaledRenderDiameterList = beadSizeList.map((size) => ({ render_width: size.ratioBeadWidth, scale_width: size.ratioBeadWidth * sizeRatio, render_diameter: size.beadDiameter, scale_height: size.beadDiameter * sizeRatio }));
 
   // 使用和CustomDesignRing相同的计算逻辑
   const positions = calcPositionsWithRenderDiameter(scaledRenderDiameterList, center);

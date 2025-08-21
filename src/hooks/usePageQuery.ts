@@ -29,15 +29,11 @@ interface UseInfiniteScrollResult<T> {
   updateItem: (item: T) => void;
 }
 
-export function useInfiniteScroll<T = any>({
-  listKey,
+export function usePageQuery<T = any>({
   initialPage = 1,
   pageSize = 10,
   fetchData,
-  threshold = 100,
   enabled = true,
-  selector,
-  rootMargin = '50px',
   queryItem,
 }: UseInfiniteScrollOptions<T>): UseInfiniteScrollResult<T> {
   const [data, setData] = useState<T[]>([]);
@@ -45,14 +41,12 @@ export function useInfiniteScroll<T = any>({
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(initialPage);
-  const observerRef = useRef<any>(null);
   const isLoadingRef = useRef(false);
   const pageRef = useRef(initialPage); // 添加pageRef来同步跟踪当前页码
 
   // 加载数据
   const loadData = useCallback(async (pageNum: number, isRefresh = false) => {
     if (isLoadingRef.current || (!hasMore && !isRefresh)) return;
-    console.log('loadData', isLoadingRef.current, !hasMore, isRefresh)
 
     isLoadingRef.current = true;
     setLoading(true);
@@ -82,7 +76,6 @@ export function useInfiniteScroll<T = any>({
 
   // 加载更多
   const loadMore = useCallback(() => {
-    console.log(!isLoadingRef.current, hasMore, enabled, pageRef.current, 'loadMore', listKey) // 使用pageRef.current来打印当前页码
     if (!isLoadingRef.current && hasMore && enabled) {
       loadData(pageRef.current); // 使用pageRef.current确保使用最新页码
     }
@@ -121,54 +114,6 @@ export function useInfiniteScroll<T = any>({
     },
     [data, queryItem]
   );
-
-  // 使用 Intersection Observer 监听指定元素
-  // useEffect(() => {
-  //   if (!enabled || !selector) return;
-  //   console.log(selector, 'selector')
-
-  //   // 清理之前的观察器
-  //   if (observerRef.current) {
-  //     observerRef.current.disconnect();
-  //     observerRef.current = null;
-  //   }
-
-  //   // 创建新的 Intersection Observer
-  //   const observer = Taro.createIntersectionObserver({}, {
-  //     thresholds: [0.1], // 当10%的元素可见时触发
-  //   });
-
-  //   console.log(selector, 'selector')
-  //   observer.observe(selector, (res) => {
-  //     console.log('Intersection Observer triggered:', res);
-      
-  //     // 当目标元素进入视口时触发加载更多
-  //     if ((res.intersectionRatio ?? 0) > 0 && !isLoadingRef.current && hasMore) {
-  //       console.log('Loading more data...');
-  //       loadMore();
-  //     }
-  //   });
-
-  //   observerRef.current = observer;
-
-  //   // 清理函数
-  //   return () => {
-  //     if (observerRef.current) {
-  //       observerRef.current.disconnect();
-  //       observerRef.current = null;
-  //     }
-  //   };
-  // }, [enabled, selector, rootMargin, hasMore, loadMore]);
-
-  // 组件卸载时清理观察器
-  // useEffect(() => {
-  //   return () => {
-  //     if (observerRef.current) {
-  //       observerRef.current.disconnect();
-  //       observerRef.current = null;
-  //     }
-  //   };
-  // }, []);
 
   return {
     data,

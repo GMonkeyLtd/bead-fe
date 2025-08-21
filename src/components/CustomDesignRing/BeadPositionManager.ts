@@ -1,4 +1,5 @@
-import { BeadArrayCalculator, Bead, Position } from "./BeadArrayCalculator";
+import { BeadArrayCalculator } from "./BeadArrayCalculator";
+import { Bead, Position } from "../../../types/crystal";
 import { ImageCacheManager } from "@/utils/image-cache";
 
 export interface BeadPositionManagerConfig {
@@ -58,15 +59,18 @@ export class BeadPositionManager {
 
     try {
       // 处理图片
-      const processedBeads = [ ...beads ]
+      const processedBeads = beads.map(bead => ({
+        ...bead,
+        ratioBeadWidth: this.calculator.calculateScaledBeadWidth(bead),
+      }))
       // 计算位置，传递现有位置信息以保持uniqueKey连续性
-      const positions = this.calculator.calculateBeadPositions(processedBeads, this.state.beads);
+      const beadsWithPosition = this.calculator.calculateBeadPositions(processedBeads, this.state.beads);
       
       // 计算预测长度
       const predictedLength = this.calculator.calculatePredictedLength(processedBeads);
       
       this.setState({
-        beads: positions,
+        beads: beadsWithPosition,
         predictedLength,
         beadStatus: "success",
       });
@@ -82,7 +86,7 @@ export class BeadPositionManager {
    * 添加珠子
    */
   async addBead(newBead: Bead): Promise<void> {
-    const validation = this.calculator.validateBeadCount(this.state.beads, newBead.diameter);
+    const validation = this.calculator.validateBeadCount(this.state.beads, newBead.diameter, 'add');
     if (!validation.isValid) {
       throw new Error(validation.message);
     }
@@ -99,7 +103,8 @@ export class BeadPositionManager {
       throw new Error("请先选择要删除的珠子");
     }
     const targetBead = this.state.beads[this.state.selectedBeadIndex];
-    const validation = this.calculator.validateBeadCount(this.state.beads, targetBead.diameter);
+    const validation = this.calculator.validateBeadCount(this.state.beads, targetBead.diameter, 'remove');
+    console.log(validation, 'validation')
     if (!validation.isValid) {
       throw new Error(validation.message);
     }

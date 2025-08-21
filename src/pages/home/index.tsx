@@ -163,9 +163,13 @@ const Home = () => {
                       />
                     }
                   />
-                  {/* <View className="crystal-link-text"> */}
-                      {/* 产看我的档案 */}
-                  {/* </View> */}
+                  {/* <View className="crystal-link-text" onClick={() => {
+                    Taro.redirectTo({
+                      url: pageUrls.customDesign + '?from=home',
+                    });
+                  }}>
+                      DIY
+                  </View> */}
                 </View>
               </View>
             </View>

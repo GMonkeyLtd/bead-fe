@@ -379,7 +379,9 @@ const InspirationDetailPage: React.FC = () => {
           productImage={detail.cover_url}
           onClose={() => setBudgetDialogShow(false)}
           referencePrice={designData?.reference_price}
+          originalPrice={detail?.original_price}
           // onModifyDesign={handleModifyDesign}
+          creatorName={detail.user.nick_name}
           isSameProduct
         />
       )}

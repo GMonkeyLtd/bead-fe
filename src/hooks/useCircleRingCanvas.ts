@@ -9,6 +9,7 @@ export interface DotImageData {
   image_url: string;
   diameter?: number;
   width?: number;
+  imageWHRatio?: number;
 }
 
 interface CircleRingConfig {
@@ -69,11 +70,11 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   }, []);
 
   // 计算珠子排列
-  const calculateBeads = useCallback((dotsBgImageData: DotImageData[]) => {
-      const beadSizes = dotsBgImageData.map(item => ({ width: item.width || item.diameter || 10, diameter: item.diameter || 10 }));
+  const calculateBeads = useCallback(async(dotsBgImageData: DotImageData[]) => {
+      // 获取图片的宽
       return calculateBeadArrangementBySize(
         ringRadius,
-        beadSizes,
+        dotsBgImageData.map(item => ({ ratioBeadWidth: (item.diameter || 10) * (item.imageWHRatio || 1), beadDiameter: item.diameter || 10 })),
         { x: ringRadius, y: ringRadius }
       );
   }, [ringRadius]);
@@ -91,7 +92,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
         // 顺序绘制珠子，确保圆形排列正确
         for (let index = 0; index < dots.length; index++) {
           const dot = dots[index];
-          const { x, y, radius, angle, scale_height } = beads[index];
+          const { x, y, scale_width, angle, scale_height } = beads[index];
 
           // 保存当前Canvas状态
           ctx.save();
@@ -107,7 +108,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           await new Promise<void>(r => { bgImg.onload = r; bgImg.src = dot; });
 
           // 绘制珠子（以珠子中心为原点）
-          ctx.drawImage(bgImg as any, -radius, -scale_height, radius * 2, scale_height * 2);
+          ctx.drawImage(bgImg as any, -scale_width, -scale_height, scale_width * 2, scale_height * 2);
 
           // 恢复Canvas状态
           ctx.restore();
@@ -167,7 +168,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
       const processedDots = await processImages(dotsBgImageData);
 
       // 2. 计算珠子排列
-      const beads = calculateBeads(dotsBgImageData);
+      const beads = await calculateBeads(dotsBgImageData);
 
       // 3. 绘制Canvas
       const imageUrl = await drawCanvas(processedDots, beads);

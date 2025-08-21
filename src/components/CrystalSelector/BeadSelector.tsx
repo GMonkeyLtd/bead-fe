@@ -13,6 +13,7 @@ interface Bead {
   name: string;
   image_url: string;
   diameter: number;
+  imageWHRatio?: number;
 }
 
 interface BeadType {
@@ -51,8 +52,11 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   }, [beadTypeMap]);
 
   const handleBeadClick = useCallback(
-    (bead: Bead) => {
-      onBeadClick(bead);
+    (bead: Bead, whRatio?: number) => {
+      onBeadClick({
+        ...bead,
+        imageWHRatio: whRatio,
+      });
     },
     [predictedLength, onBeadClick]
   );
@@ -94,7 +98,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
                   <View
                     key={`${beadItem.name}-${beadItem.diameter}`}
                     className="bead-item"
-                    onClick={() => handleBeadClick(beadItem)}
+                    onClick={() => handleBeadClick(beadItem, 1)}
                   >
                     <View className="bead-image-container">
                       <Image
@@ -128,24 +132,12 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
         className="accessories-selector-content hide-scrollbar"
       >
         {accessoryBeads?.map((accessory: AccessoryItem) => (
-            <View
-              key={`${accessory.name}-${accessory.diameter}-${accessory.width}`}
-              className="bead-item"
-              onClick={() => handleBeadClick(accessory)}
-            >
-              <View className="bead-image-container">
-                <Image
-                  src={accessory.image_url}
-                  className="bead-image"
-                  style={{
-                    width: `${accessory.width * renderRatio}px`,
-                    height: `${accessory.diameter * renderRatio}px`,
-                  }}
-                />
-              </View>
-              <View className="bead-name">{accessory.name}</View>
-              <View className="bead-diameter">{accessory.diameter}mm</View>
-            </View>
+          <AccessoryBeadItem
+            key={`${accessory.name}-${accessory.diameter}-${accessory.width}`}
+            accessory={accessory}
+            renderRatio={renderRatio}
+            handleBeadClick={handleBeadClick}
+          />
         ))}
       </View>
     );
@@ -161,12 +153,12 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
           const beadCount =
             wuxing === "精选"
               ? Object.values(beadTypeMap).reduce(
-                  (total, beads) => total + beads.length,
-                  0
-                )
+                (total, beads) => total + beads.length,
+                0
+              )
               : beadTypeMap[wuxing]
-              ? beadTypeMap[wuxing].length
-              : 0;
+                ? beadTypeMap[wuxing].length
+                : 0;
 
           return (
             <View
@@ -198,7 +190,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
             <View
               key={accType}
               className={`wuxing-tab ${isActive ? "active" : ""}`}
-              onClick={() =>  onAccessoryTypeChange(accType as AccessoryType)}
+              onClick={() => onAccessoryTypeChange(accType as AccessoryType)}
             >
               {AccessoryFormatMap[accType]}
               {beadCount > 0 && (
@@ -235,3 +227,32 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
 };
 
 export default React.memo(BeadSelector);
+
+const AccessoryBeadItem = ({ accessory, renderRatio, handleBeadClick }: { accessory: AccessoryItem, renderRatio: number, handleBeadClick: (bead: Bead, hwRatio?: number) => void }) => {
+  const [imageSize, setImageSize] = useState<{ width: number, height: number } | null>(null);
+  return (
+    <View
+      key={`${accessory.name}-${accessory.diameter}-${accessory.width}`}
+      className="bead-item"
+      onClick={() => imageSize && handleBeadClick(accessory, imageSize?.width / imageSize?.height)}
+    >
+      <View className="bead-image-container">
+        <Image
+          src={accessory.image_url}
+          className="bead-image"
+          style={{
+            height: `${accessory.diameter * renderRatio}px`,
+          }}
+          mode="aspectFit"
+          onLoad={(e) => {
+            if (!imageSize) {
+              setImageSize({ width: e.detail.width as number, height: e.detail.height as number });
+            }
+          }}
+        />
+      </View>
+      <View className="bead-name">{accessory.name}</View>
+      <View className="bead-diameter">{accessory.diameter}mm</View>
+    </View>
+  )
+}

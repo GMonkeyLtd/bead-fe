@@ -16,7 +16,7 @@ import { generateUUID } from "@/utils/uuid";
 import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import refreshIcon from "@/assets/icons/refresh.svg";
-import { imageToBase64 } from "@/utils/imageUtils";
+import { getImageInfo, imageToBase64 } from "@/utils/imageUtils";
 
 export const BraceletDraftCard = ({
   sessionId,
@@ -39,7 +39,7 @@ export const BraceletDraftCard = ({
 }) => {
   const { draft, startPolling, updateDraft } = usePollDraft({});
   const [isRegenerating, setIsRegenerating] = useState(false);
- 
+
   // 使用ref来防止重复生成图像
   const isGeneratingRef = useRef(false);
   const generatedBraceletImageRef = useRef<string | null>(null);
@@ -53,12 +53,34 @@ export const BraceletDraftCard = ({
     });
 
   // 稳定化beads数组，避免不必要的重新渲染
-  const beadsForGeneration = useMemo(() => {
+  const beadsForGeneration = useMemo(async () => {
     if (!draft?.beads?.length) return null;
-    return draft.beads.map((item) => ({
+    const promises = draft?.beads?.map(async (bead: BeadItem) => {
+      if (!bead.imageWHRatio) {
+        try {
+          const imageInfo = await getImageInfo(bead.image_url);
+          return {
+            ...bead,
+            imageWHRatio: imageInfo.width / imageInfo.height
+          }
+        } catch (error) {
+          console.error('Error in initBeads:', error);
+          return {
+            ...bead,
+            imageWHRatio: (bead.width || bead.diameter) / bead.diameter
+          }
+        }
+      }
+      return {
+        ...bead,
+      }
+    })
+    const newBeads = await Promise.all(promises);
+    return newBeads.map((item) => ({
       image_url: item.image_url,
       diameter: item.diameter,
-      width: item.width,
+      width: item.width || item.diameter,
+      imageWHRatio: item.imageWHRatio,
     }));
   }, [draft?.beads]);
 
@@ -97,48 +119,54 @@ export const BraceletDraftCard = ({
       session_id: sessionId || "",
       draft_id: draft?.draft_id || "",
       image_base64: imageBase64 as string,
-    }, { showError: false}).catch((err) => {
+    }, { showError: false }).catch((err) => {
       console.error("上传手串图像失败:", err);
     });
   }
 
-  useEffect(() => {
-
-    // 防止重复生成的条件检查
-    if (shouldGenerateImage && beadsForGeneration) {
-      isGeneratingRef.current = true;
-      // 使用本地的generateCircleRing而不是传入的generateBraceletImage
-      generateCircleRing(beadsForGeneration)
-        .then((braceletImage) => {
-          if (braceletImage) {
-            generatedBraceletImageRef.current = braceletImage;
-            // 使用ref中的draft状态，避免依赖项变化
-            const currentDraft = currentDraftRef.current;
-            if (currentDraft) {
-              updateDraft({
-                ...currentDraft,
-                bracelet_image: braceletImage,
-              } as DraftData);
-            }
-            if (braceletImage && sessionId && draft?.draft_id) {
-              uploadDraftImage(braceletImage);
-            }
-            // 图像生成完成后，隐藏Canvas以释放资源
-            // setShowCanvas(false);
-            // cleanupCanvas();
-            // 调用加载完成回调
-            onImageLoaded?.();
+  const generateBraceletImage = async () => {
+    const _beads = await beadsForGeneration
+    console.log(_beads, 'shouldGenerateImage', shouldGenerateImage)
+    isGeneratingRef.current = true;
+    // 使用本地的generateCircleRing而不是传入的generateBraceletImage
+    generateCircleRing(_beads)
+      .then((braceletImage) => {
+        if (braceletImage) {
+          generatedBraceletImageRef.current = braceletImage;
+          // 使用ref中的draft状态，避免依赖项变化
+          const currentDraft = currentDraftRef.current;
+          if (currentDraft) {
+            updateDraft({
+              ...currentDraft,
+              bracelet_image: braceletImage,
+            } as DraftData);
           }
-        })
-        .catch((error) => {
-          console.error("生成手串图像失败:", error);
-          // 即使失败也要隐藏Canvas
+          if (braceletImage && sessionId && draft?.draft_id) {
+            uploadDraftImage(braceletImage);
+          }
+          // 图像生成完成后，隐藏Canvas以释放资源
           // setShowCanvas(false);
-        })
-        .finally(() => {
-          isGeneratingRef.current = false;
-        });
+          // cleanupCanvas();
+          // 调用加载完成回调
+          onImageLoaded?.();
+        }
+      })
+      .catch((error) => {
+        console.error("生成手串图像失败:", error);
+        // 即使失败也要隐藏Canvas
+        // setShowCanvas(false);
+      })
+      .finally(() => {
+        isGeneratingRef.current = false;
+      });
+  }
+
+  useEffect(() => {
+    // 防止重复生成的条件检查
+    if (shouldGenerateImage && beadsForGeneration.length > 0) {
+      generateBraceletImage();
     }
+
   }, [
     shouldGenerateImage,
     beadsForGeneration,
@@ -182,9 +210,8 @@ export const BraceletDraftCard = ({
       return;
     }
     Taro.redirectTo({
-      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
-        draft?.draft_id
-      }&imageUrl=${encodeURIComponent(draft?.image_url || draft?.bracelet_image)}`,
+      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${draft?.draft_id
+        }&imageUrl=${encodeURIComponent(draft?.image_url || draft?.bracelet_image)}`,
     });
   };
 
