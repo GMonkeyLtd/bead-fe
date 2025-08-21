@@ -64,6 +64,7 @@ const CustomDesign = () => {
   useEffect(() => {
     refreshSkuList();
   }, [refreshSkuList]);
+  console.log(skuList, 'skuList')
 
   const checkDeadsDataChanged = (_oldBeads: any[], _newBeads: any[]) => {
     if (!_oldBeads || !_newBeads || _oldBeads?.length !== _newBeads?.length) {
