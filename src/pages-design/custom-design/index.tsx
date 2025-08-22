@@ -70,7 +70,6 @@ const CustomDesign = () => {
     enabled: true,
   });
 
-  console.log(skuList.filter((item) => item.spu_info?.name === "玻利维亚紫"), '玻利维亚紫')
 
   useEffect(() => {
     if (draftId && sessionId) {
@@ -154,13 +153,15 @@ const CustomDesign = () => {
         id: item.id,
         width: item.width || 0,
         diameter: item.diameter,
+        quantity: item.quantity,
       };
     });
     const newBeads = _newBeads?.map((item) => {
       return {
         id: item.id,
         width: item.width || 0,
-        diameter: item.diameter,
+        diameter: item.diameter,  
+        quantity: item.quantity,
       };
     });
     return JSON.stringify(oldBeads) !== JSON.stringify(newBeads);
