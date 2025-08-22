@@ -27,6 +27,7 @@ export interface BeadItem {
   diameter: number;
   funcs: string[];
   func_summary: string;
+  image_aspect_ratio?: number;
 }
 
 export enum AccessoryType {

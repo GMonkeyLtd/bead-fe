@@ -18,7 +18,6 @@ import { LILI_AVATAR_IMAGE_URL } from "@/config";
 import { AccessoryType } from "@/utils/api-session";
 import { AccessoryItem } from "@/utils/api-session";
 import { Bead } from "../../../types/crystal";
-import { downloadNetworkImage, getImageInfo } from "@/utils/imageUtils";
 
 interface BeadType {
   name: string;
@@ -145,29 +144,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     positionManagerRef.current = new BeadPositionManager(config);
 
     try {
-      const promises = beads.map(async (bead) => {
-        if (!bead.imageWHRatio) {
-          try {
-            const imageInfo = await getImageInfo(bead.image_url);
-            return {
-              ...bead,
-              imageWHRatio: imageInfo.width / imageInfo.height
-            }
-          } catch (error) {
-            console.error('Error in initBeads:', error);
-            return {
-              ...bead,
-              imageWHRatio: (bead.width ) / bead.diameter
-            }
-          }
-        }
-        return {
-          ...bead,
-        }
-      })
-      const newBeads = await Promise.all(promises);
       if (positionManagerRef.current) {
-        await positionManagerRef.current.setBeads(newBeads);
+        await positionManagerRef.current.setBeads(beads);
         const state = positionManagerRef.current.getState();
         if (state) {
           setPositionManagerState(state);
@@ -203,12 +181,11 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   // 处理查看效果
   const handleViewEffect = useCallback(() => {
     if (positionManagerState.beads.length > 0) {
-      console.log(positionManagerState.beads, 'positionManagerState.beads')
       const dotImageData = positionManagerState.beads.map(dot => ({
         image_url: dot.image_url,
         diameter: dot.diameter,
         width: dot.width,
-        imageWHRatio: dot.imageWHRatio,
+        image_aspect_ratio: dot.image_aspect_ratio,
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
         const newImageUrl = imageUrl || "";
@@ -243,7 +220,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     name: string;
     image_url: string;
     diameter: number;
-    imageWHRatio?: number;
+    image_aspect_ratio?: number;
   }) => {
     if (!positionManagerRef.current) return;
     try {

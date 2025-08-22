@@ -225,7 +225,6 @@ const ChatDesign = () => {
   }, [byMerchant, session_id]);
 
   useEffect(() => {
-    console.log('INIT useEffect', hasInitializedRef.current, year, month, day, hour, gender, isLunar)
     if (year && month && day && hour && gender && isLunar && !hasShownInitMessagesRef.current) {
       hasShownInitMessagesRef.current = true;
       

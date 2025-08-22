@@ -9,7 +9,7 @@ export interface DotImageData {
   image_url: string;
   diameter?: number;
   width?: number;
-  imageWHRatio?: number;
+  image_aspect_ratio?: number;
 }
 
 interface CircleRingConfig {
@@ -74,7 +74,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
       // 获取图片的宽
       return calculateBeadArrangementBySize(
         ringRadius,
-        dotsBgImageData.map(item => ({ ratioBeadWidth: (item.diameter || 10) * (item.imageWHRatio || 1), beadDiameter: item.diameter || 10 })),
+        dotsBgImageData.map(item => ({ ratioBeadWidth: (item.diameter || 10) * (item.image_aspect_ratio || 1), beadDiameter: item.diameter || 10 })),
         { x: ringRadius, y: ringRadius }
       );
   }, [ringRadius]);

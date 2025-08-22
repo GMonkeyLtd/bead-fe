@@ -31,7 +31,7 @@ const RingOperationControls: React.FC<RingOperationControlsProps> = ({
   }, [selectedBeadIndex, onDelete]);
 
   return (
-    <View className="ring-operation-controls">
+    <View className="ring-operation-controls" onClick={e => e.stopPropagation()}>
       {/* 顶部操作区域 - 右移 */}
       <View className="operation-section" onClick={handleClockwiseMove}>
         <View className="operation-icon">

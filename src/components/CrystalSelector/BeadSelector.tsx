@@ -52,10 +52,9 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   }, [beadTypeMap]);
 
   const handleBeadClick = useCallback(
-    (bead: Bead, whRatio?: number) => {
+    (bead: Bead) => {
       onBeadClick({
-        ...bead,
-        imageWHRatio: whRatio,
+        ...bead
       });
     },
     [predictedLength, onBeadClick]
@@ -229,12 +228,12 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
 export default React.memo(BeadSelector);
 
 const AccessoryBeadItem = ({ accessory, renderRatio, handleBeadClick }: { accessory: AccessoryItem, renderRatio: number, handleBeadClick: (bead: Bead, hwRatio?: number) => void }) => {
-  const [imageSize, setImageSize] = useState<{ width: number, height: number } | null>(null);
+
   return (
     <View
       key={`${accessory.name}-${accessory.diameter}-${accessory.width}`}
       className="bead-item"
-      onClick={() => imageSize && handleBeadClick(accessory, imageSize?.width / imageSize?.height)}
+      onClick={() => handleBeadClick(accessory)}
     >
       <View className="bead-image-container">
         <Image
@@ -244,11 +243,6 @@ const AccessoryBeadItem = ({ accessory, renderRatio, handleBeadClick }: { access
             height: `${accessory.diameter * renderRatio}px`,
           }}
           mode="aspectFit"
-          onLoad={(e) => {
-            if (!imageSize) {
-              setImageSize({ width: e.detail.width as number, height: e.detail.height as number });
-            }
-          }}
         />
       </View>
       <View className="bead-name">{accessory.name}</View>

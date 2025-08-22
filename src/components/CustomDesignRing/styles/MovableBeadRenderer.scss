@@ -31,6 +31,12 @@
           &.not-selected {
             opacity: 0.5;
           }
+          &.selected > .movable-bead-image {
+            border: 1px solid rgb(247, 231, 215);
+            border-radius: 8px;
+            box-sizing: border-box;
+            box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.40), 0 0 8px 0 rgba(46, 29, 10, 0.50);
+          }
           
           // 清除所有伪元素，确保状态重置
           &::after {

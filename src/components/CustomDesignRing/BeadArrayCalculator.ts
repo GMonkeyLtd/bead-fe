@@ -46,8 +46,7 @@ export class BeadArrayCalculator {
   }
   // 根据图片比例计算在显示时的绳上宽度
   calculateScaledBeadWidth(bead: Bead): number {
-    if (!bead.imageWHRatio) return bead.width;
-    return bead.diameter * bead.imageWHRatio;
+    return bead.diameter * (bead.image_aspect_ratio || 1);
   }
 
   /**

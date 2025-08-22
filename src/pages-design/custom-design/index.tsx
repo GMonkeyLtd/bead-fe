@@ -70,6 +70,8 @@ const CustomDesign = () => {
     enabled: true,
   });
 
+  console.log(skuList.filter((item) => item.spu_info?.name === "玻利维亚紫"), '玻利维亚紫')
+
   useEffect(() => {
     if (draftId && sessionId) {
       startPolling(sessionId, draftId);
@@ -161,7 +163,6 @@ const CustomDesign = () => {
         diameter: item.diameter,
       };
     });
-    console.log(oldBeads, newBeads, 'oldBeads, newBeads')
     return JSON.stringify(oldBeads) !== JSON.stringify(newBeads);
   }
 
@@ -200,6 +201,7 @@ const CustomDesign = () => {
       }
       const newBeadData = {
         ...(_beadData || {}),
+        image_aspect_ratio: item.image_aspect_ratio || 1,
       };
       // 删除newBeadData中的frontType
       delete newBeadData.frontType;
@@ -207,7 +209,6 @@ const CustomDesign = () => {
       delete newBeadData.uniqueKey;
       return newBeadData;
     })
-    console.log(beads, 'beads')
     apiSession.saveDraft({
       session_id: sessionId,
       beads,

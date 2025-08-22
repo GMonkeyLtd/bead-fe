@@ -104,7 +104,6 @@ export class BeadPositionManager {
     }
     const targetBead = this.state.beads[this.state.selectedBeadIndex];
     const validation = this.calculator.validateBeadCount(this.state.beads, targetBead.diameter, 'remove');
-    console.log(validation, 'validation')
     if (!validation.isValid) {
       throw new Error(validation.message);
     }
@@ -113,7 +112,6 @@ export class BeadPositionManager {
       this.state.beads,
       this.state.selectedBeadIndex
     );
-
     this.setState({ selectedBeadIndex: newSelectedIndex });
     await this.setBeads(newBeads);
   }

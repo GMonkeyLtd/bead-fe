@@ -28,6 +28,7 @@ import MaterialSvg from "@/assets/icons/material.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import apiSession from "@/utils/api-session";
 import { usePollDesign } from "@/hooks/usePollDesign";
+import { userApi } from "@/utils/api-merchant";
 
 const Result = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -105,6 +106,14 @@ const Result = () => {
       })
     }
   };
+
+  useEffect(() => {
+    if (designDraftId) {
+      apiSession.getDesignDraft({ session_id: designSessionId, draft_id: designDraftId }).then((res) => {
+        console.log(res, 'res')
+      })
+    }
+  }, [designDraftId])
 
   useDidShow(() => {
     initData();

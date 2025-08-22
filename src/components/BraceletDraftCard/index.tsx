@@ -12,11 +12,10 @@ import {
 import CrystalButton from "../CrystalButton";
 import rightArrowGoldenIcon from "@/assets/icons/right-arrow-golden.svg";
 import { pageUrls } from "@/config/page-urls";
-import { generateUUID } from "@/utils/uuid";
 import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import refreshIcon from "@/assets/icons/refresh.svg";
-import { getImageInfo, imageToBase64 } from "@/utils/imageUtils";
+import { imageToBase64 } from "@/utils/imageUtils";
 
 export const BraceletDraftCard = ({
   sessionId,
@@ -53,34 +52,13 @@ export const BraceletDraftCard = ({
     });
 
   // 稳定化beads数组，避免不必要的重新渲染
-  const beadsForGeneration = useMemo(async () => {
+  const beadsForGeneration = useMemo(() => {
     if (!draft?.beads?.length) return null;
-    const promises = draft?.beads?.map(async (bead: BeadItem) => {
-      if (!bead.imageWHRatio) {
-        try {
-          const imageInfo = await getImageInfo(bead.image_url);
-          return {
-            ...bead,
-            imageWHRatio: imageInfo.width / imageInfo.height
-          }
-        } catch (error) {
-          console.error('Error in initBeads:', error);
-          return {
-            ...bead,
-            imageWHRatio: (bead.width || bead.diameter) / bead.diameter
-          }
-        }
-      }
-      return {
-        ...bead,
-      }
-    })
-    const newBeads = await Promise.all(promises);
-    return newBeads.map((item) => ({
+    return draft?.beads?.map((item) => ({
       image_url: item.image_url,
       diameter: item.diameter,
       width: item.width || item.diameter,
-      imageWHRatio: item.imageWHRatio,
+      image_aspect_ratio: item.image_aspect_ratio || 1,
     }));
   }, [draft?.beads]);
 
@@ -125,11 +103,9 @@ export const BraceletDraftCard = ({
   }
 
   const generateBraceletImage = async () => {
-    const _beads = await beadsForGeneration
-    console.log(_beads, 'shouldGenerateImage', shouldGenerateImage)
     isGeneratingRef.current = true;
     // 使用本地的generateCircleRing而不是传入的generateBraceletImage
-    generateCircleRing(_beads)
+    generateCircleRing(beadsForGeneration)
       .then((braceletImage) => {
         if (braceletImage) {
           generatedBraceletImageRef.current = braceletImage;
@@ -163,7 +139,7 @@ export const BraceletDraftCard = ({
 
   useEffect(() => {
     // 防止重复生成的条件检查
-    if (shouldGenerateImage && beadsForGeneration.length > 0) {
+    if (shouldGenerateImage && beadsForGeneration && beadsForGeneration.length > 0) {
       generateBraceletImage();
     }
 
