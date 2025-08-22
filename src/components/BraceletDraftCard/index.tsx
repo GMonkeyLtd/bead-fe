@@ -36,7 +36,8 @@ export const BraceletDraftCard = ({
   canRegenerate?: boolean;
   byMerchant?: boolean;
 }) => {
-  const { draft, startPolling, updateDraft } = usePollDraft({});
+  // 初始化usePollDraft钩子
+  const { draft, startPolling, updateDraft } = usePollDraft<{ wishes: string[], updated_at: string }>({});
   const [isRegenerating, setIsRegenerating] = useState(false);
 
   // 使用ref来防止重复生成图像
@@ -120,21 +121,17 @@ export const BraceletDraftCard = ({
           if (braceletImage && sessionId && draft?.draft_id) {
             uploadDraftImage(braceletImage);
           }
-          // 图像生成完成后，隐藏Canvas以释放资源
-          // setShowCanvas(false);
-          // cleanupCanvas();
           // 调用加载完成回调
           onImageLoaded?.();
-        }
-      })
-      .catch((error) => {
-        console.error("生成手串图像失败:", error);
-        // 即使失败也要隐藏Canvas
-        // setShowCanvas(false);
-      })
-      .finally(() => {
-        isGeneratingRef.current = false;
-      });
+        }})
+        .catch((error) => {
+          console.error("生成手串图像失败:", error);
+          // 即使失败也要隐藏Canvas
+          // setShowCanvas(false);
+        })
+        .finally(() => {
+          isGeneratingRef.current = false;
+        });
   }
 
   useEffect(() => {
@@ -142,7 +139,6 @@ export const BraceletDraftCard = ({
     if (shouldGenerateImage && beadsForGeneration && beadsForGeneration.length > 0) {
       generateBraceletImage();
     }
-
   }, [
     shouldGenerateImage,
     beadsForGeneration,
