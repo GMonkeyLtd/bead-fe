@@ -1,7 +1,6 @@
 import Taro from '@tarojs/taro'
 import { AuthManager } from './auth'
 import { MerchantAuthManager } from './auth-merchant'
-import { MockManager } from './mockManager'
 import { pageUrls } from '@/config/page-urls'
 
 
