@@ -125,8 +125,8 @@ export class BeadArrayCalculator {
     const newBeads = [...beads];
 
     if (selectedIndex === -1) {
-      // 添加到末尾
-      newBeads.push({
+      // 添加到最前面
+      newBeads.unshift({
         ...newBead,
       });
     } else {
@@ -177,6 +177,27 @@ export class BeadArrayCalculator {
       const prevIndex = (selectedIndex - 1 + newBeads.length) % newBeads.length;
       newBeads[selectedIndex] = newBeads[prevIndex];
       newBeads[prevIndex] = selectedBead;
+    }
+
+    return newBeads;
+  }
+
+  /**
+   * 移动所有珠子一位
+   */
+  moveAllBeads(beads: Bead[], direction: 'clockwise' | 'counterclockwise'): Bead[] {
+    if (beads.length <= 1) return beads;
+
+    const newBeads = [...beads];
+
+    if (direction === 'clockwise') {
+      // 顺时针移动：所有珠子向后移动一位，最后一个珠子移到第一位
+      const lastBead = newBeads.pop()!;
+      newBeads.unshift(lastBead);
+    } else {
+      // 逆时针移动：所有珠子向前移动一位，第一个珠子移到最后一位
+      const firstBead = newBeads.shift()!;
+      newBeads.push(firstBead);
     }
 
     return newBeads;

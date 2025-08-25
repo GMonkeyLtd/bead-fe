@@ -16,6 +16,7 @@ import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import refreshIcon from "@/assets/icons/refresh.svg";
 import { imageToBase64 } from "@/utils/imageUtils";
+import { SPU_TYPE } from "@/pages-design/custom-design";
 
 export const BraceletDraftCard = ({
   sessionId,
@@ -60,6 +61,7 @@ export const BraceletDraftCard = ({
       diameter: item.diameter,
       width: item.width || item.diameter,
       image_aspect_ratio: item.image_aspect_ratio || 1,
+      isFloatAccessory: item.spu_type === SPU_TYPE.ACCESSORY && !item.width,
     }));
   }, [draft?.items]);
 
@@ -106,7 +108,7 @@ export const BraceletDraftCard = ({
   const generateBraceletImage = async () => {
     isGeneratingRef.current = true;
     // 使用本地的generateCircleRing而不是传入的generateBraceletImage
-    generateCircleRing(beadsForGeneration)
+    generateCircleRing(beadsForGeneration as DotImageData[])
       .then((braceletImage) => {
         if (braceletImage) {
           generatedBraceletImageRef.current = braceletImage;
@@ -295,6 +297,7 @@ export const BraceletDraftCard = ({
           </View>
           <View className={styles.braceletBgImageContainer} onClick={viewImage}>
             <CircleRingImage
+              // imageUrl={isRegenerating ? "" :  draft.bracelet_image || ""}
               imageUrl={isRegenerating ? "" : draft.image_url || draft.bracelet_image || ""}
               size={140}
               backendSize={160}

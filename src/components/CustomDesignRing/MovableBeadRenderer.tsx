@@ -234,6 +234,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
   // 初始化珠子位置
   useEffect(() => {
     if (beads.length > 0 && beadPositions.length === 0) {
+      console.log(beads, 'beads')
       setBeadPositions([...beads]);
     }
   }, [beads, beadPositions.length]);

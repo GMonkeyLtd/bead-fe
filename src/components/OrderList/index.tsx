@@ -126,7 +126,7 @@ export default function OrderList({
   };
 
   const handleOrderDetail = (order: Order) => {
-    const beadsData = order?.design_info?.beads_info?.reduce(
+    const beadsData = order?.design_info?.items?.reduce(
       (acc: any[], item: any) => {
         const existingBead = acc.find((bead) => bead.name === item?.name);
         if (existingBead) {

@@ -7,7 +7,7 @@ import React, {
   useImperativeHandle,
 } from "react";
 import { View, Image, MovableArea } from "@tarojs/components";
-import Taro from "@tarojs/taro";
+import Taro, { base64ToArrayBuffer } from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
 import BeadSelector from "../CrystalSelector/BeadSelector";
@@ -19,6 +19,7 @@ import { AccessoryType } from "@/utils/api-session";
 import { AccessoryItem } from "@/utils/api-session";
 import { Bead } from "../../../types/crystal";
 import { SPU_TYPE } from "@/pages-design/custom-design";
+import { imageToBase64 } from "@/utils/imageUtils";
 
 interface BeadType {
   name: string;
@@ -194,6 +195,16 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         // Taro.previewImage({
         //   urls: [newImageUrl],
         // });
+        // imageToBase64(newImageUrl, true, false, undefined, 'png')
+        // .then(base64 => {
+        //   // 将base64复制到剪贴板
+        //   Taro.setClipboardData({
+        //     data: base64,
+        //     success: () => {
+        //       console.log('base64复制到剪贴板成功')
+        //     }
+        //   })
+        // })
         onOk?.(
           newImageUrl,
           positionManagerState.beads

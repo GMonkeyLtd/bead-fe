@@ -269,7 +269,7 @@ const CustomDesign = () => {
         beads={(draft?.items || [])?.map((item: any) => {
           return {
             ...item,
-            width: item.width || item.diameter,
+            width: item.spu_type === SPU_TYPE.ACCESSORY ? item.width : item.width || item.diameter,
           };
         })}
         beadTypeMap={beadTypeMap}

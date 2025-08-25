@@ -8,7 +8,8 @@ export const calculateDotLocation = (
   centerX: number,
   centerY: number
 ) => {
-  const angle = (index / dotCount) * Math.PI * 2;
+  // 从正上方(-π/2)开始排列
+  const angle = (index / dotCount) * Math.PI * 2 - Math.PI / 2;
   const x = centerX + dotDistance * Math.cos(angle);
   const y = centerY + dotDistance * Math.sin(angle);
   return { x, y };
@@ -33,8 +34,15 @@ export const calcPositionsWithRenderDiameter = (
 
   // 4. 计算每颗珠子圆心坐标
   const positions: Position[] = [];
-  let currentDeg = 0;                // 当前累计角度
-  const radius = bigDiameter / 2;    // 大圆半径
+  // 如果没有珠子，直接返回空数组
+  if (renderDiameterList.length === 0) {
+    return positions;
+  }
+  
+  // 计算起始角度，让第一个珠子的圆心在正上方(-90度)
+  const firstHalfAngle = angles[0] / 2;
+  let currentDeg = -90 - firstHalfAngle;     // 调整起始角度
+  const radius = bigDiameter / 2;            // 大圆半径
 
   renderDiameterList.forEach((d, i) => {
     const halfAngle = angles[i] / 2;          // 珠子占角的一半

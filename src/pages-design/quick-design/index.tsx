@@ -166,7 +166,13 @@ const QuickDesign = () => {
     // pollDesignProgress(sessionId, draftId, null);
 
     const _imageUrl = decodeURIComponent(imageUrl);
-    const base64 = await imageToBase64(_imageUrl, false);
+    const base64 = await imageToBase64(_imageUrl, true, false, undefined, 'png');
+    // Taro.setClipboardData({
+    //   data: base64,
+    //   success: () => {
+    //     console.log('base64复制到剪贴板成功')
+    //   }
+    // })
     const res = await sessionApi.generateDesignByDraftImage({
       session_id: sessionId,
       draft_id: draftId,

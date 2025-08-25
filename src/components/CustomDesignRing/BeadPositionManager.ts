@@ -121,25 +121,28 @@ export class BeadPositionManager {
    */
   async moveBead(direction: 'clockwise' | 'counterclockwise'): Promise<void> {
     if (this.state.selectedBeadIndex === -1) {
-      throw new Error("请先选择要移动的珠子");
-    }
-
-    const newBeads = this.calculator.moveBead(
-      this.state.beads,
-      this.state.selectedBeadIndex,
-      direction
-    );
-
-    // 调整选中索引
-    let newSelectedIndex = this.state.selectedBeadIndex;
-    if (direction === 'clockwise') {
-      newSelectedIndex = (this.state.selectedBeadIndex + 1) % this.state.beads.length;
+      // 没有选中珠子时，所有珠子都移动一位
+      const newBeads = this.calculator.moveAllBeads(this.state.beads, direction);
+      await this.setBeads(newBeads);
     } else {
-      newSelectedIndex = (this.state.selectedBeadIndex - 1 + this.state.beads.length) % this.state.beads.length;
-    }
+      // 有选中珠子时，只移动选中的珠子
+      const newBeads = this.calculator.moveBead(
+        this.state.beads,
+        this.state.selectedBeadIndex,
+        direction
+      );
 
-    this.setState({ selectedBeadIndex: newSelectedIndex });
-    await this.setBeads(newBeads);
+      // 调整选中索引
+      let newSelectedIndex = this.state.selectedBeadIndex;
+      if (direction === 'clockwise') {
+        newSelectedIndex = (this.state.selectedBeadIndex + 1) % this.state.beads.length;
+      } else {
+        newSelectedIndex = (this.state.selectedBeadIndex - 1 + this.state.beads.length) % this.state.beads.length;
+      }
+
+      this.setState({ selectedBeadIndex: newSelectedIndex });
+      await this.setBeads(newBeads);
+    }
   }
 
   /**

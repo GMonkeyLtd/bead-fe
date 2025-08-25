@@ -140,10 +140,16 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           canvas: canvas as any,
           destHeight: targetSize * dpr,
           destWidth: targetSize * dpr,
-          quality: 1,
           fileType: fileType as keyof Taro.canvasToTempFilePath.FileType,
           success: (res) => {
             resolve(res.tempFilePath);
+            // 将图片保存到本地
+            // Taro.saveImageToPhotosAlbum({
+            //   filePath: res.tempFilePath,
+            //   success: () => {
+            //     console.log("图片保存成功");
+            //   },
+            // });
           },
           fail: (err) => {
             console.error("生成临时文件失败:", err);
