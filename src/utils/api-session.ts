@@ -29,7 +29,7 @@ export interface SpuInfo {
   wuxing: string[];
 }
 
-export interface BeadItem {
+export interface BeadItem extends SpuInfo {
   sku_id: number;
   spu_id: number;
   cost_price: number;
@@ -348,14 +348,14 @@ export default {
   saveDraft: (
     params: {
       session_id: string;
-      beads: BeadItem[];
+      beadItems: number[];
     },
     config?: ApiConfig
   ) => {
     return http.post<{ draft: DesignDraftResponse }>(
       `/user/sessions/${params.session_id}/drafts/diy`,
       {
-        beads: params.beads,
+        items: params.beadItems,
       },
       {
         cancelToken: config?.cancelToken,

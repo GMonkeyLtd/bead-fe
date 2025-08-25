@@ -56,7 +56,7 @@ export const BraceletDraftCard = ({
   const beadsForGeneration = useMemo(() => {
     if (!draft?.items?.length) return null;
     return draft?.items?.map((item) => ({
-      image_url: item?.spu_info?.image_url,
+      image_url: item?.image_url,
       diameter: item.diameter,
       width: item.width || item.diameter,
       image_aspect_ratio: item.image_aspect_ratio || 1,
@@ -123,15 +123,16 @@ export const BraceletDraftCard = ({
           }
           // 调用加载完成回调
           onImageLoaded?.();
-        }})
-        .catch((error) => {
-          console.error("生成手串图像失败:", error);
-          // 即使失败也要隐藏Canvas
-          // setShowCanvas(false);
-        })
-        .finally(() => {
-          isGeneratingRef.current = false;
-        });
+        }
+      })
+      .catch((error) => {
+        console.error("生成手串图像失败:", error);
+        // 即使失败也要隐藏Canvas
+        // setShowCanvas(false);
+      })
+      .finally(() => {
+        isGeneratingRef.current = false;
+      });
   }
 
   useEffect(() => {
@@ -157,7 +158,7 @@ export const BraceletDraftCard = ({
 
   const beadsInfo = useMemo(() => {
     return draft?.items?.reduce((acc, bead) => {
-      const beadInfo = { ...bead, ...(bead?.spu_info || {})};
+      const beadInfo = { ...bead };
       if (!acc.find((b) => b.name === beadInfo.name)) {
         acc.push(beadInfo);
       }
@@ -323,11 +324,13 @@ export const BraceletDraftCard = ({
               }
             />
           )}
-          <CrystalButton
-            // style={{
-            onClick={handleDiy}
-            text="DIY编辑"
-          />
+          {draft?.items?.length > 0 && draft?.items?.every((item) => !!item.sku_id) && (
+            <CrystalButton
+              // style={{
+              onClick={handleDiy}
+              text="DIY编辑"
+            />
+          )}
         </View>
       </View>
     </View>

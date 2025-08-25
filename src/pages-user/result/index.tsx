@@ -62,6 +62,10 @@ const Result = () => {
     });
   };
 
+  const canDiy = useMemo(() => {
+    return beadsInfo?.length > 0 && beadsInfo?.every((item) => !!item.sku_id);
+  }, [beadsInfo]);
+
   const processDesignData = (designData) => {
     const { design_id, image_url, info, reference_price, session_id, draft_id } =
       designData || {};
@@ -73,7 +77,7 @@ const Result = () => {
       wuxing,
       spec
     } = info;
-    setBeadsInfo(info.beads);
+    setBeadsInfo(info.items);
     setImageUrl(image_url);
     setBraceletName(name);
     setBeadDescriptions(recommend_beads.filter((item) => !!item.wuxing));
@@ -212,7 +216,6 @@ const Result = () => {
 
         // 将base64转换为临时文件
         const base64Data = res.data.data;
-        console.log('Base64 data length:', base64Data?.length);
 
         const tempFilePath = `${Taro.env.USER_DATA_PATH}/temp_poster_${Date.now()}.webp`;
         console.log(tempFilePath, "tempFilePath");
@@ -489,7 +492,7 @@ const Result = () => {
           productImage={imageUrl}
           onClose={() => setBudgetDialogShow(false)}
           referencePrice={referencePrice}
-          onModifyDesign={handleModifyDesign}
+          onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
       {/* <PosterGenerator  // 生成海报   

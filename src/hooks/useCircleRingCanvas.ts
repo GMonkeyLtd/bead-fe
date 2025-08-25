@@ -10,6 +10,7 @@ export interface DotImageData {
   diameter?: number;
   width?: number;
   image_aspect_ratio?: number;
+  isFloatAccessory?: boolean;   // 是否浮在别的珠子上的配饰
 }
 
 interface CircleRingConfig {
@@ -70,29 +71,45 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   }, []);
 
   // 计算珠子排列
-  const calculateBeads = useCallback(async(dotsBgImageData: DotImageData[]) => {
-      // 获取图片的宽
-      return calculateBeadArrangementBySize(
-        ringRadius,
-        dotsBgImageData.map(item => ({ ratioBeadWidth: (item.diameter || 10) * (item.image_aspect_ratio || 1), beadDiameter: item.diameter || 10 })),
-        { x: ringRadius, y: ringRadius }
-      );
+  const calculateBeads = useCallback(async (dotsBgImageData: DotImageData[]) => {
+    // 获取图片的宽
+    return calculateBeadArrangementBySize(
+      ringRadius,
+      dotsBgImageData.map(item => {
+        const ratioBeadWidth = item.isFloatAccessory ? 1 : (item.diameter || 10) * (item.image_aspect_ratio || 1);
+        return { ratioBeadWidth, beadDiameter: item.diameter || 10 }
+      }),
+      { x: ringRadius, y: ringRadius }
+    );
   }, [ringRadius]);
 
   // 绘制Canvas内容
   const drawCanvas = useCallback(async (
     dots: string[],
-    beads: any[]
+    beads: any[],
+    dotsBgImageData: DotImageData[]
   ): Promise<string> => {
     return new Promise(async (resolve, reject) => {
       try {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
         ctx.clearRect(0, 0, targetSize, targetSize);
 
+        const finalBeadsData = dots.map((item, index) => {
+          return {
+            image_url: item,
+            isFloatAccessory: dotsBgImageData[index]?.isFloatAccessory,
+            image_aspect_ratio: dotsBgImageData[index]?.image_aspect_ratio,
+            ...beads[index]
+          }
+        })
+
+        const regularBeads = finalBeadsData.filter(item => !item.isFloatAccessory);
+        const floatAccessoryBeads = finalBeadsData.filter(item => item.isFloatAccessory);
+        const sortedBeads = [...regularBeads, ...floatAccessoryBeads];
+
         // 顺序绘制珠子，确保圆形排列正确
         for (let index = 0; index < dots.length; index++) {
-          const dot = dots[index];
-          const { x, y, scale_width, angle, scale_height } = beads[index];
+          const { x, y, scale_width, angle, scale_height, image_url, isFloatAccessory, image_aspect_ratio } = sortedBeads[index];
 
           // 保存当前Canvas状态
           ctx.save();
@@ -105,10 +122,13 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
 
           // 1. 先把网络背景图下载到本地
           const bgImg = canvas.createImage();
-          await new Promise<void>(r => { bgImg.onload = r; bgImg.src = dot; });
+          await new Promise<void>(r => { bgImg.onload = r; bgImg.src = image_url; });
 
-          // 绘制珠子（以珠子中心为原点）
-          ctx.drawImage(bgImg as any, -scale_width, -scale_height, scale_width * 2, scale_height * 2);
+          if (isFloatAccessory) {
+            ctx.drawImage(bgImg as any, -(scale_height * image_aspect_ratio), -scale_height, 2 * scale_height * image_aspect_ratio, scale_height * 2);
+          } else {
+            ctx.drawImage(bgImg as any, -scale_width, -scale_height, scale_width * 2, scale_height * 2);
+          }
 
           // 恢复Canvas状态
           ctx.restore();
@@ -171,7 +191,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
       const beads = await calculateBeads(dotsBgImageData);
 
       // 3. 绘制Canvas
-      const imageUrl = await drawCanvas(processedDots, beads);
+      const imageUrl = await drawCanvas(processedDots, beads, dotsBgImageData);
 
       // 4. 更新结果
       resultsRef.current.set(resultId, {

@@ -1,5 +1,6 @@
 import { computeBraceletLength, calculateBeadArrangementBySize } from "@/utils/cystal-tools";
 import { Bead, BeadWithPosition, Position } from "../../../types/crystal";
+import { SPU_TYPE } from "@/pages-design/custom-design";
 
 /**
  * 生成唯一的珠子key
@@ -46,6 +47,10 @@ export class BeadArrayCalculator {
   }
   // 根据图片比例计算在显示时的绳上宽度
   calculateScaledBeadWidth(bead: Bead): number {
+    // 配件没有宽度，默认1，用于将配饰浮在珠子表面
+    if (bead.spu_type === SPU_TYPE.ACCESSORY && !bead.width) {
+      return 1;
+    }
     return bead.diameter * (bead.image_aspect_ratio || 1);
   }
 

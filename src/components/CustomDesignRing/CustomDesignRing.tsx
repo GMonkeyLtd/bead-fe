@@ -18,6 +18,7 @@ import { LILI_AVATAR_IMAGE_URL } from "@/config";
 import { AccessoryType } from "@/utils/api-session";
 import { AccessoryItem } from "@/utils/api-session";
 import { Bead } from "../../../types/crystal";
+import { SPU_TYPE } from "@/pages-design/custom-design";
 
 interface BeadType {
   name: string;
@@ -186,6 +187,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         diameter: dot.diameter,
         width: dot.width,
         image_aspect_ratio: dot.image_aspect_ratio,
+        isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && !dot.width,
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
         const newImageUrl = imageUrl || "";

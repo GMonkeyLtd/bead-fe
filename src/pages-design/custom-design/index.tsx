@@ -9,7 +9,7 @@ import { usePollDraft } from "@/hooks/usePollDraft";
 import { CUSTOM_RENDER_RATIO } from "@/config/beads";
 import { usePageQuery } from "@/hooks/usePageQuery";
 
-enum SPU_TYPE {
+export enum SPU_TYPE {
   BEAD = 1,
   ACCESSORY = 2,
 }
@@ -81,29 +81,19 @@ const CustomDesign = () => {
     if (skuHasMore) {
       loadMoreSku()
     } else if (skuList?.length > 0 && !skuHasMore) {
-      const beads = skuList?.filter((item) => item.spu_type === SPU_TYPE.BEAD).map((item) => {
-        return {
-          ...item,
-          ...(item.spu_info || {})
-        }
-      });
-      const accessories = skuList?.filter((item) => item.spu_type === SPU_TYPE.ACCESSORY).map((item) => {
-        return {
-          ...item,
-          ...(item.spu_info || {})
-        }
-      })
+      const beads = skuList?.filter((item) => item.spu_type === SPU_TYPE.BEAD);
+      const accessories = skuList?.filter((item) => item.spu_type === SPU_TYPE.ACCESSORY);
       setAllBeadList(beads);
       setAccessoryList(accessories);
 
       // 按id对珠子进行聚合
       const aggregatedBeads = beads.reduce((acc: Record<string, any>, item: any) => {
-        const key = `${item.id}_${item.name}`;
+        const key = `${item.spu_id}_${item.name}`;
         if (acc[key]) {
           acc[key].beadList.push(item);
         } else {
           acc[key] = {
-            id: item.id,
+            id: item.spu_id,
             name: item.name,
             wuxing: item.wuxing || [],
             beadList: [item]
@@ -136,6 +126,7 @@ const CustomDesign = () => {
         }
         return acc;
       }, {});
+      console.log(aggregatedAccessories, 'aggregatedAccessories')
       setAccessoryTypeMap(aggregatedAccessories);
     }
   }, [skuHasMore, skuList]);
@@ -150,18 +141,12 @@ const CustomDesign = () => {
     }
     const oldBeads = _oldBeads?.map((item) => {
       return {
-        id: item.id,
-        width: item.width || 0,
-        diameter: item.diameter,
-        quantity: item.quantity,
+        sku_id: item.sku_id
       };
     });
     const newBeads = _newBeads?.map((item) => {
       return {
-        id: item.id,
-        width: item.width || 0,
-        diameter: item.diameter,  
-        quantity: item.quantity,
+        sku_id: item.sku_id
       };
     });
     return JSON.stringify(oldBeads) !== JSON.stringify(newBeads);
@@ -181,7 +166,7 @@ const CustomDesign = () => {
     // const result = getCustomDesignState();
     // 将result返回的图片预览
     // Taro.previewImage({
-    //   urls: [result.image_url || ''],
+    //   urls: [imageUrl || ''],
     // })
     if (from === 'result' && !checkDeadsDataChanged((draft as any)?.items || [], editedBeads || [])) {
       Taro.redirectTo({
@@ -212,7 +197,7 @@ const CustomDesign = () => {
     })
     apiSession.saveDraft({
       session_id: sessionId,
-      beads,
+      beadItems: beads.map((item) => item.sku_id),
     }).then((res) => {
       const { draft_id, session_id } = res?.data || {};
       if (isSaveAndBack && from === 'chat') {
@@ -251,7 +236,7 @@ const CustomDesign = () => {
         success: function (res) {
           console.log(res, 'res')
           if (res.tapIndex === 1) {
-            onSaveAndBack( beads || []);
+            onSaveAndBack( beads || [] as BeadItem[]);
           } else {
             onDirectBack();
           }
@@ -284,7 +269,6 @@ const CustomDesign = () => {
         beads={(draft?.items || [])?.map((item: any) => {
           return {
             ...item,
-            ...(item.spu_info || {}),
             width: item.width || item.diameter,
           };
         })}
