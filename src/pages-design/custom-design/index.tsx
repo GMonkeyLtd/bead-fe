@@ -183,7 +183,7 @@ const CustomDesign = () => {
     // Taro.previewImage({
     //   urls: [result.image_url || ''],
     // })
-    if (from === 'result' && !checkDeadsDataChanged((draft as any)?.beads || [], editedBeads || [])) {
+    if (from === 'result' && !checkDeadsDataChanged((draft as any)?.items || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}}`,
       });
@@ -198,7 +198,7 @@ const CustomDesign = () => {
       }
       if (!_beadData) {
         // 如果allBeadList中没有找到，则使用draft中的老数据
-        _beadData = draft?.beads?.find((_item) => _item.id == item.id && _item.diameter == item.diameter && _item.width == item.width && _item.quantity == item.quantity) || item;
+        _beadData = draft?.items?.find((_item) => _item.sku_id == item.sku_id && _item.diameter == item.diameter && _item.width == item.width && _item.quantity == item.quantity) || item;
       }
       const newBeadData = {
         ...(_beadData || {}),
@@ -241,7 +241,7 @@ const CustomDesign = () => {
 
   const handleBack = () => {
     const { beads } = getCustomDesignState();
-    const oldBeads = (draft as any)?.beads;
+    const oldBeads = (draft as any)?.items;
 
     if (!checkDeadsDataChanged(oldBeads || [], beads || [])) {
       onDirectBack();
@@ -281,9 +281,10 @@ const CustomDesign = () => {
         accessoryTypeMap={accessoryTypeMap}
         ref={customDesignRef}
         size={300}
-        beads={(draft?.beads || [])?.map((item: any) => {
+        beads={(draft?.items || [])?.map((item: any) => {
           return {
             ...item,
+            ...(item.spu_info || {}),
             width: item.width || item.diameter,
           };
         })}

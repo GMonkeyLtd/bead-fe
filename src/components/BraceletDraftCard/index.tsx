@@ -54,27 +54,27 @@ export const BraceletDraftCard = ({
 
   // 稳定化beads数组，避免不必要的重新渲染
   const beadsForGeneration = useMemo(() => {
-    if (!draft?.beads?.length) return null;
-    return draft?.beads?.map((item) => ({
-      image_url: item.image_url,
+    if (!draft?.items?.length) return null;
+    return draft?.items?.map((item) => ({
+      image_url: item?.spu_info?.image_url,
       diameter: item.diameter,
       width: item.width || item.diameter,
       image_aspect_ratio: item.image_aspect_ratio || 1,
     }));
-  }, [draft?.beads]);
+  }, [draft?.items]);
 
   // 检查是否需要生成图像
   const shouldGenerateImage = useMemo(() => {
     return (
-      draft?.beads?.length &&
-      draft.beads.length > 0 &&
+      draft?.items?.length &&
+      draft.items.length > 0 &&
       shouldLoad &&
       !draft.bracelet_image &&
       !draft.image_url &&
       !isGeneratingRef.current &&
       generatedBraceletImageRef.current !== draft.bracelet_image
     );
-  }, [draft?.beads?.length, draft?.bracelet_image, shouldLoad]);
+  }, [draft?.items?.length, draft?.bracelet_image, shouldLoad]);
 
   // 更新currentDraftRef
   useEffect(() => {
@@ -156,9 +156,10 @@ export const BraceletDraftCard = ({
   // }, [cleanupCanvas]);
 
   const beadsInfo = useMemo(() => {
-    return draft?.beads?.reduce((acc, bead) => {
-      if (!acc.find((b) => b.name === bead.name)) {
-        acc.push(bead);
+    return draft?.items?.reduce((acc, bead) => {
+      const beadInfo = { ...bead, ...(bead?.spu_info || {})};
+      if (!acc.find((b) => b.name === beadInfo.name)) {
+        acc.push(beadInfo);
       }
       return acc;
     }, [] as BeadItem[]);
@@ -183,12 +184,12 @@ export const BraceletDraftCard = ({
     }
     Taro.redirectTo({
       url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${draft?.draft_id
-        }&imageUrl=${encodeURIComponent(draft?.image_url || draft?.bracelet_image)}`,
+        }&imageUrl=${encodeURIComponent(draft?.image_url || draft?.bracelet_image || "")}`,
     });
   };
 
   const handleDiy = () => {
-    if (!draft?.beads || draft?.beads?.length === 0 || byMerchant) {
+    if (!draft?.items || draft?.items?.length === 0 || byMerchant) {
       return;
     }
     Taro.redirectTo({

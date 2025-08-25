@@ -16,7 +16,7 @@ export interface DraftData {
   wishes: string[];
   size: number;
   name: string;
-  beads: BeadItem[];
+  items: BeadItem[];
   created_at: string;
   updated_at: string;
   design_id?: string;

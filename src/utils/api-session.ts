@@ -17,17 +17,30 @@ export interface BaseResponse {
   data: any;
 }
 
-export interface BeadItem {
-  bead_id: string;
-  name: string;
-  image_url: string;
-  color: string;
-  wuxing: string;
-  english: string;
-  diameter: number;
-  funcs: string[];
+export interface SpuInfo {
+  brightness: number;
+  category: string;
+  color: string[];
   func_summary: string;
-  image_aspect_ratio?: number;
+  funcs: string[];
+  id: number;
+  image_url: string;
+  name: string;
+  wuxing: string[];
+}
+
+export interface BeadItem {
+  sku_id: number;
+  spu_id: number;
+  cost_price: number;
+  reference_price: number;
+  quantity: number;
+  diameter: number;
+  width: number;
+  shape: number;
+  spu_type: number;
+  image_aspect_ratio: number;
+  spu_info?: SpuInfo;
 }
 
 export enum AccessoryType {
@@ -62,7 +75,7 @@ export interface BraceletDraft {
   progress: number;
   wuxing: string[];
   size: number;
-  beads: BeadItem[];
+  items: BeadItem[];
   created_at: string;
   name: string;
   description: string;
