@@ -222,7 +222,6 @@ export class BeadPositionManager {
         // 计算新的选中索引
         // let newSelectedIndex = validation.insertIndex;
               
-        // 更新状态
         this.setState({
           beads: newPositions,
           selectedBeadIndex: -1,
@@ -344,7 +343,15 @@ export class BeadPositionManager {
     
     // 如果启用了历史记录且状态发生了变化且不跳过历史记录，记录历史
     if (this.historyManager && !skipHistory && this.hasStateChanged(oldState, this.state)) {
+      // 检查是否在新分支上
+      const wasOnNewBranch = this.historyManager.isOnNewBranch();
+      
       this.historyManager.addHistory(this.state, this.generateHistoryDescription(oldState, this.state));
+      
+      // 如果之前在新分支上，现在创建了新的历史记录，记录日志
+      if (wasOnNewBranch) {
+        console.log('在历史分支上创建了新的历史记录，旧分支已被清理');
+      }
     }
   }
 
@@ -409,6 +416,7 @@ export class BeadPositionManager {
     if (!this.historyManager) return null;
     
     const previousState = this.historyManager.undo();
+    console.log('undo', previousState);
     if (previousState) {
       // 直接设置状态，跳过历史记录
       this.state = { ...previousState };
@@ -457,6 +465,20 @@ export class BeadPositionManager {
       currentIndex: this.historyManager.getCurrentIndex(),
       historyLength: this.historyManager.getHistoryLength(),
     };
+  }
+
+  /**
+   * 获取分支信息
+   */
+  getBranchInfo(): {
+    isOnNewBranch: boolean;
+    remainingSteps: number;
+    totalSteps: number;
+  } {
+    if (!this.historyManager) {
+      return { isOnNewBranch: false, remainingSteps: 0, totalSteps: 0 };
+    }
+    return this.historyManager.getBranchInfo();
   }
 
   /**

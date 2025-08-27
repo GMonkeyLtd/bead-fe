@@ -42,6 +42,7 @@ export class HistoryManager {
 
     this.history.push(entry);
     this.currentIndex = this.history.length - 1;
+    console.log('addHistory', this.history, this.currentIndex);
 
     // 限制历史记录数量
     if (this.history.length > this.maxHistoryLength) {
@@ -54,6 +55,7 @@ export class HistoryManager {
    * 撤销操作
    */
   undo(): BeadPositionManagerState | null {
+    console.log('undo', this.canUndo(), this.currentIndex, this.history);
     if (this.canUndo()) {
       this.currentIndex--;
       return this.cloneState(this.history[this.currentIndex].state);
@@ -127,6 +129,28 @@ export class HistoryManager {
       description: entry.description,
       timestamp: entry.timestamp,
     }));
+  }
+
+  /**
+   * 检查当前是否在新分支上（即是否在历史中间点）
+   */
+  isOnNewBranch(): boolean {
+    return this.currentIndex < this.history.length - 1;
+  }
+
+  /**
+   * 获取当前分支信息
+   */
+  getBranchInfo(): {
+    isOnNewBranch: boolean;
+    remainingSteps: number;
+    totalSteps: number;
+  } {
+    return {
+      isOnNewBranch: this.isOnNewBranch(),
+      remainingSteps: this.history.length - 1 - this.currentIndex,
+      totalSteps: this.history.length,
+    };
   }
 
   /**

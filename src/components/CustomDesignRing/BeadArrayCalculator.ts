@@ -556,7 +556,7 @@ export class BeadArrayCalculator {
   /**
    * 重新计算已有Position数组的坐标（保持其他属性不变）
    */
-  recalculatePositions(positions: BeadWithPosition[]): BeadWithPosition[] {
+  recalculatePositions(positions: Position[]): Position[] {
     if (!positions.length) return [];
     console.log(positions, 'recalculatePositions')
 
@@ -573,10 +573,10 @@ export class BeadArrayCalculator {
     return positions.map((position, index) => {
       const newPosition = newCoordinates[index];
       return {
-      ...position,
-      ...newPosition,
-      uniqueKey: position.uniqueKey || generateUniqueBeadKey(index)
-    }});
+        ...position,
+        ...newPosition,
+      };
+    });
   }
 
   /**
