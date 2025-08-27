@@ -203,15 +203,13 @@ const CustomDesign = () => {
       return newBeadData;
     })
     const imageBase64 = await imageToBase64(imageUrl, true, false, undefined, 'png');
-    // Taro.redirectTo({
-    //   url: `${pageUrls.result}?designBackendId=57&from=chat&sessionId=b902e64bed277ed&originImageUrl=${encodeURIComponent(imageUrl || "")}`,
-    // });
+
 
     apiSession.saveDraft({
       session_id: sessionId,
       beadItems: beads.map((item) => item.sku_id),
       image_base64: imageBase64 as string,
-    }, { showLoading: isSaveAndBack, loadingText: isSaveAndBack ? '保存中...' : '' }).then((res) => {
+    }, { showLoading: true, loadingText: '处理中' }).then((res) => {
       const { draft_id, session_id } = res?.data || {};
       if (isSaveAndBack && from === 'chat') {
         backToChatDesign(session_id);

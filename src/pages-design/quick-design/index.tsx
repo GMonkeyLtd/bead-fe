@@ -12,7 +12,7 @@ import { CancelToken } from "@/utils/request";
 import sessionApi from "@/utils/api-session";
 
 const predictedTimeText = (
-  <View className="quick-design-loading-content">渲染过程预计等待 20s</View>
+  <View className="quick-design-loading-content">设计过程预计等待 20s</View>
 );
 
 const QuickDesign = () => {
@@ -259,7 +259,7 @@ const QuickDesign = () => {
               />
             </View>
             <View className="quick-design-loading-title">
-              定制中
+              场景设计中
               <View className="quick-design-loading-title-dot">
                 <View className="quick-design-loading-title-dot-item">...</View>
               </View>

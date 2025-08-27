@@ -77,7 +77,7 @@ const Result = () => {
       spec
     } = info;
     setBeadsInfo(info.items);
-    // setImageUrl(image_url);
+    setImageUrl(image_url);
     setBraceletName(name);
     setBeadDescriptions(recommend_beads.filter((item) => !!item.wuxing));
     setDesignNo(design_id);
@@ -296,7 +296,7 @@ const Result = () => {
       style={{
         height: "100vh",
         paddingTop: `-${navBarTop}px`,
-        "--bg-image": `url(${imageUrl || originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
+        "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
       }}
     >
       <AppHeader isWhite onBack={() => {
