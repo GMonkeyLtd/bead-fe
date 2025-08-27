@@ -7,15 +7,15 @@ import historyBackActiveIcon from '@/assets/icons/history-back-active.svg';
 import historyForwardActiveIcon from '@/assets/icons/history-forward-active.svg';
 
 interface HistoryOperationsProps {
-  historyLenght: number;
-  currentIndex: number;
+  canUndo: boolean;
+  canRedo: boolean;
   onHistoryBack: () => void;
   onHistoryForward: () => void;
 }
 
 const HistoryOperations: React.FC<HistoryOperationsProps> = ({
-  historyLenght,
-  currentIndex,
+  canUndo,
+  canRedo,
   onHistoryBack,
   onHistoryForward,
 }) => {
@@ -23,11 +23,11 @@ const HistoryOperations: React.FC<HistoryOperationsProps> = ({
 
   return (
     <View className="history-operation-container" onClick={e => e.stopPropagation()}>
-        <View className="history-operation-item">
-            <Image src={currentIndex === 0 ? historyBackInactiveIcon : historyBackActiveIcon} style={{ width: '15px', height: '12px' }} />
+        <View className="history-operation-item" onTouchStart={canUndo ? onHistoryBack : undefined}>
+            <Image src={canUndo ? historyBackActiveIcon : historyBackInactiveIcon} style={{ width: '15px', height: '12px' }} />
         </View>
-        <View className="history-operation-item">
-            <Image src={currentIndex === historyLenght - 1 ? historyForwardInactiveIcon : historyForwardActiveIcon} style={{ width: '15px', height: '12px' }} />
+        <View className="history-operation-item" onTouchStart={canRedo ? onHistoryForward : undefined}>
+            <Image src={canRedo ? historyForwardActiveIcon : historyForwardInactiveIcon} style={{ width: '15px', height: '12px' }} />
         </View>
     </View>
   );

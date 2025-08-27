@@ -142,6 +142,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       targetRadius: canvasSize / 2 * 0.7,
       maxWristSize: 24,
       minWristSize: 8,
+      enableHistory: true,
+      maxHistoryLength: 50,
     };
 
     positionManagerRef.current = new BeadPositionManager(config);
@@ -172,7 +174,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
     const updateState = () => {
       const state = positionManagerRef.current?.getState();
-      if (state) {
+      if (state && positionManagerRef.current) {
         setPositionManagerState(state);
       }
     };
@@ -241,6 +243,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,
+        width: bead.diameter, // 添加必需的width属性
+        id: bead.id || `bead_${Date.now()}`, // 确保id不为undefined
       };
 
       if (positionManagerState.selectedBeadIndex === -1) {
@@ -398,6 +402,42 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     }
   }, []);
 
+  // 处理历史记录回退
+  const handleHistoryBack = useCallback(async () => {
+    if (!positionManagerRef.current) return;
+
+    try {
+      const previousState = positionManagerRef.current.undo();
+      if (previousState) {
+        setPositionManagerState(previousState);
+      }
+    } catch (error) {
+      Taro.showToast({
+        title: "撤销失败",
+        icon: "none",
+        duration: 2000,
+      });
+    }
+  }, []);
+
+  // 处理历史记录前进
+  const handleHistoryForward = useCallback(async () => {
+    if (!positionManagerRef.current) return;
+
+    try {
+      const nextState = positionManagerRef.current.redo();
+      if (nextState) {
+        setPositionManagerState(nextState);
+      }
+    } catch (error) {
+      Taro.showToast({
+        title: "重做失败",
+        icon: "none",
+        duration: 2000,
+      });
+    }
+  }, []);
+
   // 处理插入位置预览
   const handlePreviewInsertPosition = useCallback((beadIndex: number, newX: number, newY: number) => {
     if (!positionManagerRef.current) {
@@ -415,6 +455,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       }
     };
   }, []);
+
+  console.log('positionManagerState', positionManagerState.);
 
   return (
     <View className="custom-design-ring-container">
@@ -494,10 +536,10 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             onDelete={handleDelete}
           />
           <HistoryOperations
-            historyLenght={10}
-            currentIndex={0}
-            onHistoryBack={() => console.log('history back')}
-            onHistoryForward={() => console.log('history forward')}
+            canUndo={positionManagerRef.current?.canUndo() || false}
+            canRedo={positionManagerRef.current?.canRedo() || false}
+            onHistoryBack={handleHistoryBack}
+            onHistoryForward={handleHistoryForward}
           />
         </View>
       </View>

@@ -1,6 +1,7 @@
 import { BeadArrayCalculator } from "./BeadArrayCalculator";
 import { Bead, Position } from "../../../types/crystal";
 import { ImageCacheManager } from "@/utils/image-cache";
+import { HistoryManager } from "./HistoryManager";
 
 export interface BeadPositionManagerConfig {
   canvasSize: number;
@@ -9,6 +10,8 @@ export interface BeadPositionManagerConfig {
   targetRadius?: number;
   maxWristSize: number;
   minWristSize: number;
+  enableHistory?: boolean;
+  maxHistoryLength?: number;
 }
 
 export interface BeadPositionManagerState {
@@ -28,6 +31,7 @@ export class BeadPositionManager {
   private imageProcessCache: Map<string, string>;
   private positionCache: Map<string, Position[]>;
   private isProcessing: boolean = false;
+  private historyManager: HistoryManager | null = null;
 
   constructor(config: BeadPositionManagerConfig) {
     this.calculator = new BeadArrayCalculator(config);
@@ -39,6 +43,13 @@ export class BeadPositionManager {
     };
     this.imageProcessCache = new Map();
     this.positionCache = new Map();
+    
+    // 初始化历史记录管理器
+    if (config.enableHistory !== false) {
+      this.historyManager = new HistoryManager({
+        maxHistoryLength: config.maxHistoryLength || 50,
+      });
+    }
   }
 
   /**
@@ -51,11 +62,11 @@ export class BeadPositionManager {
   /**
    * 设置珠子数组
    */
-  async setBeads(beads: Bead[]): Promise<void> {
+  async setBeads(beads: Bead[], skipHistory: boolean = false): Promise<void> {
     if (this.isProcessing) return;
 
     this.isProcessing = true;
-    this.setState({ beadStatus: "processing" });
+    this.setState({ beadStatus: "processing" }, skipHistory);
 
     try {
       // 处理图片
@@ -73,10 +84,10 @@ export class BeadPositionManager {
         beads: beadsWithPosition,
         predictedLength,
         beadStatus: "success",
-      });
+      }, skipHistory);
     } catch (error) {
       console.error("设置珠子失败:", error);
-      this.setState({ beadStatus: "error" });
+      this.setState({ beadStatus: "error" }, skipHistory);
     } finally {
       this.isProcessing = false;
     }
@@ -112,7 +123,7 @@ export class BeadPositionManager {
       this.state.beads,
       this.state.selectedBeadIndex
     );
-    this.setState({ selectedBeadIndex: newSelectedIndex });
+    this.setState({ selectedBeadIndex: newSelectedIndex }, true); // 跳过历史记录
     await this.setBeads(newBeads);
   }
 
@@ -140,7 +151,7 @@ export class BeadPositionManager {
         newSelectedIndex = (this.state.selectedBeadIndex - 1 + this.state.beads.length) % this.state.beads.length;
       }
 
-      this.setState({ selectedBeadIndex: newSelectedIndex });
+      this.setState({ selectedBeadIndex: newSelectedIndex }, true); // 跳过历史记录
       await this.setBeads(newBeads);
     }
   }
@@ -150,7 +161,7 @@ export class BeadPositionManager {
    */
   selectBead(index: number): void {
     if (index >= 0 && index < this.state.beads.length) {
-      this.setState({ selectedBeadIndex: index });
+      this.setState({ selectedBeadIndex: index }, true); // 跳过历史记录
     }
   }
 
@@ -158,7 +169,7 @@ export class BeadPositionManager {
    * 取消选择珠子
    */
   deselectBead(): void {
-    this.setState({ selectedBeadIndex: -1 });
+    this.setState({ selectedBeadIndex: -1 }, true); // 跳过历史记录
   }
 
   /**
@@ -175,7 +186,7 @@ export class BeadPositionManager {
       this.state.selectedBeadIndex
     );
     // 替换选中索引
-    this.setState({ selectedBeadIndex: -1 });
+    this.setState({ selectedBeadIndex: -1 }, true); // 跳过历史记录
     await this.setBeads(newBeads);
   }
 
@@ -327,8 +338,55 @@ export class BeadPositionManager {
   /**
    * 设置状态
    */
-  private setState(partialState: Partial<BeadPositionManagerState>): void {
+  private setState(partialState: Partial<BeadPositionManagerState>, skipHistory: boolean = false): void {
+    const oldState = { ...this.state };
     this.state = { ...this.state, ...partialState };
+    
+    // 如果启用了历史记录且状态发生了变化且不跳过历史记录，记录历史
+    if (this.historyManager && !skipHistory && this.hasStateChanged(oldState, this.state)) {
+      this.historyManager.addHistory(this.state, this.generateHistoryDescription(oldState, this.state));
+    }
+  }
+
+  /**
+   * 检查状态是否发生变化
+   */
+  private hasStateChanged(oldState: BeadPositionManagerState, newState: BeadPositionManagerState): boolean {
+    // 检查珠子数组是否发生变化
+    if (oldState.beads.length !== newState.beads.length) return true;
+    
+    // 检查珠子内容是否发生变化
+    for (let i = 0; i < oldState.beads.length; i++) {
+      if (oldState.beads[i].id !== newState.beads[i].id || 
+          oldState.beads[i].diameter !== newState.beads[i].diameter) {
+        return true;
+      }
+    }
+    
+    // 检查其他状态是否发生变化
+    return oldState.selectedBeadIndex !== newState.selectedBeadIndex ||
+           oldState.predictedLength !== newState.predictedLength ||
+           oldState.beadStatus !== newState.beadStatus;
+  }
+
+  /**
+   * 生成历史记录描述
+   */
+  private generateHistoryDescription(oldState: BeadPositionManagerState, newState: BeadPositionManagerState): string {
+    if (oldState.beads.length < newState.beads.length) {
+      return `添加珠子 (${newState.beads.length}个)`;
+    } else if (oldState.beads.length > newState.beads.length) {
+      return `删除珠子 (${newState.beads.length}个)`;
+    } else if (oldState.beads.length > 0 && newState.beads.length > 0) {
+      // 检查是否有珠子被替换
+      for (let i = 0; i < oldState.beads.length; i++) {
+        if (oldState.beads[i].id !== newState.beads[i].id) {
+          return `替换珠子`;
+        }
+      }
+      return `移动珠子`;
+    }
+    return `修改手串`;
   }
 
   /**
@@ -338,5 +396,75 @@ export class BeadPositionManager {
     this.imageProcessCache.clear();
     this.positionCache.clear();
     this.isProcessing = false;
+  }
+
+  /**
+   * 历史记录相关方法
+   */
+  
+  /**
+   * 撤销操作
+   */
+  undo(): BeadPositionManagerState | null {
+    if (!this.historyManager) return null;
+    
+    const previousState = this.historyManager.undo();
+    if (previousState) {
+      // 直接设置状态，跳过历史记录
+      this.state = { ...previousState };
+      return this.state;
+    }
+    return null;
+  }
+
+  /**
+   * 重做操作
+   */
+  redo(): BeadPositionManagerState | null {
+    if (!this.historyManager) return null;
+    
+    const nextState = this.historyManager.redo();
+    if (nextState) {
+      // 直接设置状态，跳过历史记录
+      this.state = { ...nextState };
+      return this.state;
+    }
+    return null;
+  }
+
+  /**
+   * 检查是否可以撤销
+   */
+  canUndo(): boolean {
+    return this.historyManager ? this.historyManager.canUndo() : false;
+  }
+
+  /**
+   * 检查是否可以重做
+   */
+  canRedo(): boolean {
+    return this.historyManager ? this.historyManager.canRedo() : false;
+  }
+
+  /**
+   * 获取历史记录信息
+   */
+  getHistoryInfo(): { currentIndex: number; historyLength: number } {
+    if (!this.historyManager) {
+      return { currentIndex: -1, historyLength: 0 };
+    }
+    return {
+      currentIndex: this.historyManager.getCurrentIndex(),
+      historyLength: this.historyManager.getHistoryLength(),
+    };
+  }
+
+  /**
+   * 清空历史记录
+   */
+  clearHistory(): void {
+    if (this.historyManager) {
+      this.historyManager.clear();
+    }
   }
 }
