@@ -150,7 +150,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
     try {
       if (positionManagerRef.current) {
-        await positionManagerRef.current.setBeads(beads, true);
+        await positionManagerRef.current.setBeads(beads);
         const state = positionManagerRef.current.getState();
         if (state) {
           setPositionManagerState(state);
@@ -455,6 +455,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       }
     };
   }, []);
+
 
   return (
     <View className="custom-design-ring-container">

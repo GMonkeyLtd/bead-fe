@@ -258,7 +258,7 @@ export class BeadPositionManager {
         beads: originalBeads,
         selectedBeadIndex: originalSelectedIndex,
         beadStatus: "error",
-      });
+      }, true);
 
       console.error("拖拽处理失败:", error);
       return {
@@ -361,19 +361,14 @@ export class BeadPositionManager {
   private hasStateChanged(oldState: BeadPositionManagerState, newState: BeadPositionManagerState): boolean {
     // 检查珠子数组是否发生变化
     if (oldState.beads.length !== newState.beads.length) return true;
-    
     // 检查珠子内容是否发生变化
     for (let i = 0; i < oldState.beads.length; i++) {
-      if (oldState.beads[i].id !== newState.beads[i].id || 
-          oldState.beads[i].diameter !== newState.beads[i].diameter) {
+      if (oldState.beads[i].sku_id !== newState.beads[i].sku_id) {
         return true;
       }
     }
     
-    // 检查其他状态是否发生变化
-    return oldState.selectedBeadIndex !== newState.selectedBeadIndex ||
-           oldState.predictedLength !== newState.predictedLength ||
-           oldState.beadStatus !== newState.beadStatus;
+    return false;
   }
 
   /**
@@ -416,7 +411,6 @@ export class BeadPositionManager {
     if (!this.historyManager) return null;
     
     const previousState = this.historyManager.undo();
-    console.log('undo', previousState);
     if (previousState) {
       // 直接设置状态，跳过历史记录
       this.state = { ...previousState };

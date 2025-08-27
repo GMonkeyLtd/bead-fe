@@ -24,10 +24,10 @@ const HistoryOperations: React.FC<HistoryOperationsProps> = ({
   return (
     <View className="history-operation-container" onClick={e => e.stopPropagation()}>
         <View className="history-operation-item" onTouchStart={canUndo ? onHistoryBack : undefined}>
-            <Image src={canUndo ? historyBackActiveIcon : historyBackInactiveIcon} style={{ width: '15px', height: '12px' }} />
+            <Image src={canUndo ? historyBackActiveIcon : historyBackInactiveIcon} style={{ width: '20px', height: '20px' }} />
         </View>
         <View className="history-operation-item" onTouchStart={canRedo ? onHistoryForward : undefined}>
-            <Image src={canRedo ? historyForwardActiveIcon : historyForwardInactiveIcon} style={{ width: '15px', height: '12px' }} />
+            <Image src={canRedo ? historyForwardActiveIcon : historyForwardInactiveIcon} style={{ width: '20px', height: '20px' }} />
         </View>
     </View>
   );

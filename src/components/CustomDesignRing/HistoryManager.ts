@@ -42,7 +42,6 @@ export class HistoryManager {
 
     this.history.push(entry);
     this.currentIndex = this.history.length - 1;
-    console.log('addHistory', this.history, this.currentIndex);
 
     // 限制历史记录数量
     if (this.history.length > this.maxHistoryLength) {
@@ -55,7 +54,6 @@ export class HistoryManager {
    * 撤销操作
    */
   undo(): BeadPositionManagerState | null {
-    console.log('undo', this.canUndo(), this.currentIndex, this.history);
     if (this.canUndo()) {
       this.currentIndex--;
       return this.cloneState(this.history[this.currentIndex].state);
