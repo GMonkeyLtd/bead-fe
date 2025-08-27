@@ -1,0 +1,13 @@
+.history-operation-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+}
+
+.history-operation-item {
+  width: 20px;
+  height: 20px;
+}

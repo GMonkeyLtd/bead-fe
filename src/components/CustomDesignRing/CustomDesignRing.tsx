@@ -20,6 +20,7 @@ import { AccessoryItem } from "@/utils/api-session";
 import { Bead } from "../../../types/crystal";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 import { imageToBase64 } from "@/utils/imageUtils";
+import HistoryOperations from "./HistoryOperations";
 
 interface BeadType {
   name: string;
@@ -427,7 +428,10 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             />
           </View>
           <View className="custom-design-ring-tip-content">
-            {`你的喜用神为【${wuxing?.join('')}】`}
+            <View>{`你的喜用神为`}</View>
+            <View className="custom-design-ring-tip-tag">
+              {wuxing?.join('')}
+            </View>
           </View>
         </View>
         <View
@@ -488,6 +492,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             onClockwiseMove={handleClockwiseMove}
             onCounterclockwiseMove={handleCounterclockwiseMove}
             onDelete={handleDelete}
+          />
+          <HistoryOperations
+            historyLenght={10}
+            currentIndex={0}
+            onHistoryBack={() => console.log('history back')}
+            onHistoryForward={() => console.log('history forward')}
           />
         </View>
       </View>
