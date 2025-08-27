@@ -123,7 +123,7 @@ export async function imageToBase64(
           resolve(base64);
         },
         fail: (err) => {
-          console.error("图片转 Base64 失败:", err);
+          console.error("finalFilePath:", finalFilePath, "filePath", filePath, "图片转 Base64 失败:", err);
           reject(err);
         },
       });

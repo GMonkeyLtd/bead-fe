@@ -140,7 +140,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       renderRatio,
       targetRadius: canvasSize / 2 * 0.7,
       maxWristSize: 24,
-      minWristSize: 12,
+      minWristSize: 8,
     };
 
     positionManagerRef.current = new BeadPositionManager(config);

@@ -349,6 +349,7 @@ export default {
     params: {
       session_id: string;
       beadItems: number[];
+      image_base64: string;
     },
     config?: ApiConfig
   ) => {
@@ -356,6 +357,7 @@ export default {
       `/user/sessions/${params.session_id}/drafts/diy`,
       {
         items: params.beadItems,
+        image_base64: params.image_base64,
       },
       {
         cancelToken: config?.cancelToken,

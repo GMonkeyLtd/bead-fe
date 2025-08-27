@@ -8,6 +8,7 @@ import apiSession, { AccessoryItem, BeadItem } from "@/utils/api-session";
 import { usePollDraft } from "@/hooks/usePollDraft";
 import { CUSTOM_RENDER_RATIO } from "@/config/beads";
 import { usePageQuery } from "@/hooks/usePageQuery";
+import { imageToBase64 } from "@/utils/imageUtils";
 
 export enum SPU_TYPE {
   BEAD = 1,
@@ -126,7 +127,6 @@ const CustomDesign = () => {
         }
         return acc;
       }, {});
-      console.log(aggregatedAccessories, 'aggregatedAccessories')
       setAccessoryTypeMap(aggregatedAccessories);
     }
   }, [skuHasMore, skuList]);
@@ -158,7 +158,7 @@ const CustomDesign = () => {
     });
   }
 
-  const onCreate = (imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
+  const onCreate = async(imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
 
     if ((!isSaveAndBack && !imageUrl) || !sessionId || !draftId) {
       return;
@@ -168,6 +168,13 @@ const CustomDesign = () => {
     // Taro.previewImage({
     //   urls: [imageUrl || ''],
     // })
+    // 保存到相册
+    // Taro.saveImageToPhotosAlbum({
+    //   filePath: imageUrl,
+    //   success: () => {
+    //     console.log('图片保存成功');
+    //   },
+    // });
     if (from === 'result' && !checkDeadsDataChanged((draft as any)?.items || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}}`,
@@ -195,10 +202,16 @@ const CustomDesign = () => {
       delete newBeadData.uniqueKey;
       return newBeadData;
     })
+    const imageBase64 = await imageToBase64(imageUrl, true, false, undefined, 'png');
+    // Taro.redirectTo({
+    //   url: `${pageUrls.result}?designBackendId=57&from=chat&sessionId=b902e64bed277ed&originImageUrl=${encodeURIComponent(imageUrl || "")}`,
+    // });
+
     apiSession.saveDraft({
       session_id: sessionId,
       beadItems: beads.map((item) => item.sku_id),
-    }).then((res) => {
+      image_base64: imageBase64 as string,
+    }, { showLoading: isSaveAndBack, loadingText: isSaveAndBack ? '保存中...' : '' }).then((res) => {
       const { draft_id, session_id } = res?.data || {};
       if (isSaveAndBack && from === 'chat') {
         backToChatDesign(session_id);
@@ -210,8 +223,8 @@ const CustomDesign = () => {
     })
   };
 
-  const onSaveAndBack = (beads: BeadItem[]) => {
-    onCreate('', beads, true);
+  const onSaveAndBack = (beads: BeadItem[], imageUrl: string) => {
+    onCreate(imageUrl, beads, true);
   }
 
   const onDirectBack = () => {
@@ -224,8 +237,9 @@ const CustomDesign = () => {
     }
   }
 
-  const handleBack = () => {
+  const handleBack = async() => {
     const { beads } = getCustomDesignState();
+    const imageUrl = await customDesignRef.current?.generateBraceletImage();
     const oldBeads = (draft as any)?.items;
 
     if (!checkDeadsDataChanged(oldBeads || [], beads || [])) {
@@ -236,7 +250,7 @@ const CustomDesign = () => {
         success: function (res) {
           console.log(res, 'res')
           if (res.tapIndex === 1) {
-            onSaveAndBack( beads || [] as BeadItem[]);
+            onSaveAndBack( beads || [] as BeadItem[], imageUrl);
           } else {
             onDirectBack();
           }

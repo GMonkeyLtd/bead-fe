@@ -149,6 +149,7 @@ export const CircleRingImage = ({
           }}
           className={rotate ? "circle-image-rotate" : ""}
           onLoad={handleImageLoad}
+          lazyLoad={true}
         />
       ) : (
         <View

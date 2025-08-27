@@ -95,7 +95,7 @@ export const BraceletDraftCard = ({
   }, [sessionId, draftId, draftData, byMerchant]);
 
   const uploadDraftImage = async (braceletImage: string) => {
-    const imageBase64 = await imageToBase64(braceletImage, false);
+    const imageBase64 = await imageToBase64(braceletImage, true, false, undefined, 'png');
     apiSession.uploadDraftImage({
       session_id: sessionId || "",
       draft_id: draft?.draft_id || "",

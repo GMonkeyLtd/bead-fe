@@ -141,25 +141,21 @@ const QuickDesign = () => {
         showLoading: false,
       }
     );
-    if (res.data?.progress === 100) {
-      Taro.redirectTo({
-        url: `${pageUrls.result}?designBackendId=${res.data?.design_id}&from=chat&sessionId=${sessionId}`,
-      });
-      // processDesignData({
-      //   image_urls: [res.data?.image_url],
-      //   bracelet_name: res.data?.Info?.Name,
-      //   recommendation_text: res.data?.Info?.Description,
-      //   bead_ids_deduplication: res.data?.Info?.RecommendBeads,
-      //   design_id: res.data?.DesignId,
-      // });
-    } else {
-      if (pollTimeRef.current) {
-        clearTimeout(pollTimeRef.current);
-      }
-      pollTimeRef.current = setTimeout(() => {
-        pollDesignProgress(sessionId, draftId, designId);
-      }, 3000);
-    }
+    Taro.redirectTo({
+      url: `${pageUrls.result}?designBackendId=${res.data?.design_id}&from=chat&sessionId=${sessionId}&originImageUrl=${imageUrl}`,
+    });
+    // if (res.data?.progress === 100) {
+    //   Taro.redirectTo({
+    //     url: `${pageUrls.result}?designBackendId=${res.data?.design_id}&from=chat&sessionId=${sessionId}`,
+    //   });
+    // } else {
+    //   if (pollTimeRef.current) {
+    //     clearTimeout(pollTimeRef.current);
+    //   }
+    //   pollTimeRef.current = setTimeout(() => {
+    //     pollDesignProgress(sessionId, draftId, designId);
+    //   }, 3000);
+    // }
   };
 
   const quickDesignByDraft = async (sessionId, draftId, imageUrl) => {

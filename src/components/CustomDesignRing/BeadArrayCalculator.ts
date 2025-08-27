@@ -43,7 +43,7 @@ export class BeadArrayCalculator {
       diameter: bead.diameter,
       width: bead.width,
     })) as any; // 临时类型断言，避免类型不匹配
-    return computeBraceletLength(beadsForCalculation, "width");
+    return computeBraceletLength(beadsForCalculation);
   }
   // 根据图片比例计算在显示时的绳上宽度
   calculateScaledBeadWidth(bead: Bead): number {
@@ -217,12 +217,12 @@ export class BeadArrayCalculator {
     //   };
     // }
 
-    // if (newLength < this.config.minWristSize && type === 'remove') {
-    //   return {
-    //     isValid: false,
-    //     message: "哎呀，珠子有点少啦！一般手围建议不少于12cm噢。"
-    //   };
-    // }
+    if (newLength < this.config.minWristSize && type === 'remove') {
+      return {
+        isValid: false,
+        message: "哎呀，珠子有点少啦！一般手围建议不少于12cm噢。"
+      };
+    }
 
     return { isValid: true };
   }

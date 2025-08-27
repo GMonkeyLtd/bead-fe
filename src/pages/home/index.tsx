@@ -147,7 +147,7 @@ const Home = () => {
                       if (!lastSessionId) {
                         startDesign();
                       } else {
-                        Taro.redirectTo({
+                        Taro.navigateTo({
                           url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
                         });
                       }
