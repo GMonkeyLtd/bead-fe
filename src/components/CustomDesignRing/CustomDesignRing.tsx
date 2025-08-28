@@ -243,7 +243,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,
-        width: bead.diameter, // 添加必需的width属性
         id: bead.id || `bead_${Date.now()}`, // 确保id不为undefined
       };
 
@@ -456,6 +455,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     };
   }, []);
 
+  // console.log(accessoryTypeMap, 'accessoryTypeMap')
 
   return (
     <View className="custom-design-ring-container">

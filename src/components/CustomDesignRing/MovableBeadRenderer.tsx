@@ -89,54 +89,69 @@ const Bead = React.memo(
     return (
       <View key={bead.uniqueKey} className="bead-wrapper">
         {/* 可拖拽的珠子 */}
-        <MovableView
-          className={`bead-movable ${isSelected ? "selected" : notSelected ? "not-selected" : ""
-            } ${dragState.isDragging && dragState.dragBeadIndex === index
-              ? "dragging"
-              : ""
-            }`}
-          // 统一使用x和y属性定位，避免与style冲突
-          x={bead.x - bead.scale_width}
-          y={bead.y - bead.scale_height}
-          style={{
-            width: 2 * bead.scale_width,
-            height: 2 * bead.scale_height,
-            // @ts-ignore
-            '--rotation': `rotate(${bead.angle + Math.PI / 2}rad)`,
-            ...(isFloatAccessory ? {
+      <MovableView
+        className={`bead-movable ${isSelected ? "selected" : notSelected ? "not-selected" : ""
+          } ${dragState.isDragging && dragState.dragBeadIndex === index
+            ? "dragging"
+            : ""
+          }`}
+        // 统一使用x和y属性定位，避免与style冲突
+        x={bead.x - bead.scale_width}
+        y={bead.y - bead.scale_height}
+        style={{
+          width: 2 * bead.scale_width,
+          height: 2 * bead.scale_height,
+          // @ts-ignore
+          '--rotation': `rotate(${bead.angle + Math.PI / 2}rad)`,
+          ...(isFloatAccessory ? {
+            position: 'absolute',
+            zIndex: 100,
+          } : {}),
+        }}
+        direction="all"
+        inertia={false}
+        outOfBounds={false}
+        onTouchStart={(e) => handleDragStart(e, index)}
+        onChange={(e) => handleDragMove(e, index)}
+        onTouchEnd={(e) => handleDragEnd(e, index)}
+        onTouchCancel={(e) => handleDragEnd(e, index)}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {bead.image_url && (
+          <Image
+            src={bead.image_url}
+            className="movable-bead-image"
+            style={{
+              ...(isFloatAccessory ? {
+                position: 'absolute',
+                zIndex: 100
+              } : {}),
+              width: isFloatAccessory ? bead.scale_height * bead.image_aspect_ratio * 2 : bead.scale_width * 2,
+              height: '100%',
+              transform: "rotate(" + (bead.angle + Math.PI / 2) + "rad)",
+            }}
+          />
+        )}
+        {/* 珠子高光点 - 带渐变效果 */}
+        {bead.image_url && (
+          <View
+            className="bead-highlight"
+            style={{
               position: 'absolute',
-              zIndex: 100,
-            } : {}),
-          }}
-          direction="all"
-          inertia={false}
-          outOfBounds={false}
-          onTouchStart={(e) => handleDragStart(e, index)}
-          onChange={(e) => handleDragMove(e, index)}
-          onTouchEnd={(e) => handleDragEnd(e, index)}
-          onTouchCancel={(e) => handleDragEnd(e, index)}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          {bead.image_url && (
-            <Image
-              src={bead.image_url}
-              className="movable-bead-image"
-              style={{
-                // transformOrigin: "center center",
-                ...(isFloatAccessory ? {
-                  position: 'absolute',
-                  zIndex: 100
-                } : {}),
-                width: isFloatAccessory ? bead.scale_height * bead.image_aspect_ratio * 2 : bead.scale_width * 2,
-                height: '100%',
-                transform: "rotate(" + (bead.angle + Math.PI / 2) + "rad)",
-              }}
-            // mode="aspectFit"
-            />
-          )}
-        </MovableView>
+              left: '25%', // 偏左位置
+              top: '25%',  // 偏上位置
+              width: `${2 * bead.scale_width * 0.2}px`, // 固定尺寸便于测试
+              height: `${2 * bead.scale_height * 0.1}px`,
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              zIndex: 999, // 非常高的层级确保显示
+              transform: "rotate(-45deg)",
+            }}
+          />
+        )}
+      </MovableView>
       </View>
     );
   },
@@ -460,7 +475,46 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
           style={movableAreaStyle}
           onClick={onBeadDeselect}
         >
-          {/* 绘制珠子 */}
+          {/* 渲染所有珠子的阴影层 - 确保在最底层 */}
+          {beadPositions.map((bead, index) => {
+            // 如果当前珠子正在被拖拽，使用拖拽状态中的位置
+            let shadowX = bead.x;
+            let shadowY = bead.y;
+
+            if (dragState.isDragging && dragState.dragBeadIndex === index) {
+              shadowX = dragState.currentX;
+              shadowY = dragState.currentY;
+            }
+
+            return bead.image_url ? (
+              <View
+                key={`shadow-${bead.uniqueKey}`}
+                className="bead-shadow-layer"
+                style={{
+                  position: 'absolute',
+                  left: shadowX - bead.scale_width + 4, // 阴影偏移 - 额外的边距用于模糊扩展
+                  top: shadowY - bead.scale_height + 4,
+                  width: 2 * bead.scale_width, // 增加更多尺寸以容纳模糊边界
+                  height: 2 * bead.scale_height,
+                  zIndex: -1, // 阴影层在最底部
+                  pointerEvents: 'none', // 阴影不拦截事件
+                  filter: 'blur(4px)',
+                }}
+              >
+                <Image
+                  src={bead.image_url}
+                  className="movable-bead-image-shadow"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    transform: `rotate(${bead.angle + Math.PI / 2}rad)`, // 稍微放大以确保模糊边界不被裁切
+                  }}
+                />
+              </View>
+            ) : null;
+          })}
+
+          {/* 绘制珠子主体层 */}
           {beadPositions.map((bead, index) => (
             <Bead
               key={bead.uniqueKey}

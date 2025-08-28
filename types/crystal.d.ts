@@ -8,6 +8,7 @@ export interface Position extends BeadItem {
     scale_height: number;
     scale_width: number;
     index: number;
+    uniqueKey: string;
 }
 
 export interface BeadWithPosition extends BeadItem {
