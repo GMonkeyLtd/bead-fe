@@ -209,7 +209,7 @@ const CustomDesign = () => {
       session_id: sessionId,
       beadItems: beads.map((item) => item.sku_id),
       image_base64: imageBase64 as string,
-    }, { showLoading: true, loadingText: '处理中' }).then((res) => {
+    }, { showLoading: true, loadingText: '方案上传中...' }).then((res) => {
       const { draft_id, session_id } = res?.data || {};
       if (isSaveAndBack && from === 'chat') {
         backToChatDesign(session_id);
@@ -277,7 +277,7 @@ const CustomDesign = () => {
         wuxing={(draft as any)?.wuxing || []}
         accessoryTypeMap={accessoryTypeMap}
         ref={customDesignRef}
-        size={280}
+        size={300}
         beads={(draft?.items || [])?.map((item: any) => {
           return {
             ...item,
