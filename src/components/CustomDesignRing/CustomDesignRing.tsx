@@ -456,6 +456,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   }, []);
 
   // console.log(accessoryTypeMap, 'accessoryTypeMap')
+  console.log(accessoryTypeMap, 'accessoryTypeMap')
 
   return (
     <View className="custom-design-ring-container">

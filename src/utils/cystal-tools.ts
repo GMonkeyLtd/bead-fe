@@ -88,6 +88,7 @@ export const calculateBeadArrangementBySize = (
 };
 
 export const computeBraceletLength = (beads: Bead[]) => {
+  console.log(beads, 'beads')
   const beadsWidths = beads.map((dot) => dot.width);
   const beadsDiameters = beads.map((dot) => dot.diameter);
   // 所有珠子能围成的周长
@@ -100,5 +101,10 @@ export const computeBraceletLength = (beads: Bead[]) => {
   const averageRadius =  allDiameter / (2 * beads.length);
   // 手围 = （围成圆的半径 - 珠子的平均半径）* 2 * PI
   const predictLength = (ringRadius - averageRadius) * 2 * Math.PI;
-  return Math.ceil(predictLength / 10);
+  const rest = (Math.round(predictLength) / 10) % 1;
+  if (rest < 0.5) {
+    return Math.floor(predictLength / 10) + 0.5;
+  } else {
+    return Math.ceil(predictLength / 10);
+  }
 };
