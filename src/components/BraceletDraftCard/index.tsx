@@ -12,10 +12,11 @@ import {
 import CrystalButton from "../CrystalButton";
 import rightArrowGoldenIcon from "@/assets/icons/right-arrow-golden.svg";
 import { pageUrls } from "@/config/page-urls";
-import { generateUUID } from "@/utils/uuid";
 import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import refreshIcon from "@/assets/icons/refresh.svg";
+import { imageToBase64 } from "@/utils/imageUtils";
+import { SPU_TYPE } from "@/pages-design/custom-design";
 
 export const BraceletDraftCard = ({
   sessionId,
@@ -36,14 +37,9 @@ export const BraceletDraftCard = ({
   canRegenerate?: boolean;
   byMerchant?: boolean;
 }) => {
-  const { draft, startPolling, updateDraft } = usePollDraft({});
+  // 初始化usePollDraft钩子
+  const { draft, startPolling, updateDraft } = usePollDraft<{ wishes: string[], updated_at: string }>({});
   const [isRegenerating, setIsRegenerating] = useState(false);
-
-  // 为每个卡片实例生成唯一的canvasId，避免多个卡片共享同一个Canvas
-  const uniqueCanvasId = useMemo(
-    () => `bracelet-canvas-${draftId || generateUUID()}`,
-    [draftId]
-  );
 
   // 使用ref来防止重复生成图像
   const isGeneratingRef = useRef(false);
@@ -54,30 +50,33 @@ export const BraceletDraftCard = ({
   const { generateCircleRing } =
     useCircleRingCanvas({
       targetSize: 1024,
-      isDifferentSize: true,
       fileType: "png",
     });
 
   // 稳定化beads数组，避免不必要的重新渲染
   const beadsForGeneration = useMemo(() => {
-    if (!draft?.beads?.length) return null;
-    return draft.beads.map((item) => ({
-      image_url: item.image_url,
+    if (!draft?.items?.length) return null;
+    return draft?.items?.map((item) => ({
+      image_url: item?.image_url,
       diameter: item.diameter,
+      width: item.width || item.diameter,
+      image_aspect_ratio: item.image_aspect_ratio || 1,
+      isFloatAccessory: item.spu_type === SPU_TYPE.ACCESSORY && !item.width,
     }));
-  }, [draft?.beads]);
+  }, [draft?.items]);
 
   // 检查是否需要生成图像
   const shouldGenerateImage = useMemo(() => {
     return (
-      draft?.beads?.length &&
-      draft.beads.length > 0 &&
+      draft?.items?.length &&
+      draft.items.length > 0 &&
       shouldLoad &&
       !draft.bracelet_image &&
+      !draft.image_url &&
       !isGeneratingRef.current &&
       generatedBraceletImageRef.current !== draft.bracelet_image
     );
-  }, [draft?.beads?.length, draft?.bracelet_image, shouldLoad]);
+  }, [draft?.items?.length, draft?.bracelet_image, shouldLoad]);
 
   // 更新currentDraftRef
   useEffect(() => {
@@ -95,40 +94,53 @@ export const BraceletDraftCard = ({
     startPolling(sessionId, draftId, byMerchant);
   }, [sessionId, draftId, draftData, byMerchant]);
 
-  useEffect(() => {
+  const uploadDraftImage = async (braceletImage: string) => {
+    const imageBase64 = await imageToBase64(braceletImage, true, false, undefined, 'png');
+    apiSession.uploadDraftImage({
+      session_id: sessionId || "",
+      draft_id: draft?.draft_id || "",
+      image_base64: imageBase64 as string,
+    }, { showError: false }).catch((err) => {
+      console.error("上传手串图像失败:", err);
+    });
+  }
 
-    // 防止重复生成的条件检查
-    if (shouldGenerateImage && beadsForGeneration) {
-      isGeneratingRef.current = true;
-
-      // 使用本地的generateCircleRing而不是传入的generateBraceletImage
-      generateCircleRing(beadsForGeneration)
-        .then((braceletImage) => {
-          if (braceletImage) {
-            generatedBraceletImageRef.current = braceletImage;
-            // 使用ref中的draft状态，避免依赖项变化
-            const currentDraft = currentDraftRef.current;
-            if (currentDraft) {
-              updateDraft({
-                ...currentDraft,
-                bracelet_image: braceletImage,
-              } as DraftData);
-            }
-            // 图像生成完成后，隐藏Canvas以释放资源
-            // setShowCanvas(false);
-            // cleanupCanvas();
-            // 调用加载完成回调
-            onImageLoaded?.();
+  const generateBraceletImage = async () => {
+    isGeneratingRef.current = true;
+    // 使用本地的generateCircleRing而不是传入的generateBraceletImage
+    generateCircleRing(beadsForGeneration as DotImageData[])
+      .then((braceletImage) => {
+        if (braceletImage) {
+          generatedBraceletImageRef.current = braceletImage;
+          // 使用ref中的draft状态，避免依赖项变化
+          const currentDraft = currentDraftRef.current;
+          if (currentDraft) {
+            updateDraft({
+              ...currentDraft,
+              bracelet_image: braceletImage,
+            } as DraftData);
           }
-        })
-        .catch((error) => {
-          console.error("生成手串图像失败:", error);
-          // 即使失败也要隐藏Canvas
-          // setShowCanvas(false);
-        })
-        .finally(() => {
-          isGeneratingRef.current = false;
-        });
+          if (braceletImage && sessionId && draft?.draft_id) {
+            uploadDraftImage(braceletImage);
+          }
+          // 调用加载完成回调
+          onImageLoaded?.();
+        }
+      })
+      .catch((error) => {
+        console.error("生成手串图像失败:", error);
+        // 即使失败也要隐藏Canvas
+        // setShowCanvas(false);
+      })
+      .finally(() => {
+        isGeneratingRef.current = false;
+      });
+  }
+
+  useEffect(() => {
+    // 防止重复生成的条件检查
+    if (shouldGenerateImage && beadsForGeneration && beadsForGeneration.length > 0) {
+      generateBraceletImage();
     }
   }, [
     shouldGenerateImage,
@@ -147,9 +159,10 @@ export const BraceletDraftCard = ({
   // }, [cleanupCanvas]);
 
   const beadsInfo = useMemo(() => {
-    return draft?.beads?.reduce((acc, bead) => {
-      if (!acc.find((b) => b.name === bead.name)) {
-        acc.push(bead);
+    return draft?.items?.reduce((acc, bead) => {
+      const beadInfo = { ...bead };
+      if (!acc.find((b) => b.name === beadInfo.name)) {
+        acc.push(beadInfo);
       }
       return acc;
     }, [] as BeadItem[]);
@@ -169,18 +182,17 @@ export const BraceletDraftCard = ({
       });
       return;
     }
-    if (!draft?.bracelet_image) {
+    if (!draft?.bracelet_image && !draft?.image_url) {
       return;
     }
     Taro.redirectTo({
-      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${
-        draft?.draft_id
-      }&imageUrl=${encodeURIComponent(draft?.bracelet_image)}`,
+      url: `${pageUrls.quickDesign}?sessionId=${sessionId}&draftId=${draft?.draft_id
+        }&imageUrl=${encodeURIComponent(draft?.image_url || draft?.bracelet_image || "")}`,
     });
   };
 
   const handleDiy = () => {
-    if (!draft?.beads || draft?.beads?.length === 0 || byMerchant) {
+    if (!draft?.items || draft?.items?.length === 0 || byMerchant) {
       return;
     }
     Taro.redirectTo({
@@ -195,13 +207,13 @@ export const BraceletDraftCard = ({
   };
 
   const viewImage = () => {
-    if (!draft.bracelet_image) {
+    if (!draft.bracelet_image && !draft.image_url) {
       return;
     }
 
     Taro.previewImage({
-      current: draft.bracelet_image,
-      urls: [draft.bracelet_image],
+      current: draft.image_url || draft.bracelet_image || "",
+      urls: [draft.image_url || draft.bracelet_image || ""],
     });
   };
 
@@ -255,7 +267,7 @@ export const BraceletDraftCard = ({
           <View className={styles.braceletDetailContainer}>
             <View className={styles.braceletName}>{draft.name}</View>
             <View className={styles.braceletBeads}></View>
-            {beadsInfo?.map((bead) => (
+            {beadsInfo?.filter((bead) => !!bead.func_summary)?.map((bead) => (
               <View className={styles.braceletBead} key={bead.name}>
                 <Image
                   src={bead.image_url}
@@ -285,7 +297,8 @@ export const BraceletDraftCard = ({
           </View>
           <View className={styles.braceletBgImageContainer} onClick={viewImage}>
             <CircleRingImage
-              imageUrl={isRegenerating ? "" : draft.bracelet_image}
+              // imageUrl={isRegenerating ? "" :  draft.bracelet_image || ""}
+              imageUrl={isRegenerating ? "" : draft.image_url || draft.bracelet_image || ""}
               size={140}
               backendSize={160}
               backgroundImage={BRACELET_BG_IMAGE_URL}
@@ -314,11 +327,13 @@ export const BraceletDraftCard = ({
               }
             />
           )}
-          <CrystalButton
-            // style={{
-            onClick={handleDiy}
-            text="DIY编辑"
-          />
+          {draft?.items?.length > 0 && draft?.items?.every((item) => !!item.sku_id) && (
+            <CrystalButton
+              // style={{
+              onClick={handleDiy}
+              text="DIY编辑"
+            />
+          )}
         </View>
       </View>
     </View>

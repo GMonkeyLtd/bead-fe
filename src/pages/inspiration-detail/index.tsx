@@ -225,7 +225,7 @@ const InspirationDetailPage: React.FC = () => {
         className={styles.container}
         scrollY
         style={{
-          height: `calc(100vh - ${navBarHeight + 246}px)`,
+          height: `calc(100vh - ${navBarHeight + 154}px)`,
         }}
       >
         {/* 主图片区域 */}
@@ -302,7 +302,7 @@ const InspirationDetailPage: React.FC = () => {
             </Text>
             {/* 珠子信息区域 */}
             <BeadList
-              beads={designData?.info?.recommend_beads}
+              beads={designData?.info?.recommend_beads?.filter((item) => !!item.func_summary)}
             />
             {/* 作者和时间 */}
             <View className={styles.workDetailContainer}>
@@ -322,7 +322,7 @@ const InspirationDetailPage: React.FC = () => {
                   {formatTime(detail.created_at)}
                 </Text>
               </View>
-              <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 ></View>
+              <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 &gt;</View>
             </View>
           </View>
         </View>
@@ -369,6 +369,20 @@ const InspirationDetailPage: React.FC = () => {
           title={designData?.info?.name}
           onClose={() => setBraceletDetailDialogShow(false)}
           wristSize={designData?.info?.spec?.wrist_size}
+        />
+      )}
+       {budgetDialogShow && (
+        <BudgetDialog
+          visible={budgetDialogShow}
+          title={designData?.info?.name}
+          designNumber={designData?.design_id}
+          productImage={detail.cover_url}
+          onClose={() => setBudgetDialogShow(false)}
+          referencePrice={designData?.reference_price}
+          originalPrice={detail?.original_price}
+          // onModifyDesign={handleModifyDesign}
+          creatorName={detail.user.nick_name}
+          isSameProduct
         />
       )}
     </CrystalContainer>

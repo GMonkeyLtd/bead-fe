@@ -12,7 +12,7 @@ const OrderListDemo: React.FC = () => {
 
   const getOrderList = () => {
     api.userHistory.getOrderList().then((res) => {
-      const _orders = (res?.data?.orders || []).filter(item => !!item.design_info?.design_id).map(item => {
+      const _orders = (res?.data?.orders || []).filter(item => !!item.design_info).map(item => {
         return {
           id: item.order_uuid,
           orderNumber: item.order_uuid,

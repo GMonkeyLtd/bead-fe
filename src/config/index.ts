@@ -33,6 +33,7 @@ export const JOIN_GROUP_AVATAR_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/
 export const LILI_LOADING_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/lili-loading.png";
 export const LILI_AVATAR_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/lili-avatar.png";
 export const SERVICE_QRCODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/serivce-qrcode.png";
+export const GENERATING_GIF_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/generating-gif.gif";
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 

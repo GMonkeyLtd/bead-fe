@@ -1,0 +1,206 @@
+.custom-design-ring-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.custom-design-ring-top-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 60%;
+  box-sizing: border-box;
+  position: relative;
+  background: linear-gradient(180deg, #f5f7fa00 80%, #d8d8d9 100%);
+  padding-bottom: 16px;
+  flex: 0;
+
+  // &::after {
+  //     content: '';
+  //     display: block;
+  //     width: 100%;
+  //     height: 100%;
+  //     background-color: linear-gradient(180deg, #f5f7fa00 80%, #d8d8d9 100%);
+  //     position: absolute;
+  //     top: 0;
+  //     left: 0;
+  // }
+}
+
+.custom-design-ring-tip-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+  letter-spacing: 1px;
+  gap: 4px;
+}
+
+.custom-design-ring-tip-tag {
+  display: flex;
+  padding: 4px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 2px;
+  background: rgba(255, 195, 64, 0.10);
+  color: #723900;
+  font-family: "Source Han Serif CN";
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 11px;
+  /* 100% */
+}
+
+.custom-design-ring-bottom-container {
+  // background-color: #fff;
+  display: flex;
+  align-items: center;
+  height: 50%;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px 10px 0 0;
+  padding: 16px 20px 0 20px;
+  flex: 1;
+}
+
+// 隐藏滚动条样式
+.hide-scrollbar {
+  -webkit-overflow-scrolling: touch;
+
+  // Webkit浏览器 (Chrome, Safari, Edge)
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // Firefox
+  scrollbar-width: none;
+
+  // IE/Edge
+  -ms-overflow-style: none;
+}
+
+
+
+.wrist-size-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+}
+
+.wrist-size-label {
+  font-size: 12px;
+  color: #333;
+}
+
+.wrist-size-value {
+  font-size: 12px;
+  color: #333;
+}
+
+.custom-design-ring-tip-container {
+  width: 100%;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.custom-design-ring-tip-content-container {
+  padding: 0px 10px;
+  display: flex;
+  border-radius: 2px 15px 15px 15px;
+  align-items: center;
+  height: 40px;
+  gap: 4px;
+  background: #FBF7F5;
+  box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.04);
+  flex: 1;
+}
+
+
+.custom-design-ring-tip-content {
+  color: rgba(31, 23, 34, 0.90);
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 350;
+  line-height: normal;
+}
+
+.custom-design-ring-wrist-length-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.custom-design-ring-wrist-length-content-prefix {
+  color: #625A4F;
+
+  text-align: center;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.custom-design-ring-wrist-length-content-value {
+  color: #625A4F;
+  text-align: center;
+  font-family: "Helvetica Neue";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.custom-design-ring-lili-avatar {
+  width: 28px;
+  height: 28px;
+}
+
+.view-effect-button {
+  display: inline-flex;
+  padding: 10px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  border-radius: 100px;
+  background: #000;
+
+  font-family: "Source Han Serif CN";
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 2px;
+  color: #FFE4B5;
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

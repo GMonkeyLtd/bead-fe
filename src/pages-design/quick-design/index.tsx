@@ -12,7 +12,7 @@ import { CancelToken } from "@/utils/request";
 import sessionApi from "@/utils/api-session";
 
 const predictedTimeText = (
-  <View className="quick-design-loading-content">渲染过程预计等待 20s</View>
+  <View className="quick-design-loading-content">设计过程预计等待 20s</View>
 );
 
 const QuickDesign = () => {
@@ -141,32 +141,34 @@ const QuickDesign = () => {
         showLoading: false,
       }
     );
-    if (res.data?.progress === 100) {
-      Taro.redirectTo({
-        url: `${pageUrls.result}?designBackendId=${res.data?.design_id}&from=chat&sessionId=${sessionId}`,
-      });
-      // processDesignData({
-      //   image_urls: [res.data?.image_url],
-      //   bracelet_name: res.data?.Info?.Name,
-      //   recommendation_text: res.data?.Info?.Description,
-      //   bead_ids_deduplication: res.data?.Info?.RecommendBeads,
-      //   design_id: res.data?.DesignId,
-      // });
-    } else {
-      if (pollTimeRef.current) {
-        clearTimeout(pollTimeRef.current);
-      }
-      pollTimeRef.current = setTimeout(() => {
-        pollDesignProgress(sessionId, draftId, designId);
-      }, 3000);
-    }
+    Taro.redirectTo({
+      url: `${pageUrls.result}?designBackendId=${res.data?.design_id}&from=chat&sessionId=${sessionId}&originImageUrl=${imageUrl}`,
+    });
+    // if (res.data?.progress === 100) {
+    //   Taro.redirectTo({
+    //     url: `${pageUrls.result}?designBackendId=${res.data?.design_id}&from=chat&sessionId=${sessionId}`,
+    //   });
+    // } else {
+    //   if (pollTimeRef.current) {
+    //     clearTimeout(pollTimeRef.current);
+    //   }
+    //   pollTimeRef.current = setTimeout(() => {
+    //     pollDesignProgress(sessionId, draftId, designId);
+    //   }, 3000);
+    // }
   };
 
   const quickDesignByDraft = async (sessionId, draftId, imageUrl) => {
     // pollDesignProgress(sessionId, draftId, null);
 
     const _imageUrl = decodeURIComponent(imageUrl);
-    const base64 = await imageToBase64(_imageUrl, false);
+    const base64 = await imageToBase64(_imageUrl, true, false, undefined, 'png');
+    // Taro.setClipboardData({
+    //   data: base64,
+    //   success: () => {
+    //     console.log('base64复制到剪贴板成功')
+    //   }
+    // })
     const res = await sessionApi.generateDesignByDraftImage({
       session_id: sessionId,
       draft_id: draftId,
@@ -257,7 +259,7 @@ const QuickDesign = () => {
               />
             </View>
             <View className="quick-design-loading-title">
-              定制中
+              场景设计中
               <View className="quick-design-loading-title-dot">
                 <View className="quick-design-loading-title-dot-item">...</View>
               </View>

@@ -13,7 +13,7 @@ import Taro, { useDidShow, usePullDownRefresh, useReady } from "@tarojs/taro";
 import TabBar from "@/components/TabBar";
 import { inspirationApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { usePageQuery } from "@/hooks/usePageQuery";
 import RightArrowIcon from "@/assets/icons/right-arrow.svg";
 import CollectIcon from "@/assets/icons/collect.svg";
 import CollectedIcon from "@/assets/icons/collect-active.svg";
@@ -55,7 +55,7 @@ const InspirationPage: React.FC = () => {
     refresh,
     loadMore,
     updateItem,
-  } = useInfiniteScroll<InspirationItem>({
+  } = usePageQuery<InspirationItem>({
     listKey: "inspirationList",
     initialPage: 1,
     pageSize: 100,
@@ -90,7 +90,7 @@ const InspirationPage: React.FC = () => {
     refresh: collectRefresh,
     loadMore: collectLoadMore,
     updateItem: collectUpdateItem,
-  } = useInfiniteScroll<InspirationItem>({
+  } = usePageQuery<InspirationItem>({
     listKey: "collectInspirationList",
     initialPage: 1,
     pageSize: 100,

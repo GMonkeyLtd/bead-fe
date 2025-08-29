@@ -17,16 +17,55 @@ export interface BaseResponse {
   data: any;
 }
 
-export interface BeadItem {
-  bead_id: string;
-  name: string;
-  image_url: string;
-  color: string;
-  wuxing: string;
-  english: string;
-  diameter: number;
-  funcs: string[];
+export interface SpuInfo {
+  brightness: number;
+  category: string;
+  color: string[];
   func_summary: string;
+  funcs: string[];
+  id: number;
+  image_url: string;
+  name: string;
+  wuxing: string[];
+}
+
+export interface BeadItem extends SpuInfo {
+  sku_id: number;
+  spu_id: number;
+  cost_price: number;
+  reference_price: number;
+  quantity: number;
+  diameter: number;
+  width: number;
+  shape: number;
+  spu_type: number;
+  image_aspect_ratio: number;
+  spu_info?: SpuInfo;
+}
+
+export enum AccessoryType {
+  GeHuan = 1,
+  GeZhu = 2,
+  SuiXing = 3,
+  PaoHuan = 4
+}
+
+export const AccessoryFormatMap = {
+  [AccessoryType.GeHuan]: '隔环',
+  [AccessoryType.GeZhu]: '隔珠',
+  [AccessoryType.SuiXing]: '随形',
+  [AccessoryType.PaoHuan]: '跑环',
+}
+
+export interface AccessoryItem {
+  id: string;
+  type: AccessoryType;
+  image_url: string;
+  name: string;
+  width: number;
+  diameter: number;
+  quality: number;
+  shape: number;
 }
 
 export interface BraceletDraft {
@@ -36,7 +75,7 @@ export interface BraceletDraft {
   progress: number;
   wuxing: string[];
   size: number;
-  beads: BeadItem[];
+  items: BeadItem[];
   created_at: string;
   name: string;
   description: string;
@@ -309,14 +348,16 @@ export default {
   saveDraft: (
     params: {
       session_id: string;
-      beads: BeadItem[];
+      beadItems: number[];
+      image_base64: string;
     },
     config?: ApiConfig
   ) => {
     return http.post<{ draft: DesignDraftResponse }>(
       `/user/sessions/${params.session_id}/drafts/diy`,
       {
-        beads: params.beads,
+        items: params.beadItems,
+        image_base64: params.image_base64,
       },
       {
         cancelToken: config?.cancelToken,
@@ -374,6 +415,22 @@ export default {
     return http.get<any>(
       `/user/merchant_query/sessions/${params.session_id}/drafts/${params.draft_id}`,
       {},
+      { cancelToken: config?.cancelToken, ...config }
+    );
+  },
+  uploadDraftImage: (
+    params: {
+      session_id: string;
+      draft_id: string;
+      image_base64: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<any>(
+      `/user/sessions/${params.session_id}/drafts/${params.draft_id}/image`,
+      {
+        image_base64: params.image_base64,
+      },
       { cancelToken: config?.cancelToken, ...config }
     );
   }

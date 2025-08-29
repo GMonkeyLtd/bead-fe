@@ -166,7 +166,7 @@ export default forwardRef<
             message={message}
             sessionId={sessionId}
             animationDelay={animationDelay}
-            shouldLoadImage={shouldLoadImage}
+            shouldLoadImage={true}
             onImageLoaded={markMessageAsLoaded}
             isLatestDraft={isLatestDraft}
             byMerchant={byMerchant}     

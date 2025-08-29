@@ -2,18 +2,19 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Taro from "@tarojs/taro";
 import { ImageCacheManager } from "@/utils/image-cache";
 import {
-  calculateBeadArrangement,
   calculateBeadArrangementBySize,
 } from "@/utils/cystal-tools";
 
 export interface DotImageData {
   image_url: string;
   diameter?: number;
+  width?: number;
+  image_aspect_ratio?: number;
+  isFloatAccessory?: boolean;   // 是否浮在别的珠子上的配饰
 }
 
 interface CircleRingConfig {
   targetSize?: number;   // 保存图片的尺寸
-  isDifferentSize?: boolean;   // 是否区分珠子尺寸
   fileType?: "png" | "jpg" | "jpeg";   // 文件类型
 }
 
@@ -30,7 +31,6 @@ interface CircleRingResult {
 export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   const {
     targetSize = 1024,
-    isDifferentSize = false,
     fileType = "png",
   } = config;
 
@@ -57,7 +57,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   // 处理图片下载
   const processImages = useCallback(async (dotsBgImageData: DotImageData[]) => {
     const imageUrls = dotsBgImageData.map(item => item.image_url);
-    
+
     try {
       const processedPaths = await ImageCacheManager.processImagePaths(imageUrls);
       return dotsBgImageData.map((item, index) => {
@@ -71,52 +71,65 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   }, []);
 
   // 计算珠子排列
-  const calculateBeads = useCallback((dotsBgImageData: DotImageData[]) => {
-    const imageUrls = dotsBgImageData.map(item => item.image_url);
-    
-    if (isDifferentSize) {
-      const beadSizes = dotsBgImageData.map(item => item.diameter || 10);
-      return calculateBeadArrangementBySize(
-        ringRadius,
-        beadSizes,
-        { x: ringRadius, y: ringRadius }
-      );
-    } else {
-      return calculateBeadArrangement(ringRadius, imageUrls.length);
-    }
-  }, [ringRadius, isDifferentSize]);
+  const calculateBeads = useCallback(async (dotsBgImageData: DotImageData[]) => {
+    // 获取图片的宽
+    return calculateBeadArrangementBySize(
+      ringRadius,
+      dotsBgImageData.map(item => {
+        const ratioBeadWidth = item.isFloatAccessory ? 1 : (item.diameter || 10) * (item.image_aspect_ratio || 1);
+        return { ratioBeadWidth, beadDiameter: item.diameter || 10 }
+      }),
+      { x: ringRadius, y: ringRadius }
+    );
+  }, [ringRadius]);
 
   // 绘制Canvas内容
   const drawCanvas = useCallback(async (
     dots: string[],
-    beads: any[]
+    beads: any[],
+    dotsBgImageData: DotImageData[]
   ): Promise<string> => {
     return new Promise(async (resolve, reject) => {
       try {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
         ctx.clearRect(0, 0, targetSize, targetSize);
-        
+
+        const finalBeadsData = dots.map((item, index) => {
+          return {
+            image_url: item,
+            isFloatAccessory: dotsBgImageData[index]?.isFloatAccessory,
+            image_aspect_ratio: dotsBgImageData[index]?.image_aspect_ratio,
+            ...beads[index]
+          }
+        })
+
+        const regularBeads = finalBeadsData.filter(item => !item.isFloatAccessory);
+        const floatAccessoryBeads = finalBeadsData.filter(item => item.isFloatAccessory);
+        const sortedBeads = [...regularBeads, ...floatAccessoryBeads];
+
         // 顺序绘制珠子，确保圆形排列正确
         for (let index = 0; index < dots.length; index++) {
-          const dot = dots[index];
-          const { x, y, radius, angle } = beads[index];
-          
+          const { x, y, scale_width, angle, scale_height, image_url, isFloatAccessory, image_aspect_ratio } = sortedBeads[index];
+
           // 保存当前Canvas状态
           ctx.save();
-          
+
           // 移动到珠子中心
           ctx.translate(x, y);
-          
+
           // 旋转珠子，使孔线指向圆心
           ctx.rotate(angle + Math.PI / 2);
 
           // 1. 先把网络背景图下载到本地
           const bgImg = canvas.createImage();
-          await new Promise<void>(r => { bgImg.onload = r; bgImg.src = dot; });
-          
-          // 绘制珠子（以珠子中心为原点）
-          ctx.drawImage(bgImg as any, -radius, -radius, radius * 2, radius * 2);
-          
+          await new Promise<void>(r => { bgImg.onload = r; bgImg.src = image_url; });
+
+          if (isFloatAccessory) {
+            ctx.drawImage(bgImg as any, -(scale_height * image_aspect_ratio), -scale_height, 2 * scale_height * image_aspect_ratio, scale_height * 2);
+          } else {
+            ctx.drawImage(bgImg as any, -scale_width, -scale_height, scale_width * 2, scale_height * 2);
+          }
+
           // 恢复Canvas状态
           ctx.restore();
         }
@@ -127,10 +140,16 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           canvas: canvas as any,
           destHeight: targetSize * dpr,
           destWidth: targetSize * dpr,
-          quality: 1,
           fileType: fileType as keyof Taro.canvasToTempFilePath.FileType,
           success: (res) => {
             resolve(res.tempFilePath);
+            // 将图片保存到本地
+            // Taro.saveImageToPhotosAlbum({
+            //   filePath: res.tempFilePath,
+            //   success: () => {
+            //     console.log("图片保存成功");
+            //   },
+            // });
           },
           fail: (err) => {
             console.error("生成临时文件失败:", err);
@@ -151,7 +170,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     }
 
     const resultId = generateResultId(dotsBgImageData);
-    
+
     // 检查是否已经在处理中
     if (processingQueueRef.current.has(resultId)) {
       return resultsRef.current.get(resultId)?.imageUrl || null;
@@ -173,13 +192,13 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     try {
       // 1. 处理图片下载
       const processedDots = await processImages(dotsBgImageData);
-      
+
       // 2. 计算珠子排列
-      const beads = calculateBeads(dotsBgImageData);
-      
+      const beads = await calculateBeads(dotsBgImageData);
+
       // 3. 绘制Canvas
-      const imageUrl = await drawCanvas(processedDots, beads);
-      
+      const imageUrl = await drawCanvas(processedDots, beads, dotsBgImageData);
+
       // 4. 更新结果
       resultsRef.current.set(resultId, {
         imageUrl,

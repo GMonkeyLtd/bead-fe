@@ -1,0 +1,11 @@
+// CustomDesignRing 组件样式索引文件
+// 导入所有子组件的样式
+
+// 主组件样式
+@import './CustomDesignRing.scss';
+
+// 子组件样式
+@import './BeadSelector.scss';
+@import './RingCanvasRenderer.scss';
+@import './RingOperationControls.scss';
+@import './RingInfoDisplay.scss';

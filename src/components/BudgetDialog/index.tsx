@@ -184,7 +184,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               isPrimary
             />
           </View>
-          {!isSameProduct && (<View className="budget-dialog-button-link" onClick={onModifyDesign}>
+          {!isSameProduct && onModifyDesign && (<View className="budget-dialog-button-link" onClick={onModifyDesign}>
             修改定制方案
           </View>)}
           {isSameProduct && (<View className="creator-info-container">

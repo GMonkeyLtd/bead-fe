@@ -16,11 +16,12 @@ export interface DraftData {
   wishes: string[];
   size: number;
   name: string;
-  beads: BeadItem[];
+  items: BeadItem[];
   created_at: string;
   updated_at: string;
   design_id?: string;
   bracelet_image?: string;
+  image_url?: string;
 }
 
 export const usePollDraft = ({ pollingInterval = 2000, maxRetries = 2, showLoading = false }) => {  

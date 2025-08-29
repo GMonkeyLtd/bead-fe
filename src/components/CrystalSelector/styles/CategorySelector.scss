@@ -1,0 +1,71 @@
+.crystal-category-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 30px;
+  
+  .category-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    gap: 4px;
+    border-radius: 50px;
+    background-color: rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0 12px;
+    &.selected {
+      background-color: #000000;
+      
+      .category-name {
+        color: #ffffff;
+      }
+      
+      .icon-text,
+      .default-icon {
+        color: #ffffff;
+      }
+      
+      .default-icon {
+        background-color: #ffffff;
+      }
+    }
+    
+    .category-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .icon-text {
+        font-size: 16px;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.6);
+        transition: color 0.3s ease;
+      }
+      
+      .default-icon {
+        width: 15px;
+        height: 17px;
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 2px;
+        transition: background-color 0.3s ease;
+      }
+    }
+    
+    .category-name {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 1.2em;
+      text-align: center;
+      color: rgba(0, 0, 0, 0.6);
+      transition: color 0.3s ease;
+      white-space: nowrap;
+      font-family: "Source Han Serif CN", sans-serif;
+
+    }
+  }
+}
+

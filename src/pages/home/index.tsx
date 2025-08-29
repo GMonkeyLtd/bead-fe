@@ -26,7 +26,6 @@ const Home = () => {
       withShareTicket: true, // 支持获取群聊信息
       showShareItems: ['shareAppMessage', 'shareTimeline'] // 同时开启好友和朋友圈分享
     });
-    
   }, []);
 
   useDidShow(() => {
@@ -148,7 +147,7 @@ const Home = () => {
                       if (!lastSessionId) {
                         startDesign();
                       } else {
-                        Taro.redirectTo({
+                        Taro.navigateTo({
                           url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
                         });
                       }
@@ -161,9 +160,13 @@ const Home = () => {
                       />
                     }
                   />
-                  {/* <View className="crystal-link-text"> */}
-                      {/* 产看我的档案 */}
-                  {/* </View> */}
+                  {/* <View className="crystal-link-text" onClick={() => {
+                    Taro.redirectTo({
+                      url: pageUrls.customDesign + '?from=home',
+                    });
+                  }}>
+                      DIY
+                  </View> */}
                 </View>
               </View>
             </View>

@@ -9,17 +9,15 @@ import CrystalButton from "@/components/CrystalButton";
 import {
   CRYSTALS_BG_IMAGE_URL,
   LOGO_IMAGE_URL,
-  APP_QRCODE_IMAGE_URL,
   DESIGN_PLACEHOLDER_IMAGE_URL,
+  GENERATING_GIF_URL,
 } from "@/config";
 import shareDesignImage from "@/assets/icons/share-design.svg";
 // import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
-import { OrderStatus } from "@/utils/orderUtils";
 import OrderListComp from "@/components/OrderListComp";
 import api from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
-import { computeBraceletLength } from "@/utils/cystal-tools";
 import BraceletDetailDialog from "@/components/BraceletDetailDialog";
 import WuxingDisplay from "@/components/WuxingDisplay";
 import WearTipsSvg from "@/assets/icons/wear-tips.svg";
@@ -30,6 +28,10 @@ import apiSession from "@/utils/api-session";
 import { usePollDesign } from "@/hooks/usePollDesign";
 
 const Result = () => {
+  const instance = Taro.getCurrentInstance();
+  const params = instance.router?.params;
+  const { sessionId, from, originImageUrl: originImageUrlParam } = params || {};
+
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
@@ -50,16 +52,18 @@ const Result = () => {
   const [designDraftId, setDesignDraftId] = useState<string>("");
   const [braceletSpec, setBraceletSpec] = useState<any>({});
   const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
-
-  const instance = Taro.getCurrentInstance();
-  const params = instance.router?.params;
-  const { sessionId, from } = params || {};
+  
+  const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
 
   const getOrderData = (orderUuid: string[]) => {
     api.userHistory.getOrderById(orderUuid).then((res) => {
       res.data.orders?.length > 0 && setOrderList(res.data.orders);
     });
   };
+
+  const canDiy = useMemo(() => {
+    return beadsInfo?.length > 0 && beadsInfo?.every((item) => !!item.sku_id);
+  }, [beadsInfo]);
 
   const processDesignData = (designData) => {
     const { design_id, image_url, info, reference_price, session_id, draft_id } =
@@ -72,10 +76,10 @@ const Result = () => {
       wuxing,
       spec
     } = info;
-    setBeadsInfo(info.beads);
+    setBeadsInfo(info.items);
     setImageUrl(image_url);
     setBraceletName(name);
-    setBeadDescriptions(recommend_beads);
+    setBeadDescriptions(recommend_beads.filter((item) => !!item.wuxing));
     setDesignNo(design_id);
     setBraceletDescription(description);
     setRizhuInfo(rizhu || wuxing?.[0]);
@@ -90,6 +94,9 @@ const Result = () => {
     if (design?.order_uuids?.length) {
       getOrderData(design.order_uuids);
     }
+  }, [design?.design_id]);
+
+  useEffect(() => {
     if (design?.design_id) {
       processDesignData(design);
     }
@@ -106,6 +113,14 @@ const Result = () => {
     }
   };
 
+  useEffect(() => {
+    if (designDraftId) {
+      apiSession.getDesignDraft({ session_id: designSessionId, draft_id: designDraftId }).then((res) => {
+        res.data.image_url && setOriginImageUrl(res.data.image_url);
+      })
+    }
+  }, [designDraftId])
+
   useDidShow(() => {
     initData();
   });
@@ -113,12 +128,6 @@ const Result = () => {
   usePullDownRefresh(() => {
     initData();
   });
-
-  const predictedBraceletLength = useMemo(() => {
-    return beadsInfo?.length > 0
-      ? computeBraceletLength(beadsInfo, "diameter")
-      : 0;
-  }, [beadsInfo]);
 
   // 保存图片到相册
   const saveImage = async () => {
@@ -203,10 +212,9 @@ const Result = () => {
 
         // 将base64转换为临时文件
         const base64Data = res.data.data;
-        console.log('Base64 data length:', base64Data?.length);
 
         const tempFilePath = `${Taro.env.USER_DATA_PATH}/temp_poster_${Date.now()}.webp`;
-        console.log(tempFilePath, "tempFilePath");
+
         await Taro.getFileSystemManager().writeFile({
           filePath: tempFilePath,
           data: base64Data,
@@ -328,8 +336,19 @@ const Result = () => {
           />
         </View>
         <View className={styles.resultContentCard}>
-          <View className={styles.resultContentCardImage} onClick={viewImage}>
-            {/* <Image mode="widthFix" src={imageUrl} style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }} /> */}
+          <View
+            className={styles.resultContentCardImage}
+            onClick={viewImage}
+            style={imageUrl ? { background: `url(${imageUrl}) center/cover` } : undefined}
+          >
+            {/* {imageUrl && (
+              <Image src={imageUrl} mode="widthFix" style={{ width: '100%', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+            )} */}
+            {!imageUrl && (
+              <View className={styles.originImageContainer}>
+                <Image src={originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL} mode="heightFix" style={{ height: '70%' }} />
+              </View>
+            )}
             <View className={styles.logoImageContainer} onClick={viewImage}>
               <Image
                 className={styles.logoImage}
@@ -338,7 +357,16 @@ const Result = () => {
                 style={{ width: "48px", height: "23px" }}
               />
             </View>
-            <Image className={styles.expendImage} src={expendImage} mode="widthFix" />
+            {!imageUrl ? (
+              <View className={styles.generatingGifContainer}>
+                <Image className={styles.generatingGif} src={GENERATING_GIF_URL} mode="widthFix" />
+                <View className={styles.generatingGifText}>
+                  场景设计...
+                </View>
+              </View>
+            ) : (
+              <Image className={styles.expendImage} src={expendImage} mode="widthFix" />
+            )}
           </View>
           <View className={styles.resultContentCardTextContainer}>
             <View className={styles.resultContentCardText}>
@@ -361,7 +389,7 @@ const Result = () => {
                       </View>
                       <View className="bracelet-length-info-unit">颗</View>
                     </View> */}
-                  {predictedBraceletLength > 0 && (
+                  {braceletSpec?.wrist_size && (
                     <View className={styles.braceletLengthInfoSizeContainer}>
                       {/* <View>{`${predictedBraceletLength}～${
                           predictedBraceletLength + 0.5
@@ -480,7 +508,7 @@ const Result = () => {
           productImage={imageUrl}
           onClose={() => setBudgetDialogShow(false)}
           referencePrice={referencePrice}
-          onModifyDesign={handleModifyDesign}
+          onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
       {/* <PosterGenerator  // 生成海报   

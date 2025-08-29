@@ -2,11 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Canvas, View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./index.scss";
-import { ImageCacheManager } from "@/utils/image-cache";
-import {
-  calculateBeadArrangement,
-  calculateBeadArrangementBySize,
-} from "@/utils/cystal-tools";
+
 import { BASE_IMAGE_URL } from "@/config";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 
@@ -38,7 +34,6 @@ const CircleRing = ({
   targetSize = 1024, // 保存图片的尺寸
   dotsBgImageData,
   // 是否区分珠子尺寸
-  isDifferentSize = false,
   fileType = "png",
   onChange = (
     status: "idle" | "downloading" | "success" | "error",
@@ -53,7 +48,6 @@ const CircleRing = ({
   // 使用优化的hook
   const { generateCircleRing, getResult } = useCircleRingCanvas({
     targetSize,
-    isDifferentSize,
     fileType: fileType as "png" | "jpg" | "jpeg",
   });
 
@@ -155,6 +149,7 @@ export const CircleRingImage = ({
           }}
           className={rotate ? "circle-image-rotate" : ""}
           onLoad={handleImageLoad}
+          lazyLoad={true}
         />
       ) : (
         <View
