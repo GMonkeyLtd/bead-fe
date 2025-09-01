@@ -13,7 +13,6 @@ import {
   GENERATING_GIF_URL,
 } from "@/config";
 import shareDesignImage from "@/assets/icons/share-design.svg";
-import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
 import OrderListComp from "@/components/OrderListComp";
 import api from "@/utils/api";
@@ -27,6 +26,8 @@ import createBeadImage from "@/assets/icons/create-bead.svg";
 import apiSession from "@/utils/api-session";
 import { usePollDesign } from "@/hooks/usePollDesign";
 import { getDeduplicateBeads } from "@/utils/utils";
+import ProductImageGenerator from "@/components/ProductImageGenerator";
+import { imageToBase64 } from "@/utils/imageUtils";
 
 const Result = () => {
   const instance = Taro.getCurrentInstance();
@@ -52,8 +53,9 @@ const Result = () => {
   const [designSessionId, setDesignSessionId] = useState<string>("");
   const [designDraftId, setDesignDraftId] = useState<string>("");
   const [braceletSpec, setBraceletSpec] = useState<any>({});
+  const [productImageUrl, setProductImageUrl] = useState<string>("");
   const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
-  
+
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
 
   const getOrderData = (orderUuid: string[]) => {
@@ -67,7 +69,7 @@ const Result = () => {
   }, [beadsInfo]);
 
   const processDesignData = (designData) => {
-    const { design_id, image_url, info, reference_price, session_id, draft_id } =
+    const { design_id, image_url, draft_url, info, reference_price, session_id, draft_id } =
       designData || {};
     const {
       name,
@@ -89,6 +91,7 @@ const Result = () => {
     setDesignSessionId(session_id);
     setDesignDraftId(draft_id);
     setBraceletSpec(spec);
+    setOriginImageUrl(draft_url);
   }
 
   useEffect(() => {
@@ -113,14 +116,6 @@ const Result = () => {
       })
     }
   };
-
-  useEffect(() => {
-    if (designDraftId) {
-      apiSession.getDesignDraft({ session_id: designSessionId, draft_id: designDraftId }).then((res) => {
-        res.data.image_url && setOriginImageUrl(res.data.image_url);
-      })
-    }
-  }, [designDraftId])
 
   useDidShow(() => {
     initData();
@@ -291,6 +286,17 @@ const Result = () => {
     });
   };
 
+  const uploadProductImage = async (productImageUrl: string) => {
+    const productImageBase64 = await imageToBase64(productImageUrl, true, false, 'webp')
+    apiSession.uploadProductImage({
+      session_id: designSessionId,
+      draft_id: designDraftId,
+      image_base64: productImageBase64,
+    }).then((res) => {
+      console.log(res);
+    });
+  }
+
   return (
     <View
       className={styles.resultContainer}
@@ -340,12 +346,14 @@ const Result = () => {
           <View
             className={styles.resultContentCardImage}
             onClick={viewImage}
-            style={imageUrl ? { background: `url(${imageUrl}) center/cover` } : undefined}
           >
             {!imageUrl && (
               <View className={styles.originImageContainer}>
                 <Image src={originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL} mode="heightFix" style={{ height: '70%' }} />
               </View>
+            )}
+            {imageUrl && (
+              <Image src={imageUrl} mode="aspectFill" style={{ width: '100%' }} />
             )}
             <View className={styles.logoImageContainer} onClick={viewImage}>
               <Image
@@ -509,16 +517,14 @@ const Result = () => {
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
-      <PosterGenerator  // 生成海报   
-        data={{ braceletImage: originImageUrl }}
+      {!imageUrl && originImageUrl && <ProductImageGenerator  // 生成海报   
+        data={{ bgImage: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/test-image.png', braceletImage: originImageUrl }}
         onGenerated={(url) => {
-          // setShareImageUrl(url);
-          // if (autoShareRef.current) {
-          //   saveImage(url);
-          // }
+          setImageUrl(url);
+          uploadProductImage(url);
         }}
-        showPoster={true}
-      />
+        showProductImage={false}
+      />}
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}

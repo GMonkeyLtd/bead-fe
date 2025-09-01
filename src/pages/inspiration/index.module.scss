@@ -40,6 +40,8 @@
   width: 100%;
   cursor: pointer;
   transition: transform 0.2s ease;
+  background: #ffffff;
+  border-radius: 4px;
 
   &:active {
     transform: scale(0.98);
@@ -52,7 +54,7 @@
   height: 0;
   padding-bottom: 100%; // 使用 padding-bottom 创建正方形比例
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 4px 4px 0 0;
 }
 
 .inspirationImage {
@@ -108,7 +110,8 @@
 }
 
 .itemInfo {
-  padding: 0 8px;
+  position: relative;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -128,6 +131,104 @@
   font-family: "Source Han Serif CN", serif;
   letter-spacing: 0.071em;
   line-height: 1.437;
+}
+
+.priceSection {
+  display: flex;
+  justify-content: flex-start;
+  width: fit-content;
+  align-self: stretch;
+  gap: 2px;
+  padding: 0px 0px 4px;
+}
+
+.priceContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.pricePrefix {
+  font-family: "Helvetica Neue", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1em;
+  color: #221d17;
+}
+.currentPrice {
+  font-family: "Helvetica Neue", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1em;
+  color: #221d17;
+}
+
+.originalPrice {
+  font-family: "Helvetica Neue", sans-serif;
+  font-weight: 300;
+  font-size: 10px;
+  line-height: 1.3em;
+  color: rgba(31, 23, 34, 0.5);
+  text-decoration: line-through;
+}
+
+.authorInfoContainer {
+  position: absolute;
+  top: -20px;
+  left: 6px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.authorInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  background-color: #ffffff;
+  border: 1px solid #f4f1e5;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.authorProfile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.authorAvatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid #ffffff;
+}
+
+.authorName {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 350;
+  font-size: 10px;
+  line-height: 1.35em;
+  color: #1f1722;
+  opacity: 0.9;
+}
+
+.separator {
+  width: 1px;
+  height: 100%;
+  background-color: #f4f1e5;
+}
+
+.tagText {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 350;
+  font-size: 10px;
+  line-height: 1.35em;
+  color: #1f1722;
+  opacity: 0.9;
 }
 
 .decorativeIcon {
@@ -324,6 +425,13 @@
   opacity: 0.6;
   text-align: center;
 }
+
+.limitedTimeTagContainer {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
 
 // 响应式适配
 @media (max-width: 375px) {
