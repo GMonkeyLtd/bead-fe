@@ -53,7 +53,7 @@ const Result = () => {
   const [designSessionId, setDesignSessionId] = useState<string>("");
   const [designDraftId, setDesignDraftId] = useState<string>("");
   const [braceletSpec, setBraceletSpec] = useState<any>({});
-  const [productImageUrl, setProductImageUrl] = useState<string>("");
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string>("");
   const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
 
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
@@ -69,7 +69,7 @@ const Result = () => {
   }, [beadsInfo]);
 
   const processDesignData = (designData) => {
-    const { design_id, image_url, draft_url, info, reference_price, session_id, draft_id } =
+    const { design_id, image_url, draft_url,background_url, info, reference_price, session_id, draft_id } =
       designData || {};
     const {
       name,
@@ -82,6 +82,7 @@ const Result = () => {
     setBeadsInfo(info.items);
     setImageUrl(image_url);
     setBraceletName(name);
+    setBackgroundImageUrl(background_url);  
     setBeadDescriptions(deduplicatedBeads.filter((item) => !!item.func_summary));
     setDesignNo(design_id);
     setBraceletDescription(description);
@@ -296,6 +297,10 @@ const Result = () => {
       console.log(res);
     });
   }
+
+  const posterData = useMemo(() => {
+    return { bgImage: backgroundImageUrl, braceletImage: originImageUrl }
+  }, [backgroundImageUrl, originImageUrl])
 
   return (
     <View
@@ -517,8 +522,8 @@ const Result = () => {
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
-      {!imageUrl && originImageUrl && <ProductImageGenerator  // 生成海报   
-        data={{ bgImage: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/test-image.png', braceletImage: originImageUrl }}
+      {originImageUrl && backgroundImageUrl && <ProductImageGenerator  // 生成海报   
+        data={posterData}
         onGenerated={(url) => {
           setImageUrl(url);
           uploadProductImage(url);

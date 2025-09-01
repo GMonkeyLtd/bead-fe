@@ -7,7 +7,7 @@ import {
   RESULT_IMAGE_LOGO_IMAGE_URL,
 } from "@/config";
 import { ImageCacheManager } from "@/utils/image-cache";
-import { imageToBase64 } from "@/utils/imageUtils";
+import { downloadNetworkImage, isNetworkUrl } from "@/utils/imageUtils";
 
 
 interface ProductImageData {
@@ -85,17 +85,21 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         bgImgPath,
         0, 0, canvasWidth, canvasHeight
       );
-
+      const processedPaths = await ImageCacheManager.processImagePaths([data.bgImage, data.braceletImage]);
+      console.log('processedPaths', processedPaths);
       // 绘制侧边图片 
-      const { path: sideImgPath, width: sideImgWidth, height: sideImgHeight } = await loadImage(data.bgImage);
-      if (!sideImgPath) {
+      // const { path: sideImgPath, width: sideImgWidth, height: sideImgHeight } = await loadImage(data.bgImage);
+      // const bgImageBase64 = await imageToBase64(data.bgImage, true, false);  
+      // console.log('bgImageBase64', bgImageBase64);
+      const sideImage = processedPaths.get(data.bgImage);
+      if (!sideImage) {
         return;
       }
 
       // 裁剪逻辑：从原图中心位置裁剪出115px宽度的部分
       const cropWidth = 342; // 固定裁剪宽度115px
-      const cropHeight = sideImgHeight; // 裁剪高度 = 原图高度
-      const cropX = Math.max(0, (sideImgWidth - cropWidth) / 2); // 居中裁剪，确保不超出边界
+      const cropHeight = 1024; // 裁剪高度 = 原图高度
+      const cropX = Math.max(0, (746 - cropWidth) / 2); // 居中裁剪，确保不超出边界
       const cropY = 0;
 
       // 计算缩放比例：选择宽度和高度缩放比例中较小的那个，确保图片完全显示在Canvas内
@@ -107,24 +111,30 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       const targetHeight = cropHeight * scaleRatio;
 
       ctx.drawImage(
-        sideImgPath,
+        sideImage,
         cropX, cropY, cropWidth, cropHeight, // 源图片裁剪区域
         0, 0, targetWidth, targetHeight // 目标Canvas区域（居中）
       );
+      ctx.restore();
 
       
       // 绘制手链图片
+      const braceletImage = processedPaths.get(data.braceletImage);
+      if (!braceletImage) {
+        return;
+      }
       const braceletImageSize = 160;
-      const imgBase64 = await imageToBase64(data.braceletImage);
+      // const imgBase64 = await imageToBase64(data.braceletImage, true, false);
       const heightCenter = (canvasHeight - braceletImageSize * dpr) / 2;
 
       ctx.drawImage(
-        imgBase64,
+        braceletImage,
         targetWidth + (canvasWidth - targetWidth - braceletImageSize * dpr) / 2,
         heightCenter,
         braceletImageSize * dpr,
         braceletImageSize * dpr
       );
+      ctx.restore();
 
       // 绘制logo
       const { path: logoImgPath } = await loadImage(RESULT_IMAGE_LOGO_IMAGE_URL);
