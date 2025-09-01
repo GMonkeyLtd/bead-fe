@@ -161,7 +161,6 @@ export interface TDesign {
       is_default: boolean;
     };
     wishes: string[];
-    recommend_beads: BeadItem[];
     beads: BeadItem[];
   };
   order_uuids?: string[];

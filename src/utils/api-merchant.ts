@@ -156,8 +156,8 @@ export const userApi = {
     http.post("/merchant/querypaymentstatus", { trade_uuid: tradeId }, {
       showLoading: false,
     }),
-  submitPrice: (orderId: string, price: number, imagesBase64: string[]) =>
-    http.post("/merchant/orders/payment", { order_uuid: orderId, price: price, actual_images_base64: imagesBase64 }),
+  submitPrice: (orderId: string, price: number, imagesBase64: string[], skuIds: number[], wristSize: string) =>
+    http.post("/merchant/orders/payment", { order_uuid: orderId, price: price, actual_images_base64: imagesBase64, sku_ids: skuIds, wrist_size: wristSize }),
   updateOrderImages: (orderId: string, realImages: string[], certificateImages: string[]) => {
     const params: any = {
       order_uuid: orderId,

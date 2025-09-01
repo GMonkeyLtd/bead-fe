@@ -13,7 +13,7 @@ import {
   GENERATING_GIF_URL,
 } from "@/config";
 import shareDesignImage from "@/assets/icons/share-design.svg";
-// import PosterGenerator from "@/components/PosterGenerator";
+import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
 import OrderListComp from "@/components/OrderListComp";
 import api from "@/utils/api";
@@ -26,6 +26,7 @@ import MaterialSvg from "@/assets/icons/material.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import apiSession from "@/utils/api-session";
 import { usePollDesign } from "@/hooks/usePollDesign";
+import { getDeduplicateBeads } from "@/utils/utils";
 
 const Result = () => {
   const instance = Taro.getCurrentInstance();
@@ -71,15 +72,15 @@ const Result = () => {
     const {
       name,
       description,
-      recommend_beads,
       rizhu,
       wuxing,
       spec
     } = info;
+    const deduplicatedBeads = getDeduplicateBeads(info.items, 'spu_id');
     setBeadsInfo(info.items);
     setImageUrl(image_url);
     setBraceletName(name);
-    setBeadDescriptions(recommend_beads.filter((item) => !!item.wuxing));
+    setBeadDescriptions(deduplicatedBeads.filter((item) => !!item.func_summary));
     setDesignNo(design_id);
     setBraceletDescription(description);
     setRizhuInfo(rizhu || wuxing?.[0]);
@@ -341,9 +342,6 @@ const Result = () => {
             onClick={viewImage}
             style={imageUrl ? { background: `url(${imageUrl}) center/cover` } : undefined}
           >
-            {/* {imageUrl && (
-              <Image src={imageUrl} mode="widthFix" style={{ width: '100%', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
-            )} */}
             {!imageUrl && (
               <View className={styles.originImageContainer}>
                 <Image src={originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL} mode="heightFix" style={{ height: '70%' }} />
@@ -511,16 +509,16 @@ const Result = () => {
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
-      {/* <PosterGenerator  // 生成海报   
-        data={posterData}
+      <PosterGenerator  // 生成海报   
+        data={{ braceletImage: originImageUrl }}
         onGenerated={(url) => {
-          setShareImageUrl(url);
-          if (autoShareRef.current) {
-            saveImage(url);
-          }
+          // setShareImageUrl(url);
+          // if (autoShareRef.current) {
+          //   saveImage(url);
+          // }
         }}
-        showPoster={false}
-      /> */}
+        showPoster={true}
+      />
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}

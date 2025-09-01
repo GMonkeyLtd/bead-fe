@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, ScrollView, Image, Button } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import styles from "./index.module.scss";
@@ -16,6 +16,7 @@ import apiSession from "@/utils/api-session";
 import BudgetDialog from "@/components/BudgetDialog";
 import apiPay from "@/utils/api-pay";
 import { pageUrls } from "@/config/page-urls";
+import { getDeduplicateBeads } from "@/utils/utils";
 
 interface BeadInfo {
   id: string;
@@ -54,6 +55,13 @@ const InspirationDetailPage: React.FC = () => {
   const [detail, setDetail] = useState<InspirationWord | null>(null);
   const [loading, setLoading] = useState(true);
   const { height: navBarHeight } = getNavBarHeightAndTop();
+
+  const deduplicateBeads = useMemo(() => {
+    // 按spu_id对designData?.info?.items进行去重  
+    const beads = designData?.info?.items || [];
+    return getDeduplicateBeads(beads, 'spu_id')?.filter((item) => !!item.func_summary);
+  }, [designData]);
+
   const getInspirationDetail = async (work_id) => {
     try {
       setLoading(true);
@@ -302,7 +310,7 @@ const InspirationDetailPage: React.FC = () => {
             </Text>
             {/* 珠子信息区域 */}
             <BeadList
-              beads={designData?.info?.recommend_beads?.filter((item) => !!item.func_summary)}
+              beads={deduplicateBeads}
             />
             {/* 作者和时间 */}
             <View className={styles.workDetailContainer}>

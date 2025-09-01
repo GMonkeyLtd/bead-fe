@@ -202,6 +202,7 @@ const CustomDesign = () => {
       delete newBeadData.uniqueKey;
       return newBeadData;
     })
+
     const imageBase64 = await imageToBase64(imageUrl, true, false, undefined, 'png');
 
 

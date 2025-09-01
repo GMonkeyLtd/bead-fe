@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, Input, Image, ScrollView } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import styles from "./index.module.scss";
@@ -6,14 +6,26 @@ import CrystalButton from "../CrystalButton";
 import closeIcon from "@/assets/icons/close.svg";
 import rightArrowGolden from "@/assets/icons/right-arrow-golden.svg";
 import apiMerchant from "@/utils/api-merchant";
+import { BeadItem } from "@/utils/api-session";
+import { usePageQuery } from "@/hooks/usePageQuery";
+import { beadsApi } from "@/utils/api";
+import { SPU_TYPE } from "@/pages-design/custom-design";
+import CrystalBeadList, { CrystalBeadListItem } from "../CrystalBeadList";
+
 
 interface ProductPriceFormProps {
   visible: boolean;
   orderNumber?: string;
   productName?: string;
   productImage?: string;
+  wristSize?: string;
   onClose?: () => void;
   onConfirm?: () => void;
+  beadsInfo?: BeadItem[];
+}
+
+export interface BeadItemWithCount extends BeadItem {
+  count: number;
 }
 
 const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
@@ -21,16 +33,124 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
   orderNumber,
   productName,
   productImage,
+  beadsInfo,
+  wristSize,
   onClose,
   onConfirm,
 }) => {
   const [price, setPrice] = useState<string>("");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-
+  const [beadsData, setBeadsData] = useState<BeadItemWithCount[]>(() => {
+    if (beadsInfo) {
+      // 按sku_id进行聚合统计
+      const groupedBeads = {}
+      beadsInfo.forEach((item) => {
+        const skuId = item.sku_id;
+        if (groupedBeads[skuId]) {
+          groupedBeads[skuId].count += 1;
+        } else {
+          groupedBeads[skuId] = {
+            ...item,
+            count: 1,
+          };
+        }
+      });
+      return Object.values(groupedBeads) as BeadItemWithCount[];
+    }
+    return [];
+  });
+  const [spuList, setSpuList] = useState<CrystalBeadListItem[]>([]);
+  const [wristSizeValue, setWristSizeValue] = useState<string>(wristSize || "");
   if (!visible) {
     return null;
   }
+
+  // 使用无限滚动hook获取sku列表
+  const {
+    data: skuList,
+    loading: skuLoading,
+    error: skuError,
+    hasMore: skuHasMore,
+    refresh: refreshSkuList,
+    loadMore: loadMoreSku,
+  } = usePageQuery<BeadItem>({
+    listKey: "skuList",
+    initialPage: 1,
+    pageSize: 100,
+    fetchData: useCallback(async (page: number, pageSize: number) => {
+      const res = await beadsApi.getSkuList({ page, size: pageSize }, { showLoading: false });
+      const resData: BeadItem[] = (res.data as any)?.items || [];
+      const totalCount = (res.data as any)?.total || 0;
+      return {
+        data: resData,
+        hasMore: resData.length + (page - 1) * pageSize < totalCount,
+        total: totalCount,
+      };
+    }, [beadsApi]),
+    queryItem: useCallback(async (item: BeadItem) => {
+      // 这里可以根据需要实现单个item的查询逻辑
+      return item;
+    }, []),
+    enabled: true,
+  });
+  console.log(beadsData, 'beadsData')
+
+  useEffect(() => {
+    Taro.showLoading({
+      title: '加载中...',
+    })
+    if (skuHasMore) {
+      loadMoreSku()
+    } else if (skuList?.length > 0 && !skuHasMore) {
+
+      const beads = skuList?.filter((item) => item.spu_type === SPU_TYPE.BEAD);
+      const accessories = skuList?.filter((item) => item.spu_type === SPU_TYPE.ACCESSORY);
+
+      // 对beads按spu_id分组
+      const beadsGrouped = beads?.reduce((acc, item) => {
+        const spuId = item.spu_id;
+        if (!acc[spuId]) {
+          acc[spuId] = [];
+        }
+        acc[spuId].push(item);
+        return acc;
+      }, {} as Record<number, BeadItem[]>);
+
+      // 对accessories按spu_id分组
+      const accessoriesGrouped = accessories?.reduce((acc, item) => {
+        const spuId = item.spu_id;
+        if (!acc[spuId]) {
+          acc[spuId] = [];
+        }
+        acc[spuId].push(item);
+        return acc;
+      }, {} as Record<number, BeadItem[]>);
+
+      // 转换为数组格式，每个元素为一个对象，key为spu_id，value为BeadItem[]
+      const groupedBeadsData: CrystalBeadListItem[] = beadsGrouped ? Object.entries(beadsGrouped).map(([spuId, items]) => ({
+        spuId: Number(spuId),
+        items: items as BeadItem[],
+        name: (items as BeadItem[])[0]?.name || '',
+      })) : [];
+
+      const groupedAccessoriesData: CrystalBeadListItem[] = accessoriesGrouped ? Object.entries(accessoriesGrouped).map(([spuId, items]) => ({
+        spuId: Number(spuId),
+        items: items as BeadItem[],
+        name: (items as BeadItem[])[0]?.name || '',
+      })) : [];
+
+      // 更新状态
+      setSpuList([...groupedBeadsData, ...groupedAccessoriesData])
+      Taro.hideLoading()
+    }
+  }, [skuList, skuHasMore]);
+
+
+  // 处理水晶珠列表变化
+  const handleBeadListChange = (newData: BeadItemWithCount[]) => {
+    setBeadsData(newData);
+  };
 
   const handlePriceChange = (value: string) => {
     // 只允许输入数字和小数点
@@ -149,7 +269,14 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
       return;
     }
 
-    apiMerchant.user.submitPrice(orderNumber || "", parseFloat(price), images).then((res: any) => {
+    const skuIds: number[] = [];
+    beadsData.forEach(item => {
+      for (let i = 0; i < item.count; i++) {
+        skuIds.push(Number(item.sku_id));
+      }
+    })
+
+    apiMerchant.user.submitPrice(orderNumber || "", parseFloat(price), images, skuIds, wristSizeValue).then((res: any) => {
       if (res.code === 200) {
         onClose?.();
         Taro.showToast({
@@ -174,13 +301,17 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
     e.stopPropagation();
   };
 
+  const handleWristSizeChange = (value: string) => {
+    setWristSizeValue(value);
+  };
+
   return (
     <View className={styles["product-price-form-overlay"]} onClick={handleOverlayClick}>
       <View className={styles["product-price-form"]} onClick={handleDialogClick}>
         {/* 头部 */}
         <View className={styles["form-header"]}>
           <View className={styles["header-content"]}>
-            <Text className={styles["form-title"]}>提交商品价格</Text>
+            <Text className={styles["form-title"]}>提交商品支付信息</Text>
             {orderNumber && (
               <Text className={styles["order-number"]}>订单号：{orderNumber}</Text>
             )}
@@ -206,10 +337,39 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
         )}
 
         <ScrollView className={styles["form-content"]} scrollY>
+          <View className={styles["beads-section"]}>
+            <View className={styles["section-header"]}>
+              <Text className={styles["section-title"]}>水晶明细</Text>
+              <Text className={styles["required"]}>*</Text>
+            </View>
+            {/* 水晶珠明细列表 */}
+            {beadsData.length && spuList.length > 0 && (
+              <View className={styles["beads-section"]}>
+                <CrystalBeadList
+                  data={beadsData}
+                  spuList={spuList}
+                  onChange={handleBeadListChange}
+                />
+              </View>
+            )}
+          </View>
+
+          {/* 参考价 */}
+          <View className={styles["price-section"]}>
+            <View className={styles["section-header"]}>
+              <Text className={styles["section-title"]}>成本价</Text>
+            </View>
+            <View className={styles["cost-price-container"]}>
+              <Text className={styles["currency-symbol"]}>¥</Text>
+              {beadsData.length > 0 && (beadsData.reduce((acc, item) => acc + (item.cost_price * item.count), 0) / 100).toFixed(2)}
+
+            </View>
+          </View>
+
           {/* 价格输入 */}
           <View className={styles["price-section"]}>
             <View className={styles["section-header"]}>
-              <Text className={styles["section-title"]}>商品价格</Text>
+              <Text className={styles["section-title"]}>商品定价</Text>
               <Text className={styles["required"]}>*</Text>
             </View>
             <View className={styles["price-input-container"]}>
@@ -220,6 +380,23 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
                 placeholder="请输入价格"
                 value={price}
                 onInput={(e) => handlePriceChange(e.detail.value)}
+              />
+            </View>
+          </View>
+
+          {/* 价格输入 */}
+          <View className={styles["price-section"]}>
+            <View className={styles["section-header"]}>
+              <Text className={styles["section-title"]}>手围</Text>
+              <Text className={styles["required"]}>*</Text>
+            </View>
+            <View className={styles["price-input-container"]}>
+              <Input
+                className={styles["price-input"]}
+                type="digit"
+                placeholder="请输入手围"
+                value={wristSizeValue}
+                onInput={(e) => handleWristSizeChange(e.detail.value)}
               />
             </View>
           </View>

@@ -7,6 +7,7 @@ import OrderList from "@/components/OrderList";
 import merchantApi from "@/utils/api-merchant";
 import { AfterSaleStatus, formatOrderStatus, OrderStatus } from "@/utils/orderUtils";
 import TabBar from "@/components/TabBar";
+import api from "@/utils/api";
 
 interface Order {
   id: string;
