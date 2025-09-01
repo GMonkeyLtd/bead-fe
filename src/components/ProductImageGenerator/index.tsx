@@ -87,8 +87,10 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       );
 
       // 绘制侧边图片 
-      const { path: sideImgPath, width: sideImgWidth, height: sideImgHeight } = await loadImage(data.bgImage);
-      if (!sideImgPath) {
+      const sideImgBase64 = await imageToBase64(data.bgImage);
+      const sideImgWidth = 768;
+      const sideImgHeight = 1024;
+      if (!sideImgBase64) {
         return;
       }
 
@@ -107,7 +109,7 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       const targetHeight = cropHeight * scaleRatio;
 
       ctx.drawImage(
-        sideImgPath,
+        sideImgBase64,
         cropX, cropY, cropWidth, cropHeight, // 源图片裁剪区域
         0, 0, targetWidth, targetHeight // 目标Canvas区域（居中）
       );

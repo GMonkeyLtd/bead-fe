@@ -163,19 +163,21 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 24px;
+  padding: 20px 24px;
+  
 }
+
 .collectIcon {
   width: 16px;
   height: 16px;
 }
+
 .titleSection {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
   border-radius: 4px;
-  margin-top: 20px;
 }
 
 .titleContainer {
@@ -336,6 +338,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -374,7 +377,38 @@
   font-size: 12px;
   font-style: normal;
   font-weight: 300;
-  line-height: 150%; /* 16.5px */
+  line-height: 150%;
+  /* 16.5px */
+}
+
+.priceContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.pricePrefix {
+  color: #FF6D19;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.currentPrice {
+  color: #FF6D19;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.originalPrice {
+  color: rgba(31, 23, 34, 0.50);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 300;
+  /* 130% */
+  text-decoration-line: line-through;
 }
 
 // 响应式设计

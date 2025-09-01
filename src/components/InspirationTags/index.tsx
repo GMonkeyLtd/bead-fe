@@ -10,7 +10,7 @@ interface InspirationTagProps {
   /** 点击事件 */
   onClick?: () => void
   /** 标签类型，影响颜色主题 */
-  type?: 'default' | 'hot' | 'new' | 'limited'
+  type?: 'default' | 'hot' | 'new' | 'limited' | 'fixed-price'
 }
 
 export const LimitedTimeTag: React.FC<InspirationTagProps> = ({
@@ -58,4 +58,38 @@ export const PromoText: React.FC<PromoTextProps> = ({
     </View>
   )
 }
+
+// 一口价标签组件接口
+interface FixedPriceTagProps {
+  /** 标签文本内容 */
+  text?: string
+  /** 自定义类名 */
+  className?: string
+  /** 点击事件 */
+  onClick?: () => void
+}
+
+// 一口价标签组件
+export const FixedPriceTag: React.FC<FixedPriceTagProps> = ({
+  text = '一口价',
+  className = '',
+  onClick
+}) => {
+  const handleClick = () => {
+    onClick?.()
+  }
+
+  const tagClass = `${styles.tag} ${styles['tag--fixed-price']} ${className}`
+
+  return (
+    <View 
+      className={tagClass}
+      onClick={handleClick}
+    >
+      <View className={styles.text}>{text}</View>
+    </View>
+  )
+}
+
+
 

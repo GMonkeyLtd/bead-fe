@@ -18,10 +18,10 @@ import RightArrowIcon from "@/assets/icons/right-arrow.svg";
 import CollectIcon from "@/assets/icons/collect.svg";
 import CollectedIcon from "@/assets/icons/collect-active.svg";
 import MyWorkIcon from "@/assets/icons/my-work.svg";
-import { LimitedTimeTag, PromoText } from "@/components/InspirationTags";
+import { FixedPriceTag, LimitedTimeTag, PromoText } from "@/components/InspirationTags";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
 
-interface InspirationItem {
+export interface InspirationItem {
   work_id: string;
   title: string;
   cover_url: string;
@@ -126,8 +126,7 @@ const InspirationPage: React.FC = () => {
 
   const showData = useMemo(() => {
     if (curTab === "all") {
-      inspirationList[0] && (inspirationList[0].is_limited_time = true);
-      return inspirationList.map(item => ({ ...item, cover_url: 'https://zhuluoji.cn-sh2.ufileos.com/designs/79.webp' }));
+      return inspirationList.map(item => ({ ...item, is_limited_time: true }));
     } else {
       return collectInspirationList;
     }
@@ -427,7 +426,9 @@ const InspirationPage: React.FC = () => {
                   </View>
 
                   <View className={styles.userSection}>
-
+                    {item.is_limited_time && (
+                      <FixedPriceTag  />
+                    )}
                     <View
                       className={styles.collectSection}
                       onClick={(e) => handleCollectClick(item, e)}

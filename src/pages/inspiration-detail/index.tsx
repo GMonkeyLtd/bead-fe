@@ -17,6 +17,7 @@ import BudgetDialog from "@/components/BudgetDialog";
 import apiPay from "@/utils/api-pay";
 import { pageUrls } from "@/config/page-urls";
 import { getDeduplicateBeads } from "@/utils/utils";
+import { InspirationItem } from "../inspiration";
 
 interface BeadInfo {
   id: string;
@@ -27,32 +28,13 @@ interface BeadInfo {
   color: string;
 }
 
-interface InspirationDetail {
-  work_id: string;
-  title: string;
-  number: string;
-  description: string;
-  cover_url: string;
-  images: string[];
-  likes_count: number;
-  created_at: string;
-  final_price: number;
-  original_price: number;
-  user: {
-    user_id: string;
-    nick_name: string;
-    avatar_url: string;
-  };
-  beads: BeadInfo[];
-}
-
 const InspirationDetailPage: React.FC = () => {
   const router = useRouter();
   const { workId, designId } = router.params || {};
   const [designData, setDesignData] = useState<any>(null);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
-  const [detail, setDetail] = useState<InspirationWord | null>(null);
+  const [detail, setDetail] = useState<InspirationItem | null>(null);
   const [loading, setLoading] = useState(true);
   const { height: navBarHeight } = getNavBarHeightAndTop();
 
@@ -67,7 +49,7 @@ const InspirationDetailPage: React.FC = () => {
       setLoading(true);
       inspirationApi.getInspirationData({ work_id }).then((res) => {
         console.log(res, "res?.data[0]");
-        setDetail(res?.data?.works?.[0] as InspirationDetail);
+        setDetail(res?.data?.works?.[0] as InspirationItem);
       });
     } catch (error) {
       console.error("获取灵感详情失败:", error);
@@ -201,28 +183,28 @@ const InspirationDetailPage: React.FC = () => {
   const handlePurchase = () => {
     apiPay.buySameProduct({ word_id: detail.work_id }).then((res) => {
       const { order_uuid } = res?.data || {};
-        Taro.getSetting({ 
-          success: (res) => {
-            console.log(res, 'res')
-          }
-        })
-        Taro.requestSubscribeMessage({
-          tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
-          entityIds: [order_uuid], // 添加必需的 entityIds 参数
-          complete: () => {
-            Taro.redirectTo({
-              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-            })
-          },
-          success: () => {
-            Taro.redirectTo({
-              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-            })
-          },
-          fail: () => Taro.redirectTo({
+      Taro.getSetting({
+        success: (res) => {
+          console.log(res, 'res')
+        }
+      })
+      Taro.requestSubscribeMessage({
+        tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
+        entityIds: [order_uuid], // 添加必需的 entityIds 参数
+        complete: () => {
+          Taro.redirectTo({
             url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
           })
-        });
+        },
+        success: () => {
+          Taro.redirectTo({
+            url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+          })
+        },
+        fail: () => Taro.redirectTo({
+          url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+        })
+      });
     })
   }
 
@@ -283,6 +265,13 @@ const InspirationDetailPage: React.FC = () => {
 
         {/* 内容区域 */}
         <View className={styles.contentSection}>
+          <View className={styles.priceSection}>
+            <View className={styles.priceContainer}>
+              <Text className={styles.pricePrefix}>¥</Text>
+              <Text className={styles.currentPrice}>{detail.final_price}</Text>
+              <Text className={styles.originalPrice}>{detail.original_price}</Text>
+            </View>
+          </View>
           {/* 标题区域 */}
           <View className={styles.titleSection}>
             <View className={styles.titleContainer}>
@@ -343,14 +332,14 @@ const InspirationDetailPage: React.FC = () => {
           onClick={() => {
             setBudgetDialogShow(true)
           }}
-          text="制作同款"
-          icon={
+          text={detail.final_price ? `¥${detail.final_price} 制作同款` : "制作同款"}
+          icon={detail.final_price ? undefined : (
             <Image
               src={createBeadImage}
               mode="widthFix"
               style={{ width: "24px", height: "24px" }}
             />
-          }
+          )}
           style={{ width: "220px", margin: "24px 0 24px", }}
           isPrimary={true}
         />)}
@@ -379,7 +368,7 @@ const InspirationDetailPage: React.FC = () => {
           wristSize={designData?.info?.spec?.wrist_size}
         />
       )}
-       {budgetDialogShow && (
+      {budgetDialogShow && (
         <BudgetDialog
           visible={budgetDialogShow}
           title={designData?.info?.name}

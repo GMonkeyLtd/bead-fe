@@ -9,7 +9,7 @@
   border: 1px solid;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   // 文字样式
   .text {
     font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -19,13 +19,13 @@
     text-align: center;
     white-space: nowrap;
   }
-  
+
   // 悬停效果
   &:hover {
     opacity: 0.8;
     transform: translateY(-1px);
   }
-  
+
   // 激活效果
   &:active {
     transform: translateY(0);
@@ -34,9 +34,10 @@
 
 // 默认样式
 .tag--default {
-  background: linear-gradient(135deg, rgba(200, 200, 200, 0.8) 0%, rgba(150, 150, 150, 0.8) 100%);
-  border-color: rgba(100, 100, 100, 0.2);
-  
+  border-radius: 30px;
+  border: 1px solid rgba(255, 109, 25, 0.20);
+  background: rgba(255, 255, 255, 0.50);
+
   .text {
     color: #666;
   }
@@ -44,11 +45,11 @@
 
 // 热门标签样式 (基于Figma设计稿)
 .tag--hot {
-  background: 
+  background:
     rgba(255, 255, 255, 0.5),
     linear-gradient(135deg, rgba(255, 159, 25, 1) 0%, rgba(251, 122, 75, 1) 100%);
   border-color: rgba(255, 109, 25, 0.2);
-  
+
   .text {
     color: #FF6D19;
   }
@@ -56,11 +57,11 @@
 
 // 新品标签样式
 .tag--new {
-  background: 
+  background:
     rgba(255, 255, 255, 0.5),
     linear-gradient(135deg, rgba(25, 159, 255, 1) 0%, rgba(75, 122, 251, 1) 100%);
   border-color: rgba(25, 109, 255, 0.2);
-  
+
   .text {
     color: #196DFF;
   }
@@ -68,13 +69,37 @@
 
 // 限时标签样式
 .tag--limited {
-  background: 
-    rgba(255, 255, 255, 0.5),
-    linear-gradient(135deg, rgba(255, 25, 159, 1) 0%, rgba(251, 75, 122, 1) 100%);
-  border-color: rgba(255, 25, 109, 0.2);
-  
+  display: inline-flex;
+  padding: 2px 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 109, 25, 0.20);
+  background: rgba(255, 255, 255, 0.50);
+  color: #FF6D19;
+  font-family: "Noto Sans SC";
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 135%;
+}
+
+// 一口价标签样式 (基于Figma设计稿)
+.tag--fixed-price {
+  border-radius: 2px;
+  border: 1px solid rgba(255, 174, 25, 0.10);
+  background: rgba(255, 174, 25, 0.10);
+  padding: 2px 4px;
+
   .text {
-    color: #FF196D;
+    color: #FF670F;
+    font-family: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 1.19;
+    text-align: center;
+    opacity: 0.9;
   }
 }
 
@@ -106,7 +131,7 @@
       font-size: 9px;
     }
   }
-  
+
   .promoText {
     font-size: 10px;
   }

@@ -75,7 +75,7 @@ export const usePollDesign = (options?: UsePollDesignOptions) => {
           }
         );
 
-        if (res?.data?.image_url) {
+        if (res?.data?.progress === 100) {
           setDesign(res?.data);
           clearTimer(designId);
           cancelRequest(designId);

@@ -53,7 +53,7 @@ const Result = () => {
   const [designSessionId, setDesignSessionId] = useState<string>("");
   const [designDraftId, setDesignDraftId] = useState<string>("");
   const [braceletSpec, setBraceletSpec] = useState<any>({});
-  const [productImageUrl, setProductImageUrl] = useState<string>("");
+  const [braceletBgImageUrl, setBraceletBgImageUrl] = useState<string>("");
   const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
 
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
@@ -69,7 +69,7 @@ const Result = () => {
   }, [beadsInfo]);
 
   const processDesignData = (designData) => {
-    const { design_id, image_url, draft_url, info, reference_price, session_id, draft_id } =
+    const { design_id, image_url, draft_url, info, reference_price, session_id, draft_id, background_url } =
       designData || {};
     const {
       name,
@@ -91,7 +91,8 @@ const Result = () => {
     setDesignSessionId(session_id);
     setDesignDraftId(draft_id);
     setBraceletSpec(spec);
-    setOriginImageUrl(draft_url);
+    draft_url && setOriginImageUrl(draft_url);
+    background_url && setBraceletBgImageUrl(background_url);
   }
 
   useEffect(() => {
@@ -517,8 +518,8 @@ const Result = () => {
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
-      {!imageUrl && originImageUrl && <ProductImageGenerator  // 生成海报   
-        data={{ bgImage: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/test-image.png', braceletImage: originImageUrl }}
+      {!imageUrl && originImageUrl && braceletBgImageUrl && <ProductImageGenerator  // 生成海报   
+        data={{ bgImage: braceletBgImageUrl, braceletImage: originImageUrl }}
         onGenerated={(url) => {
           setImageUrl(url);
           uploadProductImage(url);
