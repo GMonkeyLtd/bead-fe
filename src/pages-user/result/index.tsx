@@ -53,7 +53,7 @@ const Result = () => {
   const [designSessionId, setDesignSessionId] = useState<string>("");
   const [designDraftId, setDesignDraftId] = useState<string>("");
   const [braceletSpec, setBraceletSpec] = useState<any>({});
-  const [braceletBgImageUrl, setBraceletBgImageUrl] = useState<string>("");
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string>("");
   const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
 
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
@@ -82,6 +82,7 @@ const Result = () => {
     setBeadsInfo(info.items);
     setImageUrl(image_url);
     setBraceletName(name);
+    setBackgroundImageUrl(background_url);  
     setBeadDescriptions(deduplicatedBeads.filter((item) => !!item.func_summary));
     setDesignNo(design_id);
     setBraceletDescription(description);
@@ -297,6 +298,10 @@ const Result = () => {
       console.log(res);
     });
   }
+
+  const posterData = useMemo(() => {
+    return { bgImage: backgroundImageUrl, braceletImage: originImageUrl }
+  }, [backgroundImageUrl, originImageUrl])
 
   return (
     <View
@@ -518,8 +523,8 @@ const Result = () => {
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
-      {!imageUrl && originImageUrl && braceletBgImageUrl && <ProductImageGenerator  // 生成海报   
-        data={{ bgImage: braceletBgImageUrl, braceletImage: originImageUrl }}
+      {originImageUrl && backgroundImageUrl && <ProductImageGenerator  // 生成海报   
+        data={posterData}
         onGenerated={(url) => {
           setImageUrl(url);
           uploadProductImage(url);
