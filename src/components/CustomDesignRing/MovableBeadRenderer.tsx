@@ -43,6 +43,7 @@ interface MovableBeadRendererProps {
   beads: Position[];
   selectedBeadIndex: number;
   canvasSize: number;
+  targetRadius: number;
   onBeadSelect: (index: number) => void;
   onBeadDeselect: () => void;
   onBeadDragEnd: (beadIndex: number, newX: number, newY: number) => void;
@@ -207,6 +208,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
   beads,
   selectedBeadIndex,
   canvasSize,
+  targetRadius,
   onBeadSelect,
   onBeadDeselect,
   onBeadDragEnd,
@@ -470,11 +472,28 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
   return (
     <View className="movable-bead-container" style={style}>
       <View className="canvas-wrapper">
+        {/* 手环线圈背景层 - 在最底层 */}
+        <View 
+          className="bracelet-ring-background"
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: `${targetRadius * 2}px`, // 线圈直径约为画布的70%
+            height: `${targetRadius * 2}px`,
+            borderRadius: '50%',
+            border: '2px solid #0e0e0d',
+            zIndex: -2,
+          }}
+        />
+        
         <MovableArea
           className="movable-area"
           style={movableAreaStyle}
           onClick={onBeadDeselect}
         >
+          
           {/* 渲染所有珠子的阴影层 - 确保在最底层 */}
           {beadPositions.map((bead, index) => {
             // 如果当前珠子正在被拖拽，使用拖拽状态中的位置

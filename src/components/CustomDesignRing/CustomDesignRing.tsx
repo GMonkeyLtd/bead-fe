@@ -19,7 +19,6 @@ import { AccessoryType } from "@/utils/api-session";
 import { AccessoryItem } from "@/utils/api-session";
 import { Bead } from "../../../types/crystal";
 import { SPU_TYPE } from "@/pages-design/custom-design";
-import { imageToBase64 } from "@/utils/imageUtils";
 import HistoryOperations from "./HistoryOperations";
 
 interface BeadType {
@@ -77,6 +76,18 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [currentAccessoryType, setCurrentAccessoryType] = useState<AccessoryType | ''>("");
   const [imageUrl, setImageUrl] = useState<string>("");
 
+  const beadPositionConfig: BeadPositionManagerConfig = {
+    canvasSize,
+    spacing,
+    renderRatio,
+    targetRadius: canvasSize / 2 * 0.7,
+    maxWristSize: 24,
+    minWristSize: 8,
+    enableHistory: true,
+    maxHistoryLength: 50,
+    displayScale: 4.5
+  };
+
   // 使用珠子位置管理器
   const positionManagerRef = useRef<BeadPositionManager | null>(null);
   const [positionManagerState, setPositionManagerState] = useState<{
@@ -130,23 +141,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       return;
     }
 
+    positionManagerRef.current = new BeadPositionManager(beadPositionConfig);
+
     if (!beads || beads.length === 0) {
       console.warn('beads is empty:', beads);
       return;
     }
-
-    const config: BeadPositionManagerConfig = {
-      canvasSize,
-      spacing,
-      renderRatio,
-      targetRadius: canvasSize / 2 * 0.7,
-      maxWristSize: 24,
-      minWristSize: 8,
-      enableHistory: true,
-      maxHistoryLength: 50,
-    };
-
-    positionManagerRef.current = new BeadPositionManager(config);
 
     try {
       if (positionManagerRef.current) {
@@ -163,7 +163,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
   // 初始化位置管理器
   useEffect(() => {
-    if (canvasSize > 0 && beads.length > 0) {
+    if (canvasSize > 0) {
       initBeads(beads);
     }
   }, [canvasSize, beads, initBeads]);
@@ -503,14 +503,16 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
               width: `${canvasSize}px`,
             }}
           >
-            <View className="custom-design-ring-wrist-length-container">
-              <View className="custom-design-ring-wrist-length-content-prefix">
-                适合手围：
+            {positionManagerState.beads?.length > 0 && (
+              <View className="custom-design-ring-wrist-length-container">
+                <View className="custom-design-ring-wrist-length-content-prefix">
+                  适合手围：
+                </View>
+                <View className="custom-design-ring-wrist-length-content-value">
+                  {positionManagerState.predictedLength} ~ {positionManagerState.predictedLength + 0.5}cm
+                </View>
               </View>
-              <View className="custom-design-ring-wrist-length-content-value">
-                {positionManagerState.predictedLength} ~ {positionManagerState.predictedLength + 0.5}cm
-              </View>
-            </View>
+            )}
             {/* <Image className="custom-crystal-backend" src={CUSTOM_CRYSTAL_BACKEND_IMAGE} style={{ width: `${canvasSize}px`, height: `${canvasSize}px` }} /> */}
             <MovableBeadRenderer
               style={{
@@ -518,6 +520,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
                 top: 0,
                 left: 0,
               }}
+              targetRadius={beadPositionConfig.targetRadius}
               beads={positionManagerState.beads}
               selectedBeadIndex={positionManagerState.selectedBeadIndex}
               canvasSize={canvasSize}

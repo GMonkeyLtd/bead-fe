@@ -7,6 +7,7 @@ import {
   AccessoryItem,
   AccessoryFormatMap,
 } from "@/utils/api-session";
+import LoadingIcon from "../LoadingIcon";
 
 interface Bead {
   id?: string | number;
@@ -97,7 +98,9 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
                   <View
                     key={`${beadItem.name}-${beadItem.diameter}`}
                     className="bead-item"
-                    onClick={() => handleBeadClick(beadItem, 1)}
+                    onClick={() => {
+                      handleBeadClick(beadItem)
+                    }}
                   >
                     <View className="bead-image-container">
                       <Image
@@ -204,18 +207,25 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
 
   return (
     <View className="bead-selector-container">
-      <CategorySelector
-        selectedCategory={curType}
-        onCategoryChange={(categoryKey) => {
-          if (categoryKey === "crystal") {
-            onWuxingChange(allWuxing[0]);
-          } else {
-            console.log(AccessoryType.GeHuan, 'change')
-            onAccessoryTypeChange(AccessoryType.GeHuan);
-          }
-          setCurType(categoryKey as "crystal" | "accessories");
-        }}
-      />
+      {
+        Object.keys(beadTypeMap).length === 0 && Object.keys(accessoryTypeMap).length === 0 ? (
+          <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
+            <LoadingIcon /> 
+          </View>
+        ) : (
+            <CategorySelector
+              selectedCategory={curType}
+              onCategoryChange={(categoryKey) => {
+                if (categoryKey === "crystal") {
+                  onWuxingChange(allWuxing[0]);
+                } else {
+                  onAccessoryTypeChange(AccessoryType.GeHuan);
+                }
+                setCurType(categoryKey as "crystal" | "accessories");
+              }}
+            />
+          )
+      }
       {/* 水平Tab选择器 */}
       {curType === "crystal" && renderCrystalTypes()}
       {curType === "accessories" && renderAccessoryTypes()}
