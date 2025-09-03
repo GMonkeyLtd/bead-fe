@@ -20,6 +20,7 @@ import { AccessoryItem } from "@/utils/api-session";
 import { Bead } from "../../../types/crystal";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 import HistoryOperations from "./HistoryOperations";
+import BeadSizeSelector from "../BeadSizeSelector";
 
 interface BeadType {
   name: string;
@@ -462,7 +463,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     <View className="custom-design-ring-container">
       {/* 顶部内容区域 */}
       <View className="custom-design-ring-tip-container">
-        <View className="custom-design-ring-tip-content-container">
+        {wuxing?.length > 0 && (<View className="custom-design-ring-tip-content-container">
           <View className="custom-design-ring-tip-content-prefix">
             <Image
               src={LILI_AVATAR_IMAGE_URL}
@@ -475,7 +476,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
               {wuxing?.join('')}
             </View>
           </View>
-        </View>
+        </View>)}
         <View
           className={`view-effect-button`}
           onClick={handleViewEffect}
@@ -548,8 +549,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       </View>
 
       {/* 底部珠子选择器 */}
-      <View className="custom-design-ring-bottom-container">
+      <View className="custom-design-ring-bottom-container" style={{ height: `calc(100% - ${canvasSize}px - 60px)` }}>
+        <View className="custom-design-bead-size-selector-container">
+          <View className="custom-design-bead-size-selector-title">
+            尺寸(mm):
+          </View>
+          <BeadSizeSelector value={8} options={[8, 10, 12, 13, 14, 15, 16]} onChange={console.log} />
+        </View>
         <BeadSelector
+          styleHeight={`calc(100% - 50px)`}
           accessoryTypeMap={accessoryTypeMap as Record<AccessoryType, AccessoryItem[]>}
           beadTypeMap={beadTypeMap}
           currentWuxing={currentWuxing}

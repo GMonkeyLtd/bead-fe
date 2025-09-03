@@ -16,8 +16,8 @@
   height: 60%;
   box-sizing: border-box;
   position: relative;
-  background: linear-gradient(180deg, #f5f7fa00 80%, #d8d8d9 100%);
-  padding-bottom: 16px;
+  // background: linear-gradient(180deg, #f5f7fa00 80%, #d8d8d9 100%);
+  padding-bottom: 12px;
   flex: 0;
 
   // &::after {
@@ -64,13 +64,35 @@
   // background-color: #fff;
   position: relative;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   height: 50%;
   width: 100%;
   box-sizing: border-box;
   border-radius: 10px 10px 0 0;
-  padding: 16px 20px 0 20px;
-  flex: 1;
+  padding: 0px 16px 0 16px;
+  gap: 12px;
+
+  // 尺寸选择器固定在顶部
+  .bead-size-selector {
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  // 背景伪元素
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: -40px;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background-image: url("https://zhuluoji.cn-sh2.ufileos.com/images-frontend/chat-background.png");
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    pointer-events: none;
+  }
 }
 
 // 隐藏滚动条样式
@@ -204,4 +226,30 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
+
+.custom-design-bead-size-selector-container {
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  padding: 0 12px;
+  border: 1px solid #FFF;
+  background: rgba(255, 255, 255, 0.40);
+  backdrop-filter: blur(1.5534592866897583px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+.custom-design-bead-size-selector-title {
+  color: #000;
+  font-family: "Source Han Serif CN";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }

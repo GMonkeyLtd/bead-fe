@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { View, Image, Text } from "@tarojs/components";
 import "./styles/BeadSelector.scss";
 import CategorySelector from "./CategorySelector";
+import BeadItem from "./BeadItem";
 import {
   AccessoryType,
   AccessoryItem,
@@ -29,6 +30,7 @@ interface BeadSelectorProps {
   currentAccessoryType: AccessoryType | "";
   renderRatio: number;
   predictedLength: number;
+  styleHeight: string;
   onWuxingChange: (wuxing: string) => void;
   onAccessoryTypeChange: (accessoryType: AccessoryType) => void;
   onBeadClick: (bead: Bead) => void;
@@ -41,6 +43,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   currentAccessoryType,
   renderRatio,
   predictedLength,
+  styleHeight,
   onWuxingChange,
   onAccessoryTypeChange,
   onBeadClick,
@@ -206,7 +209,14 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   };
 
   return (
-    <View className="bead-selector-container">
+    <View className="bead-selector-container" style={{ height: styleHeight }}>
+      {/* 水平Tab选择器 */}
+      <View className="bead-selector-tabs-container">
+        {curType === "crystal" && renderCrystalTypes()}
+        {curType === "accessories" && renderAccessoryTypes()}
+        {curType === "crystal" && renderBeads()}
+        {curType === "accessories" && renderAccessoryBeads()}
+      </View>
       {
         Object.keys(beadTypeMap).length === 0 && Object.keys(accessoryTypeMap).length === 0 ? (
           <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
@@ -226,11 +236,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
             />
           )
       }
-      {/* 水平Tab选择器 */}
-      {curType === "crystal" && renderCrystalTypes()}
-      {curType === "accessories" && renderAccessoryTypes()}
-      {curType === "crystal" && renderBeads()}
-      {curType === "accessories" && renderAccessoryBeads()}
     </View>
   );
 };

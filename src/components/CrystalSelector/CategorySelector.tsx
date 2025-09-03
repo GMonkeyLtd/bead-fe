@@ -30,18 +30,20 @@ const CrystalCategorySelector: React.FC<CrystalCategorySelectorProps> = ({
   className = ''
 }) => {
   const [selected, setSelected] = useState(selectedCategory);
+  console.log('selected', selected);
 
   const handleCategoryClick = (categoryId: string) => {
+    console.log('categoryId', categoryId);
     setSelected(categoryId);
     onCategoryChange?.(categoryId);
   };
 
   return (
     <View className={`crystal-category-selector ${className}`}>
-      {categories.map((category) => (
+      {categories.map((category, index) => (
         <View
           key={category.id}
-          className={`category-item ${selected === category.id ? 'selected' : ''}`}
+          className={`category-item ${selected === category.id ? 'selected' : ''} ${index === 0 ? 'first' : ''} ${index === categories.length - 1 ? 'last' : ''}`}
           onClick={() => handleCategoryClick(category.id)}
         >
           <View className="category-icon">

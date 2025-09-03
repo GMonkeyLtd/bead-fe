@@ -9,6 +9,7 @@ import { usePollDraft } from "@/hooks/usePollDraft";
 import { CUSTOM_RENDER_RATIO } from "@/config/beads";
 import { usePageQuery } from "@/hooks/usePageQuery";
 import { imageToBase64 } from "@/utils/imageUtils";
+import { getScreenHeight } from "@/utils/style-tools";
 
 export enum SPU_TYPE {
   BEAD = 1,
@@ -39,6 +40,8 @@ const CustomDesign = () => {
   const { draft, startPolling } = usePollDraft({ showLoading: true });
   const { draftId, sessionId, designId, from } = Taro.getCurrentInstance()?.router?.params || {};
   const [initCustomDraft, setInitCustomDraft] = useState<any>({});
+
+  const screenHeight = useMemo(() => getScreenHeight(), []);
 
   // 从首页直接进diy
   const isFromHome = useMemo(() => {
@@ -290,12 +293,12 @@ const CustomDesign = () => {
   }, []);
 
   return (
-    <PageContainer onBack={handleBack} headerExtraContent="编辑台">
+    <PageContainer onBack={handleBack} headerExtraContent="编辑台" backgroundColor='#F4F1EE'>
       <CustomDesignRing
         wuxing={(draft as any)?.wuxing || []}
         accessoryTypeMap={accessoryTypeMap}
         ref={customDesignRef}
-        size={300}
+        size={screenHeight > 900 ? 300 : 260}
         beads={(draft?.items || [])?.map((item: any) => {
           return {
             ...item,
