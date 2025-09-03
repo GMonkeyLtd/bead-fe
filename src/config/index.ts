@@ -34,6 +34,9 @@ export const LILI_LOADING_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/image
 export const LILI_AVATAR_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/lili-avatar.png";
 export const SERVICE_QRCODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/serivce-qrcode.png";
 export const GENERATING_GIF_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/generating-gif.gif";
+export const RESULT_IMAGE_SLOGAN_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/result-image-slogan.png";
+export const RESULT_IMAGE_TEXTURE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/result-image-texture.png";
+export const RESULT_IMAGE_LOGO_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/reuslt-image-logo.png";
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 

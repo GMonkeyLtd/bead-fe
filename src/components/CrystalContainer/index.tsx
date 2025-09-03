@@ -28,8 +28,8 @@ const CrystalContainer = ({
         keyboardVisible ? "keyboard-visible" : ""
       }`}
       style={{
-        background:
-          "linear-gradient(180deg, rgba(213, 195, 157, 0.50) 0%, rgba(252, 245, 240, 0.80) 19.55%, #FFFCFA 100%)",
+        // background:
+        //   "linear-gradient(180deg, rgba(213, 195, 157, 0.50) 0%, rgba(252, 245, 240, 0.80) 19.55%, #FFFCFA 100%), ",
         backdropFilter: "blur(24px)",
         ...(disablePaddingBottom && {
           paddingBottom: 0,

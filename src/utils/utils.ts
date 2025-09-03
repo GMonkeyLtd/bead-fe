@@ -3,6 +3,7 @@ import {
   BEAD_SIZE_TEMPLATE,
   WISH_TEMPLATES,
 } from "@/config/beads";
+import { BeadItem } from "./api-session";
 
 const isBeadSize = (value: string) => {
   const len = value.length;
@@ -27,3 +28,19 @@ export const getRecommendTemplate = (wish: string) => {
   const template = WISH_TEMPLATES.find((item) => item.wish === wish);
   return template?.reply || wish;
 };
+
+
+export const getDeduplicateBeads = (beads: BeadItem[], duplicateKey: string) => {
+  const duplicateKeys = new Set();
+  return beads.filter((item) => {
+    if (!item?.func_summary) {
+      return false;
+    }
+    if (duplicateKeys.has(item[duplicateKey])) {
+      return false;
+    }
+    duplicateKeys.add(item[duplicateKey]);
+    return true;
+  });
+  
+} 

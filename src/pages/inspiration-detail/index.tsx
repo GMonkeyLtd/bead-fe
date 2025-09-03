@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, ScrollView, Image, Button } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import styles from "./index.module.scss";
@@ -16,6 +16,12 @@ import apiSession from "@/utils/api-session";
 import BudgetDialog from "@/components/BudgetDialog";
 import apiPay from "@/utils/api-pay";
 import { pageUrls } from "@/config/page-urls";
+import { getDeduplicateBeads } from "@/utils/utils";
+import { InspirationItem } from "../inspiration";
+import editInspirationSvg from "@/assets/icons/edit-inspiration.svg";
+import PromoBanner from "@/components/PromoBanner";
+import MaterialSvg from "@/assets/icons/material.svg";
+import AppHeader from "@/components/AppHeader";
 
 interface BeadInfo {
   id: string;
@@ -26,40 +32,30 @@ interface BeadInfo {
   color: string;
 }
 
-interface InspirationDetail {
-  work_id: string;
-  title: string;
-  number: string;
-  description: string;
-  cover_url: string;
-  images: string[];
-  likes_count: number;
-  created_at: string;
-  final_price: number;
-  original_price: number;
-  user: {
-    user_id: string;
-    nick_name: string;
-    avatar_url: string;
-  };
-  beads: BeadInfo[];
-}
-
 const InspirationDetailPage: React.FC = () => {
   const router = useRouter();
   const { workId, designId } = router.params || {};
   const [designData, setDesignData] = useState<any>(null);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
-  const [detail, setDetail] = useState<InspirationWord | null>(null);
+  const [detail, setDetail] = useState<InspirationItem | null>(null);
   const [loading, setLoading] = useState(true);
-  const { height: navBarHeight } = getNavBarHeightAndTop();
+  const { height: navBarHeight, top: navBarTop } = getNavBarHeightAndTop();
+  const [isOnSale, setIsOnSale] = useState(true);
+
+
+  const deduplicateBeads = useMemo(() => {
+    // 按spu_id对designData?.info?.items进行去重  
+    const beads = designData?.info?.items || [];
+    return getDeduplicateBeads(beads, 'spu_id')?.filter((item) => !!item.func_summary);
+  }, [designData]);
+
   const getInspirationDetail = async (work_id) => {
     try {
       setLoading(true);
       inspirationApi.getInspirationData({ work_id }).then((res) => {
         console.log(res, "res?.data[0]");
-        setDetail(res?.data?.works?.[0] as InspirationDetail);
+        setDetail(res?.data?.works?.[0] as InspirationItem);
       });
     } catch (error) {
       console.error("获取灵感详情失败:", error);
@@ -193,39 +189,58 @@ const InspirationDetailPage: React.FC = () => {
   const handlePurchase = () => {
     apiPay.buySameProduct({ word_id: detail.work_id }).then((res) => {
       const { order_uuid } = res?.data || {};
-        Taro.getSetting({ 
-          success: (res) => {
-            console.log(res, 'res')
-          }
-        })
-        Taro.requestSubscribeMessage({
-          tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
-          entityIds: [order_uuid], // 添加必需的 entityIds 参数
-          complete: () => {
-            Taro.redirectTo({
-              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-            })
-          },
-          success: () => {
-            Taro.redirectTo({
-              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-            })
-          },
-          fail: () => Taro.redirectTo({
+      Taro.getSetting({
+        success: (res) => {
+          console.log(res, 'res')
+        }
+      })
+      Taro.requestSubscribeMessage({
+        tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
+        entityIds: [order_uuid], // 添加必需的 entityIds 参数
+        complete: () => {
+          Taro.redirectTo({
             url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
           })
-        });
+        },
+        success: () => {
+          Taro.redirectTo({
+            url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+          })
+        },
+        fail: () => Taro.redirectTo({
+          url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+        })
+      });
     })
+  }
+
+  const handleEditInspiration = () => {
+    Taro.redirectTo({
+      url: `${pageUrls.customDesign}?sessionId=${designData?.session_id}&draftId=${designData?.draft_id}&from=inspiration`,
+    });
   }
 
 
   return (
-    <CrystalContainer showBack={true} showHome={false}>
+    <View
+      className={styles.resultContainer}
+      style={{
+        height: "100vh",
+        paddingTop: `-${navBarTop}px`,
+        background: "#F5F1EF"
+        // "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
+      }}
+    >
+      <AppHeader
+        extraContent={null}
+        isWhite onBack={() => {
+          Taro.navigateBack();
+        }} />
       <ScrollView
         className={styles.container}
         scrollY
         style={{
-          height: `calc(100vh - ${navBarHeight + 154}px)`,
+          height: `calc(100vh - ${72}px)`,
         }}
       >
         {/* 主图片区域 */}
@@ -233,7 +248,7 @@ const InspirationDetailPage: React.FC = () => {
           <Image
             src={detail.cover_url}
             className={styles.mainImage}
-            mode="aspectFill"
+            mode="widthFix"
           />
 
           {/* 图片指示器 */}
@@ -271,58 +286,94 @@ const InspirationDetailPage: React.FC = () => {
               )}
             </>
           )} */}
+          {isOnSale && (
+            <View className={styles.promoBannerContainer}>
+              <PromoBanner
+                currentPrice={detail.final_price}
+                originalPrice={detail.original_price}
+                promoText="同款制作，每日前20名用户享"
+                discountText="9折"
+                salesCount="120"
+                onClick={undefined}
+              />
+            </View>
+          )}
         </View>
 
         {/* 内容区域 */}
         <View className={styles.contentSection}>
-          {/* 标题区域 */}
-          <View className={styles.titleSection}>
-            <View className={styles.titleContainer}>
-              <Text className={styles.title}>
-                {designData?.info?.name}
-              </Text>
-              <Text
-                className={styles.workNumber}
-              >{`NO.${designData?.design_id}`}</Text>
-            </View>
-            <View className={styles.likeContainer} onClick={handleCollectClick}>
-              <Image
-                src={detail?.is_collect ? CollectedIcon : CollectIcon}
-                className={styles.collectIcon}
-                mode="aspectFill"
-              />
-              <Text className={styles.likeCount}>{detail?.collects_count}</Text>
-            </View>
-          </View>
-
-          {/* 正文区域 */}
-          <View className={styles.descriptionSection}>
-            <Text className={styles.description}>
-              {designData?.info?.description}
-            </Text>
-            {/* 珠子信息区域 */}
-            <BeadList
-              beads={designData?.info?.recommend_beads?.filter((item) => !!item.func_summary)}
-            />
-            {/* 作者和时间 */}
-            <View className={styles.workDetailContainer}>
-              <View className={styles.authorTimeSection}>
-                <View className={styles.authorContainer}>
+          <View className={styles.sectionCardList}>
+            <View className={styles.sectionCard}>
+              {!isOnSale && (<View className={styles.priceSection}>
+                <View className={styles.priceContainer}>
+                  <Text className={styles.pricePrefix}>¥</Text>
+                  <Text className={styles.currentPrice}>{detail.final_price}</Text>
+                  <Text className={styles.originalPrice}>{detail.original_price}</Text>
+                </View>
+              </View>)}
+              {/* 标题区域 */}
+              <View className={styles.titleSection}>
+                <View className={styles.titleContainer}>
+                  <Text className={styles.title}>
+                    {designData?.info?.name}
+                  </Text>
+                  <Text
+                    className={styles.workNumber}
+                  >{`NO.${designData?.design_id}`}</Text>
+                </View>
+                <View className={styles.likeContainer} onClick={handleCollectClick}>
                   <Image
-                    src={detail.user.avatar_url}
-                    className={styles.authorAvatar}
+                    src={detail?.is_collect ? CollectedIcon : CollectIcon}
+                    className={styles.collectIcon}
                     mode="aspectFill"
                   />
-                  <Text className={styles.authorName}>
-                    {detail.user.nick_name}
-                  </Text>
+                  <Text className={styles.likeCount}>{detail?.collects_count}</Text>
                 </View>
-                <View className={styles.divider} />
-                <Text className={styles.publishTime}>
-                  {formatTime(detail.created_at)}
+              </View>
+
+              {/* 正文区域 */}
+              <View className={styles.descriptionSection}>
+                <Text className={styles.description}>
+                  {designData?.info?.description}
                 </Text>
               </View>
-              <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 &gt;</View>
+            </View>
+            <View className={styles.sectionCard}>
+              <View className={styles.beadListSection}>
+                <View className={styles.crystalMaterialTitleContainer}>
+                  <Image
+                    src={MaterialSvg}
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                  <Text className={styles.crystalMaterialTitle}>
+                    水晶材料
+                  </Text>
+                </View>
+                {/* 珠子信息区域 */}
+                <BeadList
+                  beads={deduplicateBeads}
+                />
+                {/* 作者和时间 */}
+                <View className={styles.workDetailContainer}>
+                  <View className={styles.authorTimeSection}>
+                    <View className={styles.authorContainer}>
+                      <Image
+                        src={detail.user.avatar_url}
+                        className={styles.authorAvatar}
+                        mode="aspectFill"
+                      />
+                      <Text className={styles.authorName}>
+                        {detail.user.nick_name}
+                      </Text>
+                    </View>
+                    <View className={styles.divider} />
+                    <Text className={styles.publishTime}>
+                      {formatTime(detail.created_at)}
+                    </Text>
+                  </View>
+                  <View className={styles.detailActionContainer} onClick={() => setBraceletDetailDialogShow(true)}>手串明细 &gt;</View>
+                </View>
+              </View>
             </View>
           </View>
         </View>
@@ -330,20 +381,23 @@ const InspirationDetailPage: React.FC = () => {
 
       {/* 底部按钮 */}
       <View className={styles.bottomBar}>
-        {/* <View className={styles.separator} /> */}
+        {/* <View className={styles.editorContainer} onClick={handleEditInspiration}>
+            <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
+            <View className={styles.editorText}>编辑</View>
+        </View> */}
         {designData?.session_id && designData?.reference_price && (<CrystalButton
           onClick={() => {
             setBudgetDialogShow(true)
           }}
-          text="制作同款"
-          icon={
+          text={detail.final_price ? `¥${detail.final_price} 制作同款` : "制作同款"}
+          icon={detail.final_price ? undefined : (
             <Image
               src={createBeadImage}
               mode="widthFix"
               style={{ width: "24px", height: "24px" }}
             />
-          }
-          style={{ width: "220px", margin: "24px 0 24px", }}
+          )}
+          style={{ flex: 1, margin: "24px 0 24px", }}
           isPrimary={true}
         />)}
       </View>
@@ -362,30 +416,16 @@ const InspirationDetailPage: React.FC = () => {
           onConfirm={handlePurchase}
         />
       )}
-      {braceletDetailDialogShow && designData?.info?.beads?.length > 0 && (
+      {braceletDetailDialogShow && designData?.info?.items?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}
-          beads={designData?.info?.beads}
+          beads={designData?.info?.items}
           title={designData?.info?.name}
           onClose={() => setBraceletDetailDialogShow(false)}
           wristSize={designData?.info?.spec?.wrist_size}
         />
       )}
-       {budgetDialogShow && (
-        <BudgetDialog
-          visible={budgetDialogShow}
-          title={designData?.info?.name}
-          designNumber={designData?.design_id}
-          productImage={detail.cover_url}
-          onClose={() => setBudgetDialogShow(false)}
-          referencePrice={designData?.reference_price}
-          originalPrice={detail?.original_price}
-          // onModifyDesign={handleModifyDesign}
-          creatorName={detail.user.nick_name}
-          isSameProduct
-        />
-      )}
-    </CrystalContainer>
+    </View>
   );
 };
 

@@ -13,7 +13,6 @@ import {
   GENERATING_GIF_URL,
 } from "@/config";
 import shareDesignImage from "@/assets/icons/share-design.svg";
-// import PosterGenerator from "@/components/PosterGenerator";
 import BudgetDialog from "@/components/BudgetDialog";
 import OrderListComp from "@/components/OrderListComp";
 import api from "@/utils/api";
@@ -26,6 +25,9 @@ import MaterialSvg from "@/assets/icons/material.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
 import apiSession from "@/utils/api-session";
 import { usePollDesign } from "@/hooks/usePollDesign";
+import { getDeduplicateBeads } from "@/utils/utils";
+import ProductImageGenerator from "@/components/ProductImageGenerator";
+import { imageToBase64 } from "@/utils/imageUtils";
 
 const Result = () => {
   const instance = Taro.getCurrentInstance();
@@ -51,8 +53,9 @@ const Result = () => {
   const [designSessionId, setDesignSessionId] = useState<string>("");
   const [designDraftId, setDesignDraftId] = useState<string>("");
   const [braceletSpec, setBraceletSpec] = useState<any>({});
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string>("");
   const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
-  
+
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
 
   const getOrderData = (orderUuid: string[]) => {
@@ -66,20 +69,21 @@ const Result = () => {
   }, [beadsInfo]);
 
   const processDesignData = (designData) => {
-    const { design_id, image_url, info, reference_price, session_id, draft_id } =
+    const { design_id, image_url, draft_url, info, reference_price, session_id, draft_id, background_url } =
       designData || {};
     const {
       name,
       description,
-      recommend_beads,
       rizhu,
       wuxing,
       spec
     } = info;
+    const deduplicatedBeads = getDeduplicateBeads(info.items, 'spu_id');
     setBeadsInfo(info.items);
-    setImageUrl(image_url);
+    image_url && setImageUrl(image_url);
     setBraceletName(name);
-    setBeadDescriptions(recommend_beads.filter((item) => !!item.wuxing));
+    setBackgroundImageUrl(background_url);  
+    setBeadDescriptions(deduplicatedBeads.filter((item) => !!item.func_summary));
     setDesignNo(design_id);
     setBraceletDescription(description);
     setRizhuInfo(rizhu || wuxing?.[0]);
@@ -88,6 +92,8 @@ const Result = () => {
     setDesignSessionId(session_id);
     setDesignDraftId(draft_id);
     setBraceletSpec(spec);
+    draft_url && setOriginImageUrl(draft_url);
+    background_url && setBackgroundImageUrl(background_url);
   }
 
   useEffect(() => {
@@ -112,14 +118,6 @@ const Result = () => {
       })
     }
   };
-
-  useEffect(() => {
-    if (designDraftId) {
-      apiSession.getDesignDraft({ session_id: designSessionId, draft_id: designDraftId }).then((res) => {
-        res.data.image_url && setOriginImageUrl(res.data.image_url);
-      })
-    }
-  }, [designDraftId])
 
   useDidShow(() => {
     initData();
@@ -271,10 +269,6 @@ const Result = () => {
 
   const viewImage = () => {
     if (!imageUrl) {
-      Taro.showToast({
-        title: "暂无图片",
-        icon: "none",
-      });
       return;
     }
 
@@ -290,13 +284,28 @@ const Result = () => {
     });
   };
 
+  const uploadProductImage = async (productImageUrl: string) => {
+    const productImageBase64 = await imageToBase64(productImageUrl, true, false, 'webp')
+    apiSession.uploadProductImage({
+      session_id: designSessionId,
+      draft_id: designDraftId,
+      image_base64: productImageBase64,
+    }).then((res) => {
+      console.log(res);
+    });
+  }
+
+  const posterData = useMemo(() => {
+    return { bgImage: backgroundImageUrl, braceletImage: originImageUrl }
+  }, [backgroundImageUrl, originImageUrl])
+
   return (
     <View
       className={styles.resultContainer}
       style={{
         height: "100vh",
         paddingTop: `-${navBarTop}px`,
-        "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
+        // "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
       }}
     >
       <AppHeader isWhite onBack={() => {
@@ -339,15 +348,14 @@ const Result = () => {
           <View
             className={styles.resultContentCardImage}
             onClick={viewImage}
-            style={imageUrl ? { background: `url(${imageUrl}) center/cover` } : undefined}
           >
-            {/* {imageUrl && (
-              <Image src={imageUrl} mode="widthFix" style={{ width: '100%', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
-            )} */}
             {!imageUrl && (
               <View className={styles.originImageContainer}>
                 <Image src={originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL} mode="heightFix" style={{ height: '70%' }} />
               </View>
+            )}
+            {imageUrl && (
+              <Image src={imageUrl} mode="aspectFill" style={{ width: '100%' }} />
             )}
             <View className={styles.logoImageContainer} onClick={viewImage}>
               <Image
@@ -511,16 +519,14 @@ const Result = () => {
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
-      {/* <PosterGenerator  // 生成海报   
+      {originImageUrl && backgroundImageUrl && !imageUrl && <ProductImageGenerator  // 生成海报   
         data={posterData}
         onGenerated={(url) => {
-          setShareImageUrl(url);
-          if (autoShareRef.current) {
-            saveImage(url);
-          }
+          !imageUrl && setImageUrl(url);
+          uploadProductImage(url);
         }}
-        showPoster={false}
-      /> */}
+        showProductImage={false}
+      />}
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}

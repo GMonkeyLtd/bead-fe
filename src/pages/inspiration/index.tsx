@@ -18,9 +18,10 @@ import RightArrowIcon from "@/assets/icons/right-arrow.svg";
 import CollectIcon from "@/assets/icons/collect.svg";
 import CollectedIcon from "@/assets/icons/collect-active.svg";
 import MyWorkIcon from "@/assets/icons/my-work.svg";
+import { FixedPriceTag, LimitedTimeTag, PromoText } from "@/components/InspirationTags";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
 
-interface InspirationItem {
+export interface InspirationItem {
   work_id: string;
   title: string;
   cover_url: string;
@@ -31,6 +32,11 @@ interface InspirationItem {
     avatar_url: string;
   };
   collects_count: number;
+  is_limited_time?: boolean; // 是否为限时促销
+  final_price: boolean;
+  original_price: number;
+  reference_price: number;
+  cost_price: number;
 }
 
 const INSPIRATION_TABS = [
@@ -120,7 +126,7 @@ const InspirationPage: React.FC = () => {
 
   const showData = useMemo(() => {
     if (curTab === "all") {
-      return inspirationList;
+      return inspirationList.map(item => ({ ...item, is_limited_time: true }));
     } else {
       return collectInspirationList;
     }
@@ -333,9 +339,8 @@ const InspirationPage: React.FC = () => {
           {INSPIRATION_TABS.map((tab) => (
             <View
               key={tab.value}
-              className={`${styles.tabItem} ${
-                curTab === tab.value ? styles.tabActive : ""
-              }`}
+              className={`${styles.tabItem} ${curTab === tab.value ? styles.tabActive : ""
+                }`}
               onClick={() => setCurTab(tab.value as "all" | "collect")}
             >
               {curTab === tab.value && (
@@ -376,36 +381,54 @@ const InspirationPage: React.FC = () => {
                     mode="aspectFill"
                     lazyLoad
                   />
+                  {item?.is_limited_time && 
+                    <View className={styles.limitedTimeTagContainer}>
+                      <LimitedTimeTag text="限时" type="limited" />
+                    </View>
+                  }
                 </View>
 
                 <View className={styles.itemInfo}>
+                  <View className={styles.authorInfoContainer}>
+                    <View className={styles.authorInfo}>
+                      <View className={styles.authorProfile}>
+                        <Image
+                          src={item.user.avatar_url}
+                          className={styles.authorAvatar}
+                          mode="aspectFill"
+                          lazyLoad
+                        />
+                        <Text className={styles.authorName}>{item.user.nick_name}</Text>
+                      </View>
+                      {/* <View className={styles.separator}></View>
+                      <Text className={styles.tagText}>水金火</Text> */}
+                    </View>
+                  </View>
+                  {/* 促销标语 */}
+                  {item?.is_limited_time && (
+                    <PromoText 
+                      text="同款制作，每日前20名享" 
+                      discountText="9折"
+                      className={styles.promoTextContainer}
+                    />
+                  )}
+                  
                   <View className={styles.titleSection}>
                     <Text className={styles.itemTitle}>{item.title}</Text>
-                    <Image
-                      src={RightArrowIcon}
-                      style={{ width: "16px", height: "10px" }}
-                      mode="aspectFill"
-                    />
+                  </View>
+
+                  <View className={styles.priceSection}>
+                    <View className={styles.priceContainer}>
+                      <Text className={styles.pricePrefix}>¥</Text>
+                      <Text className={styles.currentPrice}>{item.final_price}</Text>
+                      <Text className={styles.originalPrice}>{item.original_price}</Text>
+                    </View>
                   </View>
 
                   <View className={styles.userSection}>
-                    <View className={styles.userInfo}>
-                      <Image
-                        src={item.user.avatar_url}
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          borderRadius: "50%",
-                          border: "1px solid #ffffff",
-                        }}
-                        mode="aspectFill"
-                        lazyLoad
-                      />
-                      <Text className={styles.userName}>
-                        {item.user.nick_name}
-                      </Text>
-                    </View>
-
+                    {item.is_limited_time && (
+                      <FixedPriceTag  />
+                    )}
                     <View
                       className={styles.collectSection}
                       onClick={(e) => handleCollectClick(item, e)}

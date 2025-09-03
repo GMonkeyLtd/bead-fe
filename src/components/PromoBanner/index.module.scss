@@ -1,0 +1,171 @@
+.promoBanner {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 24px 24px;
+    background: linear-gradient(90deg, rgba(255, 63, 34, 1) 50%, rgba(255, 158, 94, 1) 100%);
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.priceSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.priceInfo {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 6px;
+    width: 100%;
+}
+
+.pricePrefix {
+    color: #FFF;
+    font-family: "Helvetica Neue";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.currentPrice {
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1;
+    color: #FFFFFF;
+}
+
+.divider {
+    width: 1px;
+    height: 12px;
+    background: rgba(244, 241, 229, 0.5);
+}
+
+.originalPrice {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 1.182em;
+    color: #FFFFFF;
+    text-decoration: line-through;
+    flex: 1;
+}
+
+.promoTag {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    width: fit-content;
+}
+
+.promoIcon {
+    width: 16px;
+    height: 16px;
+    background: #FFFFFF;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconWrapper {
+    width: 10px;
+    height: 13.67px;
+    position: relative;
+    top: 1.17px;
+    left: 3px;
+    background-image: url('../../assets/icons/promo-icon.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: brightness(0) saturate(100%) invert(85%) sepia(85%) saturate(1352%) hue-rotate(359deg) brightness(104%) contrast(101%);
+}
+
+.promoText {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 1.2em;
+    color: rgba(255, 255, 255, 0.9);
+}
+.discountText {
+   font-weight: 500;
+}
+
+.salesSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 6px;
+    height: 100%;
+}
+
+.fireIcon {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.fireIcon {
+    width: 68.2px;
+    height: 22px;
+    background-image: url('../../assets/icons/fire-icon.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.salesInfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    height: 24px;
+}
+
+.salesLabel {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 1.2em;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.salesCount {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    line-height: 1.221em;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 响应式调整 */
+@media (max-width: 375px) {
+    .promoBanner {
+        width: 100%;
+        padding: 10px 16px 20px;
+    }
+
+    .currentPrice {
+        font-size: 28px;
+    }
+}

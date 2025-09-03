@@ -74,6 +74,7 @@ export default function OrderList({
   >(null);
   const [orderActionDialog, setOrderActionDialog] = useState<any>(null);
   const logisticsPlugin = requirePlugin("logisticsPlugin");
+  console.log(orders, 'orders')
   const handleClose = () => {
     setDetailData(null);
   };
@@ -102,27 +103,6 @@ export default function OrderList({
           icon: "error",
         });
       });
-  };
-
-  const handleCompleteOrder = async (order: Order) => {
-    const res = await showModal({
-      title: "确认完成",
-      content: `确定完成订单 ${order.order_uuid} 吗？`,
-      confirmText: "确认完成",
-      cancelText: "取消",
-    });
-
-    if (res.confirm) {
-      merchantApi.user.completeOrder(order.order_uuid).then((res: any) => {
-        if (res.code === 200) {
-          showToast({
-            title: "完成订单成功",
-            icon: "success",
-          });
-          onRefresh?.();
-        }
-      });
-    }
   };
 
   const handleOrderDetail = (order: Order) => {
@@ -183,12 +163,12 @@ export default function OrderList({
       copyData = "";
     if (order.user_info?.default_contact === 0) {
       const phone = order.user_info?.phone || "";
-      const maskedPhone = maskContactInfo(phone, "phone");
+      const maskedPhone = phone;//maskContactInfo(phone, "phone");
       info = `电话：${maskedPhone}`;
       copyData = phone; // 复制时使用原始数据
     } else {
       const wechat = order.user_info?.wechat_id || "";
-      const maskedWechat = maskContactInfo(wechat, "wechat");
+      const maskedWechat = wechat;//maskContactInfo(wechat, "wechat");
       info = `微信：${maskedWechat}`;
       copyData = wechat; // 复制时使用原始数据
     }
@@ -292,9 +272,11 @@ export default function OrderList({
                       productName={
                         order.design_info?.word_info?.bracelet_name || ""
                       }
+                      beadsInfo={order.design_info?.items || []}
                       productImage={order.design_info?.image_url || ""}
                       onClose={() => setOrderActionDialog(null)}
                       onConfirm={submitPriceCb}
+                      wristSize={order.design_info?.spec?.wrist_size || ""}
                     />
                   );
                 }}
@@ -521,9 +503,16 @@ export default function OrderList({
                     <Text className={styles.orderTime}>{order.created_at}</Text>
                   </View>
                 </View>
-                <Text className={styles.orderPrice}>
-                  ¥{order.price.toFixed(2)}
-                </Text>
+                <View className={styles.orderPriceContainer}>
+                  {order.community_info && (
+                    <View className={styles.communityTag}>
+                      同款
+                    </View>
+                  )}
+                  <Text className={styles.orderPrice}>
+                    ¥{order.price.toFixed(2)}
+                  </Text>
+                </View>
               </View>
 
               {renderActionButtons(order)}

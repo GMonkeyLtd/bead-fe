@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useRef, useCallback, useMemo } from "react";
 import Taro from "@tarojs/taro";
 import { ImageCacheManager } from "@/utils/image-cache";
 import {
@@ -60,7 +60,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
 
     try {
       const processedPaths = await ImageCacheManager.processImagePaths(imageUrls);
-      return dotsBgImageData.map((item, index) => {
+      return dotsBgImageData.map((item) => {
         const originalPath = item.image_url;
         return processedPaths.get(originalPath) || originalPath;
       });
@@ -127,7 +127,45 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           if (isFloatAccessory) {
             ctx.drawImage(bgImg as any, -(scale_height * image_aspect_ratio), -scale_height, 2 * scale_height * image_aspect_ratio, scale_height * 2);
           } else {
+            
             ctx.drawImage(bgImg as any, -scale_width, -scale_height, scale_width * 2, scale_height * 2);
+          }
+
+          // 绘制珠子高光效果 - 参考MovableBeadRenderer的实现
+          if (!isFloatAccessory) {
+            // 创建径向渐变 - 模拟CSS的 radial-gradient(ellipse at 30% 30%, rgba(255,255,255) 0%, rgba(255,255,255,0.4) 75%, transparent 100%)
+            const highlightWidth = scale_width * 2 * 0.2; // 宽度为直径的20%
+            const highlightHeight = scale_height * 2 * 0.1; // 高度为直径的10%
+            
+            // 高光位置：左上角25%，25%的位置（相对于珠子中心的偏移）
+            const highlightX = -scale_width + (scale_width * 2 * 0.25); // 左上角25%位置
+            const highlightY = -scale_height + (scale_height * 2 * 0.25); // 左上角25%位置
+            
+            // 保存当前状态以应用高光旋转
+            ctx.save();
+            
+            // 移动到高光中心位置
+            ctx.translate(highlightX, highlightY);
+            
+            // 旋转-45度
+            ctx.rotate(-Math.PI / 4);
+            
+            // 创建椭圆形径向渐变
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(highlightWidth, highlightHeight) / 2);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); // 中心白色
+            gradient.addColorStop(0.75, 'rgba(255, 255, 255, 0.4)'); // 75%处半透明白色
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)'); // 边缘透明
+            
+            // 设置填充样式
+            ctx.fillStyle = gradient;
+            
+            // 绘制椭圆高光
+            ctx.beginPath();
+            ctx.ellipse(0, 0, highlightWidth / 2, highlightHeight / 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 恢复状态
+            ctx.restore();
           }
 
           // 恢复Canvas状态
