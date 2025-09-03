@@ -103,6 +103,8 @@ export class BeadPositionManager {
     // }
 
     const newBeads = this.calculator.addBead(this.state.beads, newBead, this.state.selectedBeadIndex);
+    const newSelectedIndex = this.state.selectedBeadIndex !== -1 ? this.state.selectedBeadIndex : 0;
+    this.setState({ selectedBeadIndex: newSelectedIndex }, true);
     await this.setBeads(newBeads);
   }
 

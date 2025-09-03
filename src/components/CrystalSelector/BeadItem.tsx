@@ -47,7 +47,7 @@ const BeadItem: React.FC<BeadItemProps> = ({
   return (
     <View 
       className={`bead-item-card ${className}`}
-      onClick={onItemClick}
+      onClick={() => onItemClick?.()}
     >
       {/* 主要内容区域 */}
       <View className="bead-item-main">

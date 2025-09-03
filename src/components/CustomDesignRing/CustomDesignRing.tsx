@@ -10,7 +10,7 @@ import { View, Image, MovableArea } from "@tarojs/components";
 import Taro, { base64ToArrayBuffer } from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
-import BeadSelector from "../CrystalSelector/BeadSelector";
+import BeadSelector, { BeadType } from "../CrystalSelector/BeadSelector";
 import MovableBeadRenderer from "./MovableBeadRenderer";
 import RingOperationControls from "./RingOperationControls";
 import "./styles/CustomDesignRing.scss";
@@ -21,16 +21,6 @@ import { Bead } from "../../../types/crystal";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 import HistoryOperations from "./HistoryOperations";
 import BeadSizeSelector from "../BeadSizeSelector";
-
-interface BeadType {
-  name: string;
-  beadList: {
-    id?: string | number;
-    name: string;
-    image_url: string;
-    diameter: number;
-  }[];
-}
 
 // 定义ref暴露的接口
 export interface CustomDesignRingRef {
@@ -76,6 +66,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [currentWuxing, setCurrentWuxing] = useState<string>("");
   const [currentAccessoryType, setCurrentAccessoryType] = useState<AccessoryType | ''>("");
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [beadSizeList, setBeadSizeList] = useState<number[]>([8, 10, 12, 13, 14, 15]);
+  const [currentBeadSize, setCurrentBeadSize] = useState<number>(8);  
 
   const beadPositionConfig: BeadPositionManagerConfig = {
     canvasSize,
@@ -232,13 +224,13 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   }), [imageUrl, positionManagerState.beads, positionManagerState.predictedLength, positionManagerState.selectedBeadIndex]);
 
   // 处理珠子点击
-  const handleBeadClick = useCallback(async (bead: {
+  const processBeadClick = useCallback(async (bead: {
     id?: string | number;
     name: string;
     image_url: string;
     diameter: number;
     image_aspect_ratio?: number;
-  }) => {
+  }, action: "add" | "replace") => {
     if (!positionManagerRef.current) return;
     try {
       // 转换为Bead类型
@@ -247,10 +239,10 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         id: bead.id || `bead_${Date.now()}`, // 确保id不为undefined
       };
 
-      if (positionManagerState.selectedBeadIndex === -1) {
+      if (action === "add") {
         // 添加新珠子
         await positionManagerRef.current.addBead(beadData);
-      } else {
+      } else if (action === "replace" && positionManagerState.selectedBeadIndex !== -1) {
         // 替换选中的珠子
         await positionManagerRef.current.replaceBead(beadData);
       }
@@ -268,6 +260,19 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       }
     }
   }, [positionManagerState.selectedBeadIndex, renderRatio]);
+
+  const handleBeadClick = useCallback(async (bead: BeadType, action: "add" | "replace" | "select") => {
+    if (action === "select") {
+      setBeadSizeList(bead.beadSizeList);
+      setCurrentBeadSize(bead.diameter);
+      return;
+    }
+    setBeadSizeList(bead.beadSizeList);
+    const newBeadSize = bead.beadSizeList.includes(currentBeadSize) ? currentBeadSize : bead.beadSizeList[0];
+    setCurrentBeadSize(newBeadSize);
+    const newBead = bead.beadList.find(item => item.diameter === newBeadSize);
+    processBeadClick(newBead as Bead, action);
+  }, [processBeadClick, currentBeadSize]);
 
   // 处理珠子选择
   const handleBeadSelect = useCallback((index: number) => {
@@ -456,8 +461,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     };
   }, []);
 
-  // console.log(accessoryTypeMap, 'accessoryTypeMap')
-  console.log(accessoryTypeMap, 'accessoryTypeMap')
+  const handleBeadSizeChange = useCallback((size: number) => {
+    setCurrentBeadSize(size);
+    if (positionManagerState.selectedBeadIndex !== -1) {
+      handleBeadClick(positionManagerState.beads[positionManagerState.selectedBeadIndex], "replace");
+    }
+  }, [positionManagerState.selectedBeadIndex, handleBeadClick, positionManagerState.beads]);
 
   return (
     <View className="custom-design-ring-container">
@@ -554,7 +563,13 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           <View className="custom-design-bead-size-selector-title">
             尺寸(mm):
           </View>
-          <BeadSizeSelector value={8} options={[8, 10, 12, 13, 14, 15, 16]} onChange={console.log} />
+          {positionManagerState.selectedBeadIndex === -1 ? (
+            <View className="custom-design-bead-size-selector-tip">
+              请先选择珠子
+            </View>
+          ) : (
+            <BeadSizeSelector value={currentBeadSize} options={beadSizeList} onChange={handleBeadSizeChange} />
+          )}
         </View>
         <BeadSelector
           styleHeight={`calc(100% - 50px)`}
@@ -567,6 +582,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           onWuxingChange={handleWuxingChange}
           onAccessoryTypeChange={setCurrentAccessoryType}
           onBeadClick={handleBeadClick}
+          currentSelectedBead={positionManagerState.beads?.[positionManagerState.selectedBeadIndex]}
         />
       </View>
     </View>

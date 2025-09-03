@@ -112,17 +112,20 @@ const CustomDesign = () => {
         const key = `${item.spu_id}_${item.name}`;
         if (acc[key]) {
           acc[key].beadList.push(item);
+          acc[key].beadSizeList.push(item.diameter);
         } else {
           acc[key] = {
+            image_url: item.image_url,
             id: item.spu_id,
             name: item.name,
             wuxing: item.wuxing || [],
-            beadList: [item]
+            beadList: [item],
+            beadSizeList: [item.diameter]
           };
         }
+        acc[key].beadSizeList = [...new Set(acc[key].beadSizeList)]?.sort((a: number, b: number) => a - b);
         return acc;
       }, {});
-
       // 转换为数组格式
       const aggregatedBeadList = Object.values(aggregatedBeads);
 
@@ -139,15 +142,36 @@ const CustomDesign = () => {
           return acc;
         }, {})
       );
-      const aggregatedAccessories = accessories.reduce((acc: Record<string, AccessoryItem[]>, item: AccessoryItem) => {
-        if (acc[item.type]) {
-          acc[item.type].push(item);
+
+      const aggregatedAccessories =  accessories.reduce((acc: Record<string, any>, item: any) => {
+        const key = `${item.spu_id}_${item.name}`;
+        if (acc[key]) {
+          acc[key].beadList.push(item);
+          acc[key].beadSizeList.push(item.diameter);
         } else {
-          acc[item.type] = [item];
+          acc[key] = {
+            image_url: item.image_url,
+            id: item.spu_id,
+            name: item.name,
+            type: item.type,
+            beadList: [item],
+            beadSizeList: [item.diameter]
+          };
         }
+        acc[key].beadSizeList = [...new Set(acc[key].beadSizeList)]?.sort((a: number, b: number) => a - b);
         return acc;
       }, {});
-      setAccessoryTypeMap(aggregatedAccessories);
+      const aggregatedAccessoriesList = Object.values(aggregatedAccessories);
+    
+      setAccessoryTypeMap(aggregatedAccessoriesList.reduce((acc: Record<string, any[]>, item: any) => {
+        // 使用第一个item的wuxing属性
+          if (acc[item.type]) {
+            acc[item.type].push(item);
+          } else {
+            acc[item.type] = [item];
+          }
+        return acc;
+      }, {}));
     }
   }, [skuHasMore, skuList]);
 
