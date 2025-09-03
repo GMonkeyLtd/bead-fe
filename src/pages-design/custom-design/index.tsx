@@ -1,6 +1,6 @@
 import Taro from "@tarojs/taro";
 import CustomDesignRing, { CustomDesignRingRef } from "@/components/CustomDesignRing/CustomDesignRing";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef, useMemo } from "react";
 import api, { beadsApi } from "@/utils/api";
 import PageContainer from "@/components/PageContainer";
 import { pageUrls } from "@/config/page-urls";
@@ -38,6 +38,22 @@ const CustomDesign = () => {
   const [accessoryTypeMap, setAccessoryTypeMap] = useState<any>({});
   const { draft, startPolling } = usePollDraft({ showLoading: true });
   const { draftId, sessionId, designId, from } = Taro.getCurrentInstance()?.router?.params || {};
+  const [initCustomDraft, setInitCustomDraft] = useState<any>({});
+
+  // 从首页直接进diy
+  const isFromHome = useMemo(() => {
+    return from === 'home';
+  }, [from]);
+
+  // 从聊天室进diy
+  const isFromChat = useMemo(() => {
+    return from === 'chat';
+  }, [from]);
+
+  // 从结果页进diy
+  const isFromResult = useMemo(() => {
+    return from === 'result';
+  }, [from]);
 
   // 使用ref获取子组件状态
   const customDesignRef = useRef<CustomDesignRingRef>(null);
@@ -78,6 +94,7 @@ const CustomDesign = () => {
     }
   }, [draftId, sessionId]);
 
+  // 获取珠子库
   useEffect(() => {
     if (skuHasMore) {
       loadMoreSku()
@@ -175,7 +192,7 @@ const CustomDesign = () => {
     //     console.log('图片保存成功');
     //   },
     // });
-    if (from === 'result' && !checkDeadsDataChanged((draft as any)?.items || [], editedBeads || [])) {
+    if (isFromResult && !checkDeadsDataChanged((draft as any)?.items || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}}`,
       });
@@ -212,7 +229,7 @@ const CustomDesign = () => {
       image_base64: imageBase64 as string,
     }, { showLoading: true, loadingText: '方案上传中...' }).then((res) => {
       const { draft_id, session_id } = res?.data || {};
-      if (isSaveAndBack && from === 'chat') {
+      if (isSaveAndBack && isFromChat) {
         backToChatDesign(session_id);
       } else {
         Taro.redirectTo({
@@ -227,7 +244,7 @@ const CustomDesign = () => {
   }
 
   const onDirectBack = () => {
-    if (from === 'result') {
+    if (isFromResult) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}`,
       });
@@ -245,7 +262,7 @@ const CustomDesign = () => {
       onDirectBack();
     } else {
       Taro.showActionSheet({
-        itemList: from === 'chat' ? ['直接返回', '保存并返回'] : ['直接返回'],
+        itemList: isFromChat ? ['直接返回', '保存并返回'] : ['直接返回'],
         success: function (res) {
           console.log(res, 'res')
           if (res.tapIndex === 1) {

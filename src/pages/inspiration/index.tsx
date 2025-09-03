@@ -400,8 +400,8 @@ const InspirationPage: React.FC = () => {
                         />
                         <Text className={styles.authorName}>{item.user.nick_name}</Text>
                       </View>
-                      <View className={styles.separator}></View>
-                      <Text className={styles.tagText}>水金火</Text>
+                      {/* <View className={styles.separator}></View>
+                      <Text className={styles.tagText}>水金火</Text> */}
                     </View>
                   </View>
                   {/* 促销标语 */}

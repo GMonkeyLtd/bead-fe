@@ -29,14 +29,16 @@ const Home = () => {
   }, []);
 
   useDidShow(() => {
-    apiSession.getLastSession().then((res) => {
-      if (res.data?.session_id) {
-        setLastSessionId(res.data.session_id);
-      }
-    }).catch((e) => {
-      setLastSessionId("");
-      console.error("getLastSession error: ", e);
-    })
+    setTimeout(() => { 
+      apiSession.getLastSession().then((res) => {
+        if (res.data?.session_id) {
+          setLastSessionId(res.data.session_id);
+        }
+      }).catch((e) => {
+        setLastSessionId("");
+        console.error("getLastSession error: ", e);
+      })
+    }, 200);
   })
 
   const startDesign = () => {
@@ -160,13 +162,13 @@ const Home = () => {
                       />
                     }
                   />
-                  {/* <View className="crystal-link-text" onClick={() => {
+                  <View className="crystal-link-text" onClick={() => {
                     Taro.redirectTo({
                       url: pageUrls.customDesign + '?from=home',
                     });
                   }}>
-                      DIY
-                  </View> */}
+                      DIY设计
+                  </View>
                 </View>
               </View>
             </View>

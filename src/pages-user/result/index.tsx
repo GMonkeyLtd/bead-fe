@@ -80,7 +80,7 @@ const Result = () => {
     } = info;
     const deduplicatedBeads = getDeduplicateBeads(info.items, 'spu_id');
     setBeadsInfo(info.items);
-    setImageUrl(image_url);
+    image_url && setImageUrl(image_url);
     setBraceletName(name);
     setBackgroundImageUrl(background_url);  
     setBeadDescriptions(deduplicatedBeads.filter((item) => !!item.func_summary));
@@ -93,7 +93,7 @@ const Result = () => {
     setDesignDraftId(draft_id);
     setBraceletSpec(spec);
     draft_url && setOriginImageUrl(draft_url);
-    background_url && setBraceletBgImageUrl(background_url);
+    background_url && setBackgroundImageUrl(background_url);
   }
 
   useEffect(() => {
@@ -269,10 +269,6 @@ const Result = () => {
 
   const viewImage = () => {
     if (!imageUrl) {
-      Taro.showToast({
-        title: "暂无图片",
-        icon: "none",
-      });
       return;
     }
 
@@ -309,7 +305,7 @@ const Result = () => {
       style={{
         height: "100vh",
         paddingTop: `-${navBarTop}px`,
-        "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
+        // "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
       }}
     >
       <AppHeader isWhite onBack={() => {
@@ -523,10 +519,10 @@ const Result = () => {
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
-      {originImageUrl && backgroundImageUrl && <ProductImageGenerator  // 生成海报   
+      {originImageUrl && backgroundImageUrl && !imageUrl && <ProductImageGenerator  // 生成海报   
         data={posterData}
         onGenerated={(url) => {
-          setImageUrl(url);
+          !imageUrl && setImageUrl(url);
           uploadProductImage(url);
         }}
         showProductImage={false}

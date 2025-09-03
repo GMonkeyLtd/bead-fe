@@ -165,7 +165,8 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         if (isUnmountedRef.current) {
           return;
         }
-
+        console.log('canvasWidth', canvasWidth);
+        console.log('canvasHeight', canvasHeight);
         // 导出图片
         Taro.canvasToTempFilePath({
           canvasId: "product-image-canvas",

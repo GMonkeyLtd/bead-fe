@@ -92,7 +92,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   });
 
   const { generateCircleRing } = useCircleRingCanvas({
-    targetSize: 1024,
+    targetSize: 640,
     fileType: "png",
   });
 

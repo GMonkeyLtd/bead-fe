@@ -49,7 +49,7 @@ export const BraceletDraftCard = ({
   // 使用独立的CircleRing Canvas实例
   const { generateCircleRing } =
     useCircleRingCanvas({
-      targetSize: 1024,
+      targetSize: 640,
       fileType: "png",
     });
 

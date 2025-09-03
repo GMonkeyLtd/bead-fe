@@ -80,10 +80,10 @@ const OrderDetail: React.FC = () => {
   });
 
   const getOrderDetail = () => {
-    console.log(isOrderPolling, "isOrderPolling, getOrderDetail");
-    if (!isOrderPolling) {
-      startOrderPolling();
+    if (pollingTimerRef.current) {
+      clearInterval(pollingTimerRef.current);
     }
+    startOrderPolling();
   };
 
   useEffect(() => {
@@ -200,6 +200,9 @@ const OrderDetail: React.FC = () => {
       return true; // 表示轮询应该继续
     } catch (error) {
       console.error("查询订单失败:", error);
+      if (pollingTimerRef.current) {
+        clearInterval(pollingTimerRef.current);
+      }
       return true; // 出错时继续轮询
     }
   };
@@ -308,9 +311,6 @@ const OrderDetail: React.FC = () => {
               if (res.extraData.status === 'success') {
                 payApi
                   .confirmOrderCallback({ orderId: order?.order_uuid })
-                  .then(() => {
-                    getOrderDetail();
-                  })
                   .then(() => {
                     getOrderDetail();
                   });
