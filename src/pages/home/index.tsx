@@ -12,12 +12,14 @@ import { AuthManager } from "@/utils/auth";
 import { pageUrls } from "@/config/page-urls";
 import TabBar, { TabBarTheme } from "@/components/TabBar";
 import apiSession from "@/utils/api-session";
+import QrCodeDialog from "@/components/QrCodeDialog";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
   const [lastSessionId, setLastSessionId] = useState("");
   const instance = Taro.getCurrentInstance();
   const { newSession } = instance.router?.params || {};
+  const [qrCodeVisible, setQrCodeVisible] = useState(false);
 
   useEffect(() => {
     AuthManager.clearAuth();
@@ -162,12 +164,17 @@ const Home = () => {
                       />
                     }
                   />
-                  <View className="crystal-link-text" onClick={() => {
+                  {/* <View className="crystal-link-text" onClick={() => {
                     Taro.redirectTo({
                       url: pageUrls.customDesign + '?from=home',
                     });
                   }}>
                       DIY设计
+                  </View> */}
+                  <View className="crystal-link-text" onClick={() => {
+                    setQrCodeVisible(true);                    
+                  }}>
+                      联系客服
                   </View>
                 </View>
               </View>
@@ -181,6 +188,14 @@ const Home = () => {
         visible={showDateTimeDrawer}
         onClose={handleDrawerClose}
       />
+      <QrCodeDialog
+        visible={qrCodeVisible}
+        qrCodeUrl={'https://zhuluoji.cn-sh2.ufileos.com/merchant-images/owned_store/OwnerStoreQR'}
+        // merchantName={order?.merchant_info?.name || ""}
+        qrType="客服微信"
+        onClose={() => setQrCodeVisible(false)}
+      />
+
     </View>
   );
 };
