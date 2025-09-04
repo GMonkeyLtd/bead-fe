@@ -11,6 +11,7 @@ const CrystalContainer = ({
   disablePaddingBottom = false,
   showBack = true,
   showHome = true,
+  headerExtraContent = '',
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -19,6 +20,7 @@ const CrystalContainer = ({
   disablePaddingBottom?: boolean;
   showBack?: boolean;
   showHome?: boolean;
+  headerExtraContent?: React.ReactNode;
 }) => {
   const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
 
@@ -36,7 +38,7 @@ const CrystalContainer = ({
         }),
       }}
     >
-      <AppHeader isWhite={isWhite} showBack={showBack} showHome={showHome} />
+      <AppHeader isWhite={isWhite} showBack={showBack} showHome={showHome} extraContent={headerExtraContent} />
       <View
         className="page-children-container"
         style={{

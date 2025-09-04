@@ -19,36 +19,38 @@
       position: relative;
       overflow: hidden;
 
-              .bead-wrapper {
+      .bead-wrapper {
         position: relative;
 
-      .bead-movable {
-        display: flex; // 确保内容正确显示
-        align-items: center;
-        justify-content: center;
-        pointer-events: auto; // 珠子可以接收事件
+        .bead-movable {
+          display: flex; // 确保内容正确显示
+          align-items: center;
+          justify-content: center;
+          pointer-events: auto; // 珠子可以接收事件
+          z-index: 10; // 确保珠子在阴影层之上
 
-        &.not-selected {
-          opacity: 0.5;
-        }
-          &.selected > .movable-bead-image {
-          border: 1px solid rgb(247, 231, 215);
-          border-radius: 8px;
-          box-sizing: border-box;
-          box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.40), 0 0 8px 0 rgba(46, 29, 10, 0.50);
-        }
+          // &.not-selected {
+          //   opacity: 0.5;
+          // }
 
-        // 清除所有伪元素，确保状态重置
-        &::after {
-          content: none;
-        }
+          &.selected>.movable-bead-image {
+            border: 1px solid rgb(247, 231, 215);
+            border-radius: 8px;
+            box-sizing: border-box;
+            box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.40), 0 0 8px 0 rgba(46, 29, 10, 0.50);
+          }
 
-        &.dragging {
-          z-index: 100;
-        }
+          // 清除所有伪元素，确保状态重置
+          &::after {
+            content: none;
+          }
 
+          &.dragging {
+            z-index: 100;
+          }
+
+        }
       }
-    }
     }
 
   }
@@ -96,7 +98,7 @@
 // 阴影图片样式
 .movable-bead-image-shadow {
   filter: brightness(1%);
-  opacity: 0.7; // 配合模糊效果的透明度
+  opacity: 0.3; // 配合模糊效果的透明度
 }
 
 // 动画效果
@@ -187,4 +189,14 @@
       }
     }
   }
+}
+
+// 手环线圈背景样式
+.bracelet-ring-background {
+  // 确保背景层有正确的层级上下文
+  z-index: 0;
+
+
+
+
 }

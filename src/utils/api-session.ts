@@ -160,8 +160,9 @@ export interface TDesign {
       count: number;
       is_default: boolean;
     };
+    report: string;
     wishes: string[];
-    beads: BeadItem[];
+    items: BeadItem[];
   };
   order_uuids?: string[];
 }
@@ -251,7 +252,7 @@ export default {
     },
     config?: ApiConfig
   ) => {
-    return http.post<{ DesignId: string }>(
+    return http.post<{ design_id: string }>(
       `/user/sessions/${params.session_id}/drafts/${params.draft_id}/design`,
       {
         base64_image: params.image_url,
@@ -435,19 +436,36 @@ export default {
   },
   uploadProductImage: (
     params: {
-      session_id: string;
-      draft_id: string;
+      design_id: string;
       image_base64: string;
     },
     config?: ApiConfig
   ) => {
   
   return http.post<any>(
-    `/user/sessions/${params.session_id}/drafts/${params.draft_id}/design/image`,
+    `/user/designs/${params.design_id}/image`,
     {
       image_base64: params.image_base64,
     },
     { cancelToken: config?.cancelToken, ...config }
   );
+  },
+  saveDiyDesign: (
+    params: {
+      beadItems: number[];
+      image_base64: string;
+      wrist_size: number;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<any>(
+      `/user/designs/diy`,
+      {
+        items: params.beadItems,
+        image_base64: params.image_base64,
+        wrist_size: params.wrist_size,
+      },
+      { cancelToken: config?.cancelToken, ...config }
+    );
   }
 };

@@ -28,6 +28,9 @@ import { usePollDesign } from "@/hooks/usePollDesign";
 import { getDeduplicateBeads } from "@/utils/utils";
 import ProductImageGenerator from "@/components/ProductImageGenerator";
 import { imageToBase64 } from "@/utils/imageUtils";
+import ConceptSvg from "@/assets/icons/concept.svg";
+import ReportSvg from "@/assets/icons/report.svg";
+import ViewReportCard from "@/components/ViewReportCard";
 
 const Result = () => {
   const instance = Taro.getCurrentInstance();
@@ -54,7 +57,12 @@ const Result = () => {
   const [designDraftId, setDesignDraftId] = useState<string>("");
   const [braceletSpec, setBraceletSpec] = useState<any>({});
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string>("");
-  const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
+  const { design, getDesign } = usePollDesign({
+    pollingInterval: 5000,
+    checkStopPoll: (design) => {
+      return design.progress == 100 && !!design?.info?.report;
+    }
+  });
 
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
 
@@ -82,7 +90,7 @@ const Result = () => {
     setBeadsInfo(info.items);
     image_url && setImageUrl(image_url);
     setBraceletName(name);
-    setBackgroundImageUrl(background_url);  
+    setBackgroundImageUrl(background_url);
     setBeadDescriptions(deduplicatedBeads.filter((item) => !!item.func_summary));
     setDesignNo(design_id);
     setBraceletDescription(description);
@@ -285,10 +293,9 @@ const Result = () => {
   };
 
   const uploadProductImage = async (productImageUrl: string) => {
-    const productImageBase64 = await imageToBase64(productImageUrl, true, false, 'webp')
+    const productImageBase64 = await imageToBase64(productImageUrl, true, false, 'png')
     apiSession.uploadProductImage({
-      session_id: designSessionId,
-      draft_id: designDraftId,
+      design_id: designNo,
       image_base64: productImageBase64,
     }).then((res) => {
       console.log(res);
@@ -410,10 +417,42 @@ const Result = () => {
               </View>
               <View className={styles.resultContentCenterContainer}>
                 <View className={styles.resultContentCenterText}>
-                  <View className={styles.resultContentBraceletDescription}>
-                    {braceletDescription}
-                  </View>
-                  <View className={styles.resultContentWearTips}>
+                  {designDraftId ? (
+                    <View className={styles.resultContentWearTips}>
+                      <View className={styles.resultContentWearTipsTitleContainer}>
+                        <Image
+                          src={ReportSvg}
+                          style={{ width: "16px", height: "16px" }}
+                        />
+                        <View className={styles.resultWuxingAnaylisisContainer}>
+                          <View>你的日主为</View>
+                          <View className={styles.resultWuxingAnaylisisTag}>{rizhuInfo}</View>
+                          <View>，喜用</View>
+                          <View className={styles.resultWuxingAnaylisisTag}>{wuxingInfo?.join("、")}</View>
+                        </View>
+                      </View>
+                      <View className={styles.resultContentBraceletDescription}>
+                        {braceletDescription}
+                      </View>
+                    </View>
+                  ) : (
+                    <View className={styles.resultContentWearTips}>
+                      <View className={styles.resultContentWearTipsTitleContainer}>
+                        <Image
+                          src={ConceptSvg}
+                          style={{ width: "16px", height: "16px" }}
+                        />
+                        <Text className={styles.resultContentWearTipsTitle}>
+                          设计理念
+                        </Text>
+                      </View>
+                      <View className={styles.resultContentBraceletDescription}>
+                        {braceletDescription}
+                      </View>
+                    </View>
+                  )}
+
+                  {/* <View className={styles.resultContentWearTips}>
                     <View className={styles.resultContentWearTipsTitleContainer}>
                       <Image
                         src={WearTipsSvg}
@@ -426,18 +465,31 @@ const Result = () => {
                     <View className={styles.resultContentBraceletDescription}>
                       天然水晶佩戴一段时间后建议定期净化噢~可以用清水冲洗或在月光下放置一晚，以保持水晶的能量纯净和光泽度。
                     </View>
-                  </View>
+                  </View> */}
+                  {design?.info?.report && (
+                    <View className={styles.resultContentReportCardContainer}>
+                      <ViewReportCard
+                        onActionClick={() => {
+                          Taro.navigateTo({
+                            url: `${pageUrls.designReport}?designId=${designNo}`,
+                          });
+                        }}
+                        disabled={!design?.info?.report}
+                        showAction={!!design?.info?.report}
+                      />
+                    </View>
+                  )}
                 </View>
-                <View className={styles.resultContentWuxingDisplayContainer}>
+                {/* <View className={styles.resultContentWuxingDisplayContainer}>
                   <WuxingDisplay
                     element={{
                       type: rizhuInfo,
                       description: `五行属性喜${wuxingInfo?.join("、")}`,
                     }}
                   />
-                </View>
+                </View> */}
               </View>
-              <View className={styles.resultContentWearTips}>
+              <View className={styles.resultContentWearTips} style={{ marginTop: "16px" }}>
                 <View className={styles.resultContentWearTipsTitleContainer}>
                   <Image
                     src={MaterialSvg}
@@ -494,7 +546,7 @@ const Result = () => {
             />
           }
         />
-        {designSessionId && referencePrice && (<CrystalButton
+        {referencePrice && (<CrystalButton
           onClick={doCreate}
           isPrimary
           text="制作成品"

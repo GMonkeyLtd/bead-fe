@@ -6,6 +6,7 @@ import Taro, { useDidHide, useUnload } from "@tarojs/taro";
 
 interface UsePollDesignOptions {
   pollingInterval?: number; // ms
+  checkStopPoll?: (design: TDesign) => boolean;
 }
 
 export const usePollDesign = (options?: UsePollDesignOptions) => {
@@ -74,8 +75,8 @@ export const usePollDesign = (options?: UsePollDesignOptions) => {
             showError: false,
           }
         );
-
-        if (res?.data?.progress == 100) {
+        console.log(options?.checkStopPoll, 'options?.checkStopPoll')
+        if (options?.checkStopPoll ? options?.checkStopPoll?.(res?.data) : res?.data?.progress == 100) {
           setDesign(res?.data);
           clearTimer(designId);
           cancelRequest(designId);

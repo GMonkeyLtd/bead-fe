@@ -1,0 +1,96 @@
+.bead-size-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  background: #EAE8E6;
+  border-radius: 16px;
+  padding: 0;
+  height: 32px;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+  
+  .bead-size-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    padding: 4px 8px;
+    background: transparent;
+    // cursor: pointer; // Taro小程序环境不支持cursor
+    transition: all 0.2s ease;
+    position: relative;
+    height: 100%;
+    box-sizing: border-box;
+    pointer-events: auto;
+    user-select: none;
+    
+    // 第一个选项 - 左边圆角
+    &.first {
+      border-radius: 16px 0 0 16px;
+    }
+    
+    // 最后一个选项 - 右边圆角
+    &.last {
+      border-radius: 0 16px 16px 0;
+    }
+    
+    // 只有一个选项时的圆角
+    &.first.last {
+      border-radius: 50px;
+    }
+    
+    // 选项之间的分割线
+    &:not(.last)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    // 选中状态
+    &.selected {
+      background: #FFFFFF;
+      
+      // 选中时隐藏分割线
+      &::after {
+        display: none;
+      }
+      
+      // 选中时隐藏前一个选项的分割线
+      & + .bead-size-option::before {
+        display: none;
+      }
+      
+      .bead-size-text {
+        color: #000000;
+        font-weight: 500;
+      }
+    }
+    
+    // 禁用状态
+    &.disabled {
+      opacity: 0.5;
+      // cursor: not-allowed; // Taro小程序环境不支持cursor
+    }
+    
+    // 悬停效果（非选中且非禁用时）
+    &:not(.selected):not(.disabled):hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+    
+    .bead-size-text {
+      font-size: 12px;
+      color: #000000;
+      line-height: 1;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      font-weight: 400;;
+    }
+  }
+}

@@ -12,12 +12,14 @@ import { AuthManager } from "@/utils/auth";
 import { pageUrls } from "@/config/page-urls";
 import TabBar, { TabBarTheme } from "@/components/TabBar";
 import apiSession from "@/utils/api-session";
+import QrCodeDialog from "@/components/QrCodeDialog";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
   const [lastSessionId, setLastSessionId] = useState("");
   const instance = Taro.getCurrentInstance();
   const { newSession } = instance.router?.params || {};
+  const [qrCodeVisible, setQrCodeVisible] = useState(false);
 
   useEffect(() => {
     AuthManager.clearAuth();
@@ -125,49 +127,75 @@ const Home = () => {
               <View className="home-content">
                 <View className="crystal-title-section">
                   <View className="crystal-title-frame">
-                    <Text className="crystal-subtitle-up">{item.subtitle}</Text>
-                    <Text className="crystal-main-title">{item.title}</Text>
+                    {/* <Text className="crystal-subtitle-up">{item.subtitle}</Text> */}
                     <Text className="crystal-subtitle-down">
                       {item.description}
                     </Text>
+                    <Text className="crystal-main-title">{item.title}</Text>
                   </View>
                 </View>
                 <View className="crystal-action-section">
-                  <CrystalButton
-                    style={{
-                      borderRadius: 70,
-                      border: "1.1px solid rgba(255, 255, 255, 0.20)",
-                      background: "rgba(0, 0, 0, 0.30)",
-                      backdropFilter: "blur(4px)",
-                      boxShadow: 'none',
-                      width: "154px",
-                    }}
-                    textStyle={{
-                      color: "#fff",
-                    }}
-                    onClick={() => {
-                      if (!lastSessionId) {
-                        startDesign();
-                      } else {
-                        Taro.navigateTo({
-                          url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
-                        });
-                      }
-                    }}
-                    text="开启定制"
-                    icon={
-                      <Image
-                        src={RightArrowWhite}
-                        style={{ width: "16px", height: "10px" }}
-                      />
-                    }
-                  />
-                  <View className="crystal-link-text" onClick={() => {
+                  <View className="crystal-action-section-items">
+                    <CrystalButton
+                      style={{
+                        borderRadius: '2px',
+                        border: "1.1px solid rgba(255, 255, 255, 0.20)",
+                        background: "rgba(0, 0, 0, 0)",
+                        backdropFilter: "blur(4px)",
+                        boxShadow: 'none',
+                        // width: "154px",
+                      }}
+                      textStyle={{
+                        color: "#fff",
+                      }}
+                      onClick={() => {
+                        if (!lastSessionId) {
+                          startDesign();
+                        } else {
+                          Taro.navigateTo({
+                            url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
+                          });
+                        }
+                      }}
+                      text="开启定制"
+                      // icon={
+                      //   <Image
+                      //     src={RightArrowWhite}
+                      //     style={{ width: "16px", height: "10px" }}
+                      //   />
+                      // }
+                    />
+                    <CrystalButton
+                      style={{
+                        borderRadius: '2px',
+                        border: "1.1px solid rgba(255, 255, 255, 0.20)",
+                        background: "rgba(0, 0, 0,0)",
+                        backdropFilter: "blur(4px)",
+                        boxShadow: 'none',
+                        // width: "154px",
+                      }}
+                      textStyle={{
+                        color: "#fff",
+                      }}
+                      onClick={() => {
+                          Taro.redirectTo({
+                            url: pageUrls.customDesign + '?from=home',
+                          });
+                      }}
+                      text="DIY设计"
+                    />
+                  </View>
+                  {/* <View className="crystal-link-text" onClick={() => {
                     Taro.redirectTo({
                       url: pageUrls.customDesign + '?from=home',
                     });
                   }}>
                       DIY设计
+                  </View> */}
+                  <View className="crystal-link-text" onClick={() => {
+                    setQrCodeVisible(true);                    
+                  }}>
+                      联系客服
                   </View>
                 </View>
               </View>
@@ -181,6 +209,14 @@ const Home = () => {
         visible={showDateTimeDrawer}
         onClose={handleDrawerClose}
       />
+      <QrCodeDialog
+        visible={qrCodeVisible}
+        qrCodeUrl={'https://zhuluoji.cn-sh2.ufileos.com/merchant-images/owned_store/OwnerStoreQR'}
+        // merchantName={order?.merchant_info?.name || ""}
+        qrType="客服微信"
+        onClose={() => setQrCodeVisible(false)}
+      />
+
     </View>
   );
 };

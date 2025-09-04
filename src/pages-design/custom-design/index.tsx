@@ -9,6 +9,8 @@ import { usePollDraft } from "@/hooks/usePollDraft";
 import { CUSTOM_RENDER_RATIO } from "@/config/beads";
 import { usePageQuery } from "@/hooks/usePageQuery";
 import { imageToBase64 } from "@/utils/imageUtils";
+import { getScreenHeight } from "@/utils/style-tools";
+import { usePollDesign } from "@/hooks/usePollDesign";
 
 export enum SPU_TYPE {
   BEAD = 1,
@@ -25,7 +27,7 @@ export interface SkuItem {
   quality: number;  // 质量
   reference_price: number;  // 参考价格
   shape: number;  // 形状
-  spu_info: {id: number; name: string; category: string;};
+  spu_info: { id: number; name: string; category: string; };
   spu_type: number;
   weight: number;
   width: number;
@@ -37,8 +39,22 @@ const CustomDesign = () => {
   const [accessoryList, setAccessoryList] = useState<any[]>([]);
   const [accessoryTypeMap, setAccessoryTypeMap] = useState<any>({});
   const { draft, startPolling } = usePollDraft({ showLoading: true });
-  const { draftId, sessionId, designId, from } = Taro.getCurrentInstance()?.router?.params || {};
-  const [initCustomDraft, setInitCustomDraft] = useState<any>({});
+  const { design, getDesign } = usePollDesign({
+    pollingInterval: 5000
+  });
+  const { draftId, sessionId, designId, from, wordId } = Taro.getCurrentInstance()?.router?.params || {};
+
+  console.log(designId, from, wordId, 'design, draft')
+
+  const oldBeadList = useMemo(() => {
+    return design?.info?.items || (draft as any)?.items || [];
+  }, [draft, design]);
+
+  const oldWuxing = useMemo(() => {
+    return design?.info?.wuxing || (draft as any)?.wuxing || [];
+  }, [draft, design]);
+
+  const screenHeight = useMemo(() => getScreenHeight(), []);
 
   // 从首页直接进diy
   const isFromHome = useMemo(() => {
@@ -53,6 +69,11 @@ const CustomDesign = () => {
   // 从结果页进diy
   const isFromResult = useMemo(() => {
     return from === 'result';
+  }, [from]);
+
+  // 从灵感社区进diy
+  const isFromInspiration = useMemo(() => {
+    return from === 'inspiration';
   }, [from]);
 
   // 使用ref获取子组件状态
@@ -89,6 +110,10 @@ const CustomDesign = () => {
 
 
   useEffect(() => {
+    if ((isFromResult || isFromInspiration) && designId) {
+      getDesign({ designId });
+      return;
+    }
     if (draftId && sessionId) {
       startPolling(sessionId, draftId);
     }
@@ -109,17 +134,20 @@ const CustomDesign = () => {
         const key = `${item.spu_id}_${item.name}`;
         if (acc[key]) {
           acc[key].beadList.push(item);
+          acc[key].beadSizeList.push(item.diameter);
         } else {
           acc[key] = {
+            image_url: item.image_url,
             id: item.spu_id,
             name: item.name,
             wuxing: item.wuxing || [],
-            beadList: [item]
+            beadList: [item],
+            beadSizeList: [item.diameter]
           };
         }
+        acc[key].beadSizeList = [...new Set(acc[key].beadSizeList)]?.sort((a: number, b: number) => a - b);
         return acc;
       }, {});
-
       // 转换为数组格式
       const aggregatedBeadList = Object.values(aggregatedBeads);
 
@@ -136,15 +164,36 @@ const CustomDesign = () => {
           return acc;
         }, {})
       );
-      const aggregatedAccessories = accessories.reduce((acc: Record<string, AccessoryItem[]>, item: AccessoryItem) => {
+
+      const aggregatedAccessories = accessories.reduce((acc: Record<string, any>, item: any) => {
+        const key = `${item.spu_id}_${item.name}`;
+        if (acc[key]) {
+          acc[key].beadList.push(item);
+          acc[key].beadSizeList.push(item.diameter);
+        } else {
+          acc[key] = {
+            image_url: item.image_url,
+            id: item.spu_id,
+            name: item.name,
+            type: item.type,
+            beadList: [item],
+            beadSizeList: [item.diameter]
+          };
+        }
+        acc[key].beadSizeList = [...new Set(acc[key].beadSizeList)]?.sort((a: number, b: number) => a - b);
+        return acc;
+      }, {});
+      const aggregatedAccessoriesList = Object.values(aggregatedAccessories);
+
+      setAccessoryTypeMap(aggregatedAccessoriesList.reduce((acc: Record<string, any[]>, item: any) => {
+        // 使用第一个item的wuxing属性
         if (acc[item.type]) {
           acc[item.type].push(item);
         } else {
           acc[item.type] = [item];
         }
         return acc;
-      }, {});
-      setAccessoryTypeMap(aggregatedAccessories);
+      }, {}));
     }
   }, [skuHasMore, skuList]);
 
@@ -175,24 +224,24 @@ const CustomDesign = () => {
     });
   }
 
-  const onCreate = async(imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
-
-    if ((!isSaveAndBack && !imageUrl) || !sessionId || !draftId) {
+  const onCreate = async (imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
+    console.log(imageUrl, editedBeads, isSaveAndBack, 'imageUrl, editedBeads, isSaveAndBack')
+    if (isFromHome || isFromInspiration) {
+      const wristSize = customDesignRef.current?.getPredictedLength();
+      // 将saveDiyDesign需要的参数传递给quickDesign页面（不包含base64，在目标页面重新生成） 
+      const beadItems = editedBeads.map((item) => item.sku_id);
+      
+      Taro.redirectTo({
+        url: `${pageUrls.quickDesign}?beadItems=${JSON.stringify(beadItems)}&wristSize=${Math.floor(wristSize || 0).toString()}&imageUrl=${encodeURIComponent(imageUrl)}&from=${isFromHome ? 'home' : 'inspiration'}`,
+      });
       return;
     }
-    // const result = getCustomDesignState();
-    // 将result返回的图片预览
-    // Taro.previewImage({
-    //   urls: [imageUrl || ''],
-    // })
-    // 保存到相册
-    // Taro.saveImageToPhotosAlbum({
-    //   filePath: imageUrl,
-    //   success: () => {
-    //     console.log('图片保存成功');
-    //   },
-    // });
-    if (isFromResult && !checkDeadsDataChanged((draft as any)?.items || [], editedBeads || [])) {
+
+
+    if ((!isSaveAndBack && !imageUrl && (!sessionId || !draftId))) {
+      return;
+    }
+    if (isFromResult && !checkDeadsDataChanged(oldBeadList || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}}`,
       });
@@ -207,7 +256,7 @@ const CustomDesign = () => {
       }
       if (!_beadData) {
         // 如果allBeadList中没有找到，则使用draft中的老数据
-        _beadData = draft?.items?.find((_item) => _item.sku_id == item.sku_id && _item.diameter == item.diameter && _item.width == item.width && _item.quantity == item.quantity) || item;
+        _beadData = oldBeadList?.find((_item) => _item.sku_id == item.sku_id && _item.diameter == item.diameter && _item.width == item.width && _item.quantity == item.quantity) || item;
       }
       const newBeadData = {
         ...(_beadData || {}),
@@ -221,7 +270,6 @@ const CustomDesign = () => {
     })
 
     const imageBase64 = await imageToBase64(imageUrl, true, false, undefined, 'png');
-
 
     apiSession.saveDraft({
       session_id: sessionId,
@@ -248,15 +296,23 @@ const CustomDesign = () => {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}`,
       });
+    } if (isFromInspiration) {
+      Taro.redirectTo({
+        url: `${pageUrls.inspirationDetail}?wordId=${wordId}&designId=${designId}`,
+      });
+    } else if (isFromHome) {
+      Taro.redirectTo({
+        url: `${pageUrls.home}`,
+      });
     } else {
       sessionId && backToChatDesign(sessionId);
     }
   }
 
-  const handleBack = async() => {
+  const handleBack = async () => {
     const { beads } = getCustomDesignState();
     const imageUrl = await customDesignRef.current?.generateBraceletImage();
-    const oldBeads = (draft as any)?.items;
+    const oldBeads = oldBeadList;
 
     if (!checkDeadsDataChanged(oldBeads || [], beads || [])) {
       onDirectBack();
@@ -266,7 +322,7 @@ const CustomDesign = () => {
         success: function (res) {
           console.log(res, 'res')
           if (res.tapIndex === 1) {
-            onSaveAndBack( beads || [] as BeadItem[], imageUrl);
+            onSaveAndBack(beads || [] as BeadItem[], imageUrl);
           } else {
             onDirectBack();
           }
@@ -290,13 +346,13 @@ const CustomDesign = () => {
   }, []);
 
   return (
-    <PageContainer onBack={handleBack} headerExtraContent="编辑台">
+    <PageContainer onBack={handleBack} headerExtraContent="编辑台" backgroundColor='#F4F1EE'>
       <CustomDesignRing
-        wuxing={(draft as any)?.wuxing || []}
+        wuxing={oldWuxing || []}
         accessoryTypeMap={accessoryTypeMap}
         ref={customDesignRef}
-        size={300}
-        beads={(draft?.items || [])?.map((item: any) => {
+        size={screenHeight > 900 ? 300 : 280}
+        beads={(oldBeadList || [])?.map((item: any) => {
           return {
             ...item,
             width: item.spu_type === SPU_TYPE.ACCESSORY ? item.width : item.width || item.diameter,

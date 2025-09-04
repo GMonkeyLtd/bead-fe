@@ -2,34 +2,33 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 30px;
+  height: 44px;
+  width: 100%;
   
   .category-item {
+    flex: 1;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 30px;
     gap: 4px;
-    border-radius: 50px;
-    background-color: rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: all 0.3s ease;
     padding: 0 12px;
+
+    &.first {
+      border-radius: 0px 0 0 10px;
+    }
+    
+    // 最后一个选项 - 右边圆角
+    &.last {
+      border-radius: 0 0px 10px 0;
+    }
+
     &.selected {
-      background-color: #000000;
-      
+      background: rgba(255, 255, 255, 0.50);
       .category-name {
-        color: #ffffff;
+        color: #000;
       }
-      
-      .icon-text,
-      .default-icon {
-        color: #ffffff;
-      }
-      
-      .default-icon {
-        background-color: #ffffff;
-      }
+
     }
     
     .category-icon {
@@ -38,21 +37,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      
-      .icon-text {
-        font-size: 16px;
-        line-height: 1;
-        color: rgba(0, 0, 0, 0.6);
-        transition: color 0.3s ease;
-      }
-      
-      .default-icon {
-        width: 15px;
-        height: 17px;
-        background-color: rgba(0, 0, 0, 0.6);
-        border-radius: 2px;
-        transition: background-color 0.3s ease;
-      }
     }
     
     .category-name {
@@ -60,7 +44,7 @@
       font-size: 12px;
       line-height: 1.2em;
       text-align: center;
-      color: rgba(0, 0, 0, 0.6);
+      color: rgba(0, 0, 0, 0.50);
       transition: color 0.3s ease;
       white-space: nowrap;
       font-family: "Source Han Serif CN", sans-serif;

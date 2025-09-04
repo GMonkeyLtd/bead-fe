@@ -1,4 +1,4 @@
-import { computeBraceletLength, calculateBeadArrangementBySize } from "@/utils/cystal-tools";
+import { computeBraceletLength, calculateBeadArrangementBySize, calculateBeadPositionsByTargetRadius, calculateBeadArrangementByTargetRadius } from "@/utils/cystal-tools";
 import { Bead, BeadWithPosition, Position } from "../../../types/crystal";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 
@@ -17,9 +17,10 @@ export interface BeadArrayCalculatorConfig {
   canvasSize: number;
   spacing: number;
   renderRatio: number;
-  targetRadius?: number;
+  targetRadius: number;
   maxWristSize: number;
   minWristSize: number;
+  displayScale: number;
 }
 
 /**
@@ -59,7 +60,7 @@ export class BeadArrayCalculator {
    */
   calculateRingRadius(beads: Bead[]): number {
     if (!beads.length) return 0;
-    
+
     const { canvasSize, spacing } = this.config;
 
     if (beads.length === 10) {
@@ -92,18 +93,29 @@ export class BeadArrayCalculator {
    * @param beads 珠子数组
    * @param existingPositions 现有的位置数组（用于保持uniqueKey的连续性）
    */
-  calculateBeadPositions(beads: Bead[], _existingPositions?: Position[]): Position[] {
+  calculateBeadPositions(beads: Bead[]): Position[] {
     if (!beads.length) return [];
-
-    // 获取beads的image_url对应图片的长款
-    const ringRadius = this.config.targetRadius || this.calculateRingRadius(beads);
+    const ringRadius = this.config.targetRadius
+    const predictRadius = beads.reduce((sum, bead) => sum + bead.ratioBeadWidth * this.config.displayScale, 0);
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
-    const positions = calculateBeadArrangementBySize(
-      ringRadius,
-      beads.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter })),
-      center,
-      false
-    );
+
+    let positions: Position[] = [];
+    // 若果珠子数量小于10颗，绘制时使用珠子width的三倍进行渲染，不按照圆圈进行自适应缩放
+    if (predictRadius < 2 * ringRadius * Math.PI) {
+      positions = calculateBeadArrangementByTargetRadius(
+        beads.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter })),
+        ringRadius,
+        center,
+        this.config.displayScale
+      );
+    } else {
+      positions = calculateBeadArrangementBySize(
+        ringRadius,
+        beads.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter })),
+        center,
+        false
+      );
+    }
 
     return beads.map((bead, index) => {
       const position: Position = positions[index];
@@ -121,7 +133,7 @@ export class BeadArrayCalculator {
   /**
    * 添加珠子到数组
    */
-  addBead(beads: Bead[], newBead: Bead, selectedIndex: number = -1): Bead[] {
+  addBead(beads: Bead[], newBead: Bead, selectedIndex: number = -1): { newBeads: Bead[]; newSelectedIndex: number } {
     const newBeads = [...beads];
 
     if (selectedIndex === -1) {
@@ -130,12 +142,23 @@ export class BeadArrayCalculator {
         ...newBead,
       });
     } else {
-      // 替换选中的珠子
-      newBeads[selectedIndex] = {
+      // 在选中位置后前面添加珠子，不覆盖选中珠子
+      newBeads.splice(selectedIndex + 1, 0, {
         ...newBead,
-      };
+      });
     }
+    // 返回插入的位置
+    return { newBeads, newSelectedIndex: selectedIndex + 1 };
+  }
 
+  /**
+   * 替换珠子
+   */
+  replaceBead(beads: Bead[], newBead: Bead, selectedIndex: number): Bead[] {
+    const newBeads = [...beads];
+    newBeads[selectedIndex] = {
+      ...newBead,
+    };
     return newBeads;
   }
 
@@ -206,7 +229,7 @@ export class BeadArrayCalculator {
   /**
    * 验证珠子数量限制
    */
-  validateBeadCount(beads: Bead[], newBeadDiameter: number, type: 'add' | 'remove' = 'add'): { isValid: boolean; message?: string   } {
+  validateBeadCount(beads: Bead[], newBeadDiameter: number, type: 'add' | 'remove' = 'add'): { isValid: boolean; message?: string } {
     const currentLength = this.calculatePredictedLength(beads);
     const newLength = type === 'add' ? currentLength + newBeadDiameter * 0.1 : currentLength - newBeadDiameter * 0.1;
 
@@ -558,7 +581,6 @@ export class BeadArrayCalculator {
    */
   recalculatePositions(positions: Position[]): Position[] {
     if (!positions.length) return [];
-    console.log(positions, 'recalculatePositions')
 
     const ringRadius = this.config.targetRadius || this.calculateRingRadius(positions);
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
@@ -609,12 +631,12 @@ export class BeadArrayCalculator {
 
     // 1. 首先检查是否在手串圆环有效范围内
     const isInRingArea = distance >= minRadius && distance <= maxRadius;
-    
+
     // 2. 检查是否覆盖在其他珠子上
     const draggedBead = beads[dragBeadIndex];
     let isOverBead = false;
     let overBeadIndex = -1;
-    
+
     for (let i = 0; i < beads.length; i++) {
       if (i === dragBeadIndex) continue;
 
@@ -706,7 +728,7 @@ export class BeadArrayCalculator {
     message?: string;
   } {
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
-    
+
     // 计算拖拽位置的角度
     const dragAngle = Math.atan2(newY - center.y, newX - center.x);
     let normalizedDragAngle = dragAngle < 0 ? dragAngle + 2 * Math.PI : dragAngle;
@@ -717,14 +739,14 @@ export class BeadArrayCalculator {
       angle: number;
       distance: number;
     }> = [];
-    
+
     for (let i = 0; i <= beads.length; i++) {
       if (i === dragBeadIndex || i === dragBeadIndex + 1) continue;
-      
+
       // 计算这个插入位置的理论角度
       const totalBeads = beads.length;
       const angleStep = (2 * Math.PI) / totalBeads;
-      
+
       let insertAngle: number;
       if (i === 0) {
         // 插入到第一个位置
@@ -736,23 +758,23 @@ export class BeadArrayCalculator {
         // 插入到中间位置
         insertAngle = (i - 0.5) * angleStep;
       }
-      
+
       // 计算角度距离
       let angleDiff = Math.abs(normalizedDragAngle - insertAngle);
       if (angleDiff > Math.PI) {
         angleDiff = 2 * Math.PI - angleDiff;
       }
-      
+
       insertionCandidates.push({
         index: i,
         angle: insertAngle,
         distance: angleDiff
       });
     }
-    
+
     // 按角度距离排序，找到最近的位置
     insertionCandidates.sort((a, b) => a.distance - b.distance);
-    
+
     if (insertionCandidates.length > 0) {
       const nearestCandidate = insertionCandidates[0];
       return {
@@ -761,7 +783,7 @@ export class BeadArrayCalculator {
         message: `自动调整到最近的插入位置 (位置 ${nearestCandidate.index})`
       };
     }
-    
+
     return {
       isValid: false,
       message: "无法找到有效的插入位置"

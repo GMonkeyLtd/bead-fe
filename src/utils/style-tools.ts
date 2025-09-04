@@ -154,3 +154,9 @@ export const getNavBarHeightAndTop = () => {
     width: menuButtonInfo.width,
   };
 };
+
+
+export const getScreenHeight = () => {
+  const systemInfo = Taro.getSystemInfoSync();
+  return systemInfo.screenHeight;
+}

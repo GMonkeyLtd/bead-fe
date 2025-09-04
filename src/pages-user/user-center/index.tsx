@@ -19,7 +19,7 @@ const UserCenterPage: React.FC = () => {
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const { design, getDesign } = usePollDesign({ pollingInterval: 5000 });
+  const { design, getDesign } = usePollDesign({ pollingInterval: 10000 });
 
   useEffect(() => {
     if (design?.design_id && design.image_url) {

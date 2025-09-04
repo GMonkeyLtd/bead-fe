@@ -15,6 +15,35 @@ export const calculateDotLocation = (
   return { x, y };
 };
 
+export const calculateBeadPositionsByTargetRadius = (
+  beads: Bead[],
+  targetRadius: number,
+  center: { x: number, y: number }
+) => {
+  // 修复：角度应该基于弧长计算，弧长 = 半径 × 角度(弧度)，所以角度(度) = (弧长 / 半径) × (180/π)
+  const angles = beads.map(d => (d.scale_width / targetRadius) * (180 / Math.PI));
+  // 修复：直接使用targetRadius作为半径，因为targetRadius就是我们想要的圆环半径
+  const radius = targetRadius;            // 使用目标半径
+  const positions: Position[] = [];
+  const firstHalfAngle = angles[0] / 2;
+  let currentDeg = -90 - firstHalfAngle;     // 调整起始角度
+  beads.forEach((d, i) => {
+    const halfAngle = angles[i] / 2;
+    const midDeg = currentDeg + halfAngle;
+    const rad = midDeg * Math.PI / 180;
+    positions.push({
+      scale_width: d.scale_width / 2,
+      scale_height: d.scale_height / 2,
+      x: center.x + radius * Math.cos(rad),
+      y: center.y + radius * Math.sin(rad),
+      angle: rad,
+      index: i as any,
+    });
+    currentDeg += angles[i];
+  });
+  return positions;
+}
+
 // 计算每个珠子的圆心坐标 - 使用渲染直径（和CustomDesignRing保持一致）
 export const calcPositionsWithRenderDiameter = (
   renderDiameterList: { render_width: number, scale_width: number, render_diameter: number, scale_height: number }[],
@@ -61,6 +90,21 @@ export const calcPositionsWithRenderDiameter = (
   return positions;
 }
 
+export const calculateBeadArrangementByTargetRadius = (
+  beads: Bead[],
+  targetRadius: number,
+  center: { x: number, y: number },
+  displayScale: number
+) => {
+  const renderDiameterList = beads.map(d => ({
+    render_width: d.ratioBeadWidth,
+    scale_width: d.ratioBeadWidth * displayScale,
+    render_diameter: d.beadDiameter,
+    scale_height: d.beadDiameter * displayScale,
+  }));
+  return calculateBeadPositionsByTargetRadius(renderDiameterList, targetRadius, center);
+}
+
 export const calculateBeadArrangementBySize = (
   ringRadius: number,
   beadSizeList: { ratioBeadWidth: number, beadDiameter: number }[],
@@ -88,11 +132,13 @@ export const calculateBeadArrangementBySize = (
 };
 
 export const computeBraceletLength = (beads: Bead[]) => {
-  console.log(beads, 'beads')
   const beadsWidths = beads.map((dot) => dot.width);
   const beadsDiameters = beads.map((dot) => dot.diameter);
   // 所有珠子能围成的周长
   const allWidth = beadsWidths.reduce((sum, number) => sum + number, 0);
+  if (allWidth < 100) {
+    return allWidth / 10;
+  }
   // 所有珠子的直径总和
   const allDiameter = beadsDiameters.reduce((sum, number) => sum + number, 0);
   // 围成圆的半径

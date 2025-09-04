@@ -43,6 +43,7 @@ interface MovableBeadRendererProps {
   beads: Position[];
   selectedBeadIndex: number;
   canvasSize: number;
+  targetRadius: number;
   onBeadSelect: (index: number) => void;
   onBeadDeselect: () => void;
   onBeadDragEnd: (beadIndex: number, newX: number, newY: number) => void;
@@ -207,6 +208,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
   beads,
   selectedBeadIndex,
   canvasSize,
+  targetRadius,
   onBeadSelect,
   onBeadDeselect,
   onBeadDragEnd,
@@ -470,11 +472,31 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
   return (
     <View className="movable-bead-container" style={style}>
       <View className="canvas-wrapper">
+        {/* 手环线圈背景层 - 在最底层 */}
+        <View 
+          className="bracelet-ring-background"
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: `${targetRadius * 2}px`, // 线圈直径约为画布的70%
+            height: `${targetRadius * 2}px`,
+            borderRadius: '50%',
+            border: '2px solid #b19c7d',
+            zIndex: 1, // 改为正数，确保显示
+          }}
+        />
+        
         <MovableArea
           className="movable-area"
-          style={movableAreaStyle}
+          style={{
+            ...movableAreaStyle,
+            zIndex: 5, // 确保MovableArea在背景层之上，但允许背景层显示
+          }}
           onClick={onBeadDeselect}
         >
+          
           {/* 渲染所有珠子的阴影层 - 确保在最底层 */}
           {beadPositions.map((bead, index) => {
             // 如果当前珠子正在被拖拽，使用拖拽状态中的位置
@@ -492,11 +514,11 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
                 className="bead-shadow-layer"
                 style={{
                   position: 'absolute',
-                  left: shadowX - bead.scale_width + 4, // 阴影偏移 - 额外的边距用于模糊扩展
-                  top: shadowY - bead.scale_height + 4,
+                  left: shadowX - bead.scale_width + 2, // 阴影偏移 - 额外的边距用于模糊扩展
+                  top: shadowY - bead.scale_height + 2,
                   width: 2 * bead.scale_width, // 增加更多尺寸以容纳模糊边界
                   height: 2 * bead.scale_height,
-                  zIndex: -1, // 阴影层在最底部
+                  zIndex: 2, // 阴影层在背景之上，珠子之下
                   pointerEvents: 'none', // 阴影不拦截事件
                   filter: 'blur(4px)',
                 }}

@@ -49,6 +49,7 @@ export default defineAppConfig({
       root: 'pages-common',
       pages: [
         'webview/index',
+        'design-report/index',
       ]
     }
   ],

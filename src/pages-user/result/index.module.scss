@@ -48,6 +48,10 @@
   box-sizing: border-box;
 }
 
+.resultContentReportCardContainer {
+  margin-bottom: 16px;
+}
+
 .resultContentBgImage {
   position: absolute;
   top: 0;
@@ -220,7 +224,6 @@
 
 .resultContentCenterContainer {
   display: flex;
-  height: 164px;
   align-items: flex-start;
   padding-bottom: 12px 24px;
   gap: 32px;
@@ -364,4 +367,28 @@
   font-weight: 350;
   line-height: 150%;
   /* 15px */
+}
+
+.resultWuxingAnaylisisContainer {
+  display: flex;
+  gap: 4px;
+  font-size: 12px;
+  align-items: center;
+}
+
+.resultWuxingAnaylisisTag {
+  display: flex;
+  padding: 4px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 2px;
+  background: rgba(255, 195, 64, 0.10);
+  color: #723900;
+  font-family: "Source Han Serif CN";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 11px;
+  /* 91.667% */
 }

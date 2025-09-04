@@ -7,11 +7,12 @@ export interface BeadPositionManagerConfig {
   canvasSize: number;
   spacing: number;
   renderRatio: number;
-  targetRadius?: number;
+  targetRadius: number;
   maxWristSize: number;
   minWristSize: number;
   enableHistory?: boolean;
   maxHistoryLength?: number;
+  displayScale: number;
 }
 
 export interface BeadPositionManagerState {
@@ -74,11 +75,10 @@ export class BeadPositionManager {
         ...bead,
         ratioBeadWidth: this.calculator.calculateScaledBeadWidth(bead),
       }))
-      // 计算位置，传递现有位置信息以保持uniqueKey连续性
-      const beadsWithPosition = this.calculator.calculateBeadPositions(processedBeads, this.state.beads);
-      
       // 计算预测长度
       const predictedLength = this.calculator.calculatePredictedLength(processedBeads);
+      // 计算位置，传递现有位置信息以保持uniqueKey连续性
+      const beadsWithPosition = this.calculator.calculateBeadPositions(processedBeads);
       
       this.setState({
         beads: beadsWithPosition,
@@ -97,12 +97,13 @@ export class BeadPositionManager {
    * 添加珠子
    */
   async addBead(newBead: Bead): Promise<void> {
-    const validation = this.calculator.validateBeadCount(this.state.beads, newBead.diameter, 'add');
-    if (!validation.isValid) {
-      throw new Error(validation.message);
-    }
+    // const validation = this.calculator.validateBeadCount(this.state.beads, newBead.diameter, 'add');
+    // if (!validation.isValid) {
+    //   throw new Error(validation.message);
+    // }
 
-    const newBeads = this.calculator.addBead(this.state.beads, newBead, this.state.selectedBeadIndex);
+    const { newBeads, newSelectedIndex } = this.calculator.addBead(this.state.beads, newBead, this.state.selectedBeadIndex);
+    this.setState({ selectedBeadIndex: newSelectedIndex }, true);
     await this.setBeads(newBeads);
   }
 
@@ -113,11 +114,11 @@ export class BeadPositionManager {
     if (this.state.selectedBeadIndex === -1) {
       throw new Error("请先选择要删除的珠子");
     }
-    const targetBead = this.state.beads[this.state.selectedBeadIndex];
-    const validation = this.calculator.validateBeadCount(this.state.beads, targetBead.diameter, 'remove');
-    if (!validation.isValid) {
-      throw new Error(validation.message);
-    }
+    // const targetBead = this.state.beads[this.state.selectedBeadIndex];
+    // const validation = this.calculator.validateBeadCount(this.state.beads, targetBead.diameter, 'remove');
+    // if (!validation.isValid) {
+    //   throw new Error(validation.message);
+    // }
 
     const { newBeads, newSelectedIndex } = this.calculator.removeBead(
       this.state.beads,
@@ -180,13 +181,12 @@ export class BeadPositionManager {
       throw new Error("请先选择要替换的珠子");
     }
 
-    const newBeads = this.calculator.addBead(
+    const newBeads = this.calculator.replaceBead(
       this.state.beads,
       newBead,
       this.state.selectedBeadIndex
     );
     // 替换选中索引
-    this.setState({ selectedBeadIndex: -1 }, true); // 跳过历史记录
     await this.setBeads(newBeads);
   }
 
