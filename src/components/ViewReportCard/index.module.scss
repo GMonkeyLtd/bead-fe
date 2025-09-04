@@ -1,0 +1,108 @@
+.viewReportCard {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #FFF5E2;
+  border: 1px solid transparent;
+  border-image: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(246, 212, 173, 0.59) 60%, rgba(255, 255, 255, 0.75) 100%) 1;
+  border-radius: 10px;
+  box-shadow: inset 0px 4px 6.1px 0px rgba(255, 255, 255, 0.43);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.contentSection {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  width: 128px;
+}
+
+.avatarContainer {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #FFFFFF;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.textInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.title {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.35em;
+  color: #A06C3A;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.subtitle {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.35em;
+  background: radial-gradient(ellipse at 51% 141%, rgba(254, 236, 80, 1) 0%, rgba(255, 126, 0, 1) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #FF6D19;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.actionSection {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.actionText {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 350;
+  font-size: 11px;
+  line-height: 1.35em;
+  color: #A06C3A;
+  margin: 0;
+}
+
+.arrowIcon {
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.arrowImage {
+  width: 4.5px;
+  height: 8.5px;
+  position: absolute;
+  left: 4px;
+  top: 1.75px;
+}

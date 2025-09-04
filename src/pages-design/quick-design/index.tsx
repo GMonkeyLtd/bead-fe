@@ -1,11 +1,9 @@
 import { View, Video, Text } from "@tarojs/components";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import Taro, { useDidHide } from "@tarojs/taro";
 import "./index.scss";
-import { generateApi } from "@/utils/api";
 import { imageToBase64 } from "@/utils/imageUtils";
 import { GENERATING_MP4_IMAGE_URL, DESIGNING_IMAGE_URL } from "@/config";
-import { generateUUID } from "@/utils/uuid";
 import { pageUrls } from "@/config/page-urls";
 import PageContainer from "@/components/PageContainer";
 import { CancelToken } from "@/utils/request";
@@ -16,7 +14,7 @@ const predictedTimeText = (
 );
 
 const QuickDesign = () => {
-  const [designing, setDesigning] = useState(true);
+  const [designing] = useState(true);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const params = Taro.getCurrentInstance()?.router?.params;
@@ -24,6 +22,10 @@ const QuickDesign = () => {
     draftId,
     imageUrl,
     sessionId,
+    // 新增的DIY设计参数
+    beadItems,
+    wristSize,
+    from,
   } = params || {};
   const cancelTokenForImage = useRef<CancelToken | null>(null);
   const cancelTokenForInfo = useRef<CancelToken | null>(null);
@@ -112,10 +114,15 @@ const QuickDesign = () => {
       }
     }, 3000);
 
+    console.log(params, 'params')
+    // 处理不同类型的设计请求
     if (sessionId && draftId && imageUrl) {
+      // AI聊天设计
       quickDesignByDraft(sessionId, draftId, imageUrl);
+    } else if (beadItems && imageUrl && wristSize && ['inspiration', 'home'].includes(from || '')) {
+      // DIY自定义设计
+      handleDiyDesign();
     }
-
 
     return () => {
       if (pollTimeRef.current) {
@@ -162,6 +169,7 @@ const QuickDesign = () => {
     // pollDesignProgress(sessionId, draftId, null);
 
     const _imageUrl = decodeURIComponent(imageUrl);
+    console.log(_imageUrl, 'imageUrl by draft')
     const base64 = await imageToBase64(_imageUrl, true, false, undefined, 'png');
     // Taro.setClipboardData({
     //   data: base64,
@@ -179,6 +187,41 @@ const QuickDesign = () => {
         setProgressTip(progressTipText(res?.data?.design_id));
       }, 3000);
       pollDesignProgress(sessionId, draftId, res.data?.design_id);
+    }
+  };
+
+  // 处理DIY自定义设计
+  const handleDiyDesign = async () => {
+    try {
+      const _imageUrl = decodeURIComponent(imageUrl || '');
+      console.log(imageUrl, _imageUrl, 'imageUrl by diy')
+      const image_base64 = await imageToBase64(_imageUrl, true, false, undefined, 'png');
+      const beadItemsArray = JSON.parse(beadItems || '[]');
+      const res = await sessionApi.saveDiyDesign({
+        beadItems: beadItemsArray,
+        image_base64: image_base64 as string,
+        wrist_size: parseInt(wristSize || '0'),
+      });
+      
+      if (res.data?.design_id) {
+        setTimeout(() => {
+          setProgressTip(progressTipText(res.data.design_id));
+        }, 3000);
+        
+        // 直接跳转到结果页面
+        setTimeout(() => {
+          Taro.redirectTo({
+            url: `${pageUrls.result}?designBackendId=${res.data.design_id}&originImageUrl=${imageUrl}&from=${from}`,
+          });
+        }, 2000); // 给用户一些时间看到加载动画
+      }
+    } catch (error) {
+      console.error('DIY设计保存失败:', error);
+      // 可以添加错误处理逻辑
+      Taro.showToast({
+        title: '设计保存失败，请重试',
+        icon: 'none',
+      });
     }
   };
 

@@ -67,7 +67,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [currentAccessoryType, setCurrentAccessoryType] = useState<AccessoryType | ''>("");
   const [imageUrl, setImageUrl] = useState<string>("");
   const [beadSizeList, setBeadSizeList] = useState<number[]>([8, 10, 12, 13, 14, 15]);
-  const [currentBeadSize, setCurrentBeadSize] = useState<number>(8);  
+  const [currentBeadSize, setCurrentBeadSize] = useState<number>(8);
 
   const beadPositionConfig: BeadPositionManagerConfig = {
     canvasSize,
@@ -286,7 +286,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       return;
     }
     setBeadSizeList(bead.beadSizeList);
-    const newBeadSize = bead.beadSizeList.includes(currentBeadSize) ? currentBeadSize : bead.beadSizeList[0];
+    const newBeadSize = bead.beadSizeList.includes(currentBeadSize) ? currentBeadSize : bead.beadSizeList.includes(10) ? 10 : bead.beadSizeList[0];
     setCurrentBeadSize(newBeadSize);
     const newBead = bead.beadList.find(item => item.diameter === newBeadSize);
     processBeadClick(newBead as Bead, action);

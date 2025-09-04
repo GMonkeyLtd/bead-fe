@@ -127,43 +127,64 @@ const Home = () => {
               <View className="home-content">
                 <View className="crystal-title-section">
                   <View className="crystal-title-frame">
-                    <Text className="crystal-subtitle-up">{item.subtitle}</Text>
-                    <Text className="crystal-main-title">{item.title}</Text>
+                    {/* <Text className="crystal-subtitle-up">{item.subtitle}</Text> */}
                     <Text className="crystal-subtitle-down">
                       {item.description}
                     </Text>
+                    <Text className="crystal-main-title">{item.title}</Text>
                   </View>
                 </View>
                 <View className="crystal-action-section">
-                  <CrystalButton
-                    style={{
-                      borderRadius: 70,
-                      border: "1.1px solid rgba(255, 255, 255, 0.20)",
-                      background: "rgba(0, 0, 0, 0.30)",
-                      backdropFilter: "blur(4px)",
-                      boxShadow: 'none',
-                      width: "154px",
-                    }}
-                    textStyle={{
-                      color: "#fff",
-                    }}
-                    onClick={() => {
-                      if (!lastSessionId) {
-                        startDesign();
-                      } else {
-                        Taro.navigateTo({
-                          url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
-                        });
-                      }
-                    }}
-                    text="开启定制"
-                    icon={
-                      <Image
-                        src={RightArrowWhite}
-                        style={{ width: "16px", height: "10px" }}
-                      />
-                    }
-                  />
+                  <View className="crystal-action-section-items">
+                    <CrystalButton
+                      style={{
+                        borderRadius: '2px',
+                        border: "1.1px solid rgba(255, 255, 255, 0.20)",
+                        background: "rgba(0, 0, 0, 0)",
+                        backdropFilter: "blur(4px)",
+                        boxShadow: 'none',
+                        // width: "154px",
+                      }}
+                      textStyle={{
+                        color: "#fff",
+                      }}
+                      onClick={() => {
+                        if (!lastSessionId) {
+                          startDesign();
+                        } else {
+                          Taro.navigateTo({
+                            url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
+                          });
+                        }
+                      }}
+                      text="开启定制"
+                      // icon={
+                      //   <Image
+                      //     src={RightArrowWhite}
+                      //     style={{ width: "16px", height: "10px" }}
+                      //   />
+                      // }
+                    />
+                    <CrystalButton
+                      style={{
+                        borderRadius: '2px',
+                        border: "1.1px solid rgba(255, 255, 255, 0.20)",
+                        background: "rgba(0, 0, 0,0)",
+                        backdropFilter: "blur(4px)",
+                        boxShadow: 'none',
+                        // width: "154px",
+                      }}
+                      textStyle={{
+                        color: "#fff",
+                      }}
+                      onClick={() => {
+                          Taro.redirectTo({
+                            url: pageUrls.customDesign + '?from=home',
+                          });
+                      }}
+                      text="DIY设计"
+                    />
+                  </View>
                   {/* <View className="crystal-link-text" onClick={() => {
                     Taro.redirectTo({
                       url: pageUrls.customDesign + '?from=home',
