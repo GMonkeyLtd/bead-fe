@@ -216,7 +216,7 @@ const InspirationDetailPage: React.FC = () => {
 
   const handleEditInspiration = () => {
     Taro.redirectTo({
-      url: `${pageUrls.customDesign}?sessionId=${designData?.session_id}&draftId=${designData?.draft_id}&from=inspiration`,
+      url: `${pageUrls.customDesign}?sessionId=${designData?.session_id}&draftId=${designData?.draft_id}&from=inspiration&wordId=${detail.work_id}`,
     });
   }
 
@@ -381,10 +381,10 @@ const InspirationDetailPage: React.FC = () => {
 
       {/* 底部按钮 */}
       <View className={styles.bottomBar}>
-        {/* <View className={styles.editorContainer} onClick={handleEditInspiration}>
+        <View className={styles.editorContainer} onClick={handleEditInspiration}>
             <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
             <View className={styles.editorText}>编辑</View>
-        </View> */}
+        </View>
         {designData?.session_id && designData?.reference_price && (<CrystalButton
           onClick={() => {
             setBudgetDialogShow(true)

@@ -46,7 +46,7 @@ const BeadItem: React.FC<BeadItemProps> = ({
 
   return (
     <View 
-      className={`bead-item-card ${className}`}
+      className={`bead-item-card ${className} ${!showReplaceButton ? 'active' : ''}`}
       onClick={() => onItemClick?.()}
     >
       {/* 主要内容区域 */}

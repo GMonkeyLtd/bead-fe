@@ -133,7 +133,7 @@ export class BeadArrayCalculator {
   /**
    * 添加珠子到数组
    */
-  addBead(beads: Bead[], newBead: Bead, selectedIndex: number = -1): Bead[] {
+  addBead(beads: Bead[], newBead: Bead, selectedIndex: number = -1): { newBeads: Bead[]; newSelectedIndex: number } {
     const newBeads = [...beads];
 
     if (selectedIndex === -1) {
@@ -142,12 +142,23 @@ export class BeadArrayCalculator {
         ...newBead,
       });
     } else {
-      // 替换选中的珠子
-      newBeads[selectedIndex] = {
+      // 在选中位置后前面添加珠子，不覆盖选中珠子
+      newBeads.splice(selectedIndex + 1, 0, {
         ...newBead,
-      };
+      });
     }
+    // 返回插入的位置
+    return { newBeads, newSelectedIndex: selectedIndex + 1 };
+  }
 
+  /**
+   * 替换珠子
+   */
+  replaceBead(beads: Bead[], newBead: Bead, selectedIndex: number): Bead[] {
+    const newBeads = [...beads];
+    newBeads[selectedIndex] = {
+      ...newBead,
+    };
     return newBeads;
   }
 

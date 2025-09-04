@@ -26,7 +26,7 @@ export interface SkuItem {
   quality: number;  // 质量
   reference_price: number;  // 参考价格
   shape: number;  // 形状
-  spu_info: {id: number; name: string; category: string;};
+  spu_info: { id: number; name: string; category: string; };
   spu_type: number;
   weight: number;
   width: number;
@@ -38,7 +38,7 @@ const CustomDesign = () => {
   const [accessoryList, setAccessoryList] = useState<any[]>([]);
   const [accessoryTypeMap, setAccessoryTypeMap] = useState<any>({});
   const { draft, startPolling } = usePollDraft({ showLoading: true });
-  const { draftId, sessionId, designId, from } = Taro.getCurrentInstance()?.router?.params || {};
+  const { draftId, sessionId, designId, from, wordId } = Taro.getCurrentInstance()?.router?.params || {};
   const [initCustomDraft, setInitCustomDraft] = useState<any>({});
 
   const screenHeight = useMemo(() => getScreenHeight(), []);
@@ -56,6 +56,11 @@ const CustomDesign = () => {
   // 从结果页进diy
   const isFromResult = useMemo(() => {
     return from === 'result';
+  }, [from]);
+
+  // 从灵感社区进diy
+  const isFromInspiration = useMemo(() => {
+    return from === 'inspiration';
   }, [from]);
 
   // 使用ref获取子组件状态
@@ -143,7 +148,7 @@ const CustomDesign = () => {
         }, {})
       );
 
-      const aggregatedAccessories =  accessories.reduce((acc: Record<string, any>, item: any) => {
+      const aggregatedAccessories = accessories.reduce((acc: Record<string, any>, item: any) => {
         const key = `${item.spu_id}_${item.name}`;
         if (acc[key]) {
           acc[key].beadList.push(item);
@@ -162,14 +167,14 @@ const CustomDesign = () => {
         return acc;
       }, {});
       const aggregatedAccessoriesList = Object.values(aggregatedAccessories);
-    
+
       setAccessoryTypeMap(aggregatedAccessoriesList.reduce((acc: Record<string, any[]>, item: any) => {
         // 使用第一个item的wuxing属性
-          if (acc[item.type]) {
-            acc[item.type].push(item);
-          } else {
-            acc[item.type] = [item];
-          }
+        if (acc[item.type]) {
+          acc[item.type].push(item);
+        } else {
+          acc[item.type] = [item];
+        }
         return acc;
       }, {}));
     }
@@ -202,23 +207,11 @@ const CustomDesign = () => {
     });
   }
 
-  const onCreate = async(imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
+  const onCreate = async (imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
 
-    if ((!isSaveAndBack && !imageUrl) || !sessionId || !draftId) {
+    if ((!isSaveAndBack && !imageUrl)) {
       return;
     }
-    // const result = getCustomDesignState();
-    // 将result返回的图片预览
-    // Taro.previewImage({
-    //   urls: [imageUrl || ''],
-    // })
-    // 保存到相册
-    // Taro.saveImageToPhotosAlbum({
-    //   filePath: imageUrl,
-    //   success: () => {
-    //     console.log('图片保存成功');
-    //   },
-    // });
     if (isFromResult && !checkDeadsDataChanged((draft as any)?.items || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}}`,
@@ -248,6 +241,24 @@ const CustomDesign = () => {
     })
 
     const imageBase64 = await imageToBase64(imageUrl, true, false, undefined, 'png');
+    const wristSize = customDesignRef.current?.getPredictedLength();
+
+    if (isFromHome || isFromInspiration) {
+      apiSession.saveDiyDesign({
+        beadItems: beads.map((item) => item.sku_id),
+        image_base64: imageBase64 as string,
+        wrist_size: Math.floor(wristSize || 0),
+      }).then((res) => {
+        Taro.redirectTo({
+          url: `${pageUrls.result}?designBackendId=${res.data.design_id}&originImageUrl=${encodeURIComponent(imageUrl)}`,
+        })
+      });
+      return;
+    }
+
+    if (!sessionId || !draftId) {
+      return;
+    }
 
 
     apiSession.saveDraft({
@@ -275,12 +286,20 @@ const CustomDesign = () => {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}`,
       });
+    } if (isFromInspiration) {
+      Taro.redirectTo({
+        url: `${pageUrls.inspirationDetail}?wordId=${wordId}&designId=${designId}`,
+      });
+    } else if (isFromHome) {
+      Taro.redirectTo({
+        url: `${pageUrls.home}`,
+      });
     } else {
       sessionId && backToChatDesign(sessionId);
     }
   }
 
-  const handleBack = async() => {
+  const handleBack = async () => {
     const { beads } = getCustomDesignState();
     const imageUrl = await customDesignRef.current?.generateBraceletImage();
     const oldBeads = (draft as any)?.items;
@@ -293,7 +312,7 @@ const CustomDesign = () => {
         success: function (res) {
           console.log(res, 'res')
           if (res.tapIndex === 1) {
-            onSaveAndBack( beads || [] as BeadItem[], imageUrl);
+            onSaveAndBack(beads || [] as BeadItem[], imageUrl);
           } else {
             onDirectBack();
           }
@@ -322,7 +341,7 @@ const CustomDesign = () => {
         wuxing={(draft as any)?.wuxing || []}
         accessoryTypeMap={accessoryTypeMap}
         ref={customDesignRef}
-        size={screenHeight > 900 ? 300 : 260}
+        size={screenHeight > 900 ? 300 : 280}
         beads={(draft?.items || [])?.map((item: any) => {
           return {
             ...item,

@@ -82,6 +82,7 @@
   border-radius: 0;
   height: calc(100% - 20px);
   box-sizing: border-box;
+  padding-bottom: 12px;
 
   /* 隐藏滚动条 */
   &::-webkit-scrollbar {

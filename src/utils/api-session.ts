@@ -449,5 +449,23 @@ export default {
     },
     { cancelToken: config?.cancelToken, ...config }
   );
+  },
+  saveDiyDesign: (
+    params: {
+      beadItems: number[];
+      image_base64: string;
+      wrist_size: number;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.post<any>(
+      `/user/designs/diy`,
+      {
+        items: params.beadItems,
+        image_base64: params.image_base64,
+        wrist_size: params.wrist_size,
+      },
+      { cancelToken: config?.cancelToken, ...config }
+    );
   }
 };

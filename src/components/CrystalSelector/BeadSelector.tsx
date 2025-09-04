@@ -64,13 +64,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
     [onBeadClick]
   );
 
-  useEffect(() => {
-    if (!currentSelectedBead) return;
-    const belongTo = currentSelectedBead.spu_type === SPU_TYPE.BEAD ? beadTypeMap[currentSelectedBead.wuxing[0] as string] : accessoryTypeMap[currentSelectedBead.type as string];
-    const typeBeads = belongTo?.find((item) => item.id === currentSelectedBead.spu_id);
-    handleBeadClick(typeBeads, "select");
-  }, [currentSelectedBead, beadTypeMap, accessoryTypeMap])
-
   const handleWuxingChange = useCallback(
     (wuxing: string) => {
       if (wuxing === "精选") {
@@ -93,7 +86,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
     }
 
     if (!typeBeads || typeBeads.length === 0) return null;
-    console.log('typeBeads', typeBeads);
 
     return (
       <View

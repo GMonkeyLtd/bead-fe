@@ -102,8 +102,7 @@ export class BeadPositionManager {
     //   throw new Error(validation.message);
     // }
 
-    const newBeads = this.calculator.addBead(this.state.beads, newBead, this.state.selectedBeadIndex);
-    const newSelectedIndex = this.state.selectedBeadIndex !== -1 ? this.state.selectedBeadIndex : 0;
+    const { newBeads, newSelectedIndex } = this.calculator.addBead(this.state.beads, newBead, this.state.selectedBeadIndex);
     this.setState({ selectedBeadIndex: newSelectedIndex }, true);
     await this.setBeads(newBeads);
   }
@@ -182,13 +181,12 @@ export class BeadPositionManager {
       throw new Error("请先选择要替换的珠子");
     }
 
-    const newBeads = this.calculator.addBead(
+    const newBeads = this.calculator.replaceBead(
       this.state.beads,
       newBead,
       this.state.selectedBeadIndex
     );
     // 替换选中索引
-    this.setState({ selectedBeadIndex: -1 }, true); // 跳过历史记录
     await this.setBeads(newBeads);
   }
 

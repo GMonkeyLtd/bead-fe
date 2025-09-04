@@ -176,6 +176,23 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     updateState();
   }, [positionManagerState.beadStatus]);
 
+  const getBeadCluster = (bead: Bead) => {
+    const { spu_type, wuxing, spu_id, type } = bead;
+    const belongTo = spu_type === SPU_TYPE.BEAD ? beadTypeMap[wuxing[0] as string] : accessoryTypeMap[type as string];
+    const typeBeads = belongTo?.find((item) => item.id === spu_id);
+    return typeBeads;
+  }
+
+  // 选中珠子变化联动显示对应珠子可选尺寸范围
+  useEffect(() => {
+    if (positionManagerState.selectedBeadIndex === -1) return;
+    const currentSelectedBead = positionManagerState.beads[positionManagerState.selectedBeadIndex];
+
+    const newBeadCluster = getBeadCluster(currentSelectedBead);
+    setBeadSizeList(newBeadCluster?.beadSizeList || []);
+    setCurrentBeadSize(currentSelectedBead?.diameter || 0);
+  }, [positionManagerState.selectedBeadIndex, beadTypeMap, accessoryTypeMap])
+
   // 处理查看效果
   const handleViewEffect = useCallback(() => {
     if (positionManagerState.beads.length > 0) {
@@ -232,6 +249,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     image_aspect_ratio?: number;
   }, action: "add" | "replace") => {
     if (!positionManagerRef.current) return;
+    console.log('processBeadClick', bead, action);
     try {
       // 转换为Bead类型
       const beadData: Bead = {
@@ -345,33 +363,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     }
   }, []);
 
-  // 处理拖拽删除
-  const handleBeadDelete = useCallback(async (beadIndex: number) => {
-    if (!positionManagerRef.current) return;
-
-    try {
-      // 先选中要删除的珠子，然后删除
-      positionManagerRef.current.selectBead(beadIndex);
-      await positionManagerRef.current.removeBead();
-      const state = positionManagerRef.current.getState();
-      setPositionManagerState(state);
-
-      Taro.showToast({
-        title: "删除成功",
-        icon: "success",
-        duration: 1500,
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        Taro.showToast({
-          title: error.message || "删除失败",
-          icon: "none",
-          duration: 2000,
-        });
-      }
-    }
-  }, []);
-
   // 处理五行类型变化
   const handleWuxingChange = useCallback((wuxing: string) => {
     setCurrentWuxing(wuxing);
@@ -462,16 +453,22 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   }, []);
 
   const handleBeadSizeChange = useCallback((size: number) => {
-    setCurrentBeadSize(size);
-    if (positionManagerState.selectedBeadIndex !== -1) {
-      handleBeadClick(positionManagerState.beads[positionManagerState.selectedBeadIndex], "replace");
+    if (positionManagerState.selectedBeadIndex === -1) {
+      return;
     }
-  }, [positionManagerState.selectedBeadIndex, handleBeadClick, positionManagerState.beads]);
+    setCurrentBeadSize(size);
+    const currentSelectedBead = positionManagerState.beads[positionManagerState.selectedBeadIndex];
+    const newBeadCluster = getBeadCluster(currentSelectedBead);
+    const newBead = newBeadCluster?.beadList.find(item => item.diameter === size);
+    if (newBead) {
+      processBeadClick(newBead, "replace");
+    }
+  }, [positionManagerState.selectedBeadIndex, processBeadClick, positionManagerState.beads, getBeadCluster]);
 
   return (
     <View className="custom-design-ring-container">
       {/* 顶部内容区域 */}
-      <View className="custom-design-ring-tip-container">
+      <View className="custom-design-ring-tip-container" style={{ justifyContent: wuxing?.length > 0 ? 'space-between' : 'flex-end' }}>
         {wuxing?.length > 0 && (<View className="custom-design-ring-tip-content-container">
           <View className="custom-design-ring-tip-content-prefix">
             <Image
