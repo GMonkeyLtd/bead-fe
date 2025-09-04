@@ -6,6 +6,7 @@ interface QrCodeDialogProps {
   visible: boolean;
   qrCodeUrl: string;
   merchantName?: string;
+  qrType?: string;
   onClose: () => void;
 }
 
@@ -13,6 +14,7 @@ const QrCodeDialog: React.FC<QrCodeDialogProps> = ({
   visible,
   qrCodeUrl,
   merchantName,
+  qrType,
   onClose,
 }) => {
   if (!visible) return null;
@@ -21,7 +23,7 @@ const QrCodeDialog: React.FC<QrCodeDialogProps> = ({
     <View className={styles.qrCodeDialogOverlay} onClick={onClose}>
       <View className={styles.qrCodeDialog} onClick={(e) => e.stopPropagation()}>
         <View className={styles.dialogHeader}>
-          <Text className={styles.dialogTitle}>商家微信二维码</Text>
+          <Text className={styles.dialogTitle}>{`${qrType || '商家微信'}二维码`}</Text>
           <View className={styles.closeButton} onClick={onClose}>
             <Text className={styles.closeIcon}>×</Text>
           </View>
@@ -43,7 +45,7 @@ const QrCodeDialog: React.FC<QrCodeDialogProps> = ({
           </View>
           
           <Text className={styles.qrCodeTip}>
-            长按扫码添加商家微信
+            {`长按扫码添加${qrType || '商家微信'}`}
           </Text>
         </View>
       </View>
