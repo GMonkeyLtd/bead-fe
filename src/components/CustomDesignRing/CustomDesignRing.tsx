@@ -67,7 +67,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [currentAccessoryType, setCurrentAccessoryType] = useState<AccessoryType | ''>("");
   const [imageUrl, setImageUrl] = useState<string>("");
   const [beadSizeList, setBeadSizeList] = useState<number[]>([8, 10, 12, 13, 14, 15]);
-  const [currentBeadSize, setCurrentBeadSize] = useState<number>(8);
+  const [currentBeadSize, setCurrentBeadSize] = useState<number>(10);
 
   const beadPositionConfig: BeadPositionManagerConfig = {
     canvasSize,
