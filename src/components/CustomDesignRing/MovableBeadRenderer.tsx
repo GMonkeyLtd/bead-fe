@@ -86,7 +86,8 @@ const Bead = React.memo(
     handleDragMove: (e: any, index: number) => void;
     handleDragEnd: (e: any, index: number) => void;
   }) => {
-    const isFloatAccessory = bead.spu_type === SPU_TYPE.ACCESSORY && !bead.width;
+    const isFloatAccessory = bead.spu_type === SPU_TYPE.ACCESSORY && !bead.width || bead.passHeightRatio !== 0.5;
+    console.log("bead", bead);
     return (
       <View key={bead.uniqueKey} className="bead-wrapper">
         {/* 可拖拽的珠子 */}
@@ -97,6 +98,7 @@ const Bead = React.memo(
             : ""
           }`}
         // 统一使用x和y属性定位，避免与style冲突
+        // 使用显示位置进行定位
         x={bead.x - bead.scale_width}
         y={bead.y - bead.scale_height}
         style={{
@@ -325,10 +327,25 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
       const actualX = (e.detail.x || 0) + bead.scale_width;
       const actualY = (e.detail.y || 0) + bead.scale_height;
 
-      // 预览插入位置
+      // 对于非中心穿线的珠子，需要将显示位置转换为穿线位置进行拖拽计算
+      let threadX = actualX;
+      let threadY = actualY;
+      
+      if (bead.passHeightRatio !== undefined && bead.passHeightRatio !== 0.5) {
+        // 计算从显示位置到穿线位置的偏移
+        const heightOffset = (bead.passHeightRatio - 0.5) * bead.scale_height * 2;
+        const normalX = -Math.cos(bead.angle);
+        const normalY = -Math.sin(bead.angle);
+        
+        // 穿线位置 = 显示位置 - 法向量 * 高度偏移
+        threadX = actualX - normalX * heightOffset;
+        threadY = actualY - normalY * heightOffset;
+      }
+
+      // 预览插入位置（使用穿线位置）
       let previewCursor: typeof dragState.previewCursor = undefined;
       if (onPreviewInsertPosition) {
-        const previewResult = onPreviewInsertPosition(beadIndex, actualX, actualY);
+        const previewResult = onPreviewInsertPosition(beadIndex, threadX, threadY);
         if (previewResult.isValid && previewResult.cursorX !== undefined && previewResult.cursorY !== undefined) {
           previewCursor = {
             isVisible: true,
@@ -340,11 +357,11 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         }
       }
 
-      // 更新拖拽状态（包含预览信息）
+      // 更新拖拽状态（包含预览信息，保存穿线位置）
       setDragState(prev => ({
         ...prev,
-        currentX: actualX,
-        currentY: actualY,
+        currentX: threadX,
+        currentY: threadY,
         previewCursor
       }));
     }, 16), // 减少节流时间，提高响应性
@@ -379,15 +396,28 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
       if (!dragState.isDragging || dragState.dragBeadIndex !== beadIndex)
         return;
 
-      // 计算最终位置：优先使用拖拽状态中的位置，备用事件位置
+      // 计算最终位置：优先使用拖拽状态中的位置（已经是穿线位置），备用事件位置
       const bead = beadPositions[beadIndex];
       let finalX = dragState.currentX;
       let finalY = dragState.currentY;
 
-      // 如果状态中没有位置信息，从事件中计算
+      // 如果状态中没有位置信息，从事件中计算并转换为穿线位置
       if (finalX === 0 && finalY === 0 && e.detail) {
-        finalX = (e.detail.x || 0) + bead.scale_width;
-        finalY = (e.detail.y || 0) + bead.scale_height;
+        const actualX = (e.detail.x || 0) + bead.scale_width;
+        const actualY = (e.detail.y || 0) + bead.scale_height;
+        
+        // 对于非中心穿线的珠子，需要将显示位置转换为穿线位置
+        if (bead.passHeightRatio !== undefined && bead.passHeightRatio !== 0.5) {
+          const heightOffset = (bead.passHeightRatio - 0.5) * bead.scale_height * 2;
+          const normalX = -Math.cos(bead.angle);
+          const normalY = -Math.sin(bead.angle);
+          
+          finalX = actualX - normalX * heightOffset;
+          finalY = actualY - normalY * heightOffset;
+        } else {
+          finalX = actualX;
+          finalY = actualY;
+        }
       }
 
       console.log("🎯 拖拽结束事件", {
@@ -499,6 +529,45 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
           }}
         />
         
+        {/* 绘制穿线路径 */}
+        {beadPositions.length > 1 && (
+          <svg
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: `${canvasSize}px`,
+              height: `${canvasSize}px`,
+              zIndex: 3, // 在背景之上，珠子之下
+              pointerEvents: 'none',
+            }}
+          >
+            {beadPositions.map((bead, index) => {
+              const nextIndex = (index + 1) % beadPositions.length;
+              const nextBead = beadPositions[nextIndex];
+              
+              // 使用穿线点位置，如果没有则使用显示位置
+              const startX = bead.threadX !== undefined ? bead.threadX : bead.x;
+              const startY = bead.threadY !== undefined ? bead.threadY : bead.y;
+              const endX = nextBead.threadX !== undefined ? nextBead.threadX : nextBead.x;
+              const endY = nextBead.threadY !== undefined ? nextBead.threadY : nextBead.y;
+              
+              return (
+                <line
+                  key={`thread-${bead.uniqueKey}`}
+                  x1={startX}
+                  y1={startY}
+                  x2={endX}
+                  y2={endY}
+                  stroke="#8B7355"
+                  strokeWidth="3"
+                  opacity="0.8"
+                />
+              );
+            })}
+          </svg>
+        )}
+        
         <MovableArea
           className="movable-area"
           style={{
@@ -514,6 +583,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
             if (dragState.isDragging && dragState.dragBeadIndex === index) {
               return null;
             }
+            // 使用显示位置渲染阴影
             let shadowX = bead.x;
             let shadowY = bead.y;
 
