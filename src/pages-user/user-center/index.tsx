@@ -96,6 +96,11 @@ const UserCenterPage: React.FC = () => {
                   url: pageUrls.merchantLogin,
                 });
               }}
+              onAvatarClick={() => {
+                Taro.navigateTo({
+                  url: pageUrls.modifyUser,
+                });
+              }}
             />
           )}
 

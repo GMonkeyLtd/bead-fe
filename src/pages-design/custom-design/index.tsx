@@ -44,7 +44,6 @@ const CustomDesign = () => {
   });
   const { draftId, sessionId, designId, from, wordId } = Taro.getCurrentInstance()?.router?.params || {};
 
-  console.log(designId, from, wordId, 'design, draft')
 
   const oldBeadList = useMemo(() => {
     return design?.info?.items || (draft as any)?.items || [];

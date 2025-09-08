@@ -170,6 +170,10 @@ export class BeadArrayCalculator {
       return { newBeads: beads, newSelectedIndex: selectedIndex };
     }
 
+    if (beads.length === 1) {
+      return { newBeads: [], newSelectedIndex: -1 };
+    }
+
     const newBeads = [...beads];
     newBeads.splice(selectedIndex, 1);
 
@@ -283,7 +287,7 @@ export class BeadArrayCalculator {
 
     // 计算画布中心和圆环参数
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
-    const ringRadius = this.config.targetRadius || this.calculateRingRadius(beads);
+    const ringRadius = this.config.targetRadius
 
     // 计算拖拽点与所有珠子的距离
     const distances = otherBeads.map(bead => ({
@@ -582,15 +586,26 @@ export class BeadArrayCalculator {
   recalculatePositions(positions: Position[]): Position[] {
     if (!positions.length) return [];
 
-    const ringRadius = this.config.targetRadius || this.calculateRingRadius(positions);
+    const ringRadius = this.config.targetRadius
+    const predictRadius = positions.reduce((sum, bead) => sum + bead.ratioBeadWidth * this.config.displayScale, 0);
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
 
-    const newCoordinates = calculateBeadArrangementBySize(
-      ringRadius,
-      positions.map(pos => ({ ratioBeadWidth: pos.ratioBeadWidth || 0, beadDiameter: pos.diameter || 0 })),
-      center,
-      false
-    );
+    let newCoordinates: Position[] = [];
+    if (predictRadius < 2 * ringRadius * Math.PI) {
+      newCoordinates = calculateBeadArrangementByTargetRadius(
+        positions.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter })),
+        ringRadius,
+        center,
+        this.config.displayScale
+      );
+    } else {
+      newCoordinates = calculateBeadArrangementBySize(
+        ringRadius,
+        positions.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter })),
+        center,
+        false
+      );
+    }
 
     return positions.map((position, index) => {
       const newPosition = newCoordinates[index];

@@ -251,7 +251,6 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
   // 初始化珠子位置
   useEffect(() => {
     if (beads.length > 0 && beadPositions.length === 0) {
-      console.log(beads, 'beads')
       setBeadPositions([...beads]);
     }
   }, [beads, beadPositions.length]);
@@ -266,7 +265,7 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
 
     // 只有在不拖拽时才更新位置，避免拖拽中的冲突
     // 但是当拖拽状态刚结束时需要立即同步，确保恢复生效
-    if (!dragState.isDragging && beads.length > 0) {
+    if (!dragState.isDragging) {
       // 检查是否需要更新 - 比较关键位置信息
       const needsUpdate = beads.length !== beadPositions.length ||
         beads.some((bead, index) => {
@@ -428,7 +427,6 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
           return;
         }
 
-        console.log('continue')
         // 等待拖拽处理完成，确保状态更新完毕
         try {
           await onBeadDragEnd(beadIndex, finalX, finalY);
@@ -440,6 +438,19 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
             resetBeadPosition(originalPos, beadIndex);
             return;
           }
+        } finally {
+          // 重置拖拽状态（清除预览）
+          setDragState({
+            isDragging: false,
+            dragBeadIndex: -1,
+            startX: 0,
+            startY: 0,
+            currentX: 0,
+            currentY: 0,
+            originalPosition: undefined,
+            touchStartTime: undefined,
+            previewCursor: undefined,
+          });
         }
       }
 
@@ -499,14 +510,12 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
           
           {/* 渲染所有珠子的阴影层 - 确保在最底层 */}
           {beadPositions.map((bead, index) => {
-            // 如果当前珠子正在被拖拽，使用拖拽状态中的位置
+            // 如果当前珠子正在被拖拽，不渲染阴影
+            if (dragState.isDragging && dragState.dragBeadIndex === index) {
+              return null;
+            }
             let shadowX = bead.x;
             let shadowY = bead.y;
-
-            if (dragState.isDragging && dragState.dragBeadIndex === index) {
-              shadowX = dragState.currentX;
-              shadowY = dragState.currentY;
-            }
 
             return bead.image_url ? (
               <View

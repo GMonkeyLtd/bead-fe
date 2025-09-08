@@ -30,10 +30,8 @@ const CrystalCategorySelector: React.FC<CrystalCategorySelectorProps> = ({
   className = ''
 }) => {
   const [selected, setSelected] = useState(selectedCategory);
-  console.log('selected', selected);
 
   const handleCategoryClick = (categoryId: string) => {
-    console.log('categoryId', categoryId);
     setSelected(categoryId);
     onCategoryChange?.(categoryId);
   };

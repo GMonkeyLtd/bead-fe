@@ -74,16 +74,17 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
           tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
           entityIds: [order_uuid], // 添加必需的 entityIds 参数
           complete: () => {
-            Taro.redirectTo({
+            Taro.reLaunch({
               url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-            })
+            });
+
           },
           success: () => {
-            Taro.redirectTo({
+            Taro.reLaunch({
               url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
             })
           },
-          fail: () => Taro.redirectTo({
+          fail: () => Taro.reLaunch({
             url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
           })
         });
