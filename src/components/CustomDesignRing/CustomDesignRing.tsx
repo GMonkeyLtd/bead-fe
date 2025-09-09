@@ -73,12 +73,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     canvasSize,
     spacing,
     renderRatio,
-    targetRadius: canvasSize / 2 * 0.7,
+    targetRadius: canvasSize / 2 * 0.6,
     maxWristSize: 24,
     minWristSize: 8,
     enableHistory: true,
     maxHistoryLength: 50,
-    displayScale: 4.5
+    displayScale: 3.5
   };
 
   // 使用珠子位置管理器
@@ -195,6 +195,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
   // 处理查看效果
   const handleViewEffect = useCallback(() => {
+    if (positionManagerState.predictedLength < 13) {
+      Taro.showToast({
+        title: "哎呀，珠子有点少啦！一般手围建议不少于13cm噢。",
+        icon: "none",
+        duration: 2000,
+      });
+      return;
+    }
     if (positionManagerState.beads.length > 0) {
       const dotImageData = positionManagerState.beads.map(dot => ({
         image_url: dot.image_url,
@@ -249,8 +257,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     image_aspect_ratio?: number;
   }, action: "add" | "replace") => {
     if (!positionManagerRef.current) return;
-    console.log('processBeadClick', bead, action);
     try {
+      console.log("bead", bead);
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,
@@ -465,6 +473,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     }
   }, [positionManagerState.selectedBeadIndex, processBeadClick, positionManagerState.beads, getBeadCluster]);
 
+
   return (
     <View className="custom-design-ring-container">
       {/* 顶部内容区域 */}
@@ -484,7 +493,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           </View>
         </View>)}
         <View
-          className={`view-effect-button`}
+          className={`view-effect-button ${positionManagerState.predictedLength < 13 ? 'disabled' : ''}`}
           onClick={handleViewEffect}
         >
           查看效果
@@ -516,7 +525,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
                   适合手围：
                 </View>
                 <View className="custom-design-ring-wrist-length-content-value">
-                  {positionManagerState.predictedLength} ~ {positionManagerState.predictedLength + 0.5}cm
+                  {positionManagerState.predictedLength?.toFixed(1)} ~ {(positionManagerState.predictedLength + 0.5)?.toFixed(1)}cm
                 </View>
               </View>
             )}

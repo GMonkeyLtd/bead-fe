@@ -11,6 +11,7 @@ interface UserInfoCardProps {
   actionText?: string;
   onActionClick?: () => void;
   showAction?: boolean;
+  onAvatarClick?: () => void;
 }
 
 const UserInfoCard: React.FC<UserInfoCardProps> = ({
@@ -20,13 +21,14 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
   actionText = "商家后台",
   onActionClick,
   showAction = true,
+  onAvatarClick,
 }) => {
   return (
     <View className={styles.userInfoCard}>
       {/* 用户信息区域 */}
       <View className={styles.userSection}>
         {/* 用户头像 */}
-        <View className={styles.userAvatar}>
+        <View className={styles.userAvatar} onClick={onAvatarClick}>
           <Image 
             src={avatar} 
             mode="aspectFill"

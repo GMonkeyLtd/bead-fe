@@ -42,9 +42,8 @@ const CustomDesign = () => {
   const { design, getDesign } = usePollDesign({
     pollingInterval: 5000
   });
-  const { draftId, sessionId, designId, from, wordId } = Taro.getCurrentInstance()?.router?.params || {};
+  const { draftId, sessionId, designId, from, workId } = Taro.getCurrentInstance()?.router?.params || {};
 
-  console.log(designId, from, wordId, 'design, draft')
 
   const oldBeadList = useMemo(() => {
     return design?.info?.items || (draft as any)?.items || [];
@@ -184,7 +183,65 @@ const CustomDesign = () => {
         return acc;
       }, {});
       const aggregatedAccessoriesList = Object.values(aggregatedAccessories);
-
+      console.log(aggregatedAccessoriesList, 'aggregatedAccessoriesList')
+      aggregatedAccessoriesList.push({
+        beadList: [{
+          allow_pre_sale: true,
+          associated: null,
+          auto_match: true,
+          cost_price: 100,
+          diameter: 30,
+          id: 4,
+          image_aspect_ratio: 0.8,
+          image_url: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/moon-start-test.png",
+          name: "爱心钻银环",
+          quality: 2,
+          reference_price: 150,
+          shape: 1,
+          sku_id: 3001,
+          spu_id: 2001,
+          spu_type: 2,
+          type: 1,
+          weight: 50,
+          width: 6,
+          
+        }],
+        beadSizeList: [30],
+        id: 2000,
+        image_url: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/moon-start-test.png",
+        name: "星星月亮吊坠",
+        pass_height_ratio: 0.1,
+        type: 1,
+      })
+      aggregatedAccessoriesList.push({
+        beadList: [{
+          allow_pre_sale: true,
+          associated: null,
+          auto_match: true,
+          cost_price: 100,
+          diameter: 25,
+          id: 2004,
+          image_aspect_ratio: 0.7,
+          image_url: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/diaozhui1.png",
+          name: "蝴蝶吊坠",
+          quality: 2,
+          reference_price: 150,
+          shape: 1,
+          sku_id: 3002,
+          spu_id: 2002,
+          spu_type: 2,
+          type: 1,
+          weight: 50,
+          width: 4,
+          pass_height_ratio: 0.1,
+          pass_width_ratio: 0.2
+        }],
+        beadSizeList: [25],
+        id: 2000,
+        image_url: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/diaozhui1.png",
+        name: "蝴蝶吊坠",
+        type: 1,
+      })
       setAccessoryTypeMap(aggregatedAccessoriesList.reduce((acc: Record<string, any[]>, item: any) => {
         // 使用第一个item的wuxing属性
         if (acc[item.type]) {
@@ -230,7 +287,7 @@ const CustomDesign = () => {
       const wristSize = customDesignRef.current?.getPredictedLength();
       // 将saveDiyDesign需要的参数传递给quickDesign页面（不包含base64，在目标页面重新生成） 
       const beadItems = editedBeads.map((item) => item.sku_id);
-      
+
       Taro.redirectTo({
         url: `${pageUrls.quickDesign}?beadItems=${JSON.stringify(beadItems)}&wristSize=${Math.floor(wristSize || 0).toString()}&imageUrl=${encodeURIComponent(imageUrl)}&from=${isFromHome ? 'home' : 'inspiration'}`,
       });
@@ -298,7 +355,7 @@ const CustomDesign = () => {
       });
     } if (isFromInspiration) {
       Taro.redirectTo({
-        url: `${pageUrls.inspirationDetail}?wordId=${wordId}&designId=${designId}`,
+        url: `${pageUrls.inspirationDetail}?workId=${workId}&designId=${designId}`,
       });
     } else if (isFromHome) {
       Taro.redirectTo({
@@ -351,7 +408,7 @@ const CustomDesign = () => {
         wuxing={oldWuxing || []}
         accessoryTypeMap={accessoryTypeMap}
         ref={customDesignRef}
-        size={screenHeight > 900 ? 300 : 280}
+        size={screenHeight > 900 ? 340 : 320}
         beads={(oldBeadList || [])?.map((item: any) => {
           return {
             ...item,
