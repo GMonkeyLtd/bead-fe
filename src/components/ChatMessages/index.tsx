@@ -59,7 +59,7 @@ const MessageItem = React.memo(({
           draftIndex={message.draft_index}
           shouldLoad={shouldLoadImage}
           onImageLoaded={() => onImageLoaded?.(message.message_id)}
-          canRegenerate={isLatestDraft && !byMerchant}
+          canRegenerate={false}
           byMerchant={byMerchant}
         />
       )}

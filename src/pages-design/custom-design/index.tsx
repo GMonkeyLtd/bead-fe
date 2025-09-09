@@ -42,7 +42,7 @@ const CustomDesign = () => {
   const { design, getDesign } = usePollDesign({
     pollingInterval: 5000
   });
-  const { draftId, sessionId, designId, from, wordId } = Taro.getCurrentInstance()?.router?.params || {};
+  const { draftId, sessionId, designId, from, workId } = Taro.getCurrentInstance()?.router?.params || {};
 
 
   const oldBeadList = useMemo(() => {
@@ -297,7 +297,7 @@ const CustomDesign = () => {
       });
     } if (isFromInspiration) {
       Taro.redirectTo({
-        url: `${pageUrls.inspirationDetail}?wordId=${wordId}&designId=${designId}`,
+        url: `${pageUrls.inspirationDetail}?workId=${workId}&designId=${designId}`,
       });
     } else if (isFromHome) {
       Taro.redirectTo({

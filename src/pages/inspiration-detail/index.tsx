@@ -217,7 +217,7 @@ const InspirationDetailPage: React.FC = () => {
   const handleEditInspiration = () => {
     console.log(designData?.design_id, detail.work_id, 'designData')
     Taro.redirectTo({
-      url: `${pageUrls.customDesign}?designId=${designData?.design_id}&from=inspiration&wordId=${detail.work_id}`,
+      url: `${pageUrls.customDesign}?designId=${designData?.design_id}&from=inspiration&workId=${detail.work_id}`,
     });
   }
 
