@@ -41,6 +41,11 @@ export interface BeadItem extends SpuInfo {
   spu_type: number;
   image_aspect_ratio: number;
   spu_info?: SpuInfo;
+  // 新增：穿线高度比例，0.5表示从中心穿过，0表示从顶部穿过，1表示从底部穿过
+  passHeightRatio?: number;
+  // 运行时计算的属性
+  ratioBeadWidth?: number;
+  render_diameter?: number;
 }
 
 export enum AccessoryType {

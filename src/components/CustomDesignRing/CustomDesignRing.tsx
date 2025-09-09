@@ -73,12 +73,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     canvasSize,
     spacing,
     renderRatio,
-    targetRadius: canvasSize / 2 * 0.7,
+    targetRadius: canvasSize / 2 * 0.6,
     maxWristSize: 24,
     minWristSize: 8,
     enableHistory: true,
     maxHistoryLength: 50,
-    displayScale: 4.5
+    displayScale: 3.5
   };
 
   // 使用珠子位置管理器
@@ -258,6 +258,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   }, action: "add" | "replace") => {
     if (!positionManagerRef.current) return;
     try {
+      console.log("bead", bead);
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,

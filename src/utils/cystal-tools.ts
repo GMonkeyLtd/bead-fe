@@ -1,4 +1,17 @@
-import { Bead, Position } from "../../types/crystal";
+import { BeadItem } from "./api-session";
+
+// 简单的位置类型，用于内部计算
+export interface SimplePosition {
+  x: number;
+  y: number;
+  angle: number;
+  scale_width: number;
+  scale_height: number;
+  index: number;
+  threadX?: number;
+  threadY?: number;
+  passHeightRatio?: number;
+}
 
 
 export const calculateDotLocation = (
@@ -16,7 +29,7 @@ export const calculateDotLocation = (
 };
 
 export const calculateBeadPositionsByTargetRadius = (
-  beads: Bead[],
+  beads: { scale_width: number, scale_height: number, passHeightRatio?: number }[],
   targetRadius: number,
   center: { x: number, y: number }
 ) => {
@@ -24,20 +37,41 @@ export const calculateBeadPositionsByTargetRadius = (
   const angles = beads.map(d => (d.scale_width / targetRadius) * (180 / Math.PI));
   // 修复：直接使用targetRadius作为半径，因为targetRadius就是我们想要的圆环半径
   const radius = targetRadius;            // 使用目标半径
-  const positions: Position[] = [];
+  const positions: SimplePosition[] = [];
   const firstHalfAngle = angles[0] / 2;
   let currentDeg = -90 - firstHalfAngle;     // 调整起始角度
   beads.forEach((d, i) => {
     const halfAngle = angles[i] / 2;
     const midDeg = currentDeg + halfAngle;
     const rad = midDeg * Math.PI / 180;
+    
+    // 计算穿线点在圆环上的位置
+    const threadX = center.x + radius * Math.cos(rad);
+    const threadY = center.y + radius * Math.sin(rad);
+    
+    // 计算珠子的显示位置，考虑passHeightRatio
+    const passHeightRatio = d.passHeightRatio || 0.5; // 默认从中心穿过
+    const heightOffset = (passHeightRatio - 0.5) * d.scale_height; // 相对于中心的偏移
+    
+    // 计算垂直于圆环切线方向的单位向量（指向圆心内侧）
+    const normalX = -Math.cos(rad); // 指向圆心的法向量
+    const normalY = -Math.sin(rad);
+    
+    // 珠子的实际显示位置 = 穿线位置 + 法向量 * 高度偏移
+    const displayX = threadX + normalX * heightOffset;
+    const displayY = threadY + normalY * heightOffset;
+    
     positions.push({
       scale_width: d.scale_width / 2,
       scale_height: d.scale_height / 2,
-      x: center.x + radius * Math.cos(rad),
-      y: center.y + radius * Math.sin(rad),
+      x: displayX,
+      y: displayY,
       angle: rad,
       index: i as any,
+      // 保存穿线点位置，用于后续计算
+      threadX,
+      threadY,
+      passHeightRatio,
     });
     currentDeg += angles[i];
   });
@@ -46,7 +80,7 @@ export const calculateBeadPositionsByTargetRadius = (
 
 // 计算每个珠子的圆心坐标 - 使用渲染直径（和CustomDesignRing保持一致）
 export const calcPositionsWithRenderDiameter = (
-  renderDiameterList: { render_width: number, scale_width: number, render_diameter: number, scale_height: number }[],
+  renderDiameterList: { render_width: number, scale_width: number, render_diameter: number, scale_height: number, passHeightRatio?: number }[],
   // 圆心坐标
   center: { x: number, y: number }
 ) => {
@@ -62,7 +96,7 @@ export const calcPositionsWithRenderDiameter = (
   const angles = renderDiameterList.map(d => d.scale_width / circumference * 360);
 
   // 4. 计算每颗珠子圆心坐标
-  const positions: Position[] = [];
+  const positions: SimplePosition[] = [];
   // 如果没有珠子，直接返回空数组
   if (renderDiameterList.length === 0) {
     return positions;
@@ -77,13 +111,34 @@ export const calcPositionsWithRenderDiameter = (
     const halfAngle = angles[i] / 2;          // 珠子占角的一半
     const midDeg = currentDeg + halfAngle;    // 珠子中心角度
     const rad = midDeg * Math.PI / 180;       // 转弧度
+    
+    // 计算穿线点在圆环上的位置
+    const threadX = center.x + radius * Math.cos(rad);
+    const threadY = center.y + radius * Math.sin(rad);
+    
+    // 计算珠子的显示位置，考虑passHeightRatio
+    const passHeightRatio = d.passHeightRatio || 0.5; // 默认从中心穿过
+    const heightOffset = (passHeightRatio - 0.5) * d.scale_height; // 相对于中心的偏移
+    
+    // 计算垂直于圆环切线方向的单位向量（指向圆心内侧）
+    const normalX = -Math.cos(rad); // 指向圆心的法向量
+    const normalY = -Math.sin(rad);
+    
+    // 珠子的实际显示位置 = 穿线位置 + 法向量 * 高度偏移
+    const displayX = threadX + normalX * heightOffset;
+    const displayY = threadY + normalY * heightOffset;
+    
     positions.push({
       scale_width: d.scale_width / 2,
       scale_height: d.scale_height / 2,
-      x: center.x + radius * Math.cos(rad),
-      y: center.y + radius * Math.sin(rad),
+      x: displayX,
+      y: displayY,
       angle: rad,
       index: i as any,
+      // 保存穿线点位置，用于后续计算
+      threadX,
+      threadY,
+      passHeightRatio,
     });
     currentDeg += angles[i];                  // 累加到下一颗起点
   });
@@ -91,23 +146,22 @@ export const calcPositionsWithRenderDiameter = (
 }
 
 export const calculateBeadArrangementByTargetRadius = (
-  beads: Bead[],
+  beads: { ratioBeadWidth: number, beadDiameter: number, passHeightRatio?: number }[],
   targetRadius: number,
   center: { x: number, y: number },
   displayScale: number
 ) => {
-  const renderDiameterList = beads.map(d => ({
-    render_width: d.ratioBeadWidth,
+  const beadData = beads.map(d => ({
     scale_width: d.ratioBeadWidth * displayScale,
-    render_diameter: d.beadDiameter,
     scale_height: d.beadDiameter * displayScale,
+    passHeightRatio: d.passHeightRatio,
   }));
-  return calculateBeadPositionsByTargetRadius(renderDiameterList, targetRadius, center);
+  return calculateBeadPositionsByTargetRadius(beadData, targetRadius, center);
 }
 
 export const calculateBeadArrangementBySize = (
   ringRadius: number,
-  beadSizeList: { ratioBeadWidth: number, beadDiameter: number }[],
+  beadSizeList: { ratioBeadWidth: number, beadDiameter: number, passHeightRatio?: number }[],
   center: { x: number, y: number },
   needScale: boolean = true
 ) => {
@@ -123,7 +177,13 @@ export const calculateBeadArrangementBySize = (
   const sizeRatio = targetRingRadius / calculatedRingRadius;
 
   // 计算缩放后的渲染直径列表
-  const scaledRenderDiameterList = beadSizeList.map((size) => ({ render_width: size.ratioBeadWidth, scale_width: size.ratioBeadWidth * sizeRatio, render_diameter: size.beadDiameter, scale_height: size.beadDiameter * sizeRatio }));
+  const scaledRenderDiameterList = beadSizeList.map((size) => ({ 
+    render_width: size.ratioBeadWidth, 
+    scale_width: size.ratioBeadWidth * sizeRatio, 
+    render_diameter: size.beadDiameter, 
+    scale_height: size.beadDiameter * sizeRatio, 
+    passHeightRatio: size.passHeightRatio 
+  }));
 
   // 使用和CustomDesignRing相同的计算逻辑
   const positions = calcPositionsWithRenderDiameter(scaledRenderDiameterList, center);
@@ -131,7 +191,7 @@ export const calculateBeadArrangementBySize = (
   return positions;
 };
 
-export const computeBraceletLength = (beads: Bead[]) => {
+export const computeBraceletLength = (beads: BeadItem[]) => {
   const beadsWidths = beads.map((dot) => dot.width);
   const beadsDiameters = beads.map((dot) => dot.diameter);
   // 所有珠子能围成的周长

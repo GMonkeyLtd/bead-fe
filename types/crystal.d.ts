@@ -9,6 +9,11 @@ export interface Position extends BeadItem {
     scale_width: number;
     index: number;
     uniqueKey: string;
+    // 新增：穿线点位置（用于拖拽计算）
+    threadX?: number;
+    threadY?: number;
+    // 新增：穿线高度比例
+    passHeightRatio?: number;
 }
 
 export interface BeadWithPosition extends BeadItem {
@@ -19,4 +24,9 @@ export interface BeadWithPosition extends BeadItem {
     scale_width: number;
     index: number;
     uniqueKey: string;
+    // 新增：穿线点位置（用于拖拽计算）
+    threadX?: number;
+    threadY?: number;
+    // 新增：穿线高度比例
+    passHeightRatio?: number;
 }
