@@ -79,6 +79,7 @@ const MessageItem = React.memo(({
           draftIndex={message.draft_index}
           shouldLoad={shouldLoadImage}
           onImageLoaded={() => onImageLoaded?.(message.message_id)}
+          canRegenerate={false}
         />
       )}
     </View>

@@ -75,7 +75,6 @@ export const usePollDesign = (options?: UsePollDesignOptions) => {
             showError: false,
           }
         );
-        console.log(options?.checkStopPoll, 'options?.checkStopPoll')
         if (options?.checkStopPoll ? options?.checkStopPoll?.(res?.data) : res?.data?.progress == 100) {
           setDesign(res?.data);
           clearTimer(designId);

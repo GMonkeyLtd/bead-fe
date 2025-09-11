@@ -37,6 +37,8 @@ export const GENERATING_GIF_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-fr
 export const RESULT_IMAGE_SLOGAN_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/result-image-slogan.png";
 export const RESULT_IMAGE_TEXTURE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/result-image-texture.png";
 export const RESULT_IMAGE_LOGO_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/poster/reuslt-image-logo.png";
+export const TIER_PRICE_TAG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/tier-price-tag.png";
+export const PRICE_TIER_BG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/price-tier-bg.png";
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 

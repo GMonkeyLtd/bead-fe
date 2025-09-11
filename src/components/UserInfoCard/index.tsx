@@ -2,7 +2,8 @@ import React from "react";
 import { Image, Text, View } from "@tarojs/components";
 import styles from "./index.module.scss";
 import switchIcon from "@/assets/icons/switch.svg";
-import CrystalButton from "../CrystalButton";
+import editUserInfoIcon from "@/assets/icons/edit-userinfo.svg";
+
 
 interface UserInfoCardProps {
   userName: string;
@@ -37,8 +38,11 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({
         </View>
         
         {/* 用户文本信息 */}
-        <View className={styles.userTextInfo}>
-          <Text className={styles.userName}>{userName}</Text>
+        <View className={styles.userTextInfo} onClick={onAvatarClick}>
+          <View className={styles.userNameContainer}>
+            <View className={styles.userName}>{userName}</View>
+            <Image src={editUserInfoIcon} className={styles.editUserInfoIcon} />
+          </View>
           <Text className={styles.userSlogan}>{userSlogan}</Text>
         </View>
       </View>

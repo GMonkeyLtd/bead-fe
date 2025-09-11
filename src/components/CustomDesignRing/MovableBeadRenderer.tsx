@@ -87,7 +87,6 @@ const Bead = React.memo(
     handleDragEnd: (e: any, index: number) => void;
   }) => {
     const isFloatAccessory = bead.spu_type === SPU_TYPE.ACCESSORY && !bead.width || bead.passHeightRatio !== 0.5;
-    console.log("bead", bead);
     return (
       <View key={bead.uniqueKey} className="bead-wrapper">
         {/* 可拖拽的珠子 */}

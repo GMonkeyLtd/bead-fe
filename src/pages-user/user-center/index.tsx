@@ -9,15 +9,18 @@ import TabBar from "@/components/TabBar";
 import { userApi, User } from "@/utils/api";
 import sessionApi from "@/utils/api-session";
 import MyWorkIcon from "@/assets/icons/my-work.svg";
+import shoppingOrderIcon from "@/assets/icons/shopping-order.svg";
 import { pageUrls } from "@/config/page-urls";
-import { DESIGN_PLACEHOLDER_IMAGE_URL } from "@/config";
 import { usePollDesign } from "@/hooks/usePollDesign";
 import styles from "./index.module.scss";
+import LoadingIcon from "@/components/LoadingIcon";
+import CrystalButton from "@/components/CrystalButton";
 
 const UserCenterPage: React.FC = () => {
   const [designList, setDesignList] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [curTab, setCurTab] = useState<"myWork" | "myPublish">("myWork");
 
   const { design, getDesign } = usePollDesign({ pollingInterval: 10000 });
 
@@ -26,7 +29,7 @@ const UserCenterPage: React.FC = () => {
       setDesignList((prev) =>
         prev.map((item) =>
           item.id === design.design_id
-            ? { ...item, progress: 100, image: design.image_url } 
+            ? { ...item, progress: 100, image: design.image_url }
             : item
         )
       );
@@ -41,23 +44,21 @@ const UserCenterPage: React.FC = () => {
       showLoading: true,
     });
     const designs = (historyRes?.data?.designs || []).map((item) => {
+      if (!item.image_url) {
+        getDesign({
+          designId: item.design_id,
+        });
+      }
       return {
         id: item.design_id,
         progress: item.progress,
         name: item.info.name,
         image: item.image_url,
+        draftUrl: item.draft_url,
+        backgroundUrl: item.background_url,
         sessionId: item.session_id,
         draftId: item.draft_id,
       };
-    });
-
-    designs.forEach((item) => {
-      if (!item.image) {
-        item.image = DESIGN_PLACEHOLDER_IMAGE_URL;
-        getDesign({
-          designId: item.id,
-        });
-      }
     });
     setDesignList(designs);
     setLoading(false);
@@ -85,82 +86,106 @@ const UserCenterPage: React.FC = () => {
     <CrystalContainer showBack={false} showHome={false}>
       <View className={styles.pageContent}>
         <View className={styles.pageTopContainer}>
-          {userInfo && !loading && (
-            <UserInfoCard
-              userName={userInfo?.nick_name?.slice(0, 10) || '璞光集用户'}
-              userSlogan='璞光集，好运气'
-              avatar={userInfo?.avatar_url || ''}
-              showAction={Boolean((userInfo as any)?.is_merchant)}
-              onActionClick={() => {
-                Taro.redirectTo({
-                  url: pageUrls.merchantLogin,
-                });
-              }}
-              onAvatarClick={() => {
-                Taro.navigateTo({
-                  url: pageUrls.modifyUser,
-                });
-              }}
-            />
-          )}
-
-          {/* 功能卡片区域 */}
-          <View className={styles.featureCards}>
-            {/* 我的订单和编辑资料卡片容器 */}
-            <View className={styles.featureCardsRow}>
-              {/* 我的订单卡片 */}
-              <View
-                className={`${styles.featureCard} ${styles.orderCard}`}
-                onClick={handleOrdersClick}
-              >
-                <View className={styles.cardContent}>
-                  <View className={styles.cardInfo}>
-                    <View className={styles.cardTitle}>
-                      <Text className={styles.titleText}>我的订单</Text>
-                    </View>
-                  </View>
-                  <Image src={rightArrow} style={{ width: "12px", height: "8px" }} />
+          <UserInfoCard
+            userName={userInfo?.nick_name?.slice(0, 10) || '--'}
+            userSlogan='璞光集，好运气'
+            avatar={userInfo?.avatar_url || ''}
+            showAction={Boolean((userInfo as any)?.is_merchant)}
+            onActionClick={() => {
+              Taro.redirectTo({
+                url: pageUrls.merchantLogin,
+              });
+            }}
+            onAvatarClick={() => {
+              Taro.navigateTo({
+                url: pageUrls.modifyUser,
+              });
+            }}
+          />
+          {/* 我的收益卡片 */}
+          <View className={`${styles.featureCard} ${styles.incomeCard}`}>
+            <View className={styles.cardContent}>
+              <View className={styles.cardInfo}>
+                <View className={styles.cardTitle}>
+                  <Text className={styles.titleText}>我的收益</Text>
+                </View>
+                <View className={styles.cardValue}>
+                  <Text className={styles.valueText}>0.00</Text>
+                  <Text className={styles.unitText}>元</Text>
                 </View>
               </View>
-
-              {/* 编辑资料卡片 */}
-              <View
-                className={`${styles.featureCard} ${styles.profileCard}`}
+              <CrystalButton 
+                isPrimary
+                text="提现"
                 onClick={() => {
-                  if (loading) return;
-                  Taro.navigateTo({
-                    url: pageUrls.modifyUser,
+                  Taro.showToast({
+                    title: "无收益可提现",
+                    icon: "none",
                   });
                 }}
-              >
-                <View className={styles.cardContent}>
-                  <View className={styles.cardInfo}>
-                    <View className={styles.cardTitle}>
-                      <Text className={styles.titleText}>编辑资料</Text>
-                    </View>
-                  </View>
-                  <Image src={rightArrow} style={{ width: "12px", height: "8px" }} />
-                </View>
-              </View>
+                style={{
+                  height: "32px",
+                  padding: "0 12px",
+                }}
+                textStyle={{
+                  fontSize: "12px",
+                }}
+              />
             </View>
           </View>
         </View>
-        <View className={styles.imageHistoryTitle}>
-          <Image
-            src={MyWorkIcon}
-            style={{
-              width: "35px",
-              height: "12px",
-              position: "absolute",
-              bottom: "12px",
-              left: "50px",
-            }}
-          />
-          我的作品
+        <View className={styles.myAssetsContainer}>
+          <View className={styles.myAssetsTabsContainer}>
+            <View className={`${styles.myAssetsTabItem} ${curTab === "myWork" ? styles.tabActive : ""}`} onClick={() => setCurTab("myWork")}>
+              {curTab === "myWork" && (<Image
+                src={MyWorkIcon}
+                style={{
+                  width: "35px",
+                  height: "12px",
+                  position: "absolute",
+                  bottom: "-6px",
+                  right: "-2px",
+                }}
+              />)}
+              我的作品
+            </View>
+            <View className={`${styles.myAssetsTabItem} ${curTab === "myPublish" ? styles.tabActive : ""}`} onClick={() => setCurTab("myPublish")}>
+              {curTab === "myPublish" && (<Image
+                src={MyWorkIcon}
+                style={{
+                  width: "35px",
+                  height: "12px",
+                  position: "absolute",
+                  bottom: "-6px",
+                  right: "-2px",
+                }}
+              />)}
+              我的发布
+            </View>
+          </View>
+
+          <View className={styles.myOrdersButton} onClick={handleOrdersClick}>
+            <Image src={shoppingOrderIcon} style={{ width: "14px", height: "14px" }} />
+            <View className={styles.myOrdersButtonText}>
+              订单
+            </View>
+          </View>
         </View>
-        {designList.length > 0 && !loading && (
+        {curTab === "myWork" && designList.length > 0 && (
           <View className={styles.imageHistoryContainer}>
             <BraceletList items={designList} onItemClick={handleItemClick} />
+          </View>
+        )}
+        {/* {loading && (
+          <View className={styles.loadingContainer}>
+            <LoadingIcon />
+          </View>
+        )} */}
+        {curTab === "myPublish" && (
+          <View className={styles.myPublishContainer}>
+            <View className={styles.myPublishText}>
+              暂无已发布的作品哦～
+            </View>
           </View>
         )}
       </View>

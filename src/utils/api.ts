@@ -269,7 +269,7 @@ export const userHistoryApi = {
     ),
 
   createOrder: (
-    params: { design_id: number; price: number },
+    params: { design_id: number; tier?: number; is_custom?: boolean },
     config?: ApiConfig
   ) =>
     http.post<{
@@ -419,6 +419,17 @@ export const fileApi = {
     config?: ApiConfig
   ) => http.upload("/upload", filePath, formData, config?.cancelToken),
 };
+
+export const configApi = {
+  getPriceTierConfig: (config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>("/configs/tier_desc", {}, {
+      cancelToken: config?.cancelToken,
+      ...config,
+    });
+  }
+}
 
 // 导出所有API
 export default {

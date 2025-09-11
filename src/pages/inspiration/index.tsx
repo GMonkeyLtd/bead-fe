@@ -118,7 +118,7 @@ const InspirationPage: React.FC = () => {
     queryItem: useCallback(async (item: InspirationItem) => {
       const res = await inspirationApi.getInspirationData({
         work_id: item.work_id,
-      });
+      }, { showLoading: false });
       return res.data.works?.[0] || null;
     }, []),
     selector: "#inspiration-more-tag", // 添加 selector 参数
@@ -166,21 +166,34 @@ const InspirationPage: React.FC = () => {
     }
   });
 
+  // 安全的 setTimeout，会在组件卸载时清理
+  const safeSetTimeout = useCallback((callback: () => void, delay: number) => {
+    const timeoutId = setTimeout(() => {
+      timeoutRefs.current.delete(timeoutId);
+      callback();
+    }, delay);
+    timeoutRefs.current.add(timeoutId);
+    return timeoutId;
+  }, []);
+
   // 处理收藏点击
   const handleCollectClick = (item: InspirationItem, e: any) => {
     e.stopPropagation();
     // TODO: 实现收藏功能
     if (item.is_collect) {
       inspirationApi
-        .cancelCollectInspiration({ work_id: item.work_id })
+        .cancelCollectInspiration({ work_id: item.work_id }, { showLoading: false })
         .then(() => {
-          Taro.showToast({
-            title: "取消收藏成功",
-            icon: "success",
-          });
           // 同时更新两个列表中的数据
           updateItem(item);
           collectUpdateItem(item);
+          safeSetTimeout(() => {
+            Taro.showToast({
+              title: "取消收藏成功",
+              icon: "success",
+              duration: 1000,
+            });
+          }, 200);
         })
         .catch((err) => {
           Taro.showToast({
@@ -190,15 +203,21 @@ const InspirationPage: React.FC = () => {
         });
     } else {
       inspirationApi
-        .collectInspiration({ work_id: item.work_id })
+        .collectInspiration({ work_id: item.work_id }, { showLoading: false })
         .then(() => {
-          Taro.showToast({
-            title: "收藏成功",
-            icon: "success",
-          });
-          // 同时更新两个列表中的数据
+          // 先更新数据状态
           updateItem(item);
           collectUpdateItem(item);
+          
+          // 延迟显示 toast 并使用最大可能的 duration
+          safeSetTimeout(() => {
+            Taro.showToast({
+              title: "收藏成功，已收藏作品可到收藏集中查看。",
+              icon: "none",
+              duration: 1000, // 使用最大的 10 秒
+              mask: false, // 不使用遮罩，避免阻止用户操作
+            });
+          }, 200);
         })
         .catch((err) => {
           Taro.showToast({
@@ -220,6 +239,7 @@ const InspirationPage: React.FC = () => {
   // 使用 IntersectionObserver 监听元素进入视口
   const observerRef = useRef<IntersectionObserver | null>(null);
   const fallbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRefs = useRef<Set<NodeJS.Timeout>>(new Set());
 
   const setupScrollListener = useCallback(() => {
     // 清理现有的观察器和定时器
@@ -261,9 +281,10 @@ const InspirationPage: React.FC = () => {
         .select(`#${targetId}`)
         .node()
         .exec((res) => {
+          // 检查组件是否仍然存在，避免在组件卸载后执行
           if (res && res[0] && res[0].node && observerRef.current) {
             observerRef.current.observe(res[0].node);
-          } else {
+          } else if (observerRef.current) {
             // 如果获取节点失败，使用降级方案
             console.warn("Failed to get target node, using fallback method");
             useFallbackMethod(targetId);
@@ -329,6 +350,11 @@ const InspirationPage: React.FC = () => {
         clearInterval(fallbackIntervalRef.current);
         fallbackIntervalRef.current = null;
       }
+      // 清理所有未完成的 timeout
+      timeoutRefs.current.forEach(timeoutId => {
+        clearTimeout(timeoutId);
+      });
+      timeoutRefs.current.clear();
     };
   }, [setupScrollListener]);
 

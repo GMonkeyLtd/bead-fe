@@ -97,10 +97,10 @@ export class BeadPositionManager {
    * 添加珠子
    */
   async addBead(newBead: Bead): Promise<void> {
-    // const validation = this.calculator.validateBeadCount(this.state.beads, newBead.diameter, 'add');
-    // if (!validation.isValid) {
-    //   throw new Error(validation.message);
-    // }
+    const validation = this.calculator.validateBeadCount(this.state.beads, newBead.diameter, 'add');
+    if (!validation.isValid) {
+      throw new Error(validation.message);
+    }
 
     const { newBeads, newSelectedIndex } = this.calculator.addBead(this.state.beads, newBead, this.state.selectedBeadIndex);
     this.setState({ selectedBeadIndex: newSelectedIndex }, true);

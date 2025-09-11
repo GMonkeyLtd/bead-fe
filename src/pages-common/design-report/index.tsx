@@ -35,8 +35,8 @@ const DesignReport = () => {
       if (res?.data) {
         setDesignData(res.data);
         // 解析markdown为HTML
-        if (res.data.info?.report) {
-          const rawReport = res.data.info.report;
+        if (res.data.info?.personal_report) {
+          const rawReport = res.data.info.personal_report;
 
           // 清理可能的特殊字符和编码问题
           let cleanedReport = rawReport;

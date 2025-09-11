@@ -215,7 +215,6 @@ const InspirationDetailPage: React.FC = () => {
   }
 
   const handleEditInspiration = () => {
-    console.log(designData?.design_id, detail.work_id, 'designData')
     Taro.redirectTo({
       url: `${pageUrls.customDesign}?designId=${designData?.design_id}&from=inspiration&workId=${detail.work_id}`,
     });
@@ -250,6 +249,12 @@ const InspirationDetailPage: React.FC = () => {
             src={detail.cover_url}
             className={styles.mainImage}
             mode="widthFix"
+            onClick={() => {
+              if (!detail) return;
+              Taro.previewImage({
+                urls: [detail.cover_url],
+              });
+            }}
           />
 
           {/* 图片指示器 */}

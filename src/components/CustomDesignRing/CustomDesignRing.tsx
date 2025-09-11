@@ -78,7 +78,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     minWristSize: 8,
     enableHistory: true,
     maxHistoryLength: 50,
-    displayScale: 3.5
+    displayScale: 3.8
   };
 
   // 使用珠子位置管理器
@@ -122,7 +122,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   useEffect(() => {
     const allWuxing = Object.keys(beadTypeMap);
     if (allWuxing.length > 0) {
-      setCurrentWuxing(allWuxing[0]); // 默认选择"土"模式
+      setCurrentWuxing('金'); // 默认选择"土"模式
     }
   }, [beadTypeMap]);
 
@@ -553,6 +553,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             onClockwiseMove={handleClockwiseMove}
             onCounterclockwiseMove={handleCounterclockwiseMove}
             onDelete={handleDelete}
+            enableRotate={positionManagerState.predictedLength >= 13}
           />
           <HistoryOperations
             canUndo={positionManagerRef.current?.canUndo() || false}

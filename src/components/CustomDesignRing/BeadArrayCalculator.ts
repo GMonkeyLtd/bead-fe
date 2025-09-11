@@ -101,26 +101,26 @@ export class BeadArrayCalculator {
   calculateBeadPositions(beads: BeadItem[]): Position[] {
     if (!beads.length) return [];
     const ringRadius = this.config.targetRadius
-    const predictRadius = beads.reduce((sum, bead) => sum + bead.ratioBeadWidth * this.config.displayScale, 0);
+    const curWristLength = this.calculatePredictedLength(beads);
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
 
     let positions: Position[] = [];
     // 若果珠子数量小于10颗，绘制时使用珠子width的三倍进行渲染，不按照圆圈进行自适应缩放
-    if (predictRadius < 2 * ringRadius * Math.PI) {
+    if (curWristLength <13) {
       positions = calculateBeadArrangementByTargetRadius(
         beads.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter, passHeightRatio: bead.pass_height_ratio })),
         ringRadius,
         center,
         this.config.displayScale,
       );
-      } else {
-        positions = calculateBeadArrangementBySize(
-          ringRadius,
-          beads.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter, passHeightRatio: bead.pass_height_ratio })),
-          center,
-          false
-        );
-      }
+    } else {
+      positions = calculateBeadArrangementBySize(
+        ringRadius,
+        beads.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter, passHeightRatio: bead.pass_height_ratio })),
+        center,
+        false
+      );
+    }
 
     return beads.map((bead, index) => {
       const simplePosition = positions[index];
@@ -250,19 +250,19 @@ export class BeadArrayCalculator {
     const currentLength = this.calculatePredictedLength(beads);
     const newLength = type === 'add' ? currentLength + newBeadDiameter * 0.1 : currentLength - newBeadDiameter * 0.1;
 
-    // if (newLength > this.config.maxWristSize && type === 'add') {
-    //   return {
-    //     isValid: false,
-    //     message: "哎呀，珠子有点多啦！一般手围建议不超过23cm噢。"
-    //   };
-    // }
-
-    if (newLength < this.config.minWristSize && type === 'remove') {
+    if (newLength > this.config.maxWristSize && type === 'add') {
       return {
         isValid: false,
-        message: "哎呀，珠子有点少啦！一般手围建议不少于12cm噢。"
+        message: "哎呀，珠子有点多啦！一般手围建议不超过23cm噢。"
       };
     }
+
+    // if (newLength < this.config.minWristSize && type === 'remove') {
+    //   return {
+    //     isValid: false,
+    //     message: "哎呀，珠子有点少啦！一般手围建议不少于12cm噢。"
+    //   };
+    // }
 
     return { isValid: true };
   }
@@ -608,11 +608,12 @@ export class BeadArrayCalculator {
     if (!positions.length) return [];
 
     const ringRadius = this.config.targetRadius
-    const predictRadius = positions.reduce((sum, bead) => sum + bead.ratioBeadWidth * this.config.displayScale, 0);
+    const curWristLength = this.calculatePredictedLength(positions);
+
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
 
     let newCoordinates: Position[] = [];
-    if (predictRadius < 2 * ringRadius * Math.PI) {
+    if (curWristLength < 13) {
       newCoordinates = calculateBeadArrangementByTargetRadius(
         positions.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter, passHeightRatio: bead.passHeightRatio })),
         ringRadius,

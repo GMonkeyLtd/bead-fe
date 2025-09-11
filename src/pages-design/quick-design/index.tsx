@@ -114,12 +114,11 @@ const QuickDesign = () => {
       }
     }, 3000);
 
-    console.log(params, 'params')
     // 处理不同类型的设计请求
     if (sessionId && draftId && imageUrl) {
       // AI聊天设计
       quickDesignByDraft(sessionId, draftId, imageUrl);
-    } else if (beadItems && imageUrl && wristSize && ['inspiration', 'home'].includes(from || '')) {
+    } else if (beadItems && imageUrl && wristSize && ['inspiration', 'home', 'result'].includes(from || '')) {
       // DIY自定义设计
       handleDiyDesign();
     }
@@ -169,7 +168,6 @@ const QuickDesign = () => {
     // pollDesignProgress(sessionId, draftId, null);
 
     const _imageUrl = decodeURIComponent(imageUrl);
-    console.log(_imageUrl, 'imageUrl by draft')
     const base64 = await imageToBase64(_imageUrl, true, false, undefined, 'png');
     // Taro.setClipboardData({
     //   data: base64,
@@ -194,7 +192,6 @@ const QuickDesign = () => {
   const handleDiyDesign = async () => {
     try {
       const _imageUrl = decodeURIComponent(imageUrl || '');
-      console.log(imageUrl, _imageUrl, 'imageUrl by diy')
       const image_base64 = await imageToBase64(_imageUrl, true, false, undefined, 'png');
       const beadItemsArray = JSON.parse(beadItems || '[]');
       const res = await sessionApi.saveDiyDesign({

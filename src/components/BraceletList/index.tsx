@@ -1,13 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Image, Text, ScrollView } from "@tarojs/components";
 import "./index.scss";
 import RightArrowIcon from "@/assets/icons/right-arrow.svg";
+import ProductImageGenerator from "../ProductImageGenerator";
+import apiSession from "@/utils/api-session";
+import { imageToBase64 } from "@/utils/imageUtils";
+import { DESIGN_PLACEHOLDER_IMAGE_URL } from "@/config";
+
 
 interface BraceletItem {
   id: string;
   name: string;
   number: string;
   image: string;
+  draftUrl: string;
+  backgroundUrl: string;
   rating?: number; // 评级分数，用于显示评级图标
 }
 
@@ -17,7 +24,16 @@ interface BraceletListProps {
 }
 
 const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
-  // 渲染评级图标
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const uploadProductImage = async (productImageUrl: string, designId: string) => {
+    const productImageBase64 = await imageToBase64(productImageUrl, true, false, 'png')
+    apiSession.uploadProductImage({
+      design_id: designId,
+      image_base64: productImageBase64,
+    }).then((res) => {
+      console.log(res);
+    });
+  }
 
   return (
     <View className="bracelet-list">
@@ -28,13 +44,32 @@ const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
           onClick={() => onItemClick?.(item)}
         >
           <View className="bracelet-image-container">
-            <Image
+            {item.image || imageUrl ? <Image
               className="bracelet-image"
-              src={item.image}
+              src={item.image || imageUrl}
               mode="aspectFill"
               lazyLoad
               fadeIn={false}
-            />
+            /> : <Image
+              className="bracelet-image"
+              src={DESIGN_PLACEHOLDER_IMAGE_URL}
+              mode="aspectFill"
+              lazyLoad
+              fadeIn={false}
+            />}
+            {!item.image && item.draftUrl && item.backgroundUrl &&
+              <ProductImageGenerator
+                data={{
+                  bgImage: item.backgroundUrl,
+                  braceletImage: item.draftUrl,
+                }}
+                onGenerated={async (productImageUrl) => {
+                  setImageUrl(productImageUrl);
+                  await uploadProductImage(productImageUrl, item.id);
+                }}
+                showProductImage={false}
+              />
+            }
           </View>
           <View className="bracelet-info">
             <View className="bracelet-header">

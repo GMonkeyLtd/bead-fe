@@ -118,3 +118,15 @@
   color: #1F1722;
   margin: 0;
 } 
+
+.userNameContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.editUserInfoIcon {
+  height: 12px;
+  width: 12px;
+}

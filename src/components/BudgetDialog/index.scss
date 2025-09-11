@@ -15,15 +15,14 @@
 
   &.visible {
     display: flex;
+    animation: fadeIn 0.3s ease-in-out;
   }
-
-  animation: fadeIn 0.3s ease-in-out;
 }
 
 .budget-dialog {
   width: 100vw;
   // height: 347px;
-  background: #f3efec;
+  // background: #f3efec;
   border-radius: 8px 8px 0 0;
   display: flex;
   flex-direction: column;
@@ -31,6 +30,16 @@
   // padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
   // padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
   padding-bottom: 48px;
+  background: linear-gradient(0deg, rgba(255, 191, 141, 0.00) 81.7%, rgba(168, 93, 34, 0.20) 100%), #F5F1EF;
+  
+  // 初始状态：在底部外面
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  // 当弹窗显示时的动画
+  .budget-dialog-overlay.visible & {
+    transform: translateY(0);
+  }
 }
 
 /* 同款制作提示条样式 */
@@ -86,8 +95,10 @@
 }
 
 .budget-dialog-header {
-  padding: 32px 32px 16px 32px;
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
 }
 
 .budget-dialog-title-section {
@@ -98,7 +109,7 @@
 
 .budget-dialog-title-group {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: flex-end;
   margin-bottom: 8px;
 }
@@ -106,7 +117,7 @@
 .budget-dialog-main-title {
   font-family: "Source Han Serif CN", serif;
   font-weight: 400;
-  font-size: 30px;
+  font-size: 18px;
   letter-spacing: 2px;
   color: #1f1722;
   opacity: 0.9;
@@ -116,7 +127,7 @@
 .budget-dialog-subtitle {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.35em;
   letter-spacing: 1px;
   color: #1f1722;
@@ -316,6 +327,36 @@
   text-underline-position: from-font;
 }
 
+.budget-dialog-button-link-up {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 2;
+}
+
+.budget-dialog-button-link-text {
+  color: rgba(0, 0, 0, 0.80);
+  text-align: center;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 350;
+  line-height: normal;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: none;
+  text-decoration-thickness: auto;
+  text-underline-offset: auto;
+  text-underline-position: from-font;
+}
+
+.budget-dialog-button-link-icon {
+  text-decoration: none;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 350;
+}
+
 .creator-info-container {
   display: flex;
   gap: 4px;
@@ -329,6 +370,117 @@
   line-height: normal;
 }
 
-.creator-nickname  {
+.creator-nickname {
   font-weight: 500;
+}
+
+.budget-dialog-header-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px;
+  gap: 16px;
+}
+
+.budget-dialog-deposit-predict {
+  color: #FEE7C1;
+  font-family: "Helvetica Neue";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-decoration-line: line-through;
+  opacity: 0.5;
+  line-height: 1;
+}
+
+.budget-dialog-deposit-tag {
+  display: flex;
+  padding: 1px 6px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  right: 24px;
+  top: -10px;
+  border-radius: 7px 0;
+  background: linear-gradient(152deg, #FFB787 21.56%, #CD2421 130.38%), #FFF;
+  color: #FFF;
+  text-align: center;
+  font-family: "Source Han Serif CN";
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.budget-dialog-button-wrapper-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 24px;
+  position: relative;
+}
+
+.budget-dialog-content-grading {
+  display: flex;
+  padding: 8px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  border-radius: 10px;
+  background: #FFF;
+  margin: 0 8px;
+}
+
+.budget-dialog-quality-compare-divider {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 4px 0;
+}
+
+.budget-dialog-quality-compare-text {
+  color: #050842;
+  text-align: center;
+  font-family: "Source Han Serif CN";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 135%;
+  /* 18.9px */
+  letter-spacing: 1px;
+}
+
+.budget-dialog-quality-compare-left-line {
+  height: 1px;
+  width: calc(50% - 60px);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(65, 68, 147, 0.00) 25%, #414493 100%);
+}
+
+.budget-dialog-quality-compare-right-line {
+  height: 1px;
+  width: calc(50% - 60px);
+  border-radius: 10px;
+  border-radius: 10px;
+  background: linear-gradient(270deg, rgba(65, 68, 147, 0.00) 25%, #414493 100%);
+}
+
+/* 动画关键帧定义 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

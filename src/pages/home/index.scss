@@ -68,11 +68,19 @@
   );
 }
 
-.crystal-title-section {
+.crystal-content-section {
   position: absolute;
-  bottom: 350px;
-  left: 0;
-  right: 0;
+  top: 0;
+  bottom: 35%;
+ 
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 40px;
+}
+
+.crystal-title-section {
+
   display: flex;
   justify-content: center;
   z-index: 10;
@@ -82,7 +90,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 16px;
 
     .crystal-main-title {
       // color: #1f1722;
@@ -121,10 +129,6 @@
 }
 
 .crystal-action-section {
-  position: absolute;
-  bottom: 204px;
-  left: 0;
-  right: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -135,12 +139,14 @@
 
 .crystal-action-section-items {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
 }
 
 .crystal-link-text {
-  color: rgba(255, 255, 255, 0.5);
+  position: absolute;
+  bottom: 140px;
+  color: rgba(255, 255, 255, 0.3);
   text-align: center;
   font-family: "Noto Sans SC";
   font-size: 14px;
