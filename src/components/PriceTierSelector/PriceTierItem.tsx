@@ -52,7 +52,7 @@ const PriceTierItem: React.FC<PriceTierItemProps> = ({
             <View className={styles.tierHeader}>
               <Text className={styles.tierTitle}>{tier.title}</Text>
             </View>
-            <Text className={styles.tierDescription}>{tier.description}</Text>
+            {/* <Text className={styles.tierDescription}>{tier.description}</Text> */}
           </View>
         </View>
         

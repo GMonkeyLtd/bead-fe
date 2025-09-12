@@ -134,7 +134,7 @@ const Result = () => {
 
   useEffect(() => {
     configApi.getPriceTierConfig().then((res) => {
-      setTierPriceConfig(res);
+      setTierPriceConfig(res?.data || []);
     });
   }, []);
 
@@ -569,6 +569,7 @@ const Result = () => {
                 merchantName: item.merchant_info?.name,
                 createTime: item.created_at,
                 budget: item.price,
+                tier: item.tier,
               }))}
               showActions={false}
               showImage={false}

@@ -21,6 +21,7 @@ export interface OrderItem {
   budget?: number; // 预算，用于显示"预算：不限"等
   merchantPhone?: string; // 商家电话
   afterSaleStatus?: AfterSaleStatus;
+  tier?: number;
 }
 
 interface OrderListProps {
@@ -119,12 +120,14 @@ const OrderListComp: React.FC<OrderListProps> = ({
   // 渲染价格或预算信息
   const renderPriceInfo = (order: OrderItem) => {
     console.log(order, 'order')
+    if (order.tier == 0) {
+      return `参考价：暂无`;
+    }
     if (!order.communityInfo && (order.status === OrderStatus.Negotiating || order.status === OrderStatus.InProgress)) {
       return `参考价：¥${order.budget?.toFixed(2) || 0}`;
     } else {
       return `实际价：¥${order.budget?.toFixed(2) || 0}`;
     }
-   
   };
 
   return (
@@ -170,7 +173,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
               </View>
 
               {/* 价格信息 */}
-              <Text className={`${styles.orderPrice} ${order.status === OrderStatus.Negotiating || order.status === OrderStatus.InProgress ? styles.referencePrice : ""}`}>{renderPriceInfo(order)}</Text>
+              <Text className={`${styles.referencePrice}`}>{renderPriceInfo(order)}</Text>
             </View>
 
             {/* 分割线 */}

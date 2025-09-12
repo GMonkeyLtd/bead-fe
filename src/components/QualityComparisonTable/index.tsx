@@ -2,6 +2,7 @@ import React from 'react'
 import styles from './index.module.scss'
 import { View, Image } from '@tarojs/components'
 import helpIcon from '@/assets/icons/help-icon.svg'
+import Taro from '@tarojs/taro'
 
 interface QualityComparisonTableProps {
   className?: string
@@ -11,7 +12,7 @@ interface QualityComparisonTableProps {
 
 export interface QualityFactor {
   name: string
-  hasHelp?: boolean
+  hasHelp?: string
   levels: {
     basic: string
     quality: string
@@ -26,9 +27,12 @@ const QualityComparisonTable: React.FC<QualityComparisonTableProps> = ({
 }) => {
   console.log('QualityComparisonTable')
 
-  const handleHelpClick = (factorName: string) => {
-    // TODO: 实现帮助信息弹窗
-    console.log(`显示${factorName}的帮助信息`)
+  const handleHelpClick = (factor: QualityFactor) => {
+    if (factor.hasHelp) { 
+    Taro.previewImage({
+      urls: [factor.hasHelp || ''],
+    })
+    }
   }
 
   return (
@@ -56,10 +60,10 @@ const QualityComparisonTable: React.FC<QualityComparisonTableProps> = ({
         {qualityFactors.map((factor, index) => (
           <View key={factor.name} className={styles.tableRow}>
             <View className={`${styles.factorCell} ${index === qualityFactors.length - 1 ? styles.lastRow : ''}`}>
-              <View className={styles.factorContent}>
+              <View className={styles.factorContent} onClick={() => handleHelpClick(factor)}>
                 <View className={styles.factorName}>{factor.name}</View>
                 {factor.hasHelp && (
-                    <Image src={helpIcon} mode="aspectFit" style={{ width: "12px", height: "12px" }} />
+                    <Image src={helpIcon} mode="aspectFit" style={{ width: "12px", height: "12px" }}/>
                 )}
               </View>
             </View>

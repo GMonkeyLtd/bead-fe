@@ -30,7 +30,7 @@
   // padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
   // padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
   padding-bottom: 48px;
-  background: linear-gradient(0deg, rgba(255, 191, 141, 0.00) 81.7%, rgba(168, 93, 34, 0.20) 100%), #F5F1EF;
+  background: linear-gradient(0deg, #FFBF8D00 81.7%, #DE640326 100%), #F5F1EF;
   
   // 初始状态：在底部外面
   transform: translateY(100%);
@@ -104,7 +104,7 @@
 .budget-dialog-title-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0px;
 }
 
 .budget-dialog-title-group {
@@ -124,6 +124,15 @@
   line-height: 1;
 }
 
+.budget-dialog-main-title-Tier {
+  font-family: "Source Han Serif CN", sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #1f1722;
+  opacity: 0.9;
+  line-height: 1;
+}
+
 .budget-dialog-subtitle {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
@@ -131,6 +140,7 @@
   line-height: 1.35em;
   letter-spacing: 1px;
   color: #1f1722;
+  opacity: 0.6;
 }
 
 /* 限时上架标签样式 */
@@ -270,13 +280,19 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  width: 70px;
   gap: 4px;
 }
 
 .budget-dialog-image {
   width: 70px;
   height: 70px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.budget-dialog-image-tier {
+  width: 52px;
+  height: 52px;
   border-radius: 8px;
   object-fit: cover;
 }
@@ -379,7 +395,7 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 24px;
+  padding: 20px 16px;
   gap: 16px;
 }
 
@@ -445,7 +461,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  margin: 4px 0;
+  margin: 28px 0 6px;
 }
 
 .budget-dialog-quality-compare-text {

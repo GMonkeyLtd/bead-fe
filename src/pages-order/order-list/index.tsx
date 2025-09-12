@@ -11,6 +11,7 @@ const OrderListDemo: React.FC = () => {
   const [orders, setOrders] = useState<OrderItem[]>([]);
 
   const getOrderList = () => {
+    // console.log('getOrderList', api.userHistory);
     api.userHistory.getOrderList().then((res) => {
       const _orders = (res?.data?.orders || []).filter(item => !!item.design_info).map(item => {
         return {
@@ -18,12 +19,13 @@ const OrderListDemo: React.FC = () => {
           orderNumber: item.order_uuid,
           status: item.order_status,
           merchantName: item.merchant_info?.name,
-          productName: item.design_info?.word_info?.bracelet_name,
+          productName: item.design_info?.name,
           orderImage: item.design_info?.image_url,
           budget: item.price || 0,
           createTime: item.created_at,
           afterSaleStatus: item.after_sale_status,
           communityInfo: item.community_info,
+          tier: item.tier,
         }
       })
       setOrders(_orders);

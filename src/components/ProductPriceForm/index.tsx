@@ -22,6 +22,7 @@ interface ProductPriceFormProps {
   onClose?: () => void;
   onConfirm?: () => void;
   beadsInfo?: BeadItem[];
+  referencePrice?: number;
 }
 
 export interface BeadItemWithCount extends BeadItem {
@@ -35,10 +36,11 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
   productImage,
   beadsInfo,
   wristSize,
+  referencePrice,
   onClose,
   onConfirm,
 }) => {
-  const [price, setPrice] = useState<string>("");
+  const [price, setPrice] = useState<string>(referencePrice?.toString() || "");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [beadsData, setBeadsData] = useState<BeadItemWithCount[]>(() => {
@@ -272,7 +274,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
     const skuIds: number[] = [];
     beadsData.forEach(item => {
       for (let i = 0; i < item.count; i++) {
-        skuIds.push(Number(item.sku_id));
+        skuIds.push(Number(item.ID || item.sku_id));
       }
     })
 
@@ -304,6 +306,8 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
   const handleWristSizeChange = (value: string) => {
     setWristSizeValue(value);
   };
+
+  console.log(wristSize, price, 'wristSize')
 
   return (
     <View className={styles["product-price-form-overlay"]} onClick={handleOverlayClick}>
@@ -380,6 +384,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
                 placeholder="请输入价格"
                 value={price}
                 onInput={(e) => handlePriceChange(e.detail.value)}
+                defaultValue={price}
               />
             </View>
           </View>
@@ -396,6 +401,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
                 type="digit"
                 placeholder="请输入手围"
                 value={wristSizeValue}
+                defaultValue={wristSize}
                 onInput={(e) => handleWristSizeChange(e.detail.value)}
               />
             </View>

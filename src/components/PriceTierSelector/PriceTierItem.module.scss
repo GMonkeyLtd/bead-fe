@@ -2,8 +2,8 @@
   position: relative;
   width: 100%;
   border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #FAFAFA;
+  border: 1px solid #0000001a;
+  background: #fff;
   transition: all 0.3s ease;
   cursor: pointer;
 
@@ -21,8 +21,7 @@
     background-repeat: no-repeat;
     
     .tierTitle {
-      font-family: 'Source Han Serif CN', serif;
-      font-weight: 900;
+      font-weight: 500;
       color: #050842;
     }
 
@@ -45,7 +44,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
+    padding: 16px 12px;
     gap: 12px;
     width: 100%;
     box-sizing: border-box;
@@ -91,8 +90,9 @@
   }
 
   .tierTitle {
+    font-weight: 400;
     font-family: 'Noto Sans SC', sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.35;
     color: #000000;
     white-space: nowrap;
@@ -133,7 +133,7 @@
     font-family: 'Source Han Serif CN', serif;
     font-weight: 500;
     font-size: 22px;
-    line-height: 1.437;
+    line-height: 1;
     color: #F56A00;
   }
 

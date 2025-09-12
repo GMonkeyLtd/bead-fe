@@ -39,6 +39,29 @@
   letter-spacing: 1px;
 }
 
+.orderQualityContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.orderQualityText {
+  font-size: 12px;
+  font-weight: 350;
+  color: #1F1722;
+  opacity: 0.6;
+}
+
+.quanlituTag {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1F1722;
+  background: #FFEDD8;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
 /* Web端容器优化 */
 @media screen and (min-width: 768px) {
   .orderListContainer {

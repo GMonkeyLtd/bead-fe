@@ -60,6 +60,7 @@ const DesignReport = () => {
             .replace(/\u0000/g, '')  // 移除null字符
             .replace(/\uFEFF/g, '')  // 移除BOM字符
             .trim();                 // 去除首尾空白
+        
 
           try {
             const html = await marked.parse(cleanedReport) as string;
@@ -70,11 +71,15 @@ const DesignReport = () => {
             );
             styledHtml = styledHtml.replace(
               /<h3>/g,
-              '<h3 style="line-height: 2; margin-top: 12px; !important;">'
+              '<h3 style="line-height: 2; margin-top: 24px; !important;">'
             );
             styledHtml = styledHtml.replace(
               /<ul>/g,
               '<ul style="margin-left: 12px; padding-left: 12px; !important;">'
+            );
+            styledHtml = styledHtml.replace(
+              /<p>/g,
+              '<p style="margin-bottom: 24px; !important;">'
             );
 
             console.log(styledHtml);

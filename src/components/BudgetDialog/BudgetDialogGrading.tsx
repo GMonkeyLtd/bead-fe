@@ -18,7 +18,6 @@ interface BudgetDialogProps {
     designNumber?: string;
     productImage?: string;
     onClose?: () => void;
-    onModifyDesign?: () => void;
     tierPriceSet?: { [key: string]: number },
     currentTierId?: number,
     tierPriceConfig?: any,
@@ -37,11 +36,11 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     designNumber = "0001",
     productImage,
     onClose,
-    onModifyDesign,
     tierPriceConfig,
     currentTierId,
     tierPriceSet,
 }) => {
+    console.log(tierPriceConfig, 'tierPriceConfig')
     const priceTiers = useMemo(() => {
         return tierPriceConfig?.map((item: any) => ({
             id: item.level,
@@ -53,10 +52,10 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     }, [tierPriceConfig]);
 
     const qualityFactors = useMemo(() => {
-        const factors = tierPriceConfig?.[0]?.factors.map(fc => fc.key);
-        const factorsData = factors.map((item: any) => ({
-            name: item,
-            hasHelp: true,
+        const factorsData = tierPriceConfig?.[0]?.factors.map((item: any) => ({
+            ...item,
+            name: item.key,
+            hasHelp: item.image,
             levels: {},
         }));
         tierPriceConfig?.forEach((config: any) => {
@@ -72,6 +71,8 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     }, [tierPriceConfig]);
     const { keyboardHeight } = useKeyboardHeight();
     const [selectedPriceTier, setSelectedPriceTier] = useState<PriceTier | null>(priceTiers?.[currentTierId - 1]);
+
+    console.log(selectedPriceTier, 'selectedPriceTier')
 
     const handleConfirm = async (isCustom = false) => {
         const userData = await userApi.getUserInfo();
@@ -92,7 +93,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
         api.userHistory
             .createOrder({
                 design_id: parseInt(designNumber),
-                ...(isCustom ? { is_custom: true } : { tier: parseInt(selectedPriceTier?.id) }),
+                ...(isCustom ? { is_custom: true } : { tier: parseInt(selectedPriceTier?.id), is_custom: false }),
             })
             .then((res) => {
                 const { order_uuid } = res?.data || {};
@@ -123,19 +124,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     };
 
     const handleSelect = (tier: PriceTier) => {
-        console.log(tier, 'tier')
         setSelectedPriceTier(tier);
-    }
-
-    const getCurrentLevel = () => {
-        switch (selectedPriceTier?.id) {
-            case 'basic':
-                return 1;
-            case 'quality':
-                return 2;
-            case 'premium':
-                return 3;
-        }
     }
 
     return (
@@ -154,7 +143,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                         {productImage && (
                             <View className="budget-dialog-product-image">
                                 <Image
-                                    className="budget-dialog-image"
+                                    className="budget-dialog-image-tier"
                                     src={productImage}
                                     mode="widthFix"
                                 />
@@ -162,7 +151,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                         )}
                         <View className="budget-dialog-title-section">
                             <View className="budget-dialog-title-group">
-                                <View className="budget-dialog-main-title">{title}</View>
+                                <View className="budget-dialog-main-title-Tier">{title}</View>
                             </View>
                             <View className="budget-dialog-subtitle">
                                 设计编号：{designNumber}
@@ -183,7 +172,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                         <View className="budget-dialog-quality-compare-text">品质对比</View>
                         <View className="budget-dialog-quality-compare-right-line"></View>
                     </View>
-                    <QualityComparisonTable qualityFactors={qualityFactors} currentLevel={getCurrentLevel() || 2} />
+                    <QualityComparisonTable qualityFactors={qualityFactors} currentLevel={2} />
                 </View>
 
                 {/* 确认按钮 */}
@@ -194,7 +183,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                     </View>
                     <View className="budget-dialog-button-wrapper-inner">
                         <CrystalButton
-                            onClick={handleConfirm}
+                            onClick={() => handleConfirm(false)}
                             text="支付定金 ¥0"
                             icon={
                                 selectedPriceTier?.price && (<View className="budget-dialog-deposit-predict">

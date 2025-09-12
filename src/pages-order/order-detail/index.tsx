@@ -554,6 +554,7 @@ const OrderDetail: React.FC = () => {
             productImage={order?.design_info?.image_url}
             beads={order?.design_info?.items || []}
             isSameBuy={order?.community_info}
+            priceTier={order?.tier}
             orderAction={
               isSptCancel
                 ? {

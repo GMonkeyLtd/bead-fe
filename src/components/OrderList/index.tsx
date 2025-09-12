@@ -108,11 +108,12 @@ export default function OrderList({
   const handleOrderDetail = (order: Order) => {
     const beadsData = order?.design_info?.items?.reduce(
       (acc: any[], item: any) => {
-        const existingBead = acc.find((bead) => bead.name === item?.name);
+        const existingBead = acc.find((bead) => bead.ID === item?.ID);
         if (existingBead) {
           existingBead.quantity += item?.quantity || 1;
         } else {
           acc.push({
+            ID: item?.ID,
             name: item?.name,
             size: item?.diameter + "mm",
             quantity: item?.quantity || 1,
@@ -222,7 +223,7 @@ export default function OrderList({
     if (!sessionId) {
       showToast({
         title: "该订单未查到沟通记录",
-        icon: "error",
+        icon: "none",
       });
       return;
     }
@@ -276,7 +277,8 @@ export default function OrderList({
                       productImage={order.design_info?.image_url || ""}
                       onClose={() => setOrderActionDialog(null)}
                       onConfirm={submitPriceCb}
-                      wristSize={order.design_info?.spec?.wrist_size || ""}
+                      wristSize={order.design_info?.word_info?.spec?.wrist_size || 15}
+                      referencePrice={order.design_info?.reference_price || 0}
                     />
                   );
                 }}
@@ -419,14 +421,24 @@ export default function OrderList({
     console.log("onScrollToLower");
   };
 
+  const formatLevel = (level: number) => {
+    switch (level) {
+      case 0:
+        return `自定义`;
+      case 1:
+        return `简单穿搭`;
+      case 2:
+        return `品质追求`;
+      case 3:
+        return `高档进阶`;
+    }
+  };
+
   return (
     <View style={{ height: "100%" }}>
       <ScrollView
         className={`${styles.orderListContainer} ${className}`}
         scrollY
-        // refresherEnabled={!!onRefresh}
-        // refresherTriggered={loading}
-        // onRefresherRefresh={onRefresh}
         onScrollToLower={onScrollToLower}
         style={style}
       >
@@ -514,7 +526,14 @@ export default function OrderList({
                   </Text>
                 </View>
               </View>
-
+              <View className={styles.orderQualityContainer}>
+                  <View className={styles.orderQualityText}>
+                    品质等级:
+                  </View>
+                  <View className={styles.quanlituTag}>
+                    {formatLevel(order.tier)}
+                  </View>
+              </View>
               {renderActionButtons(order)}
             </View>
           ))
