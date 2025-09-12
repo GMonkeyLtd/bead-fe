@@ -271,13 +271,13 @@ export default function OrderList({
                       visible={true}
                       orderNumber={order.order_uuid}
                       productName={
-                        order.design_info?.word_info?.bracelet_name || ""
+                        order.design_info?.name || ""
                       }
                       beadsInfo={order.design_info?.items || []}
                       productImage={order.design_info?.image_url || ""}
                       onClose={() => setOrderActionDialog(null)}
                       onConfirm={submitPriceCb}
-                      wristSize={order.design_info?.word_info?.spec?.wrist_size || 15}
+                      wristSize={order.design_info?.spec?.wrist_size || 15}
                       referencePrice={order.design_info?.reference_price || 0}
                     />
                   );
@@ -306,7 +306,7 @@ export default function OrderList({
                     visible={true}
                     orderId={order.order_uuid}
                     productName={
-                      order.design_info?.word_info?.bracelet_name || ""
+                      order.design_info?.name || ""
                     }
                     productImage={order.design_info?.image_url || ""}
                     onClose={() => setOrderActionDialog(null)}
@@ -544,7 +544,7 @@ export default function OrderList({
         <BeadOrderDialog
           visible
           orderNumber={detailData.order_uuid}
-          productName={detailData.design_info?.word_info?.name || ""}
+          productName={detailData.design_info?.name || ""}
           productCode={detailData.design_info?.design_id || ""}
           realImages={detailData.order_details?.actual_images || []}
           certificateImages={detailData.order_details?.certificate_images || []}
@@ -559,7 +559,7 @@ export default function OrderList({
           })}
           onClose={handleClose}
           onConfirm={console.log}
-          wristSize={detailData.design_info?.word_info?.spec?.wrist_size || ""}
+          wristSize={detailData.design_info?.spec?.wrist_size || ""}
         />
       )}
       {/* 联系用户弹窗 */}

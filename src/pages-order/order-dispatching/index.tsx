@@ -73,7 +73,7 @@ const OrderDispatching = () => {
           {orderInfo && (
             <BraceletInfo
               orderNumber={orderInfo?.order_uuid}
-              productName={orderInfo?.design_info?.word_info?.bracelet_name}
+              productName={orderInfo?.design_info?.name}
               productNumber={orderInfo?.design_info?.design_id}
               quantity={orderInfo?.design_info?.beads_number}
               price={orderInfo?.price}
