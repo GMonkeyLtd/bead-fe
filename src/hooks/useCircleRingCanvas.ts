@@ -110,7 +110,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
         const regularBeads = finalBeadsData.filter(item => !item.isFloatAccessory);
         const floatAccessoryBeads = finalBeadsData.filter(item => item.isFloatAccessory);
         const sortedBeads = [...regularBeads, ...floatAccessoryBeads];
-
+        console.log('canvas sortedBeads:', sortedBeads);
         // 顺序绘制珠子，确保圆形排列正确
         for (let index = 0; index < dots.length; index++) {
           const { x, y, scale_width, angle, scale_height, image_url, isFloatAccessory, image_aspect_ratio } = sortedBeads[index];
@@ -127,11 +127,12 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           // 1. 先把网络背景图下载到本地
           const bgImg = canvas.createImage();
           await new Promise<void>(r => { bgImg.onload = r; bgImg.src = image_url; });
-
+          console.log('canvas bgImg:', bgImg.src);
           if (isFloatAccessory) {
+            console.log('canvas isFloatAccessory:', isFloatAccessory);
             ctx.drawImage(bgImg as any, -(scale_height * image_aspect_ratio), -scale_height, 2 * scale_height * image_aspect_ratio, scale_height * 2);
           } else {
-            
+            console.log('canvas is not floatAccessory:', isFloatAccessory);
             ctx.drawImage(bgImg as any, -scale_width, -scale_height, scale_width * 2, scale_height * 2);
           }
 
