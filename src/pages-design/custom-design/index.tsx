@@ -282,6 +282,7 @@ const CustomDesign = () => {
   }
 
   const onCreate = async (imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
+    console.log('onCreate imageUrl:', imageUrl)
     if (isFromResult && !checkBeadsDataChanged(oldBeadList || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}`,

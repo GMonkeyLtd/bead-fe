@@ -41,6 +41,8 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     [targetSize]
   );
 
+  console.log('canvas instance', canvas)
+
   // 使用useRef存储结果，避免循环渲染
   const resultsRef = useRef<Map<string, CircleRingResult>>(new Map());
   const processingQueueRef = useRef<Set<string>>(new Set());
@@ -89,9 +91,11 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     beads: any[],
     dotsBgImageData: DotImageData[]
   ): Promise<string> => {
+    console.log('canvas 开始绘制')
     return new Promise(async (resolve, reject) => {
       try {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+        console.log('canvas context: ', ctx);
         ctx.clearRect(0, 0, targetSize, targetSize);
 
         const finalBeadsData = dots.map((item, index) => {
@@ -171,7 +175,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           // 恢复Canvas状态
           ctx.restore();
         }
-
+        console.log('canvas 绘制完成')
         Taro.canvasToTempFilePath({
           x: 0,
           y: 0,
@@ -180,6 +184,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           destWidth: targetSize * dpr,
           fileType: fileType as keyof Taro.canvasToTempFilePath.FileType,
           success: (res) => {
+            console.log('canvas 生成临时文件成功: ', res.tempFilePath)
             resolve(res.tempFilePath);
             // 将图片保存到本地
             // Taro.saveImageToPhotosAlbum({
@@ -230,10 +235,10 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     try {
       // 1. 处理图片下载
       const processedDots = await processImages(dotsBgImageData);
-
+      console.log('canvas processedDots:', processedDots);
       // 2. 计算珠子排列
       const beads = await calculateBeads(dotsBgImageData);
-
+      console.log('canvas beads:', beads);
       // 3. 绘制Canvas
       const imageUrl = await drawCanvas(processedDots, beads, dotsBgImageData);
 

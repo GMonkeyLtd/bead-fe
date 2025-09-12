@@ -212,6 +212,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && !dot.width,
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
+        console.log('generateCircleRing imageUrl: ', imageUrl)
         const newImageUrl = imageUrl || "";
         // Taro.previewImage({
         //   urls: [newImageUrl],
