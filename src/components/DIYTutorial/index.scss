@@ -1,0 +1,152 @@
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.tutorial-container {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.tutorial-header {
+  padding: 20px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  .step-indicator {
+    font-size: 14px;
+    color: #999;
+    font-weight: 500;
+  }
+}
+
+.nav-button {
+    font-size: 14px;
+    padding: 8px;
+    letter-spacing: 2px;
+}
+
+.tutorial-footer {
+  padding: 0 20px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+ 
+
+  .progress-dots {
+    display: flex;
+    gap: 8px;
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ddd;
+      transition: background-color 0.2s;
+
+      &.active {
+        background: #ca8831da;
+      }
+
+      &.completed {
+        background: #ae8231d8;
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .tutorial-overlay {
+    padding: 20px 16px;
+  }
+
+  .tutorial-container {
+    max-height: 90vh;
+  }
+
+  .tutorial-content {
+    padding: 16px;
+
+    .step-image {
+      height: 160px;
+      margin-bottom: 16px;
+    }
+
+    .step-title {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .step-description {
+      font-size: 15px;
+    }
+  }
+
+  .tutorial-footer {
+    padding: 0 16px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    .nav-button {
+      font-size: 15px;
+      padding: 8px 16px;
+      min-width: 70px;
+    }
+  }
+}
+
+// 动画效果
+.tutorial-container {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.step-content-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.step-content-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.3s ease-out;
+}
+
+.step-content-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.step-content-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.3s ease-out;
+}

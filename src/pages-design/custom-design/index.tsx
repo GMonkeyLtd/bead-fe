@@ -1,16 +1,19 @@
 import Taro from "@tarojs/taro";
+import { View } from "@tarojs/components";
 import CustomDesignRing, { CustomDesignRingRef } from "@/components/CustomDesignRing/CustomDesignRing";
 import { useCallback, useEffect, useState, useRef, useMemo } from "react";
-import api, { beadsApi } from "@/utils/api";
+import { beadsApi } from "@/utils/api";
 import PageContainer from "@/components/PageContainer";
 import { pageUrls } from "@/config/page-urls";
-import apiSession, { AccessoryItem, BeadItem } from "@/utils/api-session";
+import apiSession, { BeadItem } from "@/utils/api-session";
 import { usePollDraft } from "@/hooks/usePollDraft";
 import { CUSTOM_RENDER_RATIO } from "@/config/beads";
 import { usePageQuery } from "@/hooks/usePageQuery";
 import { imageToBase64 } from "@/utils/imageUtils";
 import { getScreenHeight } from "@/utils/style-tools";
 import { usePollDesign } from "@/hooks/usePollDesign";
+import DIYTutorial from "@/components/DIYTutorial";
+import { getTutorialSteps, isTutorialCompleted, markTutorialCompleted } from "@/components/DIYTutorial/tutorialData";
 
 export enum SPU_TYPE {
   BEAD = 1,
@@ -38,11 +41,12 @@ const CustomDesign = () => {
   const [allBeadList, setAllBeadList] = useState<any[]>([]);
   const [accessoryList, setAccessoryList] = useState<any[]>([]);
   const [accessoryTypeMap, setAccessoryTypeMap] = useState<any>({});
+  const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const { draft, startPolling } = usePollDraft({ showLoading: true });
   const { design, getDesign } = usePollDesign({
     pollingInterval: 5000
   });
-  const { draftId, sessionId, designId, from, workId } = Taro.getCurrentInstance()?.router?.params || {};
+  const { draftId, sessionId, designId, from, workId, showTutorial: showTutorialParam } = Taro.getCurrentInstance()?.router?.params || {};
 
 
   const oldBeadList = useMemo(() => {
@@ -81,8 +85,6 @@ const CustomDesign = () => {
   // 使用无限滚动hook获取sku列表
   const {
     data: skuList,
-    loading: skuLoading,
-    error: skuError,
     hasMore: skuHasMore,
     refresh: refreshSkuList,
     loadMore: loadMoreSku,
@@ -92,14 +94,14 @@ const CustomDesign = () => {
     pageSize: 100,
     fetchData: useCallback(async (page: number, pageSize: number) => {
       const res = await beadsApi.getSkuList({ page, size: pageSize }, { showLoading: false });
-      const resData = res.data?.items || [];
-      const totalCount = res.data?.total || 0;
+      const resData = (res as any)?.data?.items || [];
+      const totalCount = (res as any)?.data?.total || 0;
       return {
         data: resData,
         hasMore: resData.length + (page - 1) * pageSize < totalCount,
         total: totalCount,
       };
-    }, [beadsApi]),
+    }, []),
     queryItem: useCallback(async (item: any) => {
       // 这里可以根据需要实现单个item的查询逻辑
       return item;
@@ -114,9 +116,39 @@ const CustomDesign = () => {
       return;
     }
     if (draftId && sessionId) {
-      startPolling(sessionId, draftId);
+      startPolling(sessionId, draftId, false);
     }
   }, [draftId, sessionId]);
+
+  // 教程初始化逻辑
+  useEffect(() => {
+    // 检查URL参数是否要求显示教程
+    if (showTutorialParam === 'true') {
+      setShowTutorial(true);
+      return;
+    }
+
+    // 检查是否是首次使用（从首页进入且未完成教程）
+    if (isFromHome && !isTutorialCompleted()) {
+      // 延迟显示教程，让页面先完全加载
+      setTimeout(() => {
+        Taro.showModal({
+          title: '新手教程',
+          content: '这是您第一次使用DIY设计台，是否需要查看操作教程？',
+          confirmText: '查看教程',
+          cancelText: '跳过',
+          success: (res) => {
+            if (res.confirm) {
+              setShowTutorial(true);
+            } else {
+              // 用户选择跳过，标记为已完成以免再次弹出
+              markTutorialCompleted();
+            }
+          }
+        });
+      }, 1000);
+    }
+  }, [isFromHome, showTutorialParam]);
 
   // 获取珠子库
   useEffect(() => {
@@ -282,7 +314,6 @@ const CustomDesign = () => {
   }
 
   const onCreate = async (imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
-    console.log('onCreate imageUrl:', imageUrl)
     if (isFromResult && !checkBeadsDataChanged(oldBeadList || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}`,
@@ -321,28 +352,30 @@ const CustomDesign = () => {
         image_aspect_ratio: item.image_aspect_ratio || 1,
       };
       // 删除newBeadData中的frontType
-      delete newBeadData.frontType;
-      delete newBeadData.scale_height;
-      delete newBeadData.uniqueKey;
+      delete (newBeadData as any).frontType;
+      delete (newBeadData as any).scale_height;
+      delete (newBeadData as any).uniqueKey;
       return newBeadData;
     })
 
     const imageBase64 = await imageToBase64(imageUrl, true, false, undefined, 'png');
 
-    apiSession.saveDraft({
-      session_id: sessionId,
-      beadItems: beads.map((item) => item.sku_id),
-      image_base64: imageBase64 as string,
-    }, { showLoading: true, loadingText: '方案上传中...' }).then((res) => {
-      const { draft_id, session_id } = res?.data || {};
-      if (isSaveAndBack && isFromChat) {
-        backToChatDesign(session_id);
-      } else {
-        Taro.redirectTo({
-          url: `${pageUrls.quickDesign}?sessionId=${session_id}&draftId=${draft_id}&imageUrl=${encodeURIComponent(imageUrl)}`,
-        });
-      }
-    })
+    if (sessionId && imageBase64) {
+      apiSession.saveDraft({
+        session_id: sessionId,
+        beadItems: beads.map((item) => (item as any).sku_id),
+        image_base64: imageBase64 as string,
+      }, { showLoading: true, loadingText: '方案上传中...' }).then((res) => {
+        const { draft_id, session_id } = (res as any)?.data || {};
+        if (isSaveAndBack && isFromChat) {
+          backToChatDesign(session_id);
+        } else {
+          Taro.redirectTo({
+            url: `${pageUrls.quickDesign}?sessionId=${session_id}&draftId=${draft_id}&imageUrl=${encodeURIComponent(imageUrl)}`,
+          });
+        }
+      })
+    }
   };
 
   const onSaveAndBack = (beads: BeadItem[], imageUrl: string) => {
@@ -379,7 +412,7 @@ const CustomDesign = () => {
         itemList: isFromChat ? ['直接返回', '保存并返回'] : ['直接返回'],
         success: function (res) {
           if (res.tapIndex === 1) {
-            onSaveAndBack(beads || [] as BeadItem[], imageUrl);
+            onSaveAndBack(beads || [] as BeadItem[], imageUrl || '');
           } else {
             onDirectBack();
           }
@@ -402,8 +435,26 @@ const CustomDesign = () => {
     return {};
   }, []);
 
+  // 教程相关处理函数
+  const handleCloseTutorial = useCallback(() => {
+    setShowTutorial(false);
+  }, []);
+
+  const handleCompleteTutorial = useCallback(() => {
+    markTutorialCompleted();
+  }, []);
+
+  // 显示教程的函数（可以在页面中添加按钮调用）
+  const showTutorialManually = useCallback(() => {
+    setShowTutorial(true);
+  }, []);
+
   return (
-    <PageContainer onBack={handleBack} headerExtraContent="编辑台" backgroundColor='#F4F1EE'>
+    <PageContainer 
+      onBack={handleBack} 
+      headerExtraContent="编辑台" 
+      backgroundColor='#F4F1EE'
+    >
       <CustomDesignRing
         wuxing={sessionId && oldWuxing ? oldWuxing : []}
         accessoryTypeMap={accessoryTypeMap}
@@ -420,6 +471,15 @@ const CustomDesign = () => {
         // onChange={onChange}
         onOk={onCreate}
         renderRatio={CUSTOM_RENDER_RATIO}
+        showTutorial={showTutorialManually}
+      />
+      {/* DIY教程组件 */}
+      <DIYTutorial
+        visible={showTutorial}
+        onClose={handleCloseTutorial}
+        onComplete={handleCompleteTutorial}
+        steps={getTutorialSteps()}
+        autoPlay={false}
       />
     </PageContainer>
   );

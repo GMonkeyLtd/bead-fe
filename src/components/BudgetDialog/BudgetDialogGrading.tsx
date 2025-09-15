@@ -72,8 +72,6 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     const { keyboardHeight } = useKeyboardHeight();
     const [selectedPriceTier, setSelectedPriceTier] = useState<PriceTier | null>(priceTiers?.[currentTierId - 1]);
 
-    console.log(selectedPriceTier, 'selectedPriceTier')
-
     const handleConfirm = async (isCustom = false) => {
         const userData = await userApi.getUserInfo();
         const { default_contact, phone, wechat_id } = userData?.data || {} as any;

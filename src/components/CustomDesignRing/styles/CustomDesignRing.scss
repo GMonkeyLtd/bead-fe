@@ -8,6 +8,30 @@
   position: relative;
 }
 
+.custom-design-ring-tutorial-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  // width: 48px;
+  overflow: hidden;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  z-index: 10;
+  padding: 8px;
+}
+.custom-design-ring-tutorial-text {
+  color: rgba(87, 74, 58, 0.60);
+  text-align: center;
+  font-family: "Noto Sans SC";
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
 .custom-design-ring-top-container {
   display: flex;
   flex-direction: column;

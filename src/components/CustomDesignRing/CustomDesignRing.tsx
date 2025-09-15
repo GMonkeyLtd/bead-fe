@@ -21,6 +21,7 @@ import { Bead } from "../../../types/crystal";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 import HistoryOperations from "./HistoryOperations";
 import BeadSizeSelector from "../BeadSizeSelector";
+import tutorialIcon from "@/assets/icons/tutorial.svg";
 
 // 定义ref暴露的接口
 export interface CustomDesignRingRef {
@@ -46,6 +47,7 @@ interface CustomDesignRingProps {
   renderRatio?: number;
   onOk?: (imageUrl: string, editedBeads: Bead[]) => void;
   onChange?: (imageUrl: string, editedBeads: Bead[]) => void;
+  showTutorial?: () => void;
 }
 
 /**
@@ -61,6 +63,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   beadTypeMap = {},
   renderRatio = 2,
   onOk,
+  showTutorial,
 }, ref) => {
   const [canvasSize, setCanvasSize] = useState<number>(0);
   const [currentWuxing, setCurrentWuxing] = useState<string>("");
@@ -513,6 +516,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         onClick={handleBeadDeselect}
       >
         <View className="custom-design-ring-top-content">
+          <View onClick={showTutorial} className="custom-design-ring-tutorial-container">
+            <Image src={tutorialIcon} className="custom-design-ring-tutorial-icon" style={{ width: "18px", height: "18px" }} />
+            <View className="custom-design-ring-tutorial-text">
+              教程
+            </View>
+          </View>
           {/* Canvas渲染器 */}
           <View
             style={{

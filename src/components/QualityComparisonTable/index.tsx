@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styles from './index.module.scss'
 import { View, Image } from '@tarojs/components'
 import helpIcon from '@/assets/icons/help-icon.svg'
 import Taro from '@tarojs/taro'
+import CompareImages from './compareImages'
 
 interface QualityComparisonTableProps {
   className?: string
@@ -25,13 +26,12 @@ const QualityComparisonTable: React.FC<QualityComparisonTableProps> = ({
   qualityFactors,
   currentLevel,
 }) => {
-  console.log('QualityComparisonTable')
-
-  const handleHelpClick = (factor: QualityFactor) => {
-    if (factor.hasHelp) { 
-    Taro.previewImage({
-      urls: [factor.hasHelp || ''],
-    })
+  const [compareImagesVisible, setCompareImagesVisible] = useState(false);
+  const [compareImagesIndex, setCompareImagesIndex] = useState(0);
+  const handleHelpClick = (factor: QualityFactor, index: number) => {
+    if (factor.hasHelp) {
+      setCompareImagesVisible(true);
+      setCompareImagesIndex(index);
     }
   }
 
@@ -60,12 +60,12 @@ const QualityComparisonTable: React.FC<QualityComparisonTableProps> = ({
         {qualityFactors.map((factor, index) => (
           <View key={factor.name} className={styles.tableRow}>
             <View className={`${styles.factorCell} ${index === qualityFactors.length - 1 ? styles.lastRow : ''}`}>
-              <View className={styles.factorContent} onClick={() => handleHelpClick(factor)}>
+              {factor.hasHelp && (<View className={styles.factorContent} onClick={() => handleHelpClick(factor, index)}>
                 <View className={styles.factorName}>{factor.name}</View>
-                {factor.hasHelp && (
-                    <Image src={helpIcon} mode="aspectFit" style={{ width: "12px", height: "12px" }}/>
-                )}
+
+                <Image src={helpIcon} mode="aspectFit" style={{ width: "12px", height: "12px" }} />
               </View>
+              )}
             </View>
             <View className={styles.levelCells}>
               <View className={`${styles.levelCell} ${index === qualityFactors.length - 1 ? styles.lastRow : ''} ${currentLevel === 1 ? styles.currentLevel : ''}`}>
@@ -81,6 +81,15 @@ const QualityComparisonTable: React.FC<QualityComparisonTableProps> = ({
           </View>
         ))}
       </View>
+      <CompareImages
+        visible={compareImagesVisible}
+        onClose={() => setCompareImagesVisible(false)}
+        onComplete={() => setCompareImagesVisible(false)}
+        steps={qualityFactors.map((factor, index) => ({
+          image: factor.hasHelp || ''
+        }))}
+        defaultStep={compareImagesIndex + 1}
+      />
     </View>
   )
 }
