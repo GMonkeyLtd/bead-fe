@@ -96,7 +96,6 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
     }, []),
     enabled: true,
   });
-  console.log(beadsData, 'beadsData')
 
   useEffect(() => {
     Taro.showLoading({
@@ -151,6 +150,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
 
   // 处理水晶珠列表变化
   const handleBeadListChange = (newData: BeadItemWithCount[]) => {
+    console.log(newData, 'newData')
     setBeadsData(newData);
   };
 
@@ -274,7 +274,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
     const skuIds: number[] = [];
     beadsData.forEach(item => {
       for (let i = 0; i < item.count; i++) {
-        skuIds.push(Number(item.ID || item.sku_id));
+        skuIds.push(Number(item.sku_id));
       }
     })
 
@@ -306,8 +306,6 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
   const handleWristSizeChange = (value: string) => {
     setWristSizeValue(value);
   };
-
-  console.log(wristSize, price, 'wristSize')
 
   return (
     <View className={styles["product-price-form-overlay"]} onClick={handleOverlayClick}>
@@ -457,10 +455,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
               </View>
             </View>
           </View>
-        </ScrollView>
-
-        {/* 底部按钮 */}
-        <View className={styles["form-footer"]}>
+          <View className={styles["form-footer"]}>
           <CrystalButton
             text="取消"
             onClick={onClose || (() => { })}
@@ -471,9 +466,10 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
             onClick={handleConfirm}
             isPrimary
             icon={<Image src={rightArrowGolden} mode="aspectFit" style={{ width: "16px", height: "16px" }} />}
-            style={{ flex: 1, marginLeft: "12px" }}
+            style={{ flex: 1 }}
           />
         </View>
+        </ScrollView>
       </View>
     </View>
   );

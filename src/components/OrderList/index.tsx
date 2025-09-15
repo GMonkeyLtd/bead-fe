@@ -108,12 +108,12 @@ export default function OrderList({
   const handleOrderDetail = (order: Order) => {
     const beadsData = order?.design_info?.items?.reduce(
       (acc: any[], item: any) => {
-        const existingBead = acc.find((bead) => bead.ID === item?.ID);
+        const existingBead = acc.find((bead) => bead.sku_id === item?.sku_id);
         if (existingBead) {
           existingBead.quantity += item?.quantity || 1;
         } else {
           acc.push({
-            ID: item?.ID,
+            sku_id: item?.sku_id,
             name: item?.name,
             size: item?.diameter + "mm",
             quantity: item?.quantity || 1,
@@ -278,7 +278,7 @@ export default function OrderList({
                       onClose={() => setOrderActionDialog(null)}
                       onConfirm={submitPriceCb}
                       wristSize={order.design_info?.spec?.wrist_size || 15}
-                      referencePrice={order.design_info?.reference_price || 0}
+                      referencePrice={order.design_info?.reference_price / 100 || 0}
                     />
                   );
                 }}
