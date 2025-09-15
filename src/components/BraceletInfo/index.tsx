@@ -92,7 +92,8 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
           <View className="price-section">
             <View className="price-label">
               {!isSameBuy && (<View className="price-label-text">参考价：</View>)}
-              <Text className={`price ${priceTier == 0 ? 'price-tier-0' : ''}`}>{priceTier == 0 ? '暂无' : `¥${price.toFixed(2)}`}</Text>
+              {/* <Text className={`price ${priceTier == 0 ? 'price-tier-0' : ''}`}>{priceTier == 0 ? '暂无' : `¥${price.toFixed(2)}`}</Text> */}
+              <Text className={`price ${priceTier == 0 ? 'price-tier-0' : ''}`}>{`¥${price.toFixed(2)}`}</Text>
             </View>
           </View>}
       </View>

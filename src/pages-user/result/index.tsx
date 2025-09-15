@@ -609,7 +609,7 @@ const Result = () => {
           }
         />)}
       </View>
-      {budgetDialogShow && design && tierPriceConfig && (
+      {/* {budgetDialogShow && design && tierPriceConfig && (
         <BudgetDialogGrading
           visible={budgetDialogShow}
           title={braceletName}
@@ -620,6 +620,17 @@ const Result = () => {
           tierPriceSet={design?.info?.tier_price}
           currentTierId={design?.info?.tier_info?.current_tier}
           tierPriceConfig={tierPriceConfig}
+        />
+      )} */}
+      {budgetDialogShow && (
+        <BudgetDialog
+          visible={budgetDialogShow}
+          title={braceletName}
+          designNumber={designNo}
+          productImage={imageUrl}
+          onClose={() => setBudgetDialogShow(false)}
+          referencePrice={referencePrice}
+          onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
       {originImageUrl && backgroundImageUrl && !imageUrl && <ProductImageGenerator  // 生成海报   

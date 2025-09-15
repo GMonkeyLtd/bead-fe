@@ -35,6 +35,7 @@ const ChatDesign = () => {
   const chatMessagesRef = useRef<ChatMessagesRef>(null);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const draftIndexRef = useRef(1);
+  const dpr = Taro.getWindowInfo().pixelRatio || 2;
   
   // 添加防重复执行的ref
   const hasInitializedRef = useRef(false);
@@ -424,6 +425,20 @@ const ChatDesign = () => {
                 />
               </View>
             </View>
+            <Canvas 
+              canvasId="page-chat-draft-canvas"
+              id="page-chat-draft-canvas"
+              height={`${640 * dpr}px`}
+              width={`${640 * dpr}px`}
+              style={{
+                position: "absolute",
+                top: "-9999px",
+                left: "-9999px",
+                width: "640px",
+                height: "640px",
+                zIndex: -9999,
+              }}
+            />  
           </View>
         )}
       </View>

@@ -6,7 +6,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { View, Image, MovableArea } from "@tarojs/components";
+import { View, Image, MovableArea, Canvas } from "@tarojs/components";
 import Taro, { base64ToArrayBuffer } from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
@@ -95,9 +95,10 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     beadStatus: "idle",
   });
 
-  const { generateCircleRing } = useCircleRingCanvas({
+  const { generateCircleRing, canvasProps } = useCircleRingCanvas({
     targetSize: 640,
     fileType: "png",
+    canvasId: "custom-design-ring-canvas",
   });
 
   // 初始化画布尺寸
@@ -531,6 +532,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
               </View>
             )}
             {/* <Image className="custom-crystal-backend" src={CUSTOM_CRYSTAL_BACKEND_IMAGE} style={{ width: `${canvasSize}px`, height: `${canvasSize}px` }} /> */}
+            <Canvas {...canvasProps} />
             <MovableBeadRenderer
               style={{
                 position: "absolute",

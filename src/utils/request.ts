@@ -10,7 +10,7 @@ const grayDomain = 'https://api-gray.gmonkey.top'
 
 // 根据环境构建API基础URL
 const getBaseURL = () => {
-  const accountInfo = Taro.getAccountInfoSync();
+  const accountInfo = Taro.getAccountInfoSync(); 
 
   const isTest = accountInfo.miniProgram.envVersion !== 'release';
   console.log("运行环境：", accountInfo.miniProgram.envVersion)
