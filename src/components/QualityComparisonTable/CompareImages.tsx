@@ -53,7 +53,7 @@ const CompareImages: React.FC<DIYTutorialProps> = ({
     console.log(isFirst, isLast,'isFirst, isLast');
 
     return (
-        <View className={styles.compareImagesOverlay} style={{ padding: '40px 36px' }}>
+        <View className={styles.compareImagesOverlay} style={{ padding: '0 36px' }}>
             <View className={styles.compareImagesContainer}>
                 {/* 内容区域 */}
                 <View style={{ width: '100%', padding: '12px', boxSizing: 'border-box' }}>

@@ -617,7 +617,7 @@ const Result = () => {
           productImage={imageUrl}
           onClose={() => setBudgetDialogShow(false)}
           tierPriceSet={design?.info?.tier_price}
-          currentTierId={design?.info?.tier_info?.current_tier}
+          currentTierId={2}
           tierPriceConfig={tierPriceConfig}
         />
       )}

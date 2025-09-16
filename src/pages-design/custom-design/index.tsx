@@ -134,7 +134,7 @@ const CustomDesign = () => {
       setTimeout(() => {
         Taro.showModal({
           title: '新手教程',
-          content: '这是您第一次使用DIY设计台，是否需要查看操作教程？',
+          content: '这是您第一次使用DIY编辑台，是否需要查看操作教程？',
           confirmText: '查看教程',
           cancelText: '跳过',
           success: (res) => {
