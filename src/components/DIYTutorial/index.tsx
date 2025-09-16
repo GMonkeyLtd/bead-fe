@@ -65,11 +65,11 @@ const DIYTutorial: React.FC<DIYTutorialProps> = ({
     const handleComplete = useCallback(() => {
         onComplete?.();
         onClose();
-        Taro.showToast({
-            title: '教程完成！',
-            icon: 'success',
-            duration: 1500
-        });
+        // Taro.showToast({
+        //     title: '教程完成！',
+        //     icon: 'success',
+        //     duration: 1500
+        // });
     }, [onComplete, onClose]);
 
     const toggleAutoPlay = useCallback(() => {
