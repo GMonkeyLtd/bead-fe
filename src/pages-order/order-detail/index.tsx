@@ -522,6 +522,7 @@ const OrderDetail: React.FC = () => {
         ) : (
           <ProductPriceCard
             name={order?.merchant_info?.name}
+            showPrice
             price={order?.price || 0}
             isSelf={order?.merchant_info?.is_self_operated}
             showImages={
@@ -550,7 +551,7 @@ const OrderDetail: React.FC = () => {
             productNumber={order?.design_info?.design_id}
             quantity={order?.design_info?.items?.length}
             price={order?.price || 0}
-            showPrice={showReferencePrice(orderStatus)}
+            showPrice={showReferencePrice(orderStatus) && order?.tier != 0}
             productImage={order?.design_info?.image_url}
             beads={order?.design_info?.items || []}
             isSameBuy={order?.community_info}

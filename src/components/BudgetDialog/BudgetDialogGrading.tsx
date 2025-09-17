@@ -77,13 +77,13 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
         const { default_contact, phone, wechat_id } = userData?.data || {} as any;
         if (default_contact === 0 && !phone) {
             Taro.redirectTo({
-                url: `${pageUrls.contactPreference}?designId=${designNumber}`,
+                url: `${pageUrls.contactPreference}?designId=${designNumber}&tier=${selectedPriceTier?.id}&isCustom=${isCustom}`,
             });
             return;
         }
         if (default_contact === 1 && !wechat_id) {
             Taro.redirectTo({
-                url: `${pageUrls.contactPreference}?designId=${designNumber}`,
+                url: `${pageUrls.contactPreference}?designId=${designNumber}&tier=${selectedPriceTier?.id}&isCustom=${isCustom}`,
             });
             return;
         }
