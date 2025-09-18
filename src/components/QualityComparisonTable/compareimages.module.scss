@@ -1,0 +1,58 @@
+.compareImagesOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.compareImagesContainer {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.compareImagesFooter {
+    padding: 0 20px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.compareImagesProgressDots {
+    display: flex;
+    gap: 8px;
+
+}
+
+.compareImagesDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    transition: background-color 0.2s;
+
+}
+.active {
+    background: #ca8831da;
+}
+
+.completed {
+    background: #ae8231d8;
+}
+
+
+.compareImagesSkipContainer {
+
+}

@@ -25,7 +25,8 @@ const ContactPreference = () => {
   const [wechatNumber, setWechatNumber] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
 
-  const { budget, designId } = Taro.getCurrentInstance()?.router?.params || {};
+  const { designId, tier, isCustom } = Taro.getCurrentInstance()?.router?.params || {};
+  console.log(designId, tier, isCustom, 'designId, tier, isCustom')
 
   const getUserInfo = async () => {
     try {
@@ -86,10 +87,10 @@ const ContactPreference = () => {
         title: "保存成功",
         icon: "success",
       });
-      if (budget && designId) {
+      if (designId && tier && isCustom) {
         const res = await api.userHistory.createOrder({
           design_id: parseInt(designId),
-          price: parseFloat(budget),
+          ...(isCustom == 'true' ? { is_custom: true } : { tier: parseInt(tier), is_custom: false }),
         });
         const { order_uuid } = res?.data || {};
         Taro.redirectTo({

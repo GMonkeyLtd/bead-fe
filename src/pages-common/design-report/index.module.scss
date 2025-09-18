@@ -45,16 +45,26 @@
     font-size: 16px;
     font-weight: 600;
     color: #1f1722;
-    margin: 16px 0 8px 0;
+    margin: 20px 0 12px 0;
     line-height: 24px;
     display: block;
+    
+    // 与前面段落的间距
+    p + & {
+      margin-top: 24px;
+    }
   }
 
   p {
-    margin: 12px 0;
+    margin: 16px 0;
     line-height: 1.7;
     color: #333;
     font-size: 15px;
+    
+    // 确保段落之间有足够的间距
+    & + p {
+      margin-top: 20px;
+    }
   }
 
   strong {

@@ -7,7 +7,6 @@ import {
   RESULT_IMAGE_LOGO_IMAGE_URL,
 } from "@/config";
 import { ImageCacheManager } from "@/utils/image-cache";
-import { downloadNetworkImage, isNetworkUrl } from "@/utils/imageUtils";
 
 
 interface ProductImageData {
@@ -19,6 +18,8 @@ interface ProductImageGeneratorProps {
   data: ProductImageData;
   onGenerated?: (tempFilePath: string) => void;
   showProductImage?: boolean;
+  canvasId?: string; // 添加可自定义的 Canvas ID
+  autoDestroy?: boolean; // 生成完成后是否自动销毁
 }
 
 
@@ -26,13 +27,21 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
   data,
   onGenerated,
   showProductImage = false,
+  canvasId,
+  autoDestroy = true,
 }) => {
   const [canvasImageUrl, setCanvasImageUrl] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false); // 跟踪是否已完成
 
   // 防抖生成海报的引用
   const generateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isUnmountedRef = useRef(false);
+  
+  // 生成唯一的 Canvas ID
+  const uniqueCanvasId = useMemo(() => {
+    return canvasId || `product-image-canvas-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }, [canvasId]);
 
   // 画布尺寸计算
   const canvasConfig = useMemo(() => {
@@ -76,7 +85,7 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
 
       const { dpr, canvasWidth, canvasHeight } = canvasConfig;
 
-      const ctx = Taro.createCanvasContext("product-image-canvas");
+      const ctx = Taro.createCanvasContext(uniqueCanvasId);
 
       // 背景图
       const { path: bgImgPath } = await loadImage(RESULT_IMAGE_TEXTURE_IMAGE_URL);
@@ -169,16 +178,26 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
         console.log('canvasHeight', canvasHeight);
         // 导出图片
         Taro.canvasToTempFilePath({
-          canvasId: "product-image-canvas",
+          canvasId: uniqueCanvasId,
           width: canvasWidth,
           height: canvasHeight,
-          success: (res) => {
-            if (!isUnmountedRef.current) {
-              console.log("res", res);
-              setCanvasImageUrl(res.tempFilePath);
-              onGenerated?.(res.tempFilePath);
-            }
-          },
+            success: (res) => {
+              if (!isUnmountedRef.current) {
+                console.log("res", res);
+                setCanvasImageUrl(res.tempFilePath);
+                setIsCompleted(true); // 标记为已完成
+                onGenerated?.(res.tempFilePath);
+                
+                // 如果启用自动销毁，延迟清理资源
+                if (autoDestroy) {
+                  setTimeout(() => {
+                    if (!isUnmountedRef.current) {
+                      cleanup();
+                    }
+                  }, 1000); // 1秒后清理，给上传时间
+                }
+              }
+            },
           fail: (err) => {
             console.error("生成海报失败:", err);
           },
@@ -241,11 +260,16 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
     };
   }, [cleanup]);
 
+  // 如果已完成且启用自动销毁，不渲染任何内容
+  if (isCompleted && autoDestroy) {
+    return null;
+  }
+
   return (
     <View style={{ position: "relative" }}>
       <Canvas
-        id="product-image-canvas"
-        canvasId="product-image-canvas"
+        id={uniqueCanvasId}
+        canvasId={uniqueCanvasId}
         style={{
           height: canvasConfig.canvasHeight,
           width: canvasConfig.canvasWidth,

@@ -32,18 +32,16 @@
   &.primary {
     background: #1f1722;
     border: 1px solid;
-    border-image-source: linear-gradient(
-      360deg,
-      rgba(0, 0, 0, 0.05) 0%,
-      rgba(52, 52, 52, 0.39) 60.1%,
-      rgba(0, 0, 0, 0.06) 100%
-    );
     &:hover {
       transform: translateY(-1px);
     }
     &:active {
       transform: translateY(1px);
     }
+  }
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 

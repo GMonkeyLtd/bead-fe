@@ -1,5 +1,6 @@
 import { PropsWithChildren } from 'react'
 import { useLaunch } from '@tarojs/taro'
+import { Canvas } from '@tarojs/components'
 
 import './app.scss'
 

@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
 import './index.scss';
 import Taro from '@tarojs/taro';
 import copyIcon from '@/assets/icons/copy.svg';
 import closeIcon from '@/assets/icons/close.svg';
+import eyeCloseIcon from '@/assets/icons/eye-close.svg';
+import eyeOpenIcon from '@/assets/icons/eye-open.svg';
 
 interface MaterialItem {
   name: string;
   spec: string;
   quantity: string;
+  price: number;
 }
 
 interface BeadOrderDialogProps {
@@ -40,6 +43,7 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
   onConfirm,
   wristSize,
 }) => {
+  const [showBeadPrice, setShowBeadPrice] = useState(true);
   if (!visible) {
     return null;
   }
@@ -87,7 +91,10 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
             </View>
           </View>
           <View className='budget-info'>
-            <Text className='budget-text'>参考价：{budget}</Text>
+            <View className='budget-info-content' onClick={() => setShowBeadPrice(!showBeadPrice)}>
+              <Text className='budget-text'>参考价：{budget}</Text>
+              <Image src={showBeadPrice ? eyeOpenIcon : eyeCloseIcon} mode='aspectFit' style={{ width: '16px', height: '16px' }} />
+            </View>
           </View>
         </View>
         <View className='wrist-info'>
@@ -101,6 +108,7 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
             <Text className='header-name'>名称</Text>
             <Text className='header-spec'>尺寸/规格</Text>
             <Text className='header-quantity'>数量</Text>
+            {showBeadPrice && <Text className='header-price'>价格</Text>}
           </View>
 
           {/* 材料列表 */}
@@ -113,6 +121,7 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
                 <Text className='material-name'>{material.name}</Text>
                 <Text className='material-spec'>{material.spec}</Text>
                 <Text className='material-quantity'>{material.quantity}</Text>
+                {showBeadPrice && <Text className='material-price'>{material.price}</Text>}
               </View>
             ))}
           </View>

@@ -35,8 +35,8 @@ const DesignReport = () => {
       if (res?.data) {
         setDesignData(res.data);
         // 解析markdown为HTML
-        if (res.data.info?.report) {
-          const rawReport = res.data.info.report;
+        if (res.data.info?.personal_report) {
+          const rawReport = res.data.info.personal_report;
 
           // 清理可能的特殊字符和编码问题
           let cleanedReport = rawReport;
@@ -60,6 +60,7 @@ const DesignReport = () => {
             .replace(/\u0000/g, '')  // 移除null字符
             .replace(/\uFEFF/g, '')  // 移除BOM字符
             .trim();                 // 去除首尾空白
+        
 
           try {
             const html = await marked.parse(cleanedReport) as string;
@@ -70,11 +71,15 @@ const DesignReport = () => {
             );
             styledHtml = styledHtml.replace(
               /<h3>/g,
-              '<h3 style="line-height: 2; margin-top: 12px; !important;">'
+              '<h3 style="line-height: 2; margin-top: 24px; !important;">'
             );
             styledHtml = styledHtml.replace(
               /<ul>/g,
               '<ul style="margin-left: 12px; padding-left: 12px; !important;">'
+            );
+            styledHtml = styledHtml.replace(
+              /<p>/g,
+              '<p style="margin-bottom: 24px; !important;">'
             );
 
             console.log(styledHtml);

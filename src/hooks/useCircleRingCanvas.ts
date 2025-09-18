@@ -16,6 +16,7 @@ export interface DotImageData {
 interface CircleRingConfig {
   targetSize?: number;   // 保存图片的尺寸
   fileType?: "png" | "jpg" | "jpeg";   // 文件类型
+  canvasId?: string;
 }
 
 interface CircleRingResult {
@@ -32,14 +33,17 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   const {
     targetSize = 1024,
     fileType = "png",
+    canvasId = "shared-circle-canvas",
   } = config;
 
-  const canvas = useMemo(
-    () => {
-      return Taro.createOffscreenCanvas({ type: '2d', width: targetSize, height: targetSize })
-    },
-    [targetSize]
-  );
+  // const canvas = useMemo(
+  //   () => {
+  //     return Taro.createOffscreenCanvas({ type: '2d', width: targetSize, height: targetSize })
+  //   },
+  //   [targetSize]
+  // );
+
+  // console.log('canvas instance', canvas)
 
   // 使用useRef存储结果，避免循环渲染
   const resultsRef = useRef<Map<string, CircleRingResult>>(new Map());
@@ -89,9 +93,12 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     beads: any[],
     dotsBgImageData: DotImageData[]
   ): Promise<string> => {
+    console.log('canvas 开始绘制')
     return new Promise(async (resolve, reject) => {
       try {
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+        // const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+        const ctx = Taro.createCanvasContext(canvasId);
+        console.log('canvas context: ', ctx);
         ctx.clearRect(0, 0, targetSize, targetSize);
 
         const finalBeadsData = dots.map((item, index) => {
@@ -106,7 +113,7 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
         const regularBeads = finalBeadsData.filter(item => !item.isFloatAccessory);
         const floatAccessoryBeads = finalBeadsData.filter(item => item.isFloatAccessory);
         const sortedBeads = [...regularBeads, ...floatAccessoryBeads];
-
+        console.log('canvas sortedBeads:', sortedBeads);
         // 顺序绘制珠子，确保圆形排列正确
         for (let index = 0; index < dots.length; index++) {
           const { x, y, scale_width, angle, scale_height, image_url, isFloatAccessory, image_aspect_ratio } = sortedBeads[index];
@@ -121,14 +128,15 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           ctx.rotate(angle + Math.PI / 2);
 
           // 1. 先把网络背景图下载到本地
-          const bgImg = canvas.createImage();
-          await new Promise<void>(r => { bgImg.onload = r; bgImg.src = image_url; });
-
+          // const bgImg = canvas.createImage();
+          // await new Promise<void>(r => { bgImg.onload = r; bgImg.src = image_url; });
+          // console.log('canvas bgImg:', bgImg.src);
           if (isFloatAccessory) {
-            ctx.drawImage(bgImg as any, -(scale_height * image_aspect_ratio), -scale_height, 2 * scale_height * image_aspect_ratio, scale_height * 2);
+            console.log('canvas isFloatAccessory:', isFloatAccessory);
+            ctx.drawImage(image_url as any, -(scale_height * image_aspect_ratio), -scale_height, 2 * scale_height * image_aspect_ratio, scale_height * 2);
           } else {
-            
-            ctx.drawImage(bgImg as any, -scale_width, -scale_height, scale_width * 2, scale_height * 2);
+            console.log('canvas is not floatAccessory:', isFloatAccessory);
+            ctx.drawImage(image_url as any, -scale_width, -scale_height, scale_width * 2, scale_height * 2);
           }
 
           // 绘制珠子高光效果 - 参考MovableBeadRenderer的实现
@@ -151,18 +159,18 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
             ctx.rotate(-Math.PI / 4);
             
             // 创建椭圆形径向渐变
-            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(highlightWidth, highlightHeight) / 2);
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); // 中心白色
-            gradient.addColorStop(0.75, 'rgba(255, 255, 255, 0.4)'); // 75%处半透明白色
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)'); // 边缘透明
+            // const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(highlightWidth, highlightHeight) / 2);
+            // gradient.addColorStop(0, 'rgba(255, 255, 255, 1)'); // 中心白色
+            // gradient.addColorStop(0.75, 'rgba(255, 255, 255, 0.4)'); // 75%处半透明白色
+            // gradient.addColorStop(1, 'rgba(255, 255, 255, 0)'); // 边缘透明
             
-            // 设置填充样式
-            ctx.fillStyle = gradient;
+            // // 设置填充样式
+            // ctx.fillStyle = gradient;
             
             // 绘制椭圆高光
-            ctx.beginPath();
-            ctx.ellipse(0, 0, highlightWidth / 2, highlightHeight / 2, 0, 0, 2 * Math.PI);
-            ctx.fill();
+            // ctx.beginPath();
+            // ctx.ellipse(0, 0, highlightWidth / 2, highlightHeight / 2, 0, 0, 2 * Math.PI);
+            // ctx.fill();
             
             // 恢复状态
             ctx.restore();
@@ -171,35 +179,32 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
           // 恢复Canvas状态
           ctx.restore();
         }
-
-        Taro.canvasToTempFilePath({
-          x: 0,
-          y: 0,
-          canvas: canvas as any,
-          destHeight: targetSize * dpr,
-          destWidth: targetSize * dpr,
-          fileType: fileType as keyof Taro.canvasToTempFilePath.FileType,
-          success: (res) => {
-            resolve(res.tempFilePath);
-            // 将图片保存到本地
-            // Taro.saveImageToPhotosAlbum({
-            //   filePath: res.tempFilePath,
-            //   success: () => {
-            //     console.log("图片保存成功");
-            //   },
-            // });
-          },
-          fail: (err) => {
-            console.error("生成临时文件失败:", err);
-            reject(new Error("生成图片失败"));
-          },
+        console.log('canvas 绘制完成')
+        ctx.draw(true, () => {
+          Taro.canvasToTempFilePath({
+            x: 0,
+            y: 0,
+            canvasId: canvasId,
+            destHeight: targetSize * dpr,
+            destWidth: targetSize * dpr,
+            quality: 1,
+            fileType: fileType as keyof Taro.canvasToTempFilePath.FileType,
+            success: (res) => {
+              console.log('canvas 生成临时文件成功: ', res.tempFilePath)
+              resolve(res.tempFilePath);
+            },
+            fail: (err) => {
+              console.error("生成临时文件失败:", err);
+              reject(new Error("生成图片失败"));
+            },
+          });
         });
       } catch (error) {
         console.log("❌ Canvas API 不可用", error);
         reject(error);
       }
     });
-  }, [canvas, targetSize, dpr, fileType]);
+  }, [canvasId, targetSize, dpr, fileType]);
 
   // 主要绘制函数
   const generateCircleRing = useCallback(async (dotsBgImageData: DotImageData[]) => {
@@ -230,10 +235,10 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     try {
       // 1. 处理图片下载
       const processedDots = await processImages(dotsBgImageData);
-
+      console.log('canvas processedDots:', processedDots);
       // 2. 计算珠子排列
       const beads = await calculateBeads(dotsBgImageData);
-
+      console.log('canvas beads:', beads);
       // 3. 绘制Canvas
       const imageUrl = await drawCanvas(processedDots, beads, dotsBgImageData);
 
@@ -294,5 +299,20 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     clearResult,
     clearAllResults,
     getProcessingStatus,
+    canvasProps: {
+      canvasId,
+      id: canvasId,
+      height: `${targetSize * dpr}px`,
+      width: `${targetSize * dpr}px`,
+      style: {
+        width: `${targetSize}px`,
+        height: `${targetSize}px`,
+        visibility: "hidden",
+        position: "fixed",
+        top: "-999999px",
+        left: "-999999px",
+        zIndex: -100,
+      }
+    }
   };
 }; 

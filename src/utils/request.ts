@@ -10,7 +10,7 @@ const grayDomain = 'https://api-gray.gmonkey.top'
 
 // 根据环境构建API基础URL
 const getBaseURL = () => {
-  const accountInfo = Taro.getAccountInfoSync();
+  const accountInfo = Taro.getAccountInfoSync(); 
 
   const isTest = accountInfo.miniProgram.envVersion !== 'release';
   console.log("运行环境：", accountInfo.miniProgram.envVersion)
@@ -164,7 +164,7 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
     // HTTP状态码检查
     if (statusCode === 200) {
       // 检查业务状态码
-      if (data.code !== undefined) {
+      if (data.code !== undefined || data.code !== 0) {
         if (data.code === 200 || data.success) {
           resolve(data)
         } else if (data.code === 401) {
@@ -175,7 +175,7 @@ const responseInterceptor = <T>(response: any): Promise<T> => {
           })
           reject(new Error('登录已过期，请重新登录'));
         } else {
-          reject(new Error(data.message || '请求失败1'));
+          resolve(data.data || data)
         }
       } else {
         // 没有业务状态码，直接返回data

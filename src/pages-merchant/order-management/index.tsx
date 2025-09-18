@@ -82,6 +82,7 @@ export default function OrderManagement() {
       setActiveTab(curStatus.status as OrderStatus);
       getOrdersByStatus(curStatus);
     } catch (error) {
+      console.log(error, 'error');
       showToast({
         title: "获取订单状态列表失败",
         icon: "none",

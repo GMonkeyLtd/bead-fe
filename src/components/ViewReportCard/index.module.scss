@@ -81,11 +81,15 @@
   gap: 4px;
 }
 
+.disabledection {
+  line-height: 1;
+}
+
 .actionText {
   font-family: 'Noto Sans SC', sans-serif;
   font-weight: 350;
   font-size: 11px;
-  line-height: 1.35em;
+  line-height: 1;
   color: #A06C3A;
   margin: 0;
 }

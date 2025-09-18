@@ -113,7 +113,7 @@
 .orderPrice {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.2em;
   color: #1f1722;
   flex-shrink: 0;
@@ -121,6 +121,11 @@
 
 .referencePrice {
   color: #887455;
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.2em;
+  flex-shrink: 0;
 }
 
 .orderDivider {

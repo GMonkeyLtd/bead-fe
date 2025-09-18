@@ -31,7 +31,7 @@ const Home = () => {
   }, []);
 
   useDidShow(() => {
-    setTimeout(() => { 
+    setTimeout(() => {
       apiSession.getLastSession().then((res) => {
         if (res.data?.session_id) {
           setLastSessionId(res.data.session_id);
@@ -123,80 +123,82 @@ const Home = () => {
                 videoUrl={item.backgroundVideo}
                 className="banner-background"
               />
-              
+
               <View className="home-content">
-                <View className="crystal-title-section">
-                  <View className="crystal-title-frame">
-                    {/* <Text className="crystal-subtitle-up">{item.subtitle}</Text> */}
-                    <Text className="crystal-subtitle-down">
-                      {item.description}
-                    </Text>
-                    <Text className="crystal-main-title">{item.title}</Text>
+                <View className="crystal-content-section">
+                  <View className="crystal-title-section">
+                    <View className="crystal-title-frame">
+                      {/* <Text className="crystal-subtitle-up">{item.subtitle}</Text> */}
+                      <Text className="crystal-subtitle-down">
+                        {item.description}
+                      </Text>
+                      <Text className="crystal-main-title">{item.title}</Text>
+                    </View>
                   </View>
-                </View>
-                <View className="crystal-action-section">
-                  <View className="crystal-action-section-items">
-                    <CrystalButton
-                      style={{
-                        borderRadius: '2px',
-                        border: "1.1px solid rgba(255, 255, 255, 0.20)",
-                        background: "rgba(0, 0, 0, 0)",
-                        backdropFilter: "blur(4px)",
-                        boxShadow: 'none',
-                        // width: "154px",
-                      }}
-                      textStyle={{
-                        color: "#fff",
-                      }}
-                      onClick={() => {
-                        if (!lastSessionId) {
-                          startDesign();
-                        } else {
-                          Taro.navigateTo({
-                            url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
-                          });
-                        }
-                      }}
-                      text="开启定制"
+                  <View className="crystal-action-section">
+                    <View className="crystal-action-section-items">
+                      <CrystalButton
+                        style={{
+                          borderRadius: '2px',
+                          border: "1.1px solid rgba(255, 255, 255, 0.20)",
+                          background: "rgba(0, 0, 0, 0)",
+                          backdropFilter: "blur(4px)",
+                          boxShadow: 'none',
+                          // width: "154px",
+                        }}
+                        textStyle={{
+                          color: "#fff",
+                        }}
+                        onClick={() => {
+                          if (!lastSessionId) {
+                            startDesign();
+                          } else {
+                            Taro.navigateTo({
+                              url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
+                            });
+                          }
+                        }}
+                        text="智能定制"
                       // icon={
                       //   <Image
                       //     src={RightArrowWhite}
                       //     style={{ width: "16px", height: "10px" }}
                       //   />
                       // }
-                    />
-                    <CrystalButton
-                      style={{
-                        borderRadius: '2px',
-                        border: "1.1px solid rgba(255, 255, 255, 0.20)",
-                        background: "rgba(0, 0, 0,0)",
-                        backdropFilter: "blur(4px)",
-                        boxShadow: 'none',
-                        // width: "154px",
-                      }}
-                      textStyle={{
-                        color: "#fff",
-                      }}
-                      onClick={() => {
+                      />
+                      <CrystalButton
+                        style={{
+                          borderRadius: '2px',
+                          border: "1.1px solid rgba(255, 255, 255, 0.20)",
+                          background: "rgba(0, 0, 0,0)",
+                          backdropFilter: "blur(4px)",
+                          boxShadow: 'none',
+                          // width: "154px",
+                        }}
+                        textStyle={{
+                          color: "#fff",
+                        }}
+                        onClick={() => {
                           Taro.redirectTo({
                             url: pageUrls.customDesign + '?from=home',
                           });
-                      }}
-                      text="DIY设计"
-                    />
+                        }}
+                        text="DIY创作"
+                      />
+                    </View>
+                    {/* <View className="crystal-link-text" onClick={() => {
+                      Taro.redirectTo({
+                        url: pageUrls.customDesign + '?from=home',
+                      });
+                    }}>
+                        DIY设计
+                    </View> */}
                   </View>
-                  {/* <View className="crystal-link-text" onClick={() => {
-                    Taro.redirectTo({
-                      url: pageUrls.customDesign + '?from=home',
-                    });
-                  }}>
-                      DIY设计
-                  </View> */}
-                  <View className="crystal-link-text" onClick={() => {
-                    setQrCodeVisible(true);                    
-                  }}>
-                      联系客服
-                  </View>
+                </View>
+                <View className="crystal-link-text" onClick={() => {
+                  setQrCodeVisible(true);
+                }}>
+                  联系客服
                 </View>
               </View>
             </View>

@@ -47,10 +47,11 @@ export const BraceletDraftCard = ({
   const currentDraftRef = useRef<DraftData | null>(null);
 
   // 使用独立的CircleRing Canvas实例
-  const { generateCircleRing } =
+  const { generateCircleRing, canvasProps } =
     useCircleRingCanvas({
       targetSize: 640,
       fileType: "png",
+      canvasId: "page-chat-draft-canvas",
     });
 
   // 稳定化beads数组，避免不必要的重新渲染
@@ -336,6 +337,7 @@ export const BraceletDraftCard = ({
           )}
         </View>
       </View>
+      {/* Canvas已移到全局，这里不再需要 */}
     </View>
   );
 };

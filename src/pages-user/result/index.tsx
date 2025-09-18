@@ -1,6 +1,6 @@
 import { View, Image, Text, Button } from "@tarojs/components";
 import { useEffect, useMemo, useState, useRef } from "react";
-import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
+import Taro, { useDidShow, useDidHide } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import AppHeader from "@/components/AppHeader";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
@@ -12,14 +12,11 @@ import {
   DESIGN_PLACEHOLDER_IMAGE_URL,
   GENERATING_GIF_URL,
 } from "@/config";
-import shareDesignImage from "@/assets/icons/share-design.svg";
 import BudgetDialog from "@/components/BudgetDialog";
 import OrderListComp from "@/components/OrderListComp";
-import api from "@/utils/api";
+import api, { configApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 import BraceletDetailDialog from "@/components/BraceletDetailDialog";
-import WuxingDisplay from "@/components/WuxingDisplay";
-import WearTipsSvg from "@/assets/icons/wear-tips.svg";
 import BeadList from "@/components/BeadList";
 import MaterialSvg from "@/assets/icons/material.svg";
 import createBeadImage from "@/assets/icons/create-bead.svg";
@@ -31,6 +28,11 @@ import { imageToBase64 } from "@/utils/imageUtils";
 import ConceptSvg from "@/assets/icons/concept.svg";
 import ReportSvg from "@/assets/icons/report.svg";
 import ViewReportCard from "@/components/ViewReportCard";
+import editInspirationSvg from "@/assets/icons/edit-inspiration.svg";
+import sharingIconSvg from "@/assets/icons/sharing-icon.svg";
+import deleteIconSvg from "@/assets/icons/delete.svg";
+import BudgetDialogGrading from "@/components/BudgetDialog/BudgetDialogGrading";
+import RefreshSvg from "@/assets/icons/refresh.svg";
 
 const Result = () => {
   const instance = Taro.getCurrentInstance();
@@ -46,7 +48,7 @@ const Result = () => {
   const [beadDescriptions, setBeadDescriptions] = useState<any[]>([]);
   const [designNo, setDesignNo] = useState("");
   const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
-  const [rizhuInfo, setRizhuInfo] = useState<any[]>("");
+  const [rizhuInfo, setRizhuInfo] = useState<string>("");
   const [wuxingInfo, setWuxingInfo] = useState<any[]>([]);
   const [budgetDialogShow, setBudgetDialogShow] = useState(false);
   const [orderList, setOrderList] = useState<any[]>([]);
@@ -60,9 +62,10 @@ const Result = () => {
   const { design, getDesign } = usePollDesign({
     pollingInterval: 5000,
     checkStopPoll: (design) => {
-      return design.progress == 100 && !!design?.info?.report;
+      return design.progress == 100 && !!design?.info?.personal_report;
     }
   });
+  const [tierPriceConfig, setTierPriceConfig] = useState<any>(null);
 
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
 
@@ -90,11 +93,10 @@ const Result = () => {
     setBeadsInfo(info.items);
     image_url && setImageUrl(image_url);
     setBraceletName(name);
-    setBackgroundImageUrl(background_url);
     setBeadDescriptions(deduplicatedBeads.filter((item) => !!item.func_summary));
     setDesignNo(design_id);
     setBraceletDescription(description);
-    setRizhuInfo(rizhu || wuxing?.[0]);
+    setRizhuInfo(rizhu || "");
     setWuxingInfo(wuxing);
     setReferencePrice(reference_price);
     setDesignSessionId(session_id);
@@ -108,7 +110,7 @@ const Result = () => {
     if (design?.order_uuids?.length) {
       getOrderData(design.order_uuids);
     }
-  }, [design?.design_id]);
+  }, [design]);
 
   useEffect(() => {
     if (design?.design_id) {
@@ -117,12 +119,13 @@ const Result = () => {
   }, [design]);
 
   const initData = () => {
+    const designId = params?.designBackendId || design?.design_id;
     // 获取传入的图片URL参数
-    if (params?.designBackendId) {
+    if (designId) {
       const imageUrl = params?.imageUrl || "";
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
       getDesign({
-        designId: params?.designBackendId,
+        designId: designId,
       })
     }
   };
@@ -131,12 +134,17 @@ const Result = () => {
     initData();
   });
 
-  usePullDownRefresh(() => {
-    initData();
-  });
+  useEffect(() => {
+    configApi.getPriceTierConfig().then((res) => {
+      setTierPriceConfig(res?.data || []);
+    });
+  }, []);
 
   // 保存图片到相册
   const saveImage = async () => {
+    if (!imageUrl) {
+      return;
+    }
     setLoading(true);
     Taro.showLoading({
       title: "正在生成分享图...",
@@ -154,7 +162,7 @@ const Result = () => {
             design_id: designNo,
             bracelet_image: imageUrl,
             bracelet_name: braceletName,
-            rizhu: rizhuInfo,
+            rizhu: rizhuInfo || wuxingInfo?.[0],
             wuxing: wuxingInfo,
             bracelet_description: braceletDescription,
             crystal_list: beadDescriptions?.map((item) => ({
@@ -167,7 +175,6 @@ const Result = () => {
           }
         }
       })
-      console.log("请求成功，响应:", res);
       if (res.data.data) {
         // 检查相册权限
         const authSetting = await Taro.getSetting();
@@ -306,6 +313,44 @@ const Result = () => {
     return { bgImage: backgroundImageUrl, braceletImage: originImageUrl }
   }, [backgroundImageUrl, originImageUrl])
 
+  const handleDeleteDesign = () => {
+    if (orderList?.length > 0) {
+      Taro.showToast({
+        title: "该作品有相关订单，无法删除",
+        icon: "none",
+      });
+      return;
+    }
+    Taro.showModal({
+      title: "确认删除",
+      content: "删除后将无法找回",
+      success: (res) => {
+        if (res.confirm) {
+          apiSession.deleteDesign(Number(designNo)).then((res) => {
+            Taro.showToast({
+              title: "删除成功",
+              icon: "success",
+            });
+            setTimeout(() => {
+              if (Taro.getCurrentPages().length > 1) {
+                Taro.navigateBack();
+              } else {
+                Taro.redirectTo({
+                  url: pageUrls.userCenter,
+                });
+              }
+            }, 1000);
+          }).catch((err) => {
+            Taro.showToast({
+              title: "删除失败",
+              icon: "error",
+            });
+          });
+        }
+      }
+    })
+  }
+
   return (
     <View
       className={styles.resultContainer}
@@ -417,7 +462,7 @@ const Result = () => {
               </View>
               <View className={styles.resultContentCenterContainer}>
                 <View className={styles.resultContentCenterText}>
-                  {designDraftId ? (
+                  {rizhuInfo ? (
                     <View className={styles.resultContentWearTips}>
                       <View className={styles.resultContentWearTipsTitleContainer}>
                         <Image
@@ -466,7 +511,7 @@ const Result = () => {
                       天然水晶佩戴一段时间后建议定期净化噢~可以用清水冲洗或在月光下放置一晚，以保持水晶的能量纯净和光泽度。
                     </View>
                   </View> */}
-                  {design?.info?.report && (
+                  {(design?.progress != 100 || design?.info?.personal_report ) && (
                     <View className={styles.resultContentReportCardContainer}>
                       <ViewReportCard
                         onActionClick={() => {
@@ -474,8 +519,8 @@ const Result = () => {
                             url: `${pageUrls.designReport}?designId=${designNo}`,
                           });
                         }}
-                        disabled={!design?.info?.report}
-                        showAction={!!design?.info?.report}
+                        disabled={!design?.info?.personal_report}
+                        showAction={!!design?.info?.personal_report}
                       />
                     </View>
                   )}
@@ -510,8 +555,13 @@ const Result = () => {
         </View>
         {orderList?.length > 0 && (
           <View className={styles.resultOrderListContainer}>
-            <View className={styles.resultOrderListTitle}>
-              {`相关订单（${orderList.length}）`}
+            <View className={styles.resultOrderListHeader}>
+              <View className={styles.resultOrderListTitle}>
+                {`相关订单（${orderList.length}）`}
+              </View>
+              <Image src={RefreshSvg} mode="widthFix" style={{ width: "11px", height: "11px" }} onClick={() => {
+                getOrderData(design.order_uuids);
+              }} />
             </View>
             <OrderListComp
               orders={orderList.map((item) => ({
@@ -521,6 +571,7 @@ const Result = () => {
                 merchantName: item.merchant_info?.name,
                 createTime: item.created_at,
                 budget: item.price,
+                tier: item.tier,
               }))}
               showActions={false}
               showImage={false}
@@ -534,23 +585,23 @@ const Result = () => {
         )}
       </View>
       <View className={styles.resultContentCardAction}>
-        <CrystalButton
-          onClick={() => saveImage()}
-          text="分享"
-          style={{ marginTop: "20px", marginLeft: "24px" }}
-          prefixIcon={
-            <Image
-              src={shareDesignImage}
-              mode="widthFix"
-              style={{ width: "24px", height: "24px" }}
-            />
-          }
-        />
+        <View className={`${styles.editorContainer} ${orderList?.length > 0 ? styles.disabled : ''}`} onClick={handleDeleteDesign}>
+          <Image src={deleteIconSvg} mode="widthFix" style={{ width: "22px", height: "22px" }} />
+          <View className={styles.editorText}>删除</View>
+        </View>
+        <View className={styles.editorContainer} onClick={handleModifyDesign}>
+          <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
+          <View className={styles.editorText}>编辑</View>
+        </View>
+        <View className={`${styles.editorContainer} ${!imageUrl ? styles.disabled : ''}`} onClick={saveImage}>
+          <Image src={sharingIconSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
+          <View className={styles.editorText}>分享</View>
+        </View>
         {referencePrice && (<CrystalButton
           onClick={doCreate}
           isPrimary
           text="制作成品"
-          style={{ flex: 1, marginTop: "20px", marginRight: "24px" }}
+          style={{ flex: 1 }}
           prefixIcon={
             <Image
               src={createBeadImage}
@@ -560,7 +611,19 @@ const Result = () => {
           }
         />)}
       </View>
-      {budgetDialogShow && (
+      {budgetDialogShow && design && tierPriceConfig && (
+        <BudgetDialogGrading
+          visible={budgetDialogShow}
+          title={braceletName}
+          designNumber={designNo}
+          productImage={imageUrl}
+          onClose={() => setBudgetDialogShow(false)}
+          tierPriceSet={design?.info?.tier_price}
+          currentTierId={2}
+          tierPriceConfig={tierPriceConfig}
+        />
+      )}
+      {/* {budgetDialogShow && (
         <BudgetDialog
           visible={budgetDialogShow}
           title={braceletName}
@@ -570,7 +633,7 @@ const Result = () => {
           referencePrice={referencePrice}
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
-      )}
+      )} */}
       {originImageUrl && backgroundImageUrl && !imageUrl && <ProductImageGenerator  // 生成海报   
         data={posterData}
         onGenerated={(url) => {

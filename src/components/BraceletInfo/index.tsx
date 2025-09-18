@@ -30,7 +30,8 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
   className = "",
   orderAction,
   showPrice = false,
-  isSameBuy = false
+  isSameBuy = false,
+  priceTier = 0
 }) => {
 
   const handleCopyImageUrl = (orderNumber: string) => {
@@ -91,7 +92,8 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
           <View className="price-section">
             <View className="price-label">
               {!isSameBuy && (<View className="price-label-text">参考价：</View>)}
-              <Text className="price">¥{price.toFixed(2)}</Text>
+              {/* <Text className={`price ${priceTier == 0 ? 'price-tier-0' : ''}`}>{priceTier == 0 ? '暂无' : `¥${price.toFixed(2)}`}</Text> */}
+              <Text className={`price ${priceTier == 0 ? 'price-tier-0' : ''}`}>{`¥${price.toFixed(2)}`}</Text>
             </View>
           </View>}
       </View>
@@ -161,6 +163,7 @@ export interface BraceletInfoProps extends BraceletCardProps {
   showPrice?: boolean;
   style?: React.CSSProperties;
   isSameBuy?: boolean;
+  priceTier: number;
 }
 const BraceletInfo: React.FC<BraceletInfoProps> = ({
   orderNumber,
@@ -173,7 +176,8 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
   style = {},
   beads,
   orderAction,
-  isSameBuy = false
+  isSameBuy = false,
+  priceTier = 0
 }) => {
 
   return (

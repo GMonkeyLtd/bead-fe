@@ -110,7 +110,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
         )}
 
         {/* 标题区域 */}
-        <View className="budget-dialog-header">
+        <View className="budget-dialog-header" style={{ padding: '32px 32px 16px 32px' }}>
           <View className="budget-dialog-title-section">
             <View className="budget-dialog-title-group">
               <View className="budget-dialog-main-title">{title}</View>

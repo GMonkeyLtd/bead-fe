@@ -165,9 +165,12 @@ export interface TDesign {
       count: number;
       is_default: boolean;
     };
-    report: string;
+    personal_report: string;
+    pub_report: string;
     wishes: string[];
     items: BeadItem[];
+    tier_info: { current_tier: number, reference_price: number };
+    tier_price: { [key: string]: number };
   };
   order_uuids?: string[];
 }
@@ -207,7 +210,7 @@ export default {
     },
     config?: ApiConfig
   ) => {
-    
+
     return http.post<ChatResponse>(
       `/user/sessions/${params.session_id}/chat`,
       { message: params.message },
@@ -446,14 +449,14 @@ export default {
     },
     config?: ApiConfig
   ) => {
-  
-  return http.post<any>(
-    `/user/designs/${params.design_id}/image`,
-    {
-      image_base64: params.image_base64,
-    },
-    { cancelToken: config?.cancelToken, ...config }
-  );
+
+    return http.post<any>(
+      `/user/designs/${params.design_id}/image`,
+      {
+        image_base64: params.image_base64,
+      },
+      { cancelToken: config?.cancelToken, ...config }
+    );
   },
   saveDiyDesign: (
     params: {
@@ -470,6 +473,12 @@ export default {
         image_base64: params.image_base64,
         wrist_size: params.wrist_size,
       },
+      { cancelToken: config?.cancelToken, ...config }
+    );
+  },
+  deleteDesign: (designId: number, config?: ApiConfig) => {
+    return http.delete<any>(
+      `/user/designs/${designId}`,
       { cancelToken: config?.cancelToken, ...config }
     );
   }

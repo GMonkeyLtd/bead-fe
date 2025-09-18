@@ -22,6 +22,7 @@ interface ProductPriceFormProps {
   onClose?: () => void;
   onConfirm?: () => void;
   beadsInfo?: BeadItem[];
+  referencePrice?: number;
 }
 
 export interface BeadItemWithCount extends BeadItem {
@@ -35,10 +36,11 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
   productImage,
   beadsInfo,
   wristSize,
+  referencePrice,
   onClose,
   onConfirm,
 }) => {
-  const [price, setPrice] = useState<string>("");
+  const [price, setPrice] = useState<string>(referencePrice?.toString() || "");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [beadsData, setBeadsData] = useState<BeadItemWithCount[]>(() => {
@@ -94,7 +96,6 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
     }, []),
     enabled: true,
   });
-  console.log(beadsData, 'beadsData')
 
   useEffect(() => {
     Taro.showLoading({
@@ -149,6 +150,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
 
   // 处理水晶珠列表变化
   const handleBeadListChange = (newData: BeadItemWithCount[]) => {
+    console.log(newData, 'newData')
     setBeadsData(newData);
   };
 
@@ -380,6 +382,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
                 placeholder="请输入价格"
                 value={price}
                 onInput={(e) => handlePriceChange(e.detail.value)}
+                defaultValue={price}
               />
             </View>
           </View>
@@ -396,6 +399,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
                 type="digit"
                 placeholder="请输入手围"
                 value={wristSizeValue}
+                defaultValue={wristSize}
                 onInput={(e) => handleWristSizeChange(e.detail.value)}
               />
             </View>
@@ -451,10 +455,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
               </View>
             </View>
           </View>
-        </ScrollView>
-
-        {/* 底部按钮 */}
-        <View className={styles["form-footer"]}>
+          <View className={styles["form-footer"]}>
           <CrystalButton
             text="取消"
             onClick={onClose || (() => { })}
@@ -465,9 +466,10 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
             onClick={handleConfirm}
             isPrimary
             icon={<Image src={rightArrowGolden} mode="aspectFit" style={{ width: "16px", height: "16px" }} />}
-            style={{ flex: 1, marginLeft: "12px" }}
+            style={{ flex: 1 }}
           />
         </View>
+        </ScrollView>
       </View>
     </View>
   );

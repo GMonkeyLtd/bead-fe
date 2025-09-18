@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { View, Text, ScrollView, Image, Button } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import styles from "./index.module.scss";
@@ -42,7 +42,16 @@ const InspirationDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { height: navBarHeight, top: navBarTop } = getNavBarHeightAndTop();
   const [isOnSale, setIsOnSale] = useState(true);
+  const timeoutRefs = useRef<Set<NodeJS.Timeout>>(new Set());
 
+  const safeSetTimeout = useCallback((callback: () => void, delay: number) => {
+    const timeoutId = setTimeout(() => {
+      timeoutRefs.current.delete(timeoutId);
+      callback();
+    }, delay);
+    timeoutRefs.current.add(timeoutId);
+    return timeoutId;
+  }, []);
 
   const deduplicateBeads = useMemo(() => {
     // 按spu_id对designData?.info?.items进行去重  
@@ -53,7 +62,7 @@ const InspirationDetailPage: React.FC = () => {
   const getInspirationDetail = async (work_id) => {
     try {
       setLoading(true);
-      inspirationApi.getInspirationData({ work_id }).then((res) => {
+      inspirationApi.getInspirationData({ work_id }, { showLoading: false }).then((res) => {
         console.log(res, "res?.data[0]");
         setDetail(res?.data?.works?.[0] as InspirationItem);
       });
@@ -70,7 +79,7 @@ const InspirationDetailPage: React.FC = () => {
 
   const getDesignData = async (designId: number) => {
     try {
-      const res = await apiSession.getDesignItem(designId);
+      const res = await apiSession.getDesignItem(designId, { showLoading: false });
       console.log(res, "res");
       setDesignData(res.data);
     } catch (error) {
@@ -92,7 +101,7 @@ const InspirationDetailPage: React.FC = () => {
   useEffect(() => {
     getData()
     if (workId) {
-      inspirationApi.viewWorkDetail({ work_id: workId })
+      inspirationApi.viewWorkDetail({ work_id: workId }, { showLoading: false })
     }
   }, [workId, designId]);
 
@@ -127,12 +136,14 @@ const InspirationDetailPage: React.FC = () => {
     e.stopPropagation();
     if (detail?.is_collect) {
       inspirationApi
-        .cancelCollectInspiration({ work_id: detail.work_id })
+        .cancelCollectInspiration({ work_id: detail.work_id }, { showLoading: false })
         .then(() => {
-          Taro.showToast({
-            title: "取消收藏成功",
-            icon: "success",
-          });
+          safeSetTimeout(() => {
+            Taro.showToast({
+              title: "取消收藏成功",
+              icon: "success",
+            });
+          }, 200);
           getData();
         })
         .catch((err) => {
@@ -143,12 +154,14 @@ const InspirationDetailPage: React.FC = () => {
         });
     } else {
       inspirationApi
-        .collectInspiration({ work_id: detail.work_id })
+        .collectInspiration({ work_id: detail.work_id }, { showLoading: false })
         .then(() => {
-          Taro.showToast({
-            title: "收藏成功",
-            icon: "success",
-          });
+          safeSetTimeout(() => {
+            Taro.showToast({
+              title: "收藏成功，已收藏作品可到收藏集中查看。",
+              icon: "none",
+            });
+          }, 200);
           getData();
         })
         .catch((err) => {
@@ -215,7 +228,6 @@ const InspirationDetailPage: React.FC = () => {
   }
 
   const handleEditInspiration = () => {
-    console.log(designData?.design_id, detail.work_id, 'designData')
     Taro.redirectTo({
       url: `${pageUrls.customDesign}?designId=${designData?.design_id}&from=inspiration&workId=${detail.work_id}`,
     });
@@ -250,6 +262,12 @@ const InspirationDetailPage: React.FC = () => {
             src={detail.cover_url}
             className={styles.mainImage}
             mode="widthFix"
+            onClick={() => {
+              if (!detail) return;
+              Taro.previewImage({
+                urls: [detail.cover_url],
+              });
+            }}
           />
 
           {/* 图片指示器 */}
@@ -383,8 +401,8 @@ const InspirationDetailPage: React.FC = () => {
       {/* 底部按钮 */}
       <View className={styles.bottomBar}>
         <View className={styles.editorContainer} onClick={handleEditInspiration}>
-            <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
-            <View className={styles.editorText}>编辑</View>
+          <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
+          <View className={styles.editorText}>编辑</View>
         </View>
         {designData?.session_id && designData?.reference_price && (<CrystalButton
           onClick={() => {

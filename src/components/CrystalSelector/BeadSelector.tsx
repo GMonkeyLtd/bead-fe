@@ -50,9 +50,10 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
 }) => {
   const [curType, setCurType] = useState<"crystal" | "accessories">("crystal");
   const allWuxing = useMemo(() => {
-    const wuxingKeys = Object.keys(beadTypeMap);
-    // 添加"精选"作为第一个选项
-    return [...wuxingKeys];
+    // const wuxingKeys = Object.keys(beadTypeMap);
+    // // 添加"精选"作为第一个选项
+    // return [...wuxingKeys];
+    return ['金', '木', '水', '火', '土'];
   }, [beadTypeMap]);
 
   const handleBeadClick = useCallback(

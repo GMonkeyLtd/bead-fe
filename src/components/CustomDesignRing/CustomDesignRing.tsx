@@ -6,7 +6,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { View, Image, MovableArea } from "@tarojs/components";
+import { View, Image, MovableArea, Canvas } from "@tarojs/components";
 import Taro, { base64ToArrayBuffer } from "@tarojs/taro";
 import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
 import { BeadPositionManager, BeadPositionManagerConfig } from "./BeadPositionManager";
@@ -21,6 +21,7 @@ import { Bead } from "../../../types/crystal";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 import HistoryOperations from "./HistoryOperations";
 import BeadSizeSelector from "../BeadSizeSelector";
+import tutorialIcon from "@/assets/icons/tutorial.svg";
 
 // 定义ref暴露的接口
 export interface CustomDesignRingRef {
@@ -46,6 +47,7 @@ interface CustomDesignRingProps {
   renderRatio?: number;
   onOk?: (imageUrl: string, editedBeads: Bead[]) => void;
   onChange?: (imageUrl: string, editedBeads: Bead[]) => void;
+  showTutorial?: () => void;
 }
 
 /**
@@ -61,6 +63,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   beadTypeMap = {},
   renderRatio = 2,
   onOk,
+  showTutorial,
 }, ref) => {
   const [canvasSize, setCanvasSize] = useState<number>(0);
   const [currentWuxing, setCurrentWuxing] = useState<string>("");
@@ -78,7 +81,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     minWristSize: 8,
     enableHistory: true,
     maxHistoryLength: 50,
-    displayScale: 3.5
+    displayScale: 3.8
   };
 
   // 使用珠子位置管理器
@@ -95,9 +98,10 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     beadStatus: "idle",
   });
 
-  const { generateCircleRing } = useCircleRingCanvas({
+  const { generateCircleRing, canvasProps } = useCircleRingCanvas({
     targetSize: 640,
     fileType: "png",
+    canvasId: "custom-design-ring-canvas",
   });
 
   // 初始化画布尺寸
@@ -122,7 +126,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   useEffect(() => {
     const allWuxing = Object.keys(beadTypeMap);
     if (allWuxing.length > 0) {
-      setCurrentWuxing(allWuxing[0]); // 默认选择"土"模式
+      setCurrentWuxing('金'); // 默认选择"土"模式
     }
   }, [beadTypeMap]);
 
@@ -212,6 +216,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && !dot.width,
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
+        console.log('generateCircleRing imageUrl: ', imageUrl)
         const newImageUrl = imageUrl || "";
         // Taro.previewImage({
         //   urls: [newImageUrl],
@@ -511,6 +516,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         onClick={handleBeadDeselect}
       >
         <View className="custom-design-ring-top-content">
+          <View onClick={showTutorial} className="custom-design-ring-tutorial-container">
+            <Image src={tutorialIcon} className="custom-design-ring-tutorial-icon" style={{ width: "18px", height: "18px" }} />
+            <View className="custom-design-ring-tutorial-text">
+              教程
+            </View>
+          </View>
           {/* Canvas渲染器 */}
           <View
             style={{
@@ -530,6 +541,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
               </View>
             )}
             {/* <Image className="custom-crystal-backend" src={CUSTOM_CRYSTAL_BACKEND_IMAGE} style={{ width: `${canvasSize}px`, height: `${canvasSize}px` }} /> */}
+            <Canvas {...canvasProps} />
             <MovableBeadRenderer
               style={{
                 position: "absolute",
@@ -553,6 +565,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             onClockwiseMove={handleClockwiseMove}
             onCounterclockwiseMove={handleCounterclockwiseMove}
             onDelete={handleDelete}
+            enableRotate={positionManagerState.predictedLength >= 13}
           />
           <HistoryOperations
             canUndo={positionManagerRef.current?.canUndo() || false}

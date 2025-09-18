@@ -89,9 +89,13 @@ const CrystalBeadList: React.FC<CrystalBeadListProps> = ({
   // 处理数量输入变化
   const handleQuantityInput = (skuId: number, value: string) => {
     // 只允许输入数字
-    const numericValue = value.replace(/[^\d]/g, "");
-    const quantity = parseInt(numericValue) || 0;
-    handleEditConfirm(skuId, 'quantity', quantity);
+    console.log(value, typeof value, 'value')
+    if (value !== '') {
+      const numericValue = value.replace(/[^\d]/g, "");
+      const quantity = parseInt(numericValue) || 0;
+      console.log(quantity, 'quantity')
+      handleEditConfirm(skuId, 'quantity', quantity);
+    }
   };
 
   // 确认编辑
@@ -99,7 +103,7 @@ const CrystalBeadList: React.FC<CrystalBeadListProps> = ({
     const newData = data.map(item => {
       if (item.sku_id === skuId) {
         const updatedItem = { ...item };
-        
+
         switch (type) {
           case 'name':
             updatedItem.name = value as string;
@@ -108,10 +112,10 @@ const CrystalBeadList: React.FC<CrystalBeadListProps> = ({
             updatedItem.diameter = value as number;
             break;
           case 'quantity':
-            updatedItem.quantity = value as number;
+            updatedItem.count = value as number;
             break;
         }
-        
+
         return updatedItem;
       }
       return item;
@@ -133,7 +137,7 @@ const CrystalBeadList: React.FC<CrystalBeadListProps> = ({
       count: 1,
     };
     newBead.count = 1;
-    
+
     const newData = [...data, newBead];
     onChange?.(newData);
   };
@@ -155,8 +159,8 @@ const CrystalBeadList: React.FC<CrystalBeadListProps> = ({
           <Text className={styles.headerText}>操作</Text>
         </View>
       </View>
-      
-      <ScrollView 
+
+      <ScrollView
         className={styles.listContainer}
         scrollY
         showScrollbar={false}
@@ -182,7 +186,7 @@ const CrystalBeadList: React.FC<CrystalBeadListProps> = ({
                   </View>
                 </Picker>
               </View>
-              
+
               <View className={styles.diameterColumn}>
                 {(() => {
                   const diameterOptions = getDiameterOptions(spuList.find(item => item.spuId == bead.spu_id)?.items || []);
@@ -204,18 +208,18 @@ const CrystalBeadList: React.FC<CrystalBeadListProps> = ({
                   );
                 })()}
               </View>
-              
+
               <View className={styles.quantityColumn}>
                 <Input
                   className={styles.quantityInput}
                   type="number"
-                  value={bead.count?.toString() || '0'}
+                  defaultValue={bead.count?.toString() || '0'}
                   onInput={(e) => handleQuantityInput(bead.sku_id, e.detail.value)}
                 />
               </View>
-              
+
               <View className={styles.deleteColumn}>
-                <View 
+                <View
                   className={styles.deleteButton}
                   onClick={() => handleDeleteItem(bead.sku_id)}
                 >
@@ -225,17 +229,17 @@ const CrystalBeadList: React.FC<CrystalBeadListProps> = ({
             </View>
           );
         })}
-        
+
         {data.length === 0 && (
           <View className={styles.emptyState}>
             <Text className={styles.emptyText}>暂无珠子数据</Text>
           </View>
         )}
       </ScrollView>
-      
+
       {/* 添加新珠子按钮 */}
       <View className={styles.addButtonContainer}>
-        <View 
+        <View
           className={styles.addButton}
           onClick={handleAddNewBead}
         >
