@@ -1,6 +1,6 @@
 import { View, Image, Text, Button } from "@tarojs/components";
 import { useEffect, useMemo, useState, useRef } from "react";
-import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
+import Taro, { useDidShow, useDidHide } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import AppHeader from "@/components/AppHeader";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
@@ -32,6 +32,7 @@ import editInspirationSvg from "@/assets/icons/edit-inspiration.svg";
 import sharingIconSvg from "@/assets/icons/sharing-icon.svg";
 import deleteIconSvg from "@/assets/icons/delete.svg";
 import BudgetDialogGrading from "@/components/BudgetDialog/BudgetDialogGrading";
+import RefreshSvg from "@/assets/icons/refresh.svg";
 
 const Result = () => {
   const instance = Taro.getCurrentInstance();
@@ -109,7 +110,7 @@ const Result = () => {
     if (design?.order_uuids?.length) {
       getOrderData(design.order_uuids);
     }
-  }, [design?.design_id]);
+  }, [design]);
 
   useEffect(() => {
     if (design?.design_id) {
@@ -118,12 +119,13 @@ const Result = () => {
   }, [design]);
 
   const initData = () => {
+    const designId = params?.designBackendId || design?.design_id;
     // 获取传入的图片URL参数
-    if (params?.designBackendId) {
+    if (designId) {
       const imageUrl = params?.imageUrl || "";
       imageUrl && setImageUrl(decodeURIComponent(imageUrl));
       getDesign({
-        designId: params?.designBackendId,
+        designId: designId,
       })
     }
   };
@@ -137,10 +139,6 @@ const Result = () => {
       setTierPriceConfig(res?.data || []);
     });
   }, []);
-
-  usePullDownRefresh(() => {
-    initData();
-  });
 
   // 保存图片到相册
   const saveImage = async () => {
@@ -177,7 +175,6 @@ const Result = () => {
           }
         }
       })
-      console.log("请求成功，响应:", res);
       if (res.data.data) {
         // 检查相册权限
         const authSetting = await Taro.getSetting();
@@ -558,8 +555,13 @@ const Result = () => {
         </View>
         {orderList?.length > 0 && (
           <View className={styles.resultOrderListContainer}>
-            <View className={styles.resultOrderListTitle}>
-              {`相关订单（${orderList.length}）`}
+            <View className={styles.resultOrderListHeader}>
+              <View className={styles.resultOrderListTitle}>
+                {`相关订单（${orderList.length}）`}
+              </View>
+              <Image src={RefreshSvg} mode="widthFix" style={{ width: "11px", height: "11px" }} onClick={() => {
+                getOrderData(design.order_uuids);
+              }} />
             </View>
             <OrderListComp
               orders={orderList.map((item) => ({

@@ -105,17 +105,17 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                     entityIds: [order_uuid], // 添加必需的 entityIds 参数
                     complete: () => {
                         Taro.reLaunch({
-                            url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                            url: `${pageUrls.orderDetail}?orderId=${order_uuid}&from=result`,
                         });
 
                     },
                     success: () => {
                         Taro.reLaunch({
-                            url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                            url: `${pageUrls.orderDetail}?orderId=${order_uuid}&from=result`,
                         })
                     },
                     fail: () => Taro.reLaunch({
-                        url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                        url: `${pageUrls.orderDetail}?orderId=${order_uuid}&from=result`,
                     })
                 });
             });

@@ -336,15 +336,20 @@
   margin-top: 20px;
 }
 
+.resultOrderListHeader {
+  display: flex;
+  align-items: center;
+  margin: 0 10px 10px 10px;
+}
+
 .resultOrderListTitle {
   color: #1f1722;
-  font-size: 12px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
   letter-spacing: 1px;
   opacity: 0.9;
-  margin: 0 10px 10px 10px;
 }
 
 .generatingGifContainer {

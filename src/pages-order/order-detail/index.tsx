@@ -36,6 +36,7 @@ import JoinGroupChat from "@/components/JoinGroupChat";
 import JoinGroupQrcode from "@/components/JoinGroupChat/JoinGroupQrcode";
 import { useOrderPolling } from "@/hooks/useOrderPolling";
 import { SERVICE_QRCODE_IMAGE_URL } from "@/config";
+import { pageUrls } from "@/config/page-urls";
 
 enum PaymentStatus {
   Processing = 0,
@@ -57,6 +58,7 @@ const OrderDetail: React.FC = () => {
     useState<boolean>(false);
   const instance = Taro.getCurrentInstance();
   const { orderId } = instance.router?.params || {};
+  const { from } = instance.router?.params || {};
 
   const {
     orderInfo: order,
@@ -477,6 +479,21 @@ const OrderDetail: React.FC = () => {
         flexDirection: "column",
       }}
       disablePaddingBottom
+      onBack={() => {
+        if (Taro.getCurrentPages().length === 1) {
+          if (from === 'result') {
+            Taro.redirectTo({
+              url: pageUrls.result + `?designBackendId=${order?.design_info?.design_id}`,
+            });
+          } else {
+            Taro.redirectTo({
+              url: pageUrls.orderList,
+            });
+          }
+        } else {
+          Taro.navigateBack();
+        }
+      }}
     >
       <View style={{ padding: "24px 24px 0 24px" }}>
         <OrderStatus

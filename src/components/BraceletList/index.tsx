@@ -91,7 +91,8 @@ const BraceletItem: React.FC<{
               braceletImage: item.draftUrl,
             }}
             onGenerated={handleImageGenerated}
-            showProductImage={false}
+                showProductImage={false}
+                autoDestroy={true}
           />
         )}
       </View>
