@@ -132,7 +132,7 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       if (!braceletImage) {
         return;
       }
-      const braceletImageSize = 160;
+      const braceletImageSize = 280;
       // const imgBase64 = await imageToBase64(data.braceletImage, true, false);
       const heightCenter = (canvasHeight - braceletImageSize * dpr) / 2;
 

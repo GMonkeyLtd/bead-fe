@@ -11,6 +11,8 @@ export interface DotImageData {
   width?: number;
   image_aspect_ratio?: number;
   isFloatAccessory?: boolean;   // 是否浮在别的珠子上的配饰
+  pass_height_ratio?: number;
+  pass_width_ratio?: number;
 }
 
 interface CircleRingConfig {
@@ -78,10 +80,20 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   const calculateBeads = useCallback(async (dotsBgImageData: DotImageData[]) => {
     // 获取图片的宽
     return calculateBeadArrangementBySize(
-      ringRadius,
+      ringRadius * 0.6,
       dotsBgImageData.map(item => {
-        const ratioBeadWidth = item.isFloatAccessory ? 1 : (item.diameter || 10) * (item.image_aspect_ratio || 1);
-        return { ratioBeadWidth, beadDiameter: item.diameter || 10 }
+        let ratioBeadWidth = 0;
+        if (item.isFloatAccessory) {
+          ratioBeadWidth = 1;
+        } else {
+          const calculatedWidth = (item.diameter || 10) * (item.image_aspect_ratio || 1);
+          if (item.pass_width_ratio) {
+            ratioBeadWidth = calculatedWidth * (item.pass_width_ratio || 1);
+          } else {
+            ratioBeadWidth = calculatedWidth;
+          }
+        }
+        return { ratioBeadWidth, beadDiameter: item.diameter || 10, passHeightRatio: item.pass_height_ratio }
       }),
       { x: ringRadius, y: ringRadius }
     );
@@ -93,7 +105,6 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
     beads: any[],
     dotsBgImageData: DotImageData[]
   ): Promise<string> => {
-    console.log('canvas 开始绘制')
     return new Promise(async (resolve, reject) => {
       try {
         // const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;

@@ -84,49 +84,44 @@ export const calcPositionsWithRenderDiameter = (
   // 圆心坐标
   center: { x: number, y: number }
 ) => {
-
-
   // 1. 总周长 = 所有珠子直径之和
   const circumference = renderDiameterList.reduce((s, d) => s + d.scale_width, 0);
+  if (circumference === 0) return []; // 避免除以零
 
   // 2. 根据周长求大圆直径
   const bigDiameter = circumference / Math.PI;
+  const radius = bigDiameter / 2; // 大圆半径
 
   // 3. 计算每颗珠子所占角度
   const angles = renderDiameterList.map(d => d.scale_width / circumference * 360);
 
-  // 4. 计算每颗珠子圆心坐标
+  // 4. 计算每颗珠子位置
   const positions: SimplePosition[] = [];
-  // 如果没有珠子，直接返回空数组
-  if (renderDiameterList.length === 0) {
-    return positions;
-  }
   
-  // 计算起始角度，让第一个珠子的圆心在正上方(-90度)
+  // 计算起始角度，让第一个珠子的中心在正上方(-90度)
   const firstHalfAngle = angles[0] / 2;
-  let currentDeg = -90 - firstHalfAngle;     // 调整起始角度
-  const radius = bigDiameter / 2;            // 大圆半径
+  let currentDeg = -90 - firstHalfAngle;
 
   renderDiameterList.forEach((d, i) => {
-    const halfAngle = angles[i] / 2;          // 珠子占角的一半
-    const midDeg = currentDeg + halfAngle;    // 珠子中心角度
-    const rad = midDeg * Math.PI / 180;       // 转弧度
+    const halfAngle = angles[i] / 2;
+    const midDeg = currentDeg + halfAngle; // 珠子中心角度
+    const rad = midDeg * Math.PI / 180;    // 转弧度
     
-    // 计算穿线点在圆环上的位置
+    // 穿孔点必须精确位于大圆上（这是关键修正点）
     const threadX = center.x + radius * Math.cos(rad);
     const threadY = center.y + radius * Math.sin(rad);
     
-    // 计算珠子的显示位置，考虑passHeightRatio
-    const passHeightRatio = d.passHeightRatio || 0.5; // 默认从中心穿过
-    const heightOffset = (passHeightRatio - 0.5) * d.scale_height; // 相对于中心的偏移
+    // 获取穿孔比例，默认为中心
+    const passHeightRatio = d.passHeightRatio ?? 0.5;
     
-    // 计算垂直于圆环切线方向的单位向量（指向圆心内侧）
-    const normalX = -Math.cos(rad); // 指向圆心的法向量
-    const normalY = -Math.sin(rad);
+    // 计算珠子中心相对于穿孔点的偏移量
+    // 偏移方向：从穿孔点指向珠子中心，即径向向外（与半径方向相同）
+    // 偏移距离：珠子高度的一半乘以(0.5 - passHeightRatio)
+    const offsetDistance = (0.5 - passHeightRatio) * d.scale_height;
     
-    // 珠子的实际显示位置 = 穿线位置 + 法向量 * 高度偏移
-    const displayX = threadX + normalX * heightOffset;
-    const displayY = threadY + normalY * heightOffset;
+    // 计算珠子中心坐标（穿孔点加上径向偏移）
+    const displayX = threadX + Math.cos(rad) * offsetDistance;
+    const displayY = threadY + Math.sin(rad) * offsetDistance;
     
     positions.push({
       scale_width: d.scale_width / 2,
@@ -135,15 +130,31 @@ export const calcPositionsWithRenderDiameter = (
       y: displayY,
       angle: rad,
       index: i as any,
-      // 保存穿线点位置，用于后续计算
+      // 保存穿线点位置，确保在大圆上
       threadX,
       threadY,
       passHeightRatio,
     });
-    currentDeg += angles[i];                  // 累加到下一颗起点
+    
+    currentDeg += angles[i]; // 累加到下一颗珠子的起始角度
   });
+  
   return positions;
 }
+
+// 补充类型定义
+interface SimplePosition {
+  scale_width: number;
+  scale_height: number;
+  x: number;
+  y: number;
+  angle: number;
+  index: any;
+  threadX: number;
+  threadY: number;
+  passHeightRatio: number;
+}
+
 
 export const calculateBeadArrangementByTargetRadius = (
   beads: { ratioBeadWidth: number, beadDiameter: number, passHeightRatio?: number }[],
@@ -177,13 +188,18 @@ export const calculateBeadArrangementBySize = (
   const sizeRatio = targetRingRadius / calculatedRingRadius;
 
   // 计算缩放后的渲染直径列表
-  const scaledRenderDiameterList = beadSizeList.map((size) => ({ 
-    render_width: size.ratioBeadWidth, 
-    scale_width: size.ratioBeadWidth * sizeRatio, 
-    render_diameter: size.beadDiameter, 
-    scale_height: size.beadDiameter * sizeRatio, 
-    passHeightRatio: size.passHeightRatio 
-  }));
+  const scaledRenderDiameterList = beadSizeList.map((size) => {
+  // 如果穿孔位置不是中心，且珠子直径大于20，则按照20进行渲染
+  const renderDiameter = size.passHeightRatio  && size.passHeightRatio  !== 0.5 &&  size.beadDiameter > 20 ? 20 : size.beadDiameter;
+
+    return { 
+      render_width: size.ratioBeadWidth, 
+      scale_width: size.ratioBeadWidth * sizeRatio, 
+      render_diameter: renderDiameter, 
+      scale_height: renderDiameter * sizeRatio, 
+      passHeightRatio: size.passHeightRatio 
+    }
+  });
 
   // 使用和CustomDesignRing相同的计算逻辑
   const positions = calcPositionsWithRenderDiameter(scaledRenderDiameterList, center);

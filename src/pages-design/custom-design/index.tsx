@@ -265,8 +265,8 @@ const CustomDesign = () => {
       //     type: 1,
       //     weight: 50,
       //     width: 4,
-      //     pass_height_ratio: 0.1,
-      //     pass_width_ratio: 0.2
+      //     pass_height_ratio: 0.1,// 穿孔位置距图片顶部的高度占比，用于计算穿孔位置
+      //     pass_width_ratio: 0.2 // 用于计算穿孔位置在线上所占的宽度
       //   }],
       //   beadSizeList: [25],
       //   id: 2000,
@@ -314,6 +314,10 @@ const CustomDesign = () => {
   }
 
   const onCreate = async (imageUrl: string, editedBeads: any[], isSaveAndBack: boolean = false) => {
+    // Taro.previewImage({
+    //   urls: [imageUrl],
+    // });
+    // return;
     if (isFromResult && !checkBeadsDataChanged(oldBeadList || [], editedBeads || [])) {
       Taro.redirectTo({
         url: `${pageUrls.result}?designBackendId=${designId}`,

@@ -213,7 +213,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         diameter: dot.diameter,
         width: dot.width,
         image_aspect_ratio: dot.image_aspect_ratio,
-        isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && !dot.width,
+        pass_height_ratio: dot.pass_height_ratio,
+        pass_width_ratio: dot.pass_width_ratio,
+        isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && (!dot.width || (dot.pass_height_ratio && dot.pass_height_ratio !== 0.5)),
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
         console.log('generateCircleRing imageUrl: ', imageUrl)

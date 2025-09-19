@@ -62,7 +62,9 @@ export const BraceletDraftCard = ({
       diameter: item.diameter,
       width: item.width || item.diameter,
       image_aspect_ratio: item.image_aspect_ratio || 1,
-      isFloatAccessory: item.spu_type === SPU_TYPE.ACCESSORY && !item.width,
+      isFloatAccessory: item.spu_type === SPU_TYPE.ACCESSORY && (!item.width || (item.pass_height_ratio && item.pass_height_ratio !== 0.5)),
+      pass_height_ratio: item.pass_height_ratio,
+      pass_width_ratio: item.pass_width_ratio,
     }));
   }, [draft?.items]);
 
@@ -300,7 +302,7 @@ export const BraceletDraftCard = ({
             <CircleRingImage
               // imageUrl={isRegenerating ? "" :  draft.bracelet_image || ""}
               imageUrl={isRegenerating ? "" : draft.image_url || draft.bracelet_image || ""}
-              size={140}
+              size={240}
               backendSize={160}
               backgroundImage={BRACELET_BG_IMAGE_URL}
               rotate={true}
