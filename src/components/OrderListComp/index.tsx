@@ -161,6 +161,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
                       }
                       mode="aspectFill"
                       className={styles.merchantImg}
+                      lazyLoad
                     />
                   </View>
                 )}

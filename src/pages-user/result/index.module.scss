@@ -409,10 +409,10 @@
   gap: 2px;
   width: 28px;
 
-  .disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+}
+.editorContainerDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .editorText {
