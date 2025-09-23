@@ -77,7 +77,7 @@ class OrderImageGenerator {
     }
 
     this.generatingSet.add(designId);
-    
+
     try {
       await this.queue.add(task);
     } finally {
@@ -118,7 +118,7 @@ export default function OrderList({
   if (!imageGeneratorRef.current) {
     imageGeneratorRef.current = new OrderImageGenerator();
   }
-  
+
   // 跟踪已上传成功的设计 ID
   const [uploadedDesigns, setUploadedDesigns] = useState<Set<string>>(new Set());
   const [detailData, setDetailData] = useState<Order | null>(null);
@@ -182,7 +182,8 @@ export default function OrderList({
             name: item?.name,
             size: item?.diameter + "mm",
             quantity: item?.quantity || 1,
-            price: item?.cost_price / 100 || 0,
+            costPrice: item?.cost_price / 100 || 0,
+            referencePrice: item?.reference_price / 100 || 0,
           });
         }
         return acc;
@@ -508,10 +509,10 @@ export default function OrderList({
         image_base64: productImageBase64,
       });
       console.log(`设计 ${designId} 图片上传成功:`, res);
-      
+
       // 标记为已上传，使组件能够卸载
       setUploadedDesigns(prev => new Set(prev).add(designId));
-      
+
       // 更新列表显示
       onRefresh?.();
     } catch (error) {
@@ -601,44 +602,44 @@ export default function OrderList({
             </Text>
           </View>
         </View>
-        <View className={styles.orderQualityContainer}>
+        {order.tier != -1 && <View className={styles.orderQualityContainer}>
           <View className={styles.orderQualityText}>
             品质等级:
           </View>
           <View className={styles.quanlituTag}>
             {formatLevel(order.tier)}
           </View>
-        </View>
+        </View>}
         {renderActionButtons(order)}
-        {!order.design_info?.image_url && 
-         order.design_info?.background_url && 
-         order.design_info?.draft_url && 
-         !uploadedDesigns.has(order.design_info?.design_id) && (
-          <ProductImageGenerator
-            key={`image-gen-${order.design_info?.design_id}`}
-            canvasId={`order-canvas-${order.design_info?.design_id}`}
-            data={{
-              bgImage: order.design_info?.background_url,
-              braceletImage: order.design_info?.draft_url,
-            }}
-            onGenerated={(imageUrl) => {
-              if (imageGeneratorRef.current && order.design_info?.design_id) {
-                imageGeneratorRef.current.generateImage(
-                  order.design_info.design_id,
-                  () => handleImageGenerated(imageUrl, order.design_info.design_id)
-                ).catch(error => {
-                  console.warn('图片生成队列处理失败:', error);
-                  // 如果队列失败，直接执行上传
-                  handleImageGenerated(imageUrl, order.design_info.design_id);
-                });
-              } else {
-                handleImageGenerated(imageUrl, order.design_info?.design_id);
-              }
-            }}
-            showProductImage={false}
-            autoDestroy={true}
-          />
-        )}
+        {!order.design_info?.image_url &&
+          order.design_info?.background_url &&
+          order.design_info?.draft_url &&
+          !uploadedDesigns.has(order.design_info?.design_id) && (
+            <ProductImageGenerator
+              key={`image-gen-${order.design_info?.design_id}`}
+              canvasId={`order-canvas-${order.design_info?.design_id}`}
+              data={{
+                bgImage: order.design_info?.background_url,
+                braceletImage: order.design_info?.draft_url,
+              }}
+              onGenerated={(imageUrl) => {
+                if (imageGeneratorRef.current && order.design_info?.design_id) {
+                  imageGeneratorRef.current.generateImage(
+                    order.design_info.design_id,
+                    () => handleImageGenerated(imageUrl, order.design_info.design_id)
+                  ).catch(error => {
+                    console.warn('图片生成队列处理失败:', error);
+                    // 如果队列失败，直接执行上传
+                    handleImageGenerated(imageUrl, order.design_info.design_id);
+                  });
+                } else {
+                  handleImageGenerated(imageUrl, order.design_info?.design_id);
+                }
+              }}
+              showProductImage={false}
+              autoDestroy={true}
+            />
+          )}
       </View>
     )
   }
@@ -677,7 +678,8 @@ export default function OrderList({
               name: item.name,
               spec: item.size,
               quantity: item.quantity,
-              price: item.price,
+              costPrice: item.costPrice,
+              referencePrice: item.referencePrice,
             };
           })}
           onClose={handleClose}

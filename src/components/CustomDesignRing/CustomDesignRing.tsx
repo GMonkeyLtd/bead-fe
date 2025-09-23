@@ -80,7 +80,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     maxWristSize: 24,
     minWristSize: 8,
     enableHistory: true,
-    maxHistoryLength: 50,
+    maxHistoryLength: 10,
     displayScale: 3.8
   };
 
@@ -213,7 +213,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         diameter: dot.diameter,
         width: dot.width,
         image_aspect_ratio: dot.image_aspect_ratio,
-        isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && !dot.width,
+        pass_height_ratio: dot.pass_height_ratio,
+        pass_width_ratio: dot.pass_width_ratio,
+        isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && (!dot.width || (dot.pass_height_ratio && dot.pass_height_ratio !== 0.5)),
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
         console.log('generateCircleRing imageUrl: ', imageUrl)
@@ -456,11 +458,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     return positionManagerRef.current.previewInsertionPosition(beadIndex, newX, newY);
   }, []);
 
-  // 清理资源
+  // 清理资源 - 增强版
   useEffect(() => {
     return () => {
       if (positionManagerRef.current) {
         positionManagerRef.current.cleanup();
+        positionManagerRef.current = null;
       }
     };
   }, []);

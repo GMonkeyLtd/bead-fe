@@ -21,7 +21,7 @@ export class HistoryManager {
   private maxHistoryLength: number;
 
   constructor(config: HistoryManagerConfig = {}) {
-    this.maxHistoryLength = config.maxHistoryLength || 50;
+    this.maxHistoryLength = config.maxHistoryLength || 10;
   }
 
   /**

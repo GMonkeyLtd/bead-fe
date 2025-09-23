@@ -1,5 +1,6 @@
 import { BeadArrayCalculator } from "./BeadArrayCalculator";
-import { Bead, Position } from "../../../types/crystal";
+import { Position } from "../../../types/crystal";
+import { BeadItem } from "@/utils/api-session";
 import { ImageCacheManager } from "@/utils/image-cache";
 import { HistoryManager } from "./HistoryManager";
 
@@ -63,7 +64,7 @@ export class BeadPositionManager {
   /**
    * 设置珠子数组
    */
-  async setBeads(beads: Bead[], skipHistory: boolean = false): Promise<void> {
+  async setBeads(beads: BeadItem[], skipHistory: boolean = false): Promise<void> {
     if (this.isProcessing) return;
 
     this.isProcessing = true;
@@ -96,7 +97,7 @@ export class BeadPositionManager {
   /**
    * 添加珠子
    */
-  async addBead(newBead: Bead): Promise<void> {
+  async addBead(newBead: BeadItem): Promise<void> {
     const validation = this.calculator.validateBeadCount(this.state.beads, newBead.diameter, 'add');
     if (!validation.isValid) {
       throw new Error(validation.message);
@@ -176,7 +177,7 @@ export class BeadPositionManager {
   /**
    * 替换珠子
    */
-  async replaceBead(newBead: Bead): Promise<void> {
+  async replaceBead(newBead: BeadItem): Promise<void> {
     if (this.state.selectedBeadIndex === -1) {
       throw new Error("请先选择要替换的珠子");
     }
@@ -277,44 +278,6 @@ export class BeadPositionManager {
     return this.calculator.getBeadArrayInfo(this.state.beads);
   }
 
-  /**
-   * 处理图片
-   */
-  private async processImages(beads: Bead[]): Promise<Bead[]> {
-    const cacheKey = beads
-      .map(item => `${item.image_url}_${item.render_diameter}_${item.diameter}_${item.id}`)
-      .join(",");
-
-    if (this.imageProcessCache.has(cacheKey)) {
-      const cachedData = this.imageProcessCache.get(cacheKey);
-      return JSON.parse(cachedData || "[]");
-    }
-
-    try {
-      const processedPaths = await ImageCacheManager.processImagePaths(
-        beads.map(item => item.image_url)
-      );
-
-      const beadsWithImageData = beads.map(bead => ({
-        ...bead,
-        imageData: processedPaths.get(bead.image_url) || bead.image_url,
-      }));
-
-      // 缓存结果
-      this.imageProcessCache.set(cacheKey, JSON.stringify(beadsWithImageData));
-
-      // 限制缓存大小
-      if (this.imageProcessCache.size > 50) {
-        const firstKey = this.imageProcessCache.keys().next().value;
-        this.imageProcessCache.delete(firstKey);
-      }
-
-      return beadsWithImageData;
-    } catch (error) {
-      console.error("图片处理失败:", error);
-      throw error;
-    }
-  }
 
   /**
    * 预览插入位置（用于拖拽时的实时预览）
@@ -392,12 +355,35 @@ export class BeadPositionManager {
   }
 
   /**
-   * 清理资源
+   * 清理资源 - 增强版
    */
   cleanup(): void {
+    // 清理缓存
     this.imageProcessCache.clear();
     this.positionCache.clear();
+    
+    // 清理计算器缓存
+    this.calculator.clearCache();
+    
+    // 清理历史记录
+    if (this.historyManager) {
+      this.historyManager.clear();
+    }
+    
+    // 重置状态
+    this.state = {
+      beads: [],
+      selectedBeadIndex: -1,
+      predictedLength: 0,
+      beadStatus: "idle",
+    };
+    
     this.isProcessing = false;
+    
+    // 强制垃圾回收（如果支持）
+    if (typeof window !== 'undefined' && (window as any).gc) {
+      (window as any).gc();
+    }
   }
 
   /**

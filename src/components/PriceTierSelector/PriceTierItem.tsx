@@ -58,7 +58,7 @@ const PriceTierItem: React.FC<PriceTierItemProps> = ({
         
         {/* 价格信息 */}
         <View className={styles.priceInfo}>
-          <Text className={styles.priceLabel}>参考价:</Text>
+          <Text className={styles.priceLabel}>价格:</Text>
           <View className={styles.priceValue}>
             <Text className={styles.priceNumber}>{tier.price}</Text>
             <Text className={styles.priceUnit}>元</Text>

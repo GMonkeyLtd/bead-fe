@@ -2,6 +2,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   startTransition,
 } from "react";
@@ -15,25 +16,43 @@ import { BeadWithPosition, Position } from "../../../types/crystal";
 import "./styles/MovableBeadRenderer.scss";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 
-// 添加节流函数
-const throttle = (func: Function, wait: number) => {
+// 优化的节流函数 - 使用RAF提升性能
+const throttleWithRAF = (func: Function, wait: number = 16) => {
   let timeout: any = null;
+  let rafId: number | null = null;
   let previous = 0;
+  
   return function (...args: any[]) {
     const now = Date.now();
     const remaining = wait - (now - previous);
+    
     if (remaining <= 0) {
       if (timeout) {
         clearTimeout(timeout);
         timeout = null;
       }
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      
       previous = now;
-      func.apply(this, args);
+      // 使用RAF确保在下一帧执行
+      rafId = requestAnimationFrame(() => {
+        func.apply(this, args);
+        rafId = null;
+      });
     } else if (!timeout) {
       timeout = setTimeout(() => {
         previous = Date.now();
         timeout = null;
-        func.apply(this, args);
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+        }
+        rafId = requestAnimationFrame(() => {
+          func.apply(this, args);
+          rafId = null;
+        });
       }, remaining);
     }
   };
@@ -256,36 +275,37 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     }
   }, [beads, beadPositions.length]);
 
-  // 更新珠子位置 - 确保与props保持同步，增加防抖机制
-  useEffect(() => {
-    // console.log("📥 更新珠子位置", {
-    //   newBeads: beads.length,
-    //   currentBeads: beadPositions.length,
-    //   isDragging: dragState.isDragging
-    // });
+  // 防抖更新珠子位置
+  const updateBeadPositionsDebounced = useMemo(() => {
+    let timeoutId: NodeJS.Timeout;
+    return (newBeads: Position[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        startTransition(() => {
+          setBeadPositions([...newBeads]);
+        });
+      }, 50); // 防抖50ms
+    };
+  }, []);
 
-    // 只有在不拖拽时才更新位置，避免拖拽中的冲突
-    // 但是当拖拽状态刚结束时需要立即同步，确保恢复生效
-    if (!dragState.isDragging) {
-      // 检查是否需要更新 - 比较关键位置信息
+  // 优化的珠子位置更新逻辑
+  useEffect(() => {
+    if (!dragState.isDragging && beads.length > 0) {
+      // 使用更高效的比较方式
       const needsUpdate = beads.length !== beadPositions.length ||
         beads.some((bead, index) => {
           const currentBead = beadPositions[index];
           return !currentBead ||
             bead.uniqueKey !== currentBead.uniqueKey ||
-            Math.abs(bead.x - currentBead.x) > 2 || // 增加容差，减少微小变化导致的更新
-            Math.abs(bead.y - currentBead.y) > 2 ||
-            Math.abs(bead.angle - currentBead.angle) > 0.1;
+            Math.abs(bead.x - currentBead.x) > 3 || // 增加容差
+            Math.abs(bead.y - currentBead.y) > 3;
         });
 
       if (needsUpdate) {
-        // 使用 startTransition 进行非紧急更新，避免阻塞用户交互
-        startTransition(() => {
-          setBeadPositions([...beads]); // 使用展开运算符确保触发重新渲染
-        });
+        updateBeadPositionsDebounced(beads);
       }
     }
-  }, [beads, dragState.isDragging, beadPositions]);
+  }, [beads, dragState.isDragging, beadPositions, updateBeadPositionsDebounced]);
 
 
 
@@ -315,33 +335,50 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     [selectedBeadIndex, onBeadSelect, beadPositions]
   );
 
-  // 处理拖拽中 - 更新拖拽状态并预览插入位置
+  // 缓存拖拽计算结果
+  const dragCalculationCacheRef = useRef<Map<string, any>>(new Map());
+  
+  // 处理拖拽中 - 优化版本，减少重复计算
   const handleDragMove = useCallback(
-    throttle((e: any, beadIndex: number) => {
+    throttleWithRAF((e: any, beadIndex: number) => {
       if (!dragState.isDragging || dragState.dragBeadIndex !== beadIndex)
         return;
 
-      // 计算实际坐标：MovableView的坐标 + 珠子半径偏移
       const bead = beadPositions[beadIndex];
+      if (!bead) return;
+      
+      // 计算实际坐标
       const actualX = (e.detail.x || 0) + bead.scale_width;
       const actualY = (e.detail.y || 0) + bead.scale_height;
 
-      // 对于非中心穿线的珠子，需要将显示位置转换为穿线位置进行拖拽计算
+      // 生成缓存键
+      const cacheKey = `${beadIndex}_${Math.round(actualX)}_${Math.round(actualY)}`;
+      
+      // 检查缓存
+      if (dragCalculationCacheRef.current.has(cacheKey)) {
+        const cached = dragCalculationCacheRef.current.get(cacheKey);
+        setDragState(prev => ({
+          ...prev,
+          currentX: cached.threadX,
+          currentY: cached.threadY,
+          previewCursor: cached.previewCursor
+        }));
+        return;
+      }
+
+      // 计算穿线位置
       let threadX = actualX;
       let threadY = actualY;
       
       if (bead.passHeightRatio !== undefined && bead.passHeightRatio !== 0.5) {
-        // 计算从显示位置到穿线位置的偏移
         const heightOffset = (bead.passHeightRatio - 0.5) * bead.scale_height * 2;
         const normalX = -Math.cos(bead.angle);
         const normalY = -Math.sin(bead.angle);
-        
-        // 穿线位置 = 显示位置 - 法向量 * 高度偏移
         threadX = actualX - normalX * heightOffset;
         threadY = actualY - normalY * heightOffset;
       }
 
-      // 预览插入位置（使用穿线位置）
+      // 预览插入位置
       let previewCursor: typeof dragState.previewCursor = undefined;
       if (onPreviewInsertPosition) {
         const previewResult = onPreviewInsertPosition(beadIndex, threadX, threadY);
@@ -356,14 +393,21 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
         }
       }
 
-      // 更新拖拽状态（包含预览信息，保存穿线位置）
+      // 缓存结果（限制缓存大小）
+      if (dragCalculationCacheRef.current.size > 100) {
+        const firstKey = dragCalculationCacheRef.current.keys().next().value;
+        dragCalculationCacheRef.current.delete(firstKey);
+      }
+      dragCalculationCacheRef.current.set(cacheKey, { threadX, threadY, previewCursor });
+
+      // 更新状态
       setDragState(prev => ({
         ...prev,
         currentX: threadX,
         currentY: threadY,
         previewCursor
       }));
-    }, 16), // 减少节流时间，提高响应性
+    }, 20), // 稍微增加节流时间，减少计算频率
     [dragState.isDragging, dragState.dragBeadIndex, beadPositions, onPreviewInsertPosition]
   );
 
@@ -508,6 +552,16 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
     }),
     [canvasSize]
   );
+
+  // 清理资源 - 增强版
+  useEffect(() => {
+    return () => {
+      // 清理拖拽计算缓存
+      if (dragCalculationCacheRef.current) {
+        dragCalculationCacheRef.current.clear();
+      }
+    };
+  }, []);
 
   return (
     <View className="movable-bead-container" style={style}>

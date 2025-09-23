@@ -1,5 +1,5 @@
 import { computeBraceletLength, calculateBeadArrangementBySize, calculateBeadArrangementByTargetRadius } from "@/utils/cystal-tools";
-import { BeadWithPosition, Position } from "../../../types/crystal";
+import { Position } from "../../../types/crystal";
 import { BeadItem } from "@/utils/api-session";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 
@@ -30,6 +30,8 @@ export interface BeadArrayCalculatorConfig {
  */
 export class BeadArrayCalculator {
   private config: BeadArrayCalculatorConfig;
+  private positionCache: Map<string, Position[]> = new Map();
+  private calculationCache: Map<string, any> = new Map();
 
   constructor(config: BeadArrayCalculatorConfig) {
     this.config = config;
@@ -54,8 +56,8 @@ export class BeadArrayCalculator {
       return 1;
     }
     let calculatedWidth = bead.diameter * (bead.image_aspect_ratio || 1);
-    if (bead.pass_width_ratio) {
-      calculatedWidth = calculatedWidth * (bead.pass_width_ratio || 1);
+    if ((bead as any).pass_width_ratio) {
+      calculatedWidth = calculatedWidth * ((bead as any).pass_width_ratio || 1);
     }
     return calculatedWidth;
   }
@@ -74,7 +76,7 @@ export class BeadArrayCalculator {
 
     // 计算所有珠子的总直径和总间距
     const totalBeadDiameter = beads.reduce(
-      (sum, b) => sum + b.scale_width,
+      (sum, b) => sum + ((b as any).scale_width || b.diameter),
       0
     );
     const totalSpacing = beads.length * spacing; // n个珠子需要n个间距
@@ -94,21 +96,39 @@ export class BeadArrayCalculator {
   }
 
   /**
-   * 计算每个珠子的圆心坐标
+   * 计算每个珠子的圆心坐标 - 优化版本，增加缓存
    * @param beads 珠子数组
-   * @param existingPositions 现有的位置数组（用于保持uniqueKey的连续性）
    */
   calculateBeadPositions(beads: BeadItem[]): Position[] {
     if (!beads.length) return [];
-    const ringRadius = this.config.targetRadius
-    const curWristLength = this.calculatePredictedLength(beads);
+    
+    // 生成缓存键
+    const cacheKey = beads.map(b => `${b.sku_id}_${b.diameter}_${b.ratioBeadWidth}`).join('|');
+    
+    // 检查缓存
+    if (this.positionCache.has(cacheKey)) {
+      const cached = this.positionCache.get(cacheKey)!;
+      // 重新生成uniqueKey确保组件更新
+      return cached.map((pos, index) => ({
+        ...pos,
+        uniqueKey: generateUniqueBeadKey(index)
+      }));
+    }
+    
+    const ringRadius = this.config.targetRadius;
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
 
-    let positions: Position[] = [];
-    // 若果珠子数量小于10颗，绘制时使用珠子width的三倍进行渲染，不按照圆圈进行自适应缩放
-    if (curWristLength <13) {
+    let positions: any[] = [];
+
+    const totalBeadWidth = beads.reduce((sum, bead) => sum + (bead.ratioBeadWidth as number) * this.config.displayScale, 0);
+    
+    if (totalBeadWidth < 2 * ringRadius * Math.PI) {
       positions = calculateBeadArrangementByTargetRadius(
-        beads.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter, passHeightRatio: bead.pass_height_ratio })),
+        beads.map(bead => ({ 
+          ratioBeadWidth: bead.ratioBeadWidth as number, 
+          beadDiameter: bead.diameter, 
+          passHeightRatio: (bead as any).pass_height_ratio 
+        })),
         ringRadius,
         center,
         this.config.displayScale,
@@ -116,13 +136,17 @@ export class BeadArrayCalculator {
     } else {
       positions = calculateBeadArrangementBySize(
         ringRadius,
-        beads.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter, passHeightRatio: bead.pass_height_ratio })),
+        beads.map(bead => ({ 
+          ratioBeadWidth: bead.ratioBeadWidth as number, 
+          beadDiameter: bead.diameter, 
+          passHeightRatio: (bead as any).pass_height_ratio 
+        })),
         center,
         false
       );
     }
 
-    return beads.map((bead, index) => {
+    const result = beads.map((bead, index) => {
       const simplePosition = positions[index];
       
       const beadWithPosition: Position = {
@@ -136,11 +160,20 @@ export class BeadArrayCalculator {
         uniqueKey: generateUniqueBeadKey(index),
         threadX: simplePosition.threadX,
         threadY: simplePosition.threadY,
-        passHeightRatio: simplePosition.passHeightRatio || bead.passHeightRatio,
+        passHeightRatio: simplePosition.passHeightRatio || (bead as any).passHeightRatio,
       };
 
       return beadWithPosition;
     });
+
+    // 缓存结果（限制缓存大小）
+    if (this.positionCache.size > 20) {
+      const firstKey = this.positionCache.keys().next().value;
+      this.positionCache.delete(firstKey);
+    }
+    this.positionCache.set(cacheKey, result);
+
+    return result;
   }
 
   /**
@@ -612,7 +645,7 @@ export class BeadArrayCalculator {
 
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
 
-    let newCoordinates: Position[] = [];
+    let newCoordinates: any[] = [];
     if (curWristLength < 13) {
       newCoordinates = calculateBeadArrangementByTargetRadius(
         positions.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter, passHeightRatio: bead.passHeightRatio })),
@@ -666,7 +699,7 @@ export class BeadArrayCalculator {
 
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
     const maxRadius = this.config.canvasSize * 0.4;
-    const minRadius = Math.max(...beads.map(b => (b.render_diameter || b.diameter) / 2)) * 1.5;
+    const minRadius = Math.max(...beads.map(b => ((b as any).render_diameter || b.diameter) / 2)) * 1.5;
 
     // 计算新位置相对于圆心的距离
     const deltaX = newX - center.x;
@@ -679,7 +712,7 @@ export class BeadArrayCalculator {
     // 2. 检查是否覆盖在其他珠子上
     const draggedBead = beads[dragBeadIndex];
     let isOverBead = false;
-    let overBeadIndex = -1;
+    // let overBeadIndex = -1;
 
     for (let i = 0; i < beads.length; i++) {
       if (i === dragBeadIndex) continue;
@@ -690,10 +723,10 @@ export class BeadArrayCalculator {
       );
 
       // 检查是否覆盖在珠子上（使用较大的容差来判断覆盖）
-      const overlapThreshold = ((draggedBead.render_diameter || draggedBead.diameter) + (bead.render_diameter || bead.diameter)) / 4;
+      const overlapThreshold = (((draggedBead as any).render_diameter || draggedBead.diameter) + ((bead as any).render_diameter || bead.diameter)) / 4;
       if (beadDistance <= overlapThreshold) {
         isOverBead = true;
-        overBeadIndex = i;
+        // overBeadIndex = i;
         break;
       }
     }
@@ -869,12 +902,13 @@ export class BeadArrayCalculator {
 
     // 将Position转换为Bead格式进行计算
     const otherBeadsForCalculation = otherBeads.map(bead => ({
+      ...bead,
       id: bead.id,
       image_url: bead.image_url,
-      render_diameter: bead.render_diameter,
+      render_diameter: (bead as any).render_diameter,
       diameter: bead.diameter,
       width: bead.width,
-    }));
+    })) as any[];
 
     // 计算其他珠子的新位置
     const otherPositions = this.calculateBeadPositions(otherBeadsForCalculation);
@@ -907,5 +941,13 @@ export class BeadArrayCalculator {
       totalDiameter: beads.reduce((sum, bead) => sum + bead.diameter, 0),
       averageDiameter: beads.length > 0 ? beads.reduce((sum, bead) => sum + bead.diameter, 0) / beads.length : 0,
     };
+  }
+
+  /**
+   * 清理缓存
+   */
+  clearCache(): void {
+    this.positionCache.clear();
+    this.calculationCache.clear();
   }
 }

@@ -122,8 +122,6 @@ const Result = () => {
     const designId = params?.designBackendId || design?.design_id;
     // 获取传入的图片URL参数
     if (designId) {
-      const imageUrl = params?.imageUrl || "";
-      imageUrl && setImageUrl(decodeURIComponent(imageUrl));
       getDesign({
         designId: designId,
       })
@@ -305,7 +303,7 @@ const Result = () => {
       design_id: designNo,
       image_base64: productImageBase64,
     }).then((res) => {
-      console.log(res);
+      setImageUrl(res.image_url);
     });
   }
 
@@ -593,7 +591,7 @@ const Result = () => {
           <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
           <View className={styles.editorText}>编辑</View>
         </View>
-        <View className={`${styles.editorContainer} ${!imageUrl ? styles.disabled : ''}`} onClick={saveImage}>
+        <View className={`${styles.editorContainer} ${!imageUrl ? styles.editorContainerDisabled : ''}`} onClick={saveImage}>
           <Image src={sharingIconSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
           <View className={styles.editorText}>分享</View>
         </View>
@@ -611,7 +609,7 @@ const Result = () => {
           }
         />)}
       </View>
-      {budgetDialogShow && design && tierPriceConfig && (
+      {/* {budgetDialogShow && design && tierPriceConfig && (
         <BudgetDialogGrading
           visible={budgetDialogShow}
           title={braceletName}
@@ -622,8 +620,8 @@ const Result = () => {
           currentTierId={2}
           tierPriceConfig={tierPriceConfig}
         />
-      )}
-      {/* {budgetDialogShow && (
+      )} */}
+      {budgetDialogShow && (
         <BudgetDialog
           visible={budgetDialogShow}
           title={braceletName}
@@ -633,11 +631,10 @@ const Result = () => {
           referencePrice={referencePrice}
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
-      )} */}
+      )}
       {originImageUrl && backgroundImageUrl && !imageUrl && <ProductImageGenerator  // 生成海报   
         data={posterData}
         onGenerated={(url) => {
-          !imageUrl && setImageUrl(url);
           uploadProductImage(url);
         }}
         showProductImage={false}

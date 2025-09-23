@@ -131,9 +131,9 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               <View className="budget-dialog-budget-section">
                 <View className="budget-dialog-budget-section-container">
                   <View className="budget-dialog-budget-input-area">
-                    {!isSameProduct && (<View className="budget-dialog-budget-header">
+                    {/* {!isSameProduct && (<View className="budget-dialog-budget-header">
                       <Text className="budget-dialog-budget-label">参考价</Text>
-                    </View>)}
+                    </View>)} */}
                     <View className="budget-dialog-budget-price-wrapper">
                       <View className="budget-dialog-budget-input-value">
                         {referencePrice}
@@ -162,7 +162,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               <View className="budget-dialog-notice">
                 <View className="budget-dialog-divider" />
                 <Text className="budget-dialog-notice-text">
-                  {isSameProduct ? '同款制作，品质如一，价格更低' : '参考价格只是系统根据当前市场估算的结果，非最终到手价。'}
+                  {isSameProduct ? '同款制作，品质如一，价格更低' : '源头甄选，一串一证，品质全程保障'}
                 </Text>
               </View>
             </View>
