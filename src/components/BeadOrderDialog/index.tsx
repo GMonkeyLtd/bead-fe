@@ -11,7 +11,8 @@ interface MaterialItem {
   name: string;
   spec: string;
   quantity: string;
-  price: number;
+  costPrice: number;
+  referencePrice: number;
 }
 
 interface BeadOrderDialogProps {
@@ -92,7 +93,7 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
           </View>
           <View className='budget-info'>
             <View className='budget-info-content' onClick={() => setShowBeadPrice(!showBeadPrice)}>
-              <Text className='budget-text'>参考价：{budget}</Text>
+              <Text className='budget-text'>价格：{budget}</Text>
               <Image src={showBeadPrice ? eyeOpenIcon : eyeCloseIcon} mode='aspectFit' style={{ width: '16px', height: '16px' }} />
             </View>
           </View>
@@ -108,7 +109,8 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
             <Text className='header-name'>名称</Text>
             <Text className='header-spec'>尺寸/规格</Text>
             <Text className='header-quantity'>数量</Text>
-            {showBeadPrice && <Text className='header-price'>价格</Text>}
+            {showBeadPrice && <Text className='header-price'>成本价</Text>}
+            {showBeadPrice && <Text className='header-price'>参考价</Text>} 
           </View>
 
           {/* 材料列表 */}
@@ -121,7 +123,8 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
                 <Text className='material-name'>{material.name}</Text>
                 <Text className='material-spec'>{material.spec}</Text>
                 <Text className='material-quantity'>{material.quantity}</Text>
-                {showBeadPrice && <Text className='material-price'>{material.price}</Text>}
+                {showBeadPrice && <Text className='material-price'>{material.costPrice}</Text>}
+                {showBeadPrice && <Text className='material-price'>{material.referencePrice}</Text>}
               </View>
             ))}
           </View>

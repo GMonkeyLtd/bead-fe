@@ -80,7 +80,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     maxWristSize: 24,
     minWristSize: 8,
     enableHistory: true,
-    maxHistoryLength: 50,
+    maxHistoryLength: 10,
     displayScale: 3.8
   };
 
@@ -458,11 +458,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     return positionManagerRef.current.previewInsertionPosition(beadIndex, newX, newY);
   }, []);
 
-  // 清理资源
+  // 清理资源 - 增强版
   useEffect(() => {
     return () => {
       if (positionManagerRef.current) {
         positionManagerRef.current.cleanup();
+        positionManagerRef.current = null;
       }
     };
   }, []);

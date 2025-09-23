@@ -80,7 +80,8 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   const calculateBeads = useCallback(async (dotsBgImageData: DotImageData[]) => {
     // 获取图片的宽
     return calculateBeadArrangementBySize(
-      ringRadius * 0.6,
+      // ringRadius * 0.6,
+      ringRadius,
       dotsBgImageData.map(item => {
         let ratioBeadWidth = 0;
         if (item.isFloatAccessory) {
