@@ -117,7 +117,7 @@
 .budget-dialog-main-title {
   font-family: "Source Han Serif CN", serif;
   font-weight: 400;
-  font-size: 18px;
+  font-size: 30px;
   letter-spacing: 2px;
   color: #1f1722;
   opacity: 0.9;
@@ -167,6 +167,7 @@
   padding: 0 24px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .budget-dialog-card {

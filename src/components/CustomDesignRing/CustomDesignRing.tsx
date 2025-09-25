@@ -218,7 +218,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && (!dot.width || (dot.pass_height_ratio && dot.pass_height_ratio !== 0.5)),
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
-        console.log('generateCircleRing imageUrl: ', imageUrl)
         const newImageUrl = imageUrl || "";
         // Taro.previewImage({
         //   urls: [newImageUrl],
@@ -265,7 +264,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   }, action: "add" | "replace") => {
     if (!positionManagerRef.current) return;
     try {
-      console.log("bead", bead);
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,

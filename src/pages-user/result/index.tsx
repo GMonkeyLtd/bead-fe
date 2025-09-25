@@ -14,7 +14,7 @@ import {
 } from "@/config";
 import BudgetDialog from "@/components/BudgetDialog";
 import OrderListComp from "@/components/OrderListComp";
-import api, { configApi } from "@/utils/api";
+import api, { configApi, userApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 import BraceletDetailDialog from "@/components/BraceletDetailDialog";
 import BeadList from "@/components/BeadList";
@@ -37,7 +37,7 @@ import RefreshSvg from "@/assets/icons/refresh.svg";
 const Result = () => {
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
-  const { sessionId, from, originImageUrl: originImageUrlParam } = params || {};
+  const { sessionId, from, originImageUrl: originImageUrlParam, showBudgetDialog } = params || {};
 
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -50,7 +50,7 @@ const Result = () => {
   const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
   const [rizhuInfo, setRizhuInfo] = useState<string>("");
   const [wuxingInfo, setWuxingInfo] = useState<any[]>([]);
-  const [budgetDialogShow, setBudgetDialogShow] = useState(false);
+  const [budgetDialogShow, setBudgetDialogShow] = useState(showBudgetDialog == 'true' || false);
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] =
     useState(false);
@@ -276,7 +276,21 @@ const Result = () => {
   };
 
   // 分享图片
-  const doCreate = () => {
+  const doCreate = async () => {
+    const userData = await userApi.getUserInfo();
+    const { default_contact, phone, wechat_id } = userData?.data || {} as any;
+    if (default_contact === 0 && !phone) {
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?designId=${designNo}&from=result`,
+      });
+      return;
+    }
+    if (default_contact === 1 && !wechat_id) {
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?designId=${designNo}&from=result`,
+      });
+      return;
+    }
     setBudgetDialogShow(true);
   };
 

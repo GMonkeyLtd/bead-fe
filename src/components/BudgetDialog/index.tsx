@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./index.scss";
@@ -8,6 +8,8 @@ import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import api, { userApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 import sameProductIcon from "@/assets/icons/same-product-tip-icon.svg";
+import LogisticsCard, { AddressInfo } from "../LogisticsCard";
+import apiPay from "@/utils/api-pay";
 
 interface BudgetDialogProps {
   visible: boolean;
@@ -27,6 +29,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   visible,
   title = "夏日睡莲",
   designNumber = "0001",
+  workId,
   productImage,
   onConfirm,
   onClose,
@@ -37,58 +40,120 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   creatorName = "",
 }) => {
   const { keyboardHeight } = useKeyboardHeight();
+  const [address, setAddress] = useState<AddressInfo | undefined>(undefined);
 
-  const handleConfirm = async () => {
-    const userData = await userApi.getUserInfo();
-    const { default_contact, phone, wechat_id } = userData?.data || {} as any;
-    if (default_contact === 0 && !phone) {
-      Taro.redirectTo({
-        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`,
-      });
-      return;
-    }
-    if (default_contact === 1 && !wechat_id) {
-      Taro.redirectTo({
-        url: `${pageUrls.contactPreference}?budget=${referencePrice}&designId=${designNumber}`,
-      });
-      return;
-    }
+
+  const doPurchase = async (address: AddressInfo | undefined) => {
     if (onConfirm) {
       onConfirm(referencePrice || 0);
       return;
     }
 
-    api.userHistory
-      .createOrder({
-        design_id: parseInt(designNumber),
-        price: referencePrice || 0,
-      })
-      .then((res) => {
-        const { order_uuid } = res?.data || {};
-        Taro.getSetting({
-          success: (res) => {
-            console.log(res, 'res')
-          }
-        })
-        Taro.requestSubscribeMessage({
-          tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
-          entityIds: [order_uuid], // 添加必需的 entityIds 参数
-          complete: () => {
-            Taro.reLaunch({
-              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-            });
+    const addressInfo = {
+      name: address?.userName,
+      phone: address?.telNumber,
+      province: address?.provinceName,
+      city: address?.cityName,
+      district: address?.countyName,
+      detail: address?.detailInfo,
+      postal_code: address?.postalCode,
+    }
 
-          },
-          success: () => {
-            Taro.reLaunch({
-              url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-            })
-          },
-          fail: () => Taro.reLaunch({
-            url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-          })
+    const apiCall = isSameProduct ? apiPay.buySameProductV2 : apiPay.generateOrder;
+    const params = isSameProduct ? { work_id: workId, address_info: addressInfo } : { design_id: parseInt(designNumber), address_info: addressInfo };
+
+    apiCall(params).then((res) => {
+      const { order_uuid } = res?.data || {};
+      apiPay
+        .purchase({ orderId: order_uuid, amount: referencePrice || 0 })
+        .then((res) => {
+          const wxPayParams = res?.data;
+          Taro.requestPayment({
+            timeStamp: wxPayParams.timestamp, // 秒级时间戳
+            nonceStr: wxPayParams.nonce_str,
+            package: wxPayParams.package, // 服务端返回
+            signType: wxPayParams.sign_type,
+            paySign: wxPayParams.pay_sign,
+            success: () => {
+              Taro.getSetting({
+                success: (res) => {
+                  console.log(res, 'res')
+                }
+              })
+              Taro.requestSubscribeMessage({
+                tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
+                entityIds: [order_uuid], // 添加必需的 entityIds 参数
+                complete: () => {
+                  Taro.reLaunch({
+                    url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                  });
+
+                },
+                success: () => {
+                  Taro.reLaunch({
+                    url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                  })
+                },
+                fail: () => Taro.reLaunch({
+                  url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                })
+              });
+            },
+            fail: (err) => console.error("支付失败", err),
+          });
         });
+    })
+
+    // api.userHistory
+    //   .createOrder({
+    //     design_id: parseInt(designNumber),
+    //     price: referencePrice || 0,
+    //   })
+    //   .then((res) => {
+    //     const { order_uuid } = res?.data || {};
+    //     Taro.getSetting({
+    //       success: (res) => {
+    //         console.log(res, 'res')
+    //       }
+    //     })
+    //     Taro.requestSubscribeMessage({
+    //       tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
+    //       entityIds: [order_uuid], // 添加必需的 entityIds 参数
+    //       complete: () => {
+    //         Taro.reLaunch({
+    //           url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+    //         });
+
+    //       },
+    //       success: () => {
+    //         Taro.reLaunch({
+    //           url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+    //         })
+    //       },
+    //       fail: () => Taro.reLaunch({
+    //         url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+    //       })
+    //     });
+    //   });
+  }
+
+
+  const handleConfirm = async () => {
+    if (!address) {
+      Taro.showToast({
+        title: "请先添加收货地址",
+        icon: "none",
+        duration: 1000,
       });
+      Taro.chooseAddress({
+        success: (result) => {
+          setAddress(result);
+          doPurchase(result);
+        },
+      });
+      return;
+    }
+    doPurchase(address);
   };
 
   return (
@@ -126,6 +191,15 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
 
         {/* 主要内容区域 */}
         <View className="budget-dialog-content">
+          {address && (
+            <LogisticsCard
+              address={address}
+              onAddressChange={setAddress}
+              enableChangeAddress={true}
+              logisticsStatus={undefined}
+              onViewLogistics={undefined}
+            />
+          )}
           <View className="budget-dialog-card">
             <View className="budget-dialog-form">
               <View className="budget-dialog-budget-section">
@@ -175,27 +249,39 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
             <CrystalButton
               style={{ width: "220px", height: "46px" }}
               onClick={handleConfirm}
-              text="确认"
-              icon={
-                <Image
-                  src={rightArrowGolden}
-                  style={{ width: "16px", height: "10px" }}
-                />
-              }
+              text="确认支付"
+              // icon={
+              //   <Image
+              //     src={rightArrowGolden}
+              //     style={{ width: "16px", height: "10px" }}
+              //   />
+              // }
               isPrimary
             />
           </View>
-          {!isSameProduct && onModifyDesign && (<View className="budget-dialog-button-link" onClick={onModifyDesign}>
-            修改定制方案
-          </View>)}
-          {isSameProduct && (<View className="creator-info-container">
-            <View>
-              创作者
+          {!isSameProduct && (
+            <View className="creator-info-container">
+              <View>
+                专属客服将与您核对
+              </View>
+              <View className="creator-nickname">
+                实拍图
+              </View>
+              <View>
+                ，满意后发货
+              </View>
             </View>
-            <View className="creator-nickname">
-              {`${creatorName}`}
+          )}
+          {isSameProduct && (
+            <View className="creator-info-container">
+              <View>
+                创作者
+              </View>
+              <View className="creator-nickname">
+                {`${creatorName}`}
+              </View>
             </View>
-          </View>)}
+          )}
         </View>
       </View>
     </View>
