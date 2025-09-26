@@ -41,6 +41,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
 }) => {
   const { keyboardHeight } = useKeyboardHeight();
   const [address, setAddress] = useState<AddressInfo | undefined>(undefined);
+  const [orderUuid, setOrderUuid] = useState<string | undefined>(undefined);
 
 
   const doPurchase = async (address: AddressInfo | undefined) => {
@@ -49,23 +50,30 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
       return;
     }
 
-    const addressInfo = {
-      name: address?.userName,
-      phone: address?.telNumber,
-      province: address?.provinceName,
-      city: address?.cityName,
-      district: address?.countyName,
-      detail: address?.detailInfo,
-      postal_code: address?.postalCode,
-    }
+    try {
 
-    const apiCall = isSameProduct ? apiPay.buySameProductV2 : apiPay.generateOrder;
-    const params = isSameProduct ? { work_id: workId, address_info: addressInfo } : { design_id: parseInt(designNumber), address_info: addressInfo };
-
-    apiCall(params).then((res) => {
-      const { order_uuid } = res?.data || {};
+      const addressInfo = {
+        name: address?.userName,
+        phone: address?.telNumber,
+        province: address?.provinceName,
+        city: address?.cityName,
+        district: address?.countyName,
+        detail: address?.detailInfo,
+        postal_code: address?.postalCode,
+      }
+  
+      const apiCall = isSameProduct ? apiPay.buySameProductV2 : apiPay.generateOrder;
+      const params = isSameProduct ? { work_id: workId, address_info: addressInfo } : { design_id: parseInt(designNumber), address_info: addressInfo };
+      let _orderUuid;
+      if (!orderUuid) {
+        const res = await apiCall(params);
+        _orderUuid = res?.data?.order_uuid;
+        setOrderUuid(_orderUuid);
+      } else {
+        _orderUuid = orderUuid;
+      }
       apiPay
-        .purchase({ orderId: order_uuid, amount: referencePrice || 0 })
+        .purchase({ orderId: _orderUuid, amount: referencePrice || 0 })
         .then((res) => {
           const wxPayParams = res?.data;
           Taro.requestPayment({
@@ -82,27 +90,29 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               })
               Taro.requestSubscribeMessage({
                 tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
-                entityIds: [order_uuid], // 添加必需的 entityIds 参数
+                entityIds: [_orderUuid], // 添加必需的 entityIds 参数
                 complete: () => {
                   Taro.reLaunch({
-                    url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                    url: `${pageUrls.orderDetail}?orderId=${_orderUuid}`,
                   });
 
                 },
                 success: () => {
                   Taro.reLaunch({
-                    url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                    url: `${pageUrls.orderDetail}?orderId=${_orderUuid}`,
                   })
                 },
                 fail: () => Taro.reLaunch({
-                  url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+                  url: `${pageUrls.orderDetail}?orderId=${_orderUuid}`,
                 })
               });
             },
             fail: (err) => console.error("支付失败", err),
           });
         });
-    })
+    } catch (error) {
+      console.error("error", error);
+    }
 
     // api.userHistory
     //   .createOrder({
