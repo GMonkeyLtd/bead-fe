@@ -5,6 +5,7 @@ import React, {
   useRef,
   forwardRef,
   useImperativeHandle,
+  useMemo,
 } from "react";
 import { View, Image, MovableArea, Canvas } from "@tarojs/components";
 import Taro, { base64ToArrayBuffer } from "@tarojs/taro";
@@ -72,7 +73,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [beadSizeList, setBeadSizeList] = useState<number[]>([8, 10, 12, 13, 14, 15]);
   const [currentBeadSize, setCurrentBeadSize] = useState<number>(10);
 
-  const beadPositionConfig: BeadPositionManagerConfig = {
+  // 稳定化 beadPositionConfig，避免不必要的重新初始化
+  const beadPositionConfig = useMemo<BeadPositionManagerConfig>(() => ({
     canvasSize,
     spacing,
     renderRatio,
@@ -82,7 +84,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     enableHistory: true,
     maxHistoryLength: 10,
     displayScale: 3.8
-  };
+  }), [canvasSize, spacing, renderRatio]);
 
   // 使用珠子位置管理器
   const positionManagerRef = useRef<BeadPositionManager | null>(null);
@@ -138,10 +140,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       return;
     }
 
-    positionManagerRef.current = new BeadPositionManager(beadPositionConfig);
+    // 只有在没有实例或者配置发生变化时才创建新实例
+    if (!positionManagerRef.current) {
+      positionManagerRef.current = new BeadPositionManager(beadPositionConfig);
+    }
 
     if (!beads || beads.length === 0) {
       console.warn('beads is empty:', beads);
+      // 即使珠子为空，也要保持现有状态，不要重置
       return;
     }
 
@@ -156,12 +162,18 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     } catch (error) {
       console.error('Error in initBeads:', error);
     }
-  }, [canvasSize, spacing, renderRatio]);
+  }, [beadPositionConfig]);
 
-  // 初始化位置管理器
+  // 初始化位置管理器 - 只在必要时重新初始化
   useEffect(() => {
     if (canvasSize > 0) {
-      initBeads(beads);
+      // 如果已经有实例且珠子数据相同，则不重新初始化
+      const currentBeads = positionManagerRef.current?.getState()?.beads;
+      const beadsChanged = JSON.stringify(currentBeads) !== JSON.stringify(beads);
+      
+      if (!positionManagerRef.current || beadsChanged) {
+        initBeads(beads);
+      }
     }
   }, [canvasSize, beads, initBeads]);
 
@@ -478,6 +490,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       processBeadClick(newBead, "replace");
     }
   }, [positionManagerState.selectedBeadIndex, processBeadClick, positionManagerState.beads, getBeadCluster]);
+
+  console.log(positionManagerState.beads, 'positionManagerState.beads')
 
 
   return (

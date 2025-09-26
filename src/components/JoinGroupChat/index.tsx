@@ -65,11 +65,11 @@ const JoinGroupChat: React.FC<JoinGroupChatProps> = ({
             />
             <View className={styles.groupDetails}>
               <Text className={styles.groupName}>{groupInfo.name}</Text>
-              <Image
+              {/* <Image
                 src={rightArrowIcon}
                 className={styles.rightArrowIcon}
                 style={{ width: "12px", height: "12px" }}
-              />
+              /> */}
             </View>
           </View>
         </View>

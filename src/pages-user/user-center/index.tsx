@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { View, Text, Image } from "@tarojs/components";
 import Taro, { useDidShow } from "@tarojs/taro";
 import BraceletList from "@/components/BraceletList";
@@ -14,9 +14,9 @@ import { usePollDesign } from "@/hooks/usePollDesign";
 import styles from "./index.module.scss";
 import CrystalButton from "@/components/CrystalButton";
 import LoadingIcon from "@/components/LoadingIcon";
+import { usePageQuery } from "@/hooks/usePageQuery";
 
 const UserCenterPage: React.FC = () => {
-  const [designList, setDesignList] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [curTab, setCurTab] = useState<"myWork" | "myPublish">("myWork");
@@ -27,43 +27,22 @@ const UserCenterPage: React.FC = () => {
     enableBackoff: true
   });
 
-  // 优化 design 更新逻辑，避免不必要的重新渲染
-  const updateDesignInList = useCallback((designData: typeof design) => {
-    if (designData?.design_id && designData.image_url) {
-      setDesignList((prev) => {
-        const existingItem = prev.find(item => item.id === designData.design_id);
-        // 只有当图片 URL 发生变化时才更新
-        if (existingItem && existingItem.image !== designData.image_url) {
-          return prev.map((item) =>
-            item.id === designData.design_id
-              ? { ...item, progress: 100, image: designData.image_url }
-              : item
-          );
-        }
-        return prev;
-      });
-    }
-  }, []);
-  
-  useEffect(() => {
-    updateDesignInList(design);
-  }, [design, updateDesignInList]);
-
-  const initPageData = useCallback(async () => {
-    if (loading) return; // 防止重复加载
-    
-    try {
-      setLoading(true);
-      
-      // 并行加载用户信息和设计列表
-      const [userInfoRes, historyRes] = await Promise.all([
-        userApi.getUserInfo({ showLoading: false }),
-        sessionApi.getDesignList({ showLoading: false })
-      ]);
-      
-      setUserInfo(userInfoRes?.data);
-      
-      const designs = (historyRes?.data?.designs || []).map((item) => {
+  // 使用无限滚动hook获取sku列表
+  const {
+    loading: designLoading,
+    data: designList,
+    hasMore: designHasMore,
+    refresh: refreshDesigns,
+    loadMore: loadMoreDesigns,
+    updateData: updateDesignList,
+  } = usePageQuery<any>({
+    listKey: "designList",
+    initialPage: 0,
+    pageSize:40,
+    fetchData: useCallback(async (page: number, pageSize: number) => {
+      const res = await sessionApi.getDesignList({ offset: page * pageSize, limit: pageSize }, { showLoading: false });
+      console.log(res, 'res');
+      const resData = ((res as any)?.data?.designs || []).map(item => {
         // 延迟启动轮询，避免同时发起太多请求
         if (!item.image_url) {
           setTimeout(() => {
@@ -83,9 +62,58 @@ const UserCenterPage: React.FC = () => {
           sessionId: item.session_id,
           draftId: item.draft_id,
         };
+      })
+      const totalCount = (res as any)?.data?.total || 0;
+      return {
+        data: resData,
+        hasMore: resData.length + page * pageSize < totalCount,
+        total: totalCount,
+      };
+    }, []),
+    queryItem: useCallback(async (item: any) => {
+      // 这里可以根据需要实现单个item的查询逻辑
+      return item;
+    }, []),
+    enabled: true,
+  });
+
+  // useEffect(() => {
+  //   if (designHasMore) {
+  //     loadMoreDesigns();
+  //   }
+  // }, [designHasMore, designList]);
+
+  // 优化 design 更新逻辑，避免不必要的重新渲染
+  const updateDesignInList = useCallback((designData: typeof design) => {
+    if (designData?.design_id && designData.image_url) {
+      const newDesignList = designList.map((prev) => {
+        const existingItem = prev.find(item => item.id === designData.design_id);
+        // 只有当图片 URL 发生变化时才更新
+        if (existingItem && existingItem.image !== designData.image_url) {
+          return prev.map((item) =>
+            item.id === designData.design_id
+              ? { ...item, progress: 100, image: designData.image_url }
+              : item
+          );
+        }
+        return prev;
       });
-      
-      setDesignList(designs);
+      updateDesignList(newDesignList);
+    }
+  }, []);
+  
+  useEffect(() => {
+    updateDesignInList(design);
+  }, [design, updateDesignInList]);
+
+  const initPageData = useCallback(async () => {
+    if (loading) return; // 防止重复加载
+    
+    try {
+      setLoading(true);
+      // 并行加载用户信息和设计列表
+      const userInfoRes = await userApi.getUserInfo({ showLoading: false })
+      setUserInfo(userInfoRes?.data);
     } catch (error) {
       console.error('初始化页面数据失败:', error);
       Taro.showToast({
@@ -95,14 +123,130 @@ const UserCenterPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, getDesign]);
+  }, [loading]);
 
   useDidShow(() => {
+    refreshDesigns();
     initPageData();
   });
 
+   // 使用 IntersectionObserver 监听元素进入视口
+   const observerRef = useRef<IntersectionObserver | null>(null);
+   const fallbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+   const timeoutRefs = useRef<Set<NodeJS.Timeout>>(new Set());
+ 
+   const setupScrollListener = useCallback(() => {
+     // 清理现有的观察器和定时器
+     if (observerRef.current) {
+       observerRef.current.disconnect();
+       observerRef.current = null;
+     }
+     if (fallbackIntervalRef.current) {
+       clearInterval(fallbackIntervalRef.current);
+       fallbackIntervalRef.current = null;
+     }
+ 
+     const targetId = "my-work-more-tag";
+ 
+     // 优先使用 IntersectionObserver
+     if (typeof IntersectionObserver !== "undefined") {
+       observerRef.current = new IntersectionObserver(
+         (entries) => {
+           entries.forEach((entry) => {
+             if (entry.isIntersecting) {
+               if (designHasMore) {
+                 loadMoreDesigns();
+               }
+             }
+           });
+         },
+         {
+           root: null, // 相对于视口
+           rootMargin: "100px", // 提前100px开始加载
+           threshold: 0.1, // 10%的元素可见时触发
+         }
+       );
+ 
+       // 查找目标元素并开始观察
+       Taro.createSelectorQuery()
+         .select(`#${targetId}`)
+         .node()
+         .exec((res) => {
+           // 检查组件是否仍然存在，避免在组件卸载后执行
+           if (res && res[0] && res[0].node && observerRef.current) {
+             observerRef.current.observe(res[0].node);
+           } else if (observerRef.current) {
+             // 如果获取节点失败，使用降级方案
+             console.warn("Failed to get target node, using fallback method");
+             useFallbackMethod(targetId);
+           }
+         });
+     } else {
+       // 降级到定时器方案
+       console.warn("IntersectionObserver not supported, using fallback method");
+       useFallbackMethod(targetId);
+     }
+   }, [curTab, designHasMore, loadMoreDesigns]);
+ 
+   // 降级方案：使用定时器轮询
+   const useFallbackMethod = useCallback(
+     (targetId: string) => {
+       const checkElementStatus = () => {
+         Taro.createSelectorQuery()
+           .select(`#${targetId}`)
+           .boundingClientRect()
+           .exec((res) => {
+             if (res && res[0]) {
+               const rect = res[0];
+               try {
+                 const windowInfo = Taro.getWindowInfo();
+                 if (rect.top < windowInfo.windowHeight && rect.bottom > 0) {
+                   if (designHasMore) {
+                     loadMoreDesigns();
+                   }
+                 }
+               } catch (error) {
+                 console.warn("Failed to get window info:", error);
+                 const fallbackHeight = 667;
+                 if (rect.top < fallbackHeight && rect.bottom > 0) {
+                   if (designHasMore) {
+                     loadMoreDesigns();
+                   }
+                 }
+               }
+             }
+           });
+       };
+ 
+       fallbackIntervalRef.current = setInterval(checkElementStatus, 500); // 降级方案使用较低频率
+     },
+     [curTab, designHasMore, loadMoreDesigns]
+   );
+ 
+   // 设置滚动监听
+   useEffect(() => {
+     setupScrollListener();
+ 
+     return () => {
+       // 清理观察器和定时器
+       if (observerRef.current) {
+         observerRef.current.disconnect();
+         observerRef.current = null;
+       }
+       if (fallbackIntervalRef.current) {
+         clearInterval(fallbackIntervalRef.current);
+         fallbackIntervalRef.current = null;
+       }
+       // 清理所有未完成的 timeout
+       timeoutRefs.current.forEach(timeoutId => {
+         clearTimeout(timeoutId);
+       });
+       timeoutRefs.current.clear();
+     };
+   }, [setupScrollListener]);
+
   const handleItemClick = useCallback((item: any) => {
-    if (loading || isPolling) return;
+    // if (loading || isPolling) return;
     Taro.navigateTo({
       url: `${pageUrls.result}?designBackendId=${item.id}&showBack=true`,
     });
@@ -211,12 +355,19 @@ const UserCenterPage: React.FC = () => {
         {curTab === "myWork" && (
           <View className={styles.imageHistoryContainer}>
             {designList.length > 0 ? (
-              <BraceletList items={designList} onItemClick={handleItemClick} />
+              <View style={{ overflowY: "auto" }}>
+                <BraceletList items={designList} onItemClick={handleItemClick} />
+                {designHasMore && 
+                  <View className={styles.emptyText} style={{ marginTop: "8px" }} id="my-work-more-tag">
+                    更多作品加载中...
+                  </View>
+                }
+              </View>
             ) : (
-              <View className={styles.emptyContainer}>
-                {loading && <LoadingIcon />}
+              <View className= {styles.emptyContainer}>
+                {designLoading && designList.length === 0 && <LoadingIcon />}
                 <Text className={styles.emptyText}>
-                  {loading ? '加载中...' : '暂无作品，快去创作吧～'}
+                  {designLoading ? '加载中...' : '暂无作品，快去创作吧～'}
                 </Text>
               </View>
             )}
