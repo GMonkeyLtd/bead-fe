@@ -14,9 +14,9 @@ import { usePollDesign } from "@/hooks/usePollDesign";
 import styles from "./index.module.scss";
 import CrystalButton from "@/components/CrystalButton";
 import LoadingIcon from "@/components/LoadingIcon";
+import { usePageQuery } from "@/hooks/usePageQuery";
 
 const UserCenterPage: React.FC = () => {
-  const [designList, setDesignList] = useState<any[]>([]);
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [curTab, setCurTab] = useState<"myWork" | "myPublish">("myWork");
@@ -27,43 +27,22 @@ const UserCenterPage: React.FC = () => {
     enableBackoff: true
   });
 
-  // 优化 design 更新逻辑，避免不必要的重新渲染
-  const updateDesignInList = useCallback((designData: typeof design) => {
-    if (designData?.design_id && designData.image_url) {
-      setDesignList((prev) => {
-        const existingItem = prev.find(item => item.id === designData.design_id);
-        // 只有当图片 URL 发生变化时才更新
-        if (existingItem && existingItem.image !== designData.image_url) {
-          return prev.map((item) =>
-            item.id === designData.design_id
-              ? { ...item, progress: 100, image: designData.image_url }
-              : item
-          );
-        }
-        return prev;
-      });
-    }
-  }, []);
-  
-  useEffect(() => {
-    updateDesignInList(design);
-  }, [design, updateDesignInList]);
-
-  const initPageData = useCallback(async () => {
-    if (loading) return; // 防止重复加载
-    
-    try {
-      setLoading(true);
-      
-      // 并行加载用户信息和设计列表
-      const [userInfoRes, historyRes] = await Promise.all([
-        userApi.getUserInfo({ showLoading: false }),
-        sessionApi.getDesignList({ showLoading: false })
-      ]);
-      
-      setUserInfo(userInfoRes?.data);
-      
-      const designs = (historyRes?.data?.designs || []).map((item) => {
+  // 使用无限滚动hook获取sku列表
+  const {
+    loading: designLoading,
+    data: designList,
+    hasMore: designHasMore,
+    refresh: refreshDesigns,
+    loadMore: loadMoreDesigns,
+    updateData: updateDesignList,
+  } = usePageQuery<any>({
+    listKey: "designList",
+    initialPage: 1,
+    pageSize:40,
+    fetchData: useCallback(async (page: number, pageSize: number) => {
+      const res = await sessionApi.getDesignList({ offset: page, limit: pageSize }, { showLoading: false });
+      console.log(res, 'res');
+      const resData = ((res as any)?.data?.designs || []).map(item => {
         // 延迟启动轮询，避免同时发起太多请求
         if (!item.image_url) {
           setTimeout(() => {
@@ -83,9 +62,81 @@ const UserCenterPage: React.FC = () => {
           sessionId: item.session_id,
           draftId: item.draft_id,
         };
+      })
+      const totalCount = (res as any)?.data?.total || 0;
+      return {
+        data: resData,
+        hasMore: resData.length + (page - 1) * pageSize < totalCount,
+        total: totalCount,
+      };
+    }, []),
+    queryItem: useCallback(async (item: any) => {
+      // 这里可以根据需要实现单个item的查询逻辑
+      return item;
+    }, []),
+    enabled: true,
+  });
+
+  useEffect(() => {
+    if (designHasMore) {
+      loadMoreDesigns();
+    }
+  }, [designHasMore, designList]);
+
+  // 优化 design 更新逻辑，避免不必要的重新渲染
+  const updateDesignInList = useCallback((designData: typeof design) => {
+    if (designData?.design_id && designData.image_url) {
+      const newDesignList = designList.map((prev) => {
+        const existingItem = prev.find(item => item.id === designData.design_id);
+        // 只有当图片 URL 发生变化时才更新
+        if (existingItem && existingItem.image !== designData.image_url) {
+          return prev.map((item) =>
+            item.id === designData.design_id
+              ? { ...item, progress: 100, image: designData.image_url }
+              : item
+          );
+        }
+        return prev;
       });
+      updateDesignList(newDesignList);
+    }
+  }, []);
+  
+  useEffect(() => {
+    updateDesignInList(design);
+  }, [design, updateDesignInList]);
+
+  const initPageData = useCallback(async () => {
+    if (loading) return; // 防止重复加载
+    
+    try {
+      setLoading(true);
+      // 并行加载用户信息和设计列表
+      const userInfoRes = await userApi.getUserInfo({ showLoading: false })
+      setUserInfo(userInfoRes?.data);
+      // const designs = (historyRes?.data?.designs || []).map((item) => {
+      //   // 延迟启动轮询，避免同时发起太多请求
+      //   if (!item.image_url) {
+      //     setTimeout(() => {
+      //       getDesign({
+      //         designId: item.design_id,
+      //       });
+      //     }, Math.random() * 1000); // 随机延迟 0-1秒
+      //   }
+        
+      //   return {
+      //     id: item.design_id,
+      //     progress: item.progress,
+      //     name: item.info.name,
+      //     image: item.image_url,
+      //     draftUrl: item.draft_url,
+      //     backgroundUrl: item.background_url,
+      //     sessionId: item.session_id,
+      //     draftId: item.draft_id,
+      //   };
+      // });
       
-      setDesignList(designs);
+      // setDesignList(designs);
     } catch (error) {
       console.error('初始化页面数据失败:', error);
       Taro.showToast({
@@ -95,14 +146,15 @@ const UserCenterPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, getDesign]);
+  }, [loading]);
 
   useDidShow(() => {
+    refreshDesigns();
     initPageData();
   });
 
   const handleItemClick = useCallback((item: any) => {
-    if (loading || isPolling) return;
+    // if (loading || isPolling) return;
     Taro.navigateTo({
       url: `${pageUrls.result}?designBackendId=${item.id}&showBack=true`,
     });
@@ -211,12 +263,19 @@ const UserCenterPage: React.FC = () => {
         {curTab === "myWork" && (
           <View className={styles.imageHistoryContainer}>
             {designList.length > 0 ? (
-              <BraceletList items={designList} onItemClick={handleItemClick} />
+              <View>
+                <BraceletList items={designList} onItemClick={handleItemClick} />
+                {designHasMore && 
+                  <View className={styles.emptyText} style={{ marginTop: "8px" }}>
+                    加载中...
+                  </View>
+                }
+              </View>
             ) : (
-              <View className={styles.emptyContainer}>
-                {loading && <LoadingIcon />}
+              <View className= {styles.emptyContainer}>
+                {designLoading && designList.length === 0 && <LoadingIcon />}
                 <Text className={styles.emptyText}>
-                  {loading ? '加载中...' : '暂无作品，快去创作吧～'}
+                  {designLoading ? '加载中...' : '暂无作品，快去创作吧～'}
                 </Text>
               </View>
             )}
