@@ -182,6 +182,9 @@ const Home = () => {
                           color: "#fff",
                         }}
                         onClick={() => {
+                          Taro.reportEvent('diy_event', {
+                            diy_entry: 1
+                          })
                           Taro.redirectTo({
                             url: pageUrls.customDesign + '?from=home',
                           });
