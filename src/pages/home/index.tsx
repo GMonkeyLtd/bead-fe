@@ -150,6 +150,9 @@ const Home = () => {
                           color: "#fff",
                         }}
                         onClick={() => {
+                          Taro.reportEvent('ai_design', {
+                            click_count: 1
+                          })
                           if (!lastSessionId) {
                             startDesign();
                           } else {

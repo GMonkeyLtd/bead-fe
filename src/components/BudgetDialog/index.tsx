@@ -39,6 +39,15 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   const { keyboardHeight } = useKeyboardHeight();
 
   const handleConfirm = async () => {
+    if (!isSameProduct) {
+      Taro.reportEvent('result_event', {
+        confirm_pay: 1
+      })
+    } else {
+      Taro.reportEvent('inspiration_event', {
+        same_product_pay: 1
+      })
+    }
     const userData = await userApi.getUserInfo();
     const { default_contact, phone, wechat_id } = userData?.data || {} as any;
     if (default_contact === 0 && !phone) {

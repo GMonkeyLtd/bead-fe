@@ -140,6 +140,9 @@ const Result = () => {
 
   // 保存图片到相册
   const saveImage = async () => {
+    Taro.reportEvent('result_event', {
+      share_design: 1
+    })
     if (!imageUrl) {
       return;
     }
@@ -277,6 +280,9 @@ const Result = () => {
 
   // 分享图片
   const doCreate = () => {
+    Taro.reportEvent('result_event', {
+      get_product: 1
+    })
     setBudgetDialogShow(true);
   };
 
@@ -292,6 +298,9 @@ const Result = () => {
   };
 
   const handleModifyDesign = () => {
+    Taro.reportEvent('result_event', {
+      edit_design: 1
+    })
     Taro.redirectTo({
       url: `${pageUrls.customDesign}?designId=${designNo}&sessionId=${designSessionId}&draftId=${designDraftId}&from=result`,
     });
@@ -312,6 +321,9 @@ const Result = () => {
   }, [backgroundImageUrl, originImageUrl])
 
   const handleDeleteDesign = () => {
+    Taro.reportEvent('result_event', {
+      delete_design: 1
+    })
     if (orderList?.length > 0) {
       Taro.showToast({
         title: "该作品有相关订单，无法删除",
@@ -513,6 +525,9 @@ const Result = () => {
                     <View className={styles.resultContentReportCardContainer}>
                       <ViewReportCard
                         onActionClick={() => {
+                          Taro.reportEvent('result_event', {
+                            view_crystal_analysis: 1
+                          })
                           Taro.navigateTo({
                             url: `${pageUrls.designReport}?designId=${designNo}`,
                           });

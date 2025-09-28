@@ -228,6 +228,9 @@ const InspirationDetailPage: React.FC = () => {
   }
 
   const handleEditInspiration = () => {
+    Taro.reportEvent('inspiration_event', {
+      edit_inspiration_design: 1
+    })
     Taro.redirectTo({
       url: `${pageUrls.customDesign}?designId=${designData?.design_id}&from=inspiration&workId=${detail.work_id}`,
     });
@@ -406,6 +409,9 @@ const InspirationDetailPage: React.FC = () => {
         </View>
         {designData?.session_id && designData?.reference_price && (<CrystalButton
           onClick={() => {
+            Taro.reportEvent('inspiration_event', {
+              get_same_product: 1
+            });
             setBudgetDialogShow(true)
           }}
           text={detail.final_price ? `¥${detail.final_price} 制作同款` : "制作同款"}
