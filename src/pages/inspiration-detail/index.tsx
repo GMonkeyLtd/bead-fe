@@ -200,12 +200,18 @@ const InspirationDetailPage: React.FC = () => {
   }
 
   const handleEditInspiration = () => {
+    Taro.reportEvent('inspiration_event', {
+      edit_inspiration_design: 1
+    })
     Taro.redirectTo({
       url: `${pageUrls.customDesign}?designId=${designData?.design_id}&from=inspiration&workId=${detail.work_id}`,
     });
   }
 
   const onClickBuySame = async () => {
+    Taro.reportEvent('inspiration_event', {
+      get_same_product: 1
+    });
     const userData = await userApi.getUserInfo();
     const { default_contact, phone, wechat_id } = userData?.data || {} as any;
     if (default_contact === 0 && !phone) {

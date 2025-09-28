@@ -45,6 +45,15 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
 
 
   const doPurchase = async (address: AddressInfo | undefined) => {
+    if (!isSameProduct) {
+      Taro.reportEvent('result_event', {
+        confirm_pay: 1
+      })
+    } else {
+      Taro.reportEvent('inspiration_event', {
+        same_product_pay: 1
+      })
+    }
     if (onConfirm) {
       onConfirm(referencePrice || 0);
       return;

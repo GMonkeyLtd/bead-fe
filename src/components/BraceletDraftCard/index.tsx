@@ -198,6 +198,9 @@ export const BraceletDraftCard = ({
     if (!draft?.items || draft?.items?.length === 0 || byMerchant) {
       return;
     }
+    Taro.reportEvent('ai_design', {
+      edit_ai_design	: 1
+    })
     Taro.redirectTo({
       url:
         pageUrls.customDesign +
@@ -318,6 +321,9 @@ export const BraceletDraftCard = ({
                 flex: 1,
               }}
               onClick={() => {
+                Taro.reportEvent('ai_design', {
+                  view_report: 1
+                })
                 viewDraftDesign();
               }}
               text="查看效果"

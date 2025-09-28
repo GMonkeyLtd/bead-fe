@@ -211,6 +211,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
   // 处理查看效果
   const handleViewEffect = useCallback(() => {
+    Taro.reportEvent('diy_event', {
+      view_diy_result: 1
+    })
     if (positionManagerState.predictedLength < 13) {
       Taro.showToast({
         title: "哎呀，珠子有点少啦！一般手围建议不少于13cm噢。",
@@ -531,7 +534,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         onClick={handleBeadDeselect}
       >
         <View className="custom-design-ring-top-content">
-          <View onClick={showTutorial} className="custom-design-ring-tutorial-container">
+          <View 
+            onClick={() => {
+              Taro.reportEvent('diy_event', {
+                view_tutorial: 1
+              })
+              showTutorial?.()
+            }} 
+            className="custom-design-ring-tutorial-container"
+          >
             <Image src={tutorialIcon} className="custom-design-ring-tutorial-icon" style={{ width: "18px", height: "18px" }} />
             <View className="custom-design-ring-tutorial-text">
               教程
