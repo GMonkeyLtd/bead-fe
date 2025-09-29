@@ -74,6 +74,22 @@ export default {
     http.post<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, { success: true, }, config),
   confirmReceiptCallback: (params: { orderId: string }, config?: ApiConfig) =>
     http.get<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, undefined, config),
-  buySameProduct: (params: { word_id: string }, config?: ApiConfig) =>
-    http.post<any>(`/user/community/${params.word_id}/buy`, undefined, config),
+  buySameProduct: (params: { work_id: string }, config?: ApiConfig) =>
+    http.post<any>(`/user/community/${params.work_id}/buy`, undefined, config),
+  buySameProductV2: (params: { work_id: string, address_info?: any }, config?: ApiConfig) =>
+    http.post<any>(`/user/community/${params.work_id}/buy_v2`, params, config),
+  generateOrder: (
+    params: { design_id: number; address_info?: any; },
+    config?: ApiConfig
+  ) =>
+    http.post<{
+      data: {
+        order_uuid: string;
+      };
+    }>(`/user/generateorder_v2`, params, {
+      showLoading: true,
+      loadingText: "订单生成中...",
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
 };

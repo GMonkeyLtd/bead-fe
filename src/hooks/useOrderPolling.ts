@@ -30,7 +30,7 @@ interface UseOrderPollingOptions {
   orderId: string | undefined;
   interval?: number; // 轮询间隔，默认3000ms
   onStatusChange?: (newStatus: OrderStatus) => void; // 状态变化回调
-  shouldStopPolling?: (status: OrderStatus) => boolean; // 自定义停止条件
+  shouldStopPolling?: (status: OrderStatus, orderData: any) => boolean; // 自定义停止条件
   autoRedirect?: boolean; // 是否自动跳转，默认true
   redirectUrl?: string; // 自定义跳转URL
 }
@@ -75,7 +75,7 @@ export const useOrderPolling = ({
         }
 
         // 检查是否应该停止轮询
-        if (orderStatusStr !== undefined && shouldStopPolling(orderStatusStr)) {
+        if (orderStatusStr !== undefined && shouldStopPolling(orderStatusStr, orderData)) {
           console.log("订单状态已变更，停止轮询");
 
           return false; // 表示轮询应该停止

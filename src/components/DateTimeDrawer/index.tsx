@@ -4,6 +4,7 @@ import { CommonEventFunction } from "@tarojs/components/types/common";
 import { Lunar, LunarMonth, Solar } from "lunar-typescript";
 import "./index.scss";
 import CrystalButton from "../CrystalButton";
+import Taro from "@tarojs/taro";
 
 interface DateTimeDrawerProps {
   visible: boolean;
@@ -176,6 +177,9 @@ const DateTimeDrawer = ({
   const handleDateTypeToggle = () => {
     const newDateType = dateType === "公历" ? "农历" : "公历";
     setDateType(newDateType);
+    Taro.reportEvent('ai_design', {
+      calendar_type: newDateType,
+    })
 
     // 在切换日期类型时转换日期
     const year = years[selectedIndexes[0]];
@@ -208,7 +212,11 @@ const DateTimeDrawer = ({
   };
 
   const handleGenderToggle = () => {
-    setGender(gender === "男" ? "女" : "男");
+    const newGender = gender === "男" ? "女" : "男";
+    Taro.reportEvent('ai_design', {
+      gender: newGender,
+    })
+    setGender(newGender);
   };
 
   const getTransformedData = () => {
@@ -227,6 +235,9 @@ const DateTimeDrawer = ({
 
   const handlePersonalizeCustomize = () => {
     const selectedDateTime = getTransformedData();
+    Taro.reportEvent('ai_design', {
+      next_step: 1
+    })
     onPersonalizeCustomize?.(selectedDateTime);
   };
 

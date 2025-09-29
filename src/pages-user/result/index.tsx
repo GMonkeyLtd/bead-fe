@@ -14,7 +14,7 @@ import {
 } from "@/config";
 import BudgetDialog from "@/components/BudgetDialog";
 import OrderListComp from "@/components/OrderListComp";
-import api, { configApi } from "@/utils/api";
+import api, { configApi, userApi } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 import BraceletDetailDialog from "@/components/BraceletDetailDialog";
 import BeadList from "@/components/BeadList";
@@ -37,7 +37,7 @@ import RefreshSvg from "@/assets/icons/refresh.svg";
 const Result = () => {
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
-  const { sessionId, from, originImageUrl: originImageUrlParam } = params || {};
+  const { sessionId, from, originImageUrl: originImageUrlParam, showBudgetDialog } = params || {};
 
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -50,7 +50,7 @@ const Result = () => {
   const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
   const [rizhuInfo, setRizhuInfo] = useState<string>("");
   const [wuxingInfo, setWuxingInfo] = useState<any[]>([]);
-  const [budgetDialogShow, setBudgetDialogShow] = useState(false);
+  const [budgetDialogShow, setBudgetDialogShow] = useState(showBudgetDialog == 'true' || false);
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] =
     useState(false);
@@ -70,7 +70,7 @@ const Result = () => {
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
 
   const getOrderData = (orderUuid: string[]) => {
-    api.userHistory.getOrderById(orderUuid).then((res) => {
+    api.userHistory.getOrderById(orderUuid, { showLoading: false }).then((res) => {
       res.data.orders?.length > 0 && setOrderList(res.data.orders);
     });
   };
@@ -140,6 +140,9 @@ const Result = () => {
 
   // 保存图片到相册
   const saveImage = async () => {
+    Taro.reportEvent('result_event', {
+      share_design: 1
+    })
     if (!imageUrl) {
       return;
     }
@@ -275,8 +278,24 @@ const Result = () => {
     }
   };
 
-  // 分享图片
-  const doCreate = () => {
+  const doCreate = async () => {
+    Taro.reportEvent('result_event', {
+      get_product: 1
+    })
+    const userData = await userApi.getUserInfo();
+    const { default_contact, phone, wechat_id } = userData?.data || {} as any;
+    if (default_contact === 0 && !phone) {
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?designId=${designNo}&from=result`,
+      });
+      return;
+    }
+    if (default_contact === 1 && !wechat_id) {
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?designId=${designNo}&from=result`,
+      });
+      return;
+    }
     setBudgetDialogShow(true);
   };
 
@@ -292,6 +311,9 @@ const Result = () => {
   };
 
   const handleModifyDesign = () => {
+    Taro.reportEvent('result_event', {
+      edit_design: 1
+    })
     Taro.redirectTo({
       url: `${pageUrls.customDesign}?designId=${designNo}&sessionId=${designSessionId}&draftId=${designDraftId}&from=result`,
     });
@@ -312,6 +334,9 @@ const Result = () => {
   }, [backgroundImageUrl, originImageUrl])
 
   const handleDeleteDesign = () => {
+    Taro.reportEvent('result_event', {
+      delete_design: 1
+    })
     if (orderList?.length > 0) {
       Taro.showToast({
         title: "该作品有相关订单，无法删除",
@@ -513,6 +538,9 @@ const Result = () => {
                     <View className={styles.resultContentReportCardContainer}>
                       <ViewReportCard
                         onActionClick={() => {
+                          Taro.reportEvent('result_event', {
+                            view_crystal_analysis: 1
+                          })
                           Taro.navigateTo({
                             url: `${pageUrls.designReport}?designId=${designNo}`,
                           });
@@ -566,6 +594,7 @@ const Result = () => {
                 id: item.order_uuid,
                 orderNumber: item.order_uuid,
                 status: item.order_status,
+                afterSaleStatus: item.after_sale_status,
                 merchantName: item.merchant_info?.name,
                 createTime: item.created_at,
                 budget: item.price,
@@ -579,6 +608,11 @@ const Result = () => {
                 });
               }}
             />
+          </View>
+        )}
+        {design?.order_uuids?.length > 0 && orderList.length === 0 && (
+          <View style={{ marginTop: "16px", fontSize: "12px", color: "gray", textAlign: "center" }}>
+            {`订单信息加载中...`}
           </View>
         )}
       </View>
@@ -627,7 +661,10 @@ const Result = () => {
           title={braceletName}
           designNumber={designNo}
           productImage={imageUrl}
-          onClose={() => setBudgetDialogShow(false)}
+          onClose={() => {
+            initData();
+            setBudgetDialogShow(false)
+          }}
           referencePrice={referencePrice}
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />

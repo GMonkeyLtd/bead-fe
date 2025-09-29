@@ -69,12 +69,12 @@ const OrderDetail: React.FC = () => {
     orderId: orderId,
     interval: 3000, // 5秒轮询间隔
     autoRedirect: false, // 禁用自动跳转
-    shouldStopPolling: (status) => {
+    shouldStopPolling: (status, _order) => {
       return [
         OrderStatusEnum.Completed,
         OrderStatusEnum.Cancelled,
         OrderStatusEnum.MerchantCancelled,
-      ].includes(status);
+      ].includes(status) || (status === OrderStatusEnum.AfterSale && [AfterSaleStatus.Refunded].includes(_order?.after_sale_status));
     },
     onStatusChange: (newStatus) => {
       // 可以在这里添加状态变化时的额外逻辑

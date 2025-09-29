@@ -5,6 +5,7 @@ import React, {
   useRef,
   forwardRef,
   useImperativeHandle,
+  useMemo,
 } from "react";
 import { View, Image, MovableArea, Canvas } from "@tarojs/components";
 import Taro, { base64ToArrayBuffer } from "@tarojs/taro";
@@ -72,7 +73,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [beadSizeList, setBeadSizeList] = useState<number[]>([8, 10, 12, 13, 14, 15]);
   const [currentBeadSize, setCurrentBeadSize] = useState<number>(10);
 
-  const beadPositionConfig: BeadPositionManagerConfig = {
+  // 稳定化 beadPositionConfig，避免不必要的重新初始化
+  const beadPositionConfig = useMemo<BeadPositionManagerConfig>(() => ({
     canvasSize,
     spacing,
     renderRatio,
@@ -82,7 +84,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     enableHistory: true,
     maxHistoryLength: 10,
     displayScale: 3.8
-  };
+  }), [canvasSize, spacing, renderRatio]);
 
   // 使用珠子位置管理器
   const positionManagerRef = useRef<BeadPositionManager | null>(null);
@@ -138,10 +140,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       return;
     }
 
-    positionManagerRef.current = new BeadPositionManager(beadPositionConfig);
+    // 只有在没有实例或者配置发生变化时才创建新实例
+    if (!positionManagerRef.current) {
+      positionManagerRef.current = new BeadPositionManager(beadPositionConfig);
+    }
 
     if (!beads || beads.length === 0) {
       console.warn('beads is empty:', beads);
+      // 即使珠子为空，也要保持现有状态，不要重置
       return;
     }
 
@@ -156,12 +162,18 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     } catch (error) {
       console.error('Error in initBeads:', error);
     }
-  }, [canvasSize, spacing, renderRatio]);
+  }, [beadPositionConfig]);
 
-  // 初始化位置管理器
+  // 初始化位置管理器 - 只在必要时重新初始化
   useEffect(() => {
     if (canvasSize > 0) {
-      initBeads(beads);
+      // 如果已经有实例且珠子数据相同，则不重新初始化
+      const currentBeads = positionManagerRef.current?.getState()?.beads;
+      const beadsChanged = JSON.stringify(currentBeads) !== JSON.stringify(beads);
+      
+      if (!positionManagerRef.current || beadsChanged) {
+        initBeads(beads);
+      }
     }
   }, [canvasSize, beads, initBeads]);
 
@@ -199,6 +211,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
   // 处理查看效果
   const handleViewEffect = useCallback(() => {
+    Taro.reportEvent('diy_event', {
+      view_diy_result: 1
+    })
     if (positionManagerState.predictedLength < 13) {
       Taro.showToast({
         title: "哎呀，珠子有点少啦！一般手围建议不少于13cm噢。",
@@ -218,7 +233,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && (!dot.width || (dot.pass_height_ratio && dot.pass_height_ratio !== 0.5)),
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
-        console.log('generateCircleRing imageUrl: ', imageUrl)
         const newImageUrl = imageUrl || "";
         // Taro.previewImage({
         //   urls: [newImageUrl],
@@ -265,7 +279,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   }, action: "add" | "replace") => {
     if (!positionManagerRef.current) return;
     try {
-      console.log("bead", bead);
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,
@@ -481,6 +494,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     }
   }, [positionManagerState.selectedBeadIndex, processBeadClick, positionManagerState.beads, getBeadCluster]);
 
+  console.log(positionManagerState.beads, 'positionManagerState.beads')
+
 
   return (
     <View className="custom-design-ring-container">
@@ -519,7 +534,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         onClick={handleBeadDeselect}
       >
         <View className="custom-design-ring-top-content">
-          <View onClick={showTutorial} className="custom-design-ring-tutorial-container">
+          <View 
+            onClick={() => {
+              Taro.reportEvent('diy_event', {
+                view_tutorial: 1
+              })
+              showTutorial?.()
+            }} 
+            className="custom-design-ring-tutorial-container"
+          >
             <Image src={tutorialIcon} className="custom-design-ring-tutorial-icon" style={{ width: "18px", height: "18px" }} />
             <View className="custom-design-ring-tutorial-text">
               教程

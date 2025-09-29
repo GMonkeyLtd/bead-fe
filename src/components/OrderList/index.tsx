@@ -327,7 +327,7 @@ export default function OrderList({
             </View>
           </View>
           <View className={styles.actionButtons}>
-            {[OrderStatus.Negotiating, OrderStatus.InProgress].includes(
+            {[OrderStatus.Negotiating, OrderStatus.InProgress, OrderStatus.PendingPayment].includes(
               order.order_status
             ) && (
                 <View

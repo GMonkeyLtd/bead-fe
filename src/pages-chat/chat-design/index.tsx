@@ -267,6 +267,9 @@ const ChatDesign = () => {
         <View
           className={styles.designResetInfo}
           onClick={() => {
+            Taro.reportEvent('ai_design', {
+              reset_info: 1
+            })
             Taro.redirectTo({
               url: pageUrls.home + "?newSession=true",
             });

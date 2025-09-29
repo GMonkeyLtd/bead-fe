@@ -27,6 +27,7 @@ interface UseInfiniteScrollResult<T> {
   refresh: () => void;
   resetData: () => void;
   updateItem: (item: T) => void;
+  updateData: (newData: T[]) => void;
 }
 
 export function usePageQuery<T = any>({
@@ -51,8 +52,11 @@ export function usePageQuery<T = any>({
     isLoadingRef.current = true;
     setLoading(true);
     setError(null);
+    console.log('loadData');
     try {
       const result = await fetchData(pageNum, pageSize);
+      setLoading(false);
+      isLoadingRef.current = false;
       
       if (isRefresh) {
         setData(result.data);
@@ -68,14 +72,16 @@ export function usePageQuery<T = any>({
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败');
-    } finally {
       setLoading(false);
       isLoadingRef.current = false;
-    }
+    } 
   }, [fetchData, pageSize]); // 移除hasMore依赖，避免不必要的重新创建
 
   // 加载更多
   const loadMore = useCallback(() => {
+    console.log(isLoadingRef.current, 'isLoadingRef.current');
+    console.log(hasMore, 'hasMore');
+    console.log(enabled, 'enabled');
     if (!isLoadingRef.current && hasMore && enabled) {
       loadData(pageRef.current); // 使用pageRef.current确保使用最新页码
     }
@@ -97,6 +103,10 @@ export function usePageQuery<T = any>({
     setHasMore(true);
     setError(null);
   }, [initialPage]);
+
+  const updateData = useCallback((newData: T[]) => {
+    setData(newData);
+  }, []);
 
   const updateItem = useCallback(async(item: T) => {
     const resData = await queryItem(item);
@@ -125,5 +135,6 @@ export function usePageQuery<T = any>({
     refresh,
     resetData,
     updateItem,
+    updateData
   };
 } 

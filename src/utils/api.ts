@@ -300,14 +300,14 @@ export const userHistoryApi = {
   },
 
 
-  getOrderList: (config?: ApiConfig) =>
+  getOrderList: (params: { page: number; size_size: number }, config?: ApiConfig) =>
     http.post<{
       data: {
         any: [];
       };
     }>(
       `/user/queryorder`,
-      {},
+      params,
       {
         showLoading: true,
         cancelToken: config?.cancelToken,
