@@ -46,13 +46,16 @@ export interface BeadItem extends SpuInfo {
   // 运行时计算的属性
   ratioBeadWidth?: number;
   render_diameter?: number;
+  display_width?: number;
+  hole_postion?: number;
 }
 
 export enum AccessoryType {
   GeHuan = 1,
   GeZhu = 2,
   SuiXing = 3,
-  PaoHuan = 4
+  PaoHuan = 4,
+  GuaShi = 5
 }
 
 export const AccessoryFormatMap = {
@@ -60,6 +63,7 @@ export const AccessoryFormatMap = {
   [AccessoryType.GeZhu]: '隔珠',
   [AccessoryType.SuiXing]: '随形',
   [AccessoryType.PaoHuan]: '跑环',
+  [AccessoryType.GuaShi]: '挂饰',
 }
 
 export interface AccessoryItem {

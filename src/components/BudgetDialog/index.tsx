@@ -170,9 +170,17 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               {/* 说明文字 */}
               <View className="budget-dialog-notice">
                 <View className="budget-dialog-divider" />
-                <Text className="budget-dialog-notice-text">
-                  {isSameProduct ? '同款制作，品质如一，价格更低' : '源头甄选，一串一证，品质全程保障'}
-                </Text>
+                  {isSameProduct ?
+                    <Text className="budget-dialog-notice-text">'同款制作，品质如一，价格更低' </Text> :
+                    <View>
+                      <View className="budget-dialog-notice-text">· 下单后与客服确认实拍图，满意后送检发货；</View>
+                      <View className="budget-dialog-notice-text" style={{ marginTop: "4px" }}>
+                        <Text>· 实拍图不满意可</Text>
+                        <Text className="budget-dialog-notice-text-bold">全额退款</Text>
+                        <Text>。</Text>
+                      </View>
+                    </View>
+                  }
               </View>
             </View>
           </View>

@@ -215,65 +215,7 @@ const CustomDesign = () => {
         return acc;
       }, {});
       const aggregatedAccessoriesList = Object.values(aggregatedAccessories);
-      // console.log(aggregatedAccessoriesList, 'aggregatedAccessoriesList')
-      // aggregatedAccessoriesList.push({
-      //   beadList: [{
-      //     allow_pre_sale: true,
-      //     associated: null,
-      //     auto_match: true,
-      //     cost_price: 100,
-      //     diameter: 30,
-      //     id: 4,
-      //     image_aspect_ratio: 0.8,
-      //     image_url: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/moon-start-test.png",
-      //     name: "爱心钻银环",
-      //     quality: 2,
-      //     reference_price: 150,
-      //     shape: 1,
-      //     sku_id: 3001,
-      //     spu_id: 2001,
-      //     spu_type: 2,
-      //     type: 1,
-      //     weight: 50,
-      //     width: 6,
-          
-      //   }],
-      //   beadSizeList: [30],
-      //   id: 2000,
-      //   image_url: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/moon-start-test.png",
-      //   name: "星星月亮吊坠",
-      //   pass_height_ratio: 0.1,
-      //   type: 1,
-      // })
-      // aggregatedAccessoriesList.push({
-      //   beadList: [{
-      //     allow_pre_sale: true,
-      //     associated: null,
-      //     auto_match: true,
-      //     cost_price: 100,
-      //     diameter: 25,
-      //     id: 2004,
-      //     image_aspect_ratio: 0.7,
-      //     image_url: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/diaozhui1.png",
-      //     name: "蝴蝶吊坠",
-      //     quality: 2,
-      //     reference_price: 150,
-      //     shape: 1,
-      //     sku_id: 3002,
-      //     spu_id: 2002,
-      //     spu_type: 2,
-      //     type: 1,
-      //     weight: 50,
-      //     width: 4,
-      //     pass_height_ratio: 0.1,// 穿孔位置距图片顶部的高度占比，用于计算穿孔位置
-      //     pass_width_ratio: 0.2 // 用于计算穿孔位置在线上所占的宽度
-      //   }],
-      //   beadSizeList: [25],
-      //   id: 2000,
-      //   image_url: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/test/diaozhui1.png",
-      //   name: "蝴蝶吊坠",
-      //   type: 1,
-      // })
+
       setAccessoryTypeMap(aggregatedAccessoriesList.reduce((acc: Record<string, any[]>, item: any) => {
         // 使用第一个item的wuxing属性
         if (acc[item.type]) {
