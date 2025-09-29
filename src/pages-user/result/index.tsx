@@ -70,7 +70,7 @@ const Result = () => {
   const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
 
   const getOrderData = (orderUuid: string[]) => {
-    api.userHistory.getOrderById(orderUuid).then((res) => {
+    api.userHistory.getOrderById(orderUuid, { showLoading: false }).then((res) => {
       res.data.orders?.length > 0 && setOrderList(res.data.orders);
     });
   };
@@ -566,6 +566,7 @@ const Result = () => {
                 id: item.order_uuid,
                 orderNumber: item.order_uuid,
                 status: item.order_status,
+                afterSaleStatus: item.after_sale_status,
                 merchantName: item.merchant_info?.name,
                 createTime: item.created_at,
                 budget: item.price,
@@ -579,6 +580,11 @@ const Result = () => {
                 });
               }}
             />
+          </View>
+        )}
+        {design?.order_uuids?.length > 0 && orderList.length === 0 && (
+          <View style={{ marginTop: "16px", fontSize: "12px", color: "gray", textAlign: "center" }}>
+            {`订单信息加载中...`}
           </View>
         )}
       </View>

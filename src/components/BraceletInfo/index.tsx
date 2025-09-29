@@ -75,6 +75,11 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
             className="product-image"
             src={productImage}
             mode="aspectFill"
+            onClick={() => {
+              Taro.previewImage({
+                urls: [productImage],
+              });
+            }}
           />
 
           {/* 商品详情 */}

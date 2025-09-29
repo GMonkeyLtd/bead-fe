@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { View, Image, Text, ScrollView } from "@tarojs/components";
+import { View, Image, Text } from "@tarojs/components";
 import "./index.scss";
 import RightArrowIcon from "@/assets/icons/right-arrow.svg";
 import ProductImageGenerator from "../ProductImageGenerator";
@@ -36,7 +36,7 @@ const BraceletItem: React.FC<{
     
     try {
       setIsUploading(true);
-      const productImageBase64 = await imageToBase64(productImageUrl, true, false, 'png');
+      const productImageBase64 = await imageToBase64(productImageUrl, true, false);
       const res = await apiSession.uploadProductImage({
         design_id: designId,
         image_base64: productImageBase64,
@@ -49,7 +49,10 @@ const BraceletItem: React.FC<{
     }
   }, [isUploading]);
   
-  const handleItemClick = useCallback(() => {
+  const handleItemClick = useCallback((e) => {
+    // 阻止事件冒泡，避免与滚动事件冲突
+    e?.stopPropagation?.();
+    
     if (!isUploading) {
       onItemClick?.(item);
     }
@@ -117,19 +120,33 @@ const BraceletItem: React.FC<{
       </View>
     </View>
   );
+}, (prevProps, nextProps) => {
+  // 自定义比较函数，确保只在必要时重新渲染
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.image === nextProps.item.image &&
+    prevProps.item.name === nextProps.item.name &&
+    prevProps.onItemClick === nextProps.onItemClick
+  );
 });
 
 const BraceletList: React.FC<BraceletListProps> = ({ items, onItemClick }) => {
+  // 稳定化 onItemClick 回调，避免不必要的重新渲染
+  const stableOnItemClick = useCallback((item: BraceletItem) => {
+    console.log('BraceletList onItemClick triggered:', item.id);
+    onItemClick?.(item);
+  }, [onItemClick]);
+
   // 使用 useMemo 优化渲染性能
   const renderedItems = useMemo(() => {
     return items.map((item) => (
       <BraceletItem
         key={item.id}
         item={item}
-        onItemClick={onItemClick}
+        onItemClick={stableOnItemClick}
       />
     ));
-  }, [items, onItemClick]);
+  }, [items, stableOnItemClick]);
 
   return (
     <View className="bracelet-list">
