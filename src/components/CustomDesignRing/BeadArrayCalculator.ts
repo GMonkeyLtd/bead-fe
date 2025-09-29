@@ -52,12 +52,14 @@ export class BeadArrayCalculator {
   // 根据图片比例计算在显示时的绳上宽度
   calculateScaledBeadWidth(bead: BeadItem): number {
     // 配件没有宽度，默认1，用于将配饰浮在珠子表面
-    if (bead.spu_type === SPU_TYPE.ACCESSORY && !bead.width) {
+    console.log('calculateScaledBeadWidth bead', bead);
+    if (bead.spu_type === SPU_TYPE.ACCESSORY && !bead.width && !bead.display_width) {
       return 1;
     }
     let calculatedWidth = bead.diameter * (bead.image_aspect_ratio || 1);
-    if ((bead as any).pass_width_ratio) {
-      calculatedWidth = calculatedWidth * ((bead as any).pass_width_ratio || 1);
+    if ((bead as any).display_width) {
+      calculatedWidth = calculatedWidth * ((bead as any).display_width || 1);
+      console.log('calculatedWidth、display_width', calculatedWidth, (bead as any).display_width)
     }
     return calculatedWidth;
   }
@@ -127,7 +129,7 @@ export class BeadArrayCalculator {
         beads.map(bead => ({ 
           ratioBeadWidth: bead.ratioBeadWidth as number, 
           beadDiameter: bead.diameter, 
-          passHeightRatio: (bead as any).pass_height_ratio 
+          passHeightRatio: (bead as any).hole_postion 
         })),
         ringRadius,
         center,
@@ -139,7 +141,7 @@ export class BeadArrayCalculator {
         beads.map(bead => ({ 
           ratioBeadWidth: bead.ratioBeadWidth as number, 
           beadDiameter: bead.diameter, 
-          passHeightRatio: (bead as any).pass_height_ratio 
+          passHeightRatio: (bead as any).hole_postion 
         })),
         center,
         false

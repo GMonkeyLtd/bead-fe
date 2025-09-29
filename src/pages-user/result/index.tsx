@@ -426,7 +426,7 @@ const Result = () => {
           >
             {!imageUrl && (
               <View className={styles.originImageContainer}>
-                <Image src={originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL} mode="heightFix" style={{ height: '70%' }} />
+                <Image src={originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL} mode="heightFix" style={{ height: '100%' }} />
               </View>
             )}
             {imageUrl && (

@@ -11,8 +11,8 @@ export interface DotImageData {
   width?: number;
   image_aspect_ratio?: number;
   isFloatAccessory?: boolean;   // 是否浮在别的珠子上的配饰
-  pass_height_ratio?: number;
-  pass_width_ratio?: number;
+  hole_postion?: number;
+  display_width?: number;
 }
 
 interface CircleRingConfig {
@@ -80,21 +80,21 @@ export const useCircleRingCanvas = (config: CircleRingConfig = {}) => {
   const calculateBeads = useCallback(async (dotsBgImageData: DotImageData[]) => {
     // 获取图片的宽
     return calculateBeadArrangementBySize(
-      // ringRadius * 0.6,
-      ringRadius,
+      ringRadius * 0.6,
+      // ringRadius,
       dotsBgImageData.map(item => {
         let ratioBeadWidth = 0;
-        if (item.isFloatAccessory) {
+        if (item.isFloatAccessory && !item.display_width) {
           ratioBeadWidth = 1;
         } else {
           const calculatedWidth = (item.diameter || 10) * (item.image_aspect_ratio || 1);
-          if (item.pass_width_ratio) {
-            ratioBeadWidth = calculatedWidth * (item.pass_width_ratio || 1);
+          if (item.display_width) {
+            ratioBeadWidth = calculatedWidth * (item.display_width || 1);
           } else {
             ratioBeadWidth = calculatedWidth;
           }
         }
-        return { ratioBeadWidth, beadDiameter: item.diameter || 10, passHeightRatio: item.pass_height_ratio }
+        return { ratioBeadWidth, beadDiameter: item.diameter || 10, passHeightRatio: item.hole_postion }
       }),
       { x: ringRadius, y: ringRadius }
     );

@@ -15,6 +15,7 @@ import { SPU_TYPE } from "@/pages-design/custom-design/index";
 
 
 export interface BeadType {
+  type: AccessoryType;
   name: string;
   image_url: string;
   beadList: BeadItemType[];
@@ -112,7 +113,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   const renderAccessoryBeads = () => {
     if (!currentAccessoryType) return null;
     const accessoryBeads = accessoryTypeMap[currentAccessoryType] || [];
-    console.log('accessoryBeads', accessoryBeads);
     if (!accessoryBeads || accessoryBeads.length === 0) return null;
     return (
       <View
@@ -128,6 +128,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
             onAddClick={() => handleBeadClick(accessory, "add")}
             onReplaceClick={() => handleBeadClick(accessory, "replace")}
             showReplaceButton={currentSelectedBead && currentSelectedBead?.name !== accessory.name}
+            imageNeedRotate={accessory.type === AccessoryType.GuaShi}
           />
         </View>
         ))}
@@ -172,25 +173,27 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   const renderAccessoryTypes = () => {
     return (
       <View className="wuxing-tabs">
-        {Object.keys(accessoryTypeMap || {}).map((accType) => {
+        <View className="wuxing-tabs-inner">
+          {Object.keys(accessoryTypeMap || {}).map((accType) => {
 
-          const isActive = accType == currentAccessoryType;
-          const beadCount = accessoryTypeMap[accType]
-            ? accessoryTypeMap[accType].length
-            : 0;
-          return (
-            <View
-              key={accType}
-              className={`wuxing-tab ${isActive ? "active" : ""}`}
-              onClick={() => onAccessoryTypeChange(accType as AccessoryType)}
-            >
-              {AccessoryFormatMap[accType]}
-              {beadCount > 0 && (
-                <Text className="bead-count">({beadCount})</Text>
-              )}
-            </View>
-          );
-        })}
+            const isActive = accType == currentAccessoryType;
+            const beadCount = accessoryTypeMap[accType]
+              ? accessoryTypeMap[accType].length
+              : 0;
+            return (
+              <View
+                key={accType}
+                className={`wuxing-tab ${isActive ? "active" : ""}`}
+                onClick={() => onAccessoryTypeChange(accType as AccessoryType)}
+              >
+                {AccessoryFormatMap[accType]}
+                {beadCount > 0 && (
+                  <Text className="bead-count">({beadCount})</Text>
+                )}
+              </View>
+            );
+          })}
+        </View>
       </View>
     );
   };

@@ -21,6 +21,8 @@ interface BeadItemProps {
   onItemClick?: () => void;
   /** 自定义样式类名 */
   className?: string;
+  /** 是否需要旋转图片 */
+  imageNeedRotate?: boolean;
 }
 
 const BeadItem: React.FC<BeadItemProps> = ({
@@ -32,7 +34,8 @@ const BeadItem: React.FC<BeadItemProps> = ({
   onReplaceClick,
   onAddClick,
   onItemClick,
-  className = ''
+  className = '',
+  imageNeedRotate = false
 }) => {
   const handleReplaceClick = (e: any) => {
     e.stopPropagation();
@@ -57,6 +60,7 @@ const BeadItem: React.FC<BeadItemProps> = ({
             src={imageUrl}
             className="bead-image"
             mode="aspectFit"
+            style={{ transform: imageNeedRotate ? 'rotate(180deg)' : 'none' }}
           />
         </View>
 
