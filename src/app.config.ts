@@ -1,8 +1,6 @@
 export default defineAppConfig({
   pages: [
-    'pages/home/index',
-    'pages/inspiration/index',
-    'pages/inspiration-detail/index',
+    'pages/home/index'
   ],
   subPackages: [
     {
@@ -50,6 +48,8 @@ export default defineAppConfig({
       pages: [
         'webview/index',
         'design-report/index',
+        'inspiration/index',
+        'inspiration-detail/index',
       ]
     }
   ],
