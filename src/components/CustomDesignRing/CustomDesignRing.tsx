@@ -494,7 +494,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     }
   }, [positionManagerState.selectedBeadIndex, processBeadClick, positionManagerState.beads, getBeadCluster]);
 
-  console.log(positionManagerState.beads, 'positionManagerState.beads')
 
 
   return (

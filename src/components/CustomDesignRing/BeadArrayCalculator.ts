@@ -52,14 +52,12 @@ export class BeadArrayCalculator {
   // 根据图片比例计算在显示时的绳上宽度
   calculateScaledBeadWidth(bead: BeadItem): number {
     // 配件没有宽度，默认1，用于将配饰浮在珠子表面
-    console.log('calculateScaledBeadWidth bead', bead);
     if (bead.spu_type === SPU_TYPE.ACCESSORY && !bead.width && !bead.display_width) {
       return 1;
     }
     let calculatedWidth = bead.diameter * (bead.image_aspect_ratio || 1);
     if ((bead as any).display_width) {
       calculatedWidth = calculatedWidth * ((bead as any).display_width || 1);
-      console.log('calculatedWidth、display_width', calculatedWidth, (bead as any).display_width)
     }
     return calculatedWidth;
   }
