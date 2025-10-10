@@ -81,7 +81,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     minWristSize: 8,
     enableHistory: true,
     maxHistoryLength: 10,
-    displayScale: 3.8
+    displayScale: 3.4
   };
 
   // 使用珠子位置管理器
@@ -204,7 +204,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     })
     if (positionManagerState.predictedLength < 13) {
       Taro.showToast({
-        title: "哎呀，珠子有点少啦！一般手围建议不少于13cm噢。",
+        title: "哎呀，珠子有点少啦！一般手围建议至少不少于13cm噢。",
         icon: "none",
         duration: 2000,
       });
