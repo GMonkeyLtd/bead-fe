@@ -34,6 +34,7 @@ interface BeadSelectorProps {
   onAccessoryTypeChange: (accessoryType: BeadType) => void;
   onBeadClick: (bead: BeadType, action: "add" | "replace" | "select") => void;
   currentSelectedBead: BeadItemType;
+  onBeadImageClick: (bead: BeadItemType) => void;
 }
 
 const BeadSelector: React.FC<BeadSelectorProps> = ({
@@ -48,6 +49,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   onAccessoryTypeChange,
   onBeadClick,
   currentSelectedBead,
+  onBeadImageClick,
 }) => {
   const [curType, setCurType] = useState<"crystal" | "accessories">("crystal");
   const allWuxing = useMemo(() => {
@@ -103,6 +105,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
               onAddClick={() => handleBeadClick(typeBead, "add")}
               onReplaceClick={() => handleBeadClick(typeBead, "replace")}
               showReplaceButton={currentSelectedBead && currentSelectedBead?.name !== typeBead.name}
+              onBeadImageClick={() => onBeadImageClick(typeBead)}
             />
           </View>
         ))}
@@ -129,6 +132,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
             onReplaceClick={() => handleBeadClick(accessory, "replace")}
             showReplaceButton={currentSelectedBead && currentSelectedBead?.name !== accessory.name}
             imageNeedRotate={accessory.type === AccessoryType.GuaShi}
+            onBeadImageClick={() => onBeadImageClick(accessory)}
           />
         </View>
         ))}
