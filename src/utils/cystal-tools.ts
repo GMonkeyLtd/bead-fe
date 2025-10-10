@@ -1,3 +1,4 @@
+import { SPU_TYPE } from "@/pages-design/custom-design";
 import { BeadItem } from "./api-session";
 
 // 简单的位置类型，用于内部计算
@@ -142,31 +143,21 @@ export const calcPositionsWithRenderDiameter = (
   return positions;
 }
 
-// 补充类型定义
-interface SimplePosition {
-  scale_width: number;
-  scale_height: number;
-  x: number;
-  y: number;
-  angle: number;
-  index: any;
-  threadX: number;
-  threadY: number;
-  passHeightRatio: number;
-}
-
-
 export const calculateBeadArrangementByTargetRadius = (
   beads: { ratioBeadWidth: number, beadDiameter: number, passHeightRatio?: number }[],
   targetRadius: number,
   center: { x: number, y: number },
   displayScale: number
 ) => {
-  const beadData = beads.map(d => ({
-    scale_width: d.ratioBeadWidth * displayScale,
-    scale_height: d.beadDiameter * displayScale,
-    passHeightRatio: d.passHeightRatio,
-  }));
+  const beadData = beads.map(d => {
+    // 如果穿孔位置不是中心，且珠子直径大于20，则按照直径为20进行缩小渲染
+    const zoomRatioByLongDiameter = d.passHeightRatio && d.passHeightRatio !== 0.5 && d.beadDiameter > 20 ? 20 / d.beadDiameter : 1;
+    return {
+      scale_width: d.ratioBeadWidth * displayScale * zoomRatioByLongDiameter,
+      scale_height: d.beadDiameter * displayScale * zoomRatioByLongDiameter,
+      passHeightRatio: d.passHeightRatio,
+    }
+  });
   return calculateBeadPositionsByTargetRadius(beadData, targetRadius, center);
 }
 
@@ -189,15 +180,15 @@ export const calculateBeadArrangementBySize = (
 
   // 计算缩放后的渲染直径列表
   const scaledRenderDiameterList = beadSizeList.map((size) => {
-  // 如果穿孔位置不是中心，且珠子直径大于20，则按照20进行渲染
-  const renderDiameter = size.passHeightRatio  && size.passHeightRatio  !== 0.5 &&  size.beadDiameter > 20 ? 20 : size.beadDiameter;
+    // 如果穿孔位置不是中心，且珠子直径大于20，则按照直径为20进行缩小渲染
+    const zoomRatioByLongDiameter = size.passHeightRatio && size.passHeightRatio !== 0.5 && size.beadDiameter > 20 ? 20 / size.beadDiameter : 1;
 
     return { 
       render_width: size.ratioBeadWidth, 
-      scale_width: size.ratioBeadWidth * sizeRatio, 
-      render_diameter: renderDiameter, 
-      scale_height: renderDiameter * sizeRatio, 
-      passHeightRatio: size.passHeightRatio 
+      scale_width: size.ratioBeadWidth * sizeRatio * zoomRatioByLongDiameter, 
+      render_diameter: size.beadDiameter, 
+      scale_height:  size.beadDiameter * sizeRatio * zoomRatioByLongDiameter, 
+      passHeightRatio: size.passHeightRatio || 0.5
     }
   });
 
@@ -209,18 +200,18 @@ export const calculateBeadArrangementBySize = (
 
 export const computeBraceletLength = (beads: BeadItem[]) => {
   const beadsWidths = beads.map((dot) => dot.width);
-  const beadsDiameters = beads.map((dot) => dot.diameter);
   // 所有珠子能围成的周长
   const allWidth = beadsWidths.reduce((sum, number) => sum + number, 0);
   if (allWidth < 100) {
     return allWidth / 10;
   }
-  // 所有珠子的直径总和
+  // 所有珠子的直径总和(排除配饰，配饰太长影响计算)
+  const beadsDiameters = beads.filter((dot) => dot.spu_type !== SPU_TYPE.ACCESSORY).map((dot) => dot.diameter);
   const allDiameter = beadsDiameters.reduce((sum, number) => sum + number, 0);
+  // 珠子的平均半径
+  const averageRadius =  allDiameter / (2 * beadsDiameters.length);
   // 围成圆的半径
   const ringRadius = allWidth / (2 * Math.PI);
-  // 珠子的平均半径
-  const averageRadius =  allDiameter / (2 * beads.length);
   // 手围 = （围成圆的半径 - 珠子的平均半径）* 2 * PI
   const predictLength = (ringRadius - averageRadius) * 2 * Math.PI;
   const rest = (Math.round(predictLength) / 10) % 1;

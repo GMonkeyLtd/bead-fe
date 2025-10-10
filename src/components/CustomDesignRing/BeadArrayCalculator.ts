@@ -46,6 +46,7 @@ export class BeadArrayCalculator {
     const beadsForCalculation = beads.map(bead => ({
       diameter: bead.diameter,
       width: bead.width,
+      spu_type: bead.spu_type,
     })) as any; // 临时类型断言，避免类型不匹配
     return computeBraceletLength(beadsForCalculation);
   }
@@ -121,8 +122,10 @@ export class BeadArrayCalculator {
     let positions: any[] = [];
 
     const totalBeadWidth = beads.reduce((sum, bead) => sum + (bead.ratioBeadWidth as number) * this.config.displayScale, 0);
+    const curWristLength = this.calculatePredictedLength(beads);
     
-    if (totalBeadWidth < 2 * ringRadius * Math.PI) {
+    if (totalBeadWidth < 2 * ringRadius * Math.PI && curWristLength < 13) {
+      // 珠子按固定放大倍数绘制，不围成圆环
       positions = calculateBeadArrangementByTargetRadius(
         beads.map(bead => ({ 
           ratioBeadWidth: bead.ratioBeadWidth as number, 
@@ -642,11 +645,13 @@ export class BeadArrayCalculator {
 
     const ringRadius = this.config.targetRadius
     const curWristLength = this.calculatePredictedLength(positions);
+    const totalBeadWidth = positions.reduce((sum, bead) => sum + (bead.ratioBeadWidth as number) * this.config.displayScale, 0);
+
 
     const center = { x: this.config.canvasSize / 2, y: this.config.canvasSize / 2 };
 
     let newCoordinates: any[] = [];
-    if (curWristLength < 13) {
+    if (totalBeadWidth < 2 * ringRadius * Math.PI && curWristLength < 13) {
       newCoordinates = calculateBeadArrangementByTargetRadius(
         positions.map(bead => ({ ratioBeadWidth: bead.ratioBeadWidth as number, beadDiameter: bead.diameter, passHeightRatio: bead.passHeightRatio })),
         ringRadius,
