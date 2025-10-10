@@ -23,6 +23,7 @@ import { SPU_TYPE } from "@/pages-design/custom-design";
 import HistoryOperations from "./HistoryOperations";
 import BeadSizeSelector from "../BeadSizeSelector";
 import tutorialIcon from "@/assets/icons/tutorial.svg";
+import ImagePreviewModal from "../ImagePreviewModal";
 
 // 定义ref暴露的接口
 export interface CustomDesignRingRef {
@@ -72,6 +73,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [imageUrl, setImageUrl] = useState<string>("");
   const [beadSizeList, setBeadSizeList] = useState<number[]>([8, 10, 12, 13, 14, 15]);
   const [currentBeadSize, setCurrentBeadSize] = useState<number>(10);
+  const [detailBeadItem, setDetailBeadItem] = useState<Bead | null>(null);
 
   // 稳定化 beadPositionConfig，避免不必要的重新初始化
   const beadPositionConfig = useMemo<BeadPositionManagerConfig>(() => ({
@@ -494,6 +496,10 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     }
   }, [positionManagerState.selectedBeadIndex, processBeadClick, positionManagerState.beads, getBeadCluster]);
 
+  const handleBeadImageClick = useCallback((bead: Bead) => {
+    setDetailBeadItem(bead);
+  }, []);
+
 
 
   return (
@@ -626,7 +632,16 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           onWuxingChange={handleWuxingChange}
           onAccessoryTypeChange={setCurrentAccessoryType}
           onBeadClick={handleBeadClick}
+          onBeadImageClick={handleBeadImageClick}
           currentSelectedBead={positionManagerState.beads?.[positionManagerState.selectedBeadIndex]}
+        />
+        {/* 图片预览弹窗 */}
+        <ImagePreviewModal
+          visible={!!detailBeadItem?.image_url}
+          imageUrl={detailBeadItem?.image_url || ''}
+          title={detailBeadItem?.name }
+          onClose={() => setDetailBeadItem(null)}
+          imageNeedRotate={detailBeadItem?.type === AccessoryType.GuaShi}
         />
       </View>
     </View>

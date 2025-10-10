@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Image, Text } from '@tarojs/components';
-import './styles/BeadItem.scss';
+import styles from './styles/BeadItem.module.scss';
 
 interface BeadItemProps {
   /** 珠子图片URL */
@@ -23,6 +23,8 @@ interface BeadItemProps {
   className?: string;
   /** 是否需要旋转图片 */
   imageNeedRotate?: boolean;
+  /** 图片点击事件 */
+  onBeadImageClick?: () => void;
 }
 
 const BeadItem: React.FC<BeadItemProps> = ({
@@ -34,9 +36,12 @@ const BeadItem: React.FC<BeadItemProps> = ({
   onReplaceClick,
   onAddClick,
   onItemClick,
+  onBeadImageClick,
   className = '',
   imageNeedRotate = false
 }) => {
+  const [showImagePreview, setShowImagePreview] = useState(false);
+
   const handleReplaceClick = (e: any) => {
     e.stopPropagation();
     onReplaceClick?.();
@@ -47,58 +52,65 @@ const BeadItem: React.FC<BeadItemProps> = ({
     onAddClick?.();
   };
 
+  const handleImageClick = (e: any) => {
+    e.stopPropagation();
+    // 点击图片，从页面底部弹出图片预览弹窗，不使用Taro.previewImage
+    onBeadImageClick?.();
+  };
+
   return (
     <View 
-      className={`bead-item-card ${className} ${!showReplaceButton ? 'active' : ''}`}
+      className={`${styles.beadItemCard} ${className} ${!showReplaceButton ? styles.active : ''}`}
       onClick={() => onItemClick?.()}
     >
       {/* 主要内容区域 */}
-      <View className="bead-item-main">
+        <View className={styles.beadItemMain}>
         {/* 珠子图片 */}
-        <View className="bead-item-image">
+        <View className={styles.beadItemImage}>
           <Image 
             src={imageUrl}
-            className="bead-image"
+            className={styles.beadImage}
             mode="aspectFit"
             style={{ transform: imageNeedRotate ? 'rotate(180deg)' : 'none' }}
+            onClick={handleImageClick}
           />
         </View>
 
         {/* 珠子信息 */}
-        <View className="bead-item-info">
-          <View className="bead-item-header">
-            <Text className="bead-item-name">{name}</Text>
+        <View className={styles.beadItemInfo}>
+          <View className={styles.beadItemHeader}>
+            <Text className={styles.beadItemName}>{name}</Text>
           </View>
-          <View className="bead-item-specs">
-            <Text className="specs-label">规格 :</Text>
-            <Text className="specs-value">{specifications}</Text>
+          <View className={styles.beadItemSpecs}>
+            <Text className={styles.specsLabel}>规格 :</Text>
+            <Text className={styles.specsValue}>{specifications}</Text>
           </View>
         </View>
       </View>
 
       {/* 操作按钮区域 */}
-      <View className="bead-item-actions">
+      <View className={styles.beadItemActions}>
         {showReplaceButton && (
           <View 
-            className="action-button replace-button"
+            className={`${styles.actionButton} ${styles.replaceButton}`}
             onClick={handleReplaceClick}
           >
-            <Text className="button-text">替换</Text>
+            <Text className={styles.buttonText}>替换</Text>
           </View>
         )}
         
         {showAddButton && (
           <View 
-            className="action-button add-button"
+            className={`${styles.actionButton} ${styles.addButton}`}
             onClick={handleAddClick}
           >
-            <View className="add-icon">
-              <View className="add-icon-plus">
-                <View className="plus-horizontal"></View>
-                <View className="plus-vertical"></View>
+            <View className={styles.addIcon}>
+              <View className={styles.addIconPlus}>
+                <View className={styles.plusHorizontal}></View>
+                <View className={styles.plusVertical}></View>
               </View>
             </View>
-            <Text className="button-text">添加</Text>
+            <Text className={styles.buttonText}>添加</Text>
           </View>
         )}
       </View>
