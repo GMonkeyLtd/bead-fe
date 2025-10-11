@@ -175,10 +175,11 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   };
 
   const renderAccessoryTypes = () => {
+    console.log(Object.keys(AccessoryFormatMap || {}),AccessoryFormatMap, "accessoryTypeMap");
     return (
       <View className="wuxing-tabs">
         <View className="wuxing-tabs-inner">
-          {Object.keys(accessoryTypeMap || {}).map((accType) => {
+          {Object.keys(AccessoryFormatMap || {}).map((accType) => {
 
             const isActive = accType == currentAccessoryType;
             const beadCount = accessoryTypeMap[accType]

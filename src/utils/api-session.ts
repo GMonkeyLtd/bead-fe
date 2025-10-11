@@ -59,10 +59,10 @@ export enum AccessoryType {
 }
 
 export const AccessoryFormatMap = {
-  [AccessoryType.GeHuan]: '隔环',
-  [AccessoryType.GeZhu]: '隔珠',
   [AccessoryType.SuiXing]: '随形',
   [AccessoryType.PaoHuan]: '跑环',
+  [AccessoryType.GeHuan]: '隔环',
+  [AccessoryType.GeZhu]: '隔珠',
   [AccessoryType.GuaShi]: '挂饰',
 }
 

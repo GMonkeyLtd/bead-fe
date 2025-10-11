@@ -23,15 +23,6 @@ import PromoBanner from "@/components/PromoBanner";
 import MaterialSvg from "@/assets/icons/material.svg";
 import AppHeader from "@/components/AppHeader";
 
-interface BeadInfo {
-  id: string;
-  name: string;
-  element: string;
-  effect: string;
-  image: string;
-  color: string;
-}
-
 const InspirationDetailPage: React.FC = () => {
   const router = useRouter();
   const { workId, designId } = router.params || {};
