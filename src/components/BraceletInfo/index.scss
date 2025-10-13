@@ -191,13 +191,26 @@
   overflow: hidden;
 
   .table-header {
+    width: 100%;
     display: flex;
     justify-content: stretch;
     align-items: stretch;
     padding: 0 4px;
     gap: 10px;
 
-    .header-name,
+    .header-name{
+      flex: 1;
+      min-width: 50%;
+      font-family: "Noto Sans SC", sans-serif;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 1.2;
+      letter-spacing: 1px;
+      color: #1f1722;
+      opacity: 0.9;
+      text-align: left;
+      padding: 8px 0;
+    }
     .header-size {
       flex: 1;
       font-family: "Noto Sans SC", sans-serif;

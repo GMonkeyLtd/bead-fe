@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Image, Text } from "@tarojs/components";
+import React, { useCallback, useMemo, useState } from "react";
+import { View, Text } from "@tarojs/components";
 import "./styles/BeadSelector.scss";
 import CategorySelector from "./CategorySelector";
 import BeadItem from "./BeadItem";
 import {
   AccessoryType,
-  AccessoryItem,
   AccessoryFormatMap,
+  AccessoryDisplayOrder,
   BeadItem as BeadItemType,
 } from "@/utils/api-session";
 import LoadingIcon from "../LoadingIcon";
-import { SPU_TYPE } from "@/pages-design/custom-design/index";
 
 
 
@@ -27,14 +26,12 @@ interface BeadSelectorProps {
   accessoryTypeMap: Record<AccessoryType, BeadType[]>;
   currentWuxing: string;
   currentAccessoryType: AccessoryType | "";
-  renderRatio: number;
-  predictedLength: number;
   styleHeight: string;
   onWuxingChange: (wuxing: string) => void;
-  onAccessoryTypeChange: (accessoryType: BeadType) => void;
+  onAccessoryTypeChange: (accessoryType: AccessoryType) => void;
   onBeadClick: (bead: BeadType, action: "add" | "replace" | "select") => void;
   currentSelectedBead: BeadItemType;
-  onBeadImageClick: (bead: BeadItemType) => void;
+  onBeadImageClick: (bead: BeadType) => void;
 }
 
 const BeadSelector: React.FC<BeadSelectorProps> = ({
@@ -42,8 +39,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   accessoryTypeMap,
   currentWuxing,
   currentAccessoryType,
-  renderRatio,
-  predictedLength,
   styleHeight,
   onWuxingChange,
   onAccessoryTypeChange,
@@ -175,11 +170,11 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   };
 
   const renderAccessoryTypes = () => {
+    console.log(AccessoryDisplayOrder, AccessoryFormatMap, "accessoryTypeMap");
     return (
       <View className="wuxing-tabs">
         <View className="wuxing-tabs-inner">
-          {Object.keys(accessoryTypeMap || {}).map((accType) => {
-
+          {AccessoryDisplayOrder.map((accType) => {
             const isActive = accType == currentAccessoryType;
             const beadCount = accessoryTypeMap[accType]
               ? accessoryTypeMap[accType].length
@@ -188,7 +183,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
               <View
                 key={accType}
                 className={`wuxing-tab ${isActive ? "active" : ""}`}
-                onClick={() => onAccessoryTypeChange(accType as AccessoryType)}
+                onClick={() => onAccessoryTypeChange(accType)}
               >
                 {AccessoryFormatMap[accType]}
                 {beadCount > 0 && (
@@ -223,7 +218,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
                 if (categoryKey === "crystal") {
                   onWuxingChange(allWuxing[0]);
                 } else {
-                  onAccessoryTypeChange(AccessoryType.GeHuan);
+                  onAccessoryTypeChange(AccessoryType.SuiXing);
                 }
                 setCurType(categoryKey as "crystal" | "accessories");
               }}
