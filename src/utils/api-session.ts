@@ -386,12 +386,12 @@ export default {
       }
     );
   },
-  getDesignList: (config?: ApiConfig) => {
+  getDesignList: (params: { offset: number; limit: number }, config?: ApiConfig) => {
     return http.get<{
       data: any;
     }>(
       `/user/designs`,
-      undefined,
+      params,
       {
         showLoading: false,
         cancelToken: config?.cancelToken,
