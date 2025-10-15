@@ -10,7 +10,7 @@ import { CancelToken } from "@/utils/request";
 import sessionApi from "@/utils/api-session";
 
 const predictedTimeText = (
-  <View className="quick-design-loading-content">设计过程预计等待 20s</View>
+  <View className="quick-design-loading-content">设计过程预计等待 5s</View>
 );
 
 const QuickDesign = () => {

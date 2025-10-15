@@ -62,9 +62,9 @@ export const BraceletDraftCard = ({
       diameter: item.diameter,
       width: item.width || item.diameter,
       image_aspect_ratio: item.image_aspect_ratio || 1,
-      isFloatAccessory: item.spu_type === SPU_TYPE.ACCESSORY && (!item.width || (item.pass_height_ratio && item.pass_height_ratio !== 0.5)),
-      pass_height_ratio: item.pass_height_ratio,
-      pass_width_ratio: item.pass_width_ratio,
+      isFloatAccessory: item.spu_type === SPU_TYPE.ACCESSORY && (!item.width || (item.hole_postion && item.hole_postion !== 0.5)),
+      hole_postion: item.hole_postion,
+      display_width: item.display_width,
     }));
   }, [draft?.items]);
 
@@ -198,6 +198,9 @@ export const BraceletDraftCard = ({
     if (!draft?.items || draft?.items?.length === 0 || byMerchant) {
       return;
     }
+    Taro.reportEvent('ai_design', {
+      edit_ai_design	: 1
+    })
     Taro.redirectTo({
       url:
         pageUrls.customDesign +
@@ -302,8 +305,8 @@ export const BraceletDraftCard = ({
             <CircleRingImage
               // imageUrl={isRegenerating ? "" :  draft.bracelet_image || ""}
               imageUrl={isRegenerating ? "" : draft.image_url || draft.bracelet_image || ""}
-              // size={240}
-              size={140}
+              size={240}
+              // size={140}
               backendSize={160}
               backgroundImage={BRACELET_BG_IMAGE_URL}
               rotate={true}
@@ -318,6 +321,9 @@ export const BraceletDraftCard = ({
                 flex: 1,
               }}
               onClick={() => {
+                Taro.reportEvent('ai_design', {
+                  view_report: 1
+                })
                 viewDraftDesign();
               }}
               text="查看效果"

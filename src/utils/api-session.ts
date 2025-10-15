@@ -46,21 +46,34 @@ export interface BeadItem extends SpuInfo {
   // 运行时计算的属性
   ratioBeadWidth?: number;
   render_diameter?: number;
+  display_width?: number;
+  hole_postion?: number;
 }
 
 export enum AccessoryType {
   GeHuan = 1,
   GeZhu = 2,
   SuiXing = 3,
-  PaoHuan = 4
+  PaoHuan = 4,
+  GuaShi = 5
 }
 
 export const AccessoryFormatMap = {
-  [AccessoryType.GeHuan]: '隔环',
-  [AccessoryType.GeZhu]: '隔珠',
   [AccessoryType.SuiXing]: '随形',
   [AccessoryType.PaoHuan]: '跑环',
+  [AccessoryType.GeHuan]: '隔环',
+  [AccessoryType.GeZhu]: '隔珠',
+  [AccessoryType.GuaShi]: '挂饰',
 }
+
+// 定义显示顺序，按照设计需要的顺序排列
+export const AccessoryDisplayOrder = [
+  AccessoryType.SuiXing,  // 随形
+  AccessoryType.PaoHuan,  // 跑环
+  AccessoryType.GeHuan,   // 隔环
+  AccessoryType.GeZhu,    // 隔珠
+  AccessoryType.GuaShi,   // 挂饰
+]
 
 export interface AccessoryItem {
   id: string;

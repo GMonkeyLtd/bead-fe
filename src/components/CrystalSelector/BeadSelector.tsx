@@ -1,20 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Image, Text } from "@tarojs/components";
+import React, { useCallback, useMemo, useState } from "react";
+import { View, Text } from "@tarojs/components";
 import "./styles/BeadSelector.scss";
 import CategorySelector from "./CategorySelector";
 import BeadItem from "./BeadItem";
 import {
   AccessoryType,
-  AccessoryItem,
   AccessoryFormatMap,
+  AccessoryDisplayOrder,
   BeadItem as BeadItemType,
 } from "@/utils/api-session";
 import LoadingIcon from "../LoadingIcon";
-import { SPU_TYPE } from "@/pages-design/custom-design/index";
 
 
 
 export interface BeadType {
+  type: AccessoryType;
   name: string;
   image_url: string;
   beadList: BeadItemType[];
@@ -26,13 +26,12 @@ interface BeadSelectorProps {
   accessoryTypeMap: Record<AccessoryType, BeadType[]>;
   currentWuxing: string;
   currentAccessoryType: AccessoryType | "";
-  renderRatio: number;
-  predictedLength: number;
   styleHeight: string;
   onWuxingChange: (wuxing: string) => void;
-  onAccessoryTypeChange: (accessoryType: BeadType) => void;
+  onAccessoryTypeChange: (accessoryType: AccessoryType) => void;
   onBeadClick: (bead: BeadType, action: "add" | "replace" | "select") => void;
   currentSelectedBead: BeadItemType;
+  onBeadImageClick: (bead: BeadType) => void;
 }
 
 const BeadSelector: React.FC<BeadSelectorProps> = ({
@@ -40,13 +39,12 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   accessoryTypeMap,
   currentWuxing,
   currentAccessoryType,
-  renderRatio,
-  predictedLength,
   styleHeight,
   onWuxingChange,
   onAccessoryTypeChange,
   onBeadClick,
   currentSelectedBead,
+  onBeadImageClick,
 }) => {
   const [curType, setCurType] = useState<"crystal" | "accessories">("crystal");
   const allWuxing = useMemo(() => {
@@ -102,6 +100,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
               onAddClick={() => handleBeadClick(typeBead, "add")}
               onReplaceClick={() => handleBeadClick(typeBead, "replace")}
               showReplaceButton={currentSelectedBead && currentSelectedBead?.name !== typeBead.name}
+              onBeadImageClick={() => onBeadImageClick(typeBead)}
             />
           </View>
         ))}
@@ -112,7 +111,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   const renderAccessoryBeads = () => {
     if (!currentAccessoryType) return null;
     const accessoryBeads = accessoryTypeMap[currentAccessoryType] || [];
-    console.log('accessoryBeads', accessoryBeads);
     if (!accessoryBeads || accessoryBeads.length === 0) return null;
     return (
       <View
@@ -128,6 +126,8 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
             onAddClick={() => handleBeadClick(accessory, "add")}
             onReplaceClick={() => handleBeadClick(accessory, "replace")}
             showReplaceButton={currentSelectedBead && currentSelectedBead?.name !== accessory.name}
+            imageNeedRotate={accessory.type === AccessoryType.GuaShi}
+            onBeadImageClick={() => onBeadImageClick(accessory)}
           />
         </View>
         ))}
@@ -170,27 +170,29 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   };
 
   const renderAccessoryTypes = () => {
+    console.log(AccessoryDisplayOrder, AccessoryFormatMap, "accessoryTypeMap");
     return (
       <View className="wuxing-tabs">
-        {Object.keys(accessoryTypeMap || {}).map((accType) => {
-
-          const isActive = accType == currentAccessoryType;
-          const beadCount = accessoryTypeMap[accType]
-            ? accessoryTypeMap[accType].length
-            : 0;
-          return (
-            <View
-              key={accType}
-              className={`wuxing-tab ${isActive ? "active" : ""}`}
-              onClick={() => onAccessoryTypeChange(accType as AccessoryType)}
-            >
-              {AccessoryFormatMap[accType]}
-              {beadCount > 0 && (
-                <Text className="bead-count">({beadCount})</Text>
-              )}
-            </View>
-          );
-        })}
+        <View className="wuxing-tabs-inner">
+          {AccessoryDisplayOrder.map((accType) => {
+            const isActive = accType == currentAccessoryType;
+            const beadCount = accessoryTypeMap[accType]
+              ? accessoryTypeMap[accType].length
+              : 0;
+            return (
+              <View
+                key={accType}
+                className={`wuxing-tab ${isActive ? "active" : ""}`}
+                onClick={() => onAccessoryTypeChange(accType)}
+              >
+                {AccessoryFormatMap[accType]}
+                {beadCount > 0 && (
+                  <Text className="bead-count">({beadCount})</Text>
+                )}
+              </View>
+            );
+          })}
+        </View>
       </View>
     );
   };
@@ -216,7 +218,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
                 if (categoryKey === "crystal") {
                   onWuxingChange(allWuxing[0]);
                 } else {
-                  onAccessoryTypeChange(AccessoryType.GeHuan);
+                  onAccessoryTypeChange(AccessoryType.SuiXing);
                 }
                 setCurType(categoryKey as "crystal" | "accessories");
               }}

@@ -1,4 +1,4 @@
-.bead-item-card {
+.beadItemCard {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -17,7 +17,7 @@
   }
 }
 
-.bead-item-main {
+.beadItemMain {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -26,7 +26,7 @@
   flex: 1;
 }
 
-.bead-item-image {
+.beadItemImage {
   width: 30px;
   height: 30px;
   flex-shrink: 0;
@@ -36,14 +36,14 @@
   align-items: center;
   justify-content: center;
 
-  .bead-image {
+  .beadImage {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 }
 
-.bead-item-info {
+.beadItemInfo {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -52,7 +52,7 @@
   flex: 1;
 }
 
-.bead-item-header {
+.beadItemHeader {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -61,7 +61,7 @@
   gap: 4px;
 }
 
-.bead-item-name {
+.beadItemName {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 500;
   font-size: 11px;
@@ -72,7 +72,7 @@
   flex: 1;
 }
 
-.bead-item-specs {
+.beadItemSpecs {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -80,7 +80,7 @@
   align-self: stretch;
   gap: 6px;
 
-  .specs-label {
+  .specsLabel {
     font-family: "Noto Sans SC", sans-serif;
     font-weight: 350;
     font-size: 10px;
@@ -90,7 +90,7 @@
     white-space: nowrap;
   }
 
-  .specs-value {
+  .specsValue {
     font-family: "Helvetica Neue", sans-serif;
     font-weight: 300;
     font-size: 10px;
@@ -101,7 +101,7 @@
   }
 }
 
-.bead-item-actions {
+.beadItemActions {
   display: flex;
   flex-direction: row;
   gap: 6px;
@@ -109,7 +109,7 @@
   flex-shrink: 0;
 }
 
-.action-button {
+.actionButton {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -119,7 +119,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
 
-  .button-text {
+  .buttonText {
     font-family: "Noto Sans SC", sans-serif;
     font-weight: 400;
     font-size: 10px;
@@ -136,12 +136,12 @@
   }
 }
 
-.replace-button {
+.replaceButton {
   padding: 6px 12px;
   background: rgba(255, 255, 255, 0.3);
   border: 1px solid #FFFFFF;
 
-  .button-text {
+  .buttonText {
     color: #000000;
   }
 
@@ -150,12 +150,12 @@
   }
 }
 
-.add-button {
+.addButton {
   padding: 6px 12px;
   background: #FFFFFF;
   border-radius: 50px;
 
-  .button-text {
+  .buttonText {
     color: #000000;
   }
 
@@ -164,7 +164,7 @@
   }
 }
 
-.add-icon {
+.addIcon {
   width: 12px;
   height: 12px;
   display: flex;
@@ -175,25 +175,25 @@
   border: 1px solid #000000;
 }
 
-.add-icon-plus {
+.addIconPlus {
   position: relative;
   width: 11.67px;
   height: 11.67px;
 
-  .plus-horizontal,
-  .plus-vertical {
+  .plusHorizontal,
+  .plusVertical {
     position: absolute;
     background: #000000;
   }
 
-  .plus-horizontal {
+  .plusHorizontal {
     left: 2.92px;
     top: 5.4px;
     width: 5.83px;
     height: 0.88px;
   }
 
-  .plus-vertical {
+  .plusVertical {
     left: 5.4px;
     top: 2.92px;
     width: 0.88px;

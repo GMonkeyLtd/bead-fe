@@ -23,6 +23,7 @@ import { SPU_TYPE } from "@/pages-design/custom-design";
 import HistoryOperations from "./HistoryOperations";
 import BeadSizeSelector from "../BeadSizeSelector";
 import tutorialIcon from "@/assets/icons/tutorial.svg";
+import ImagePreviewModal from "../ImagePreviewModal";
 
 // 定义ref暴露的接口
 export interface CustomDesignRingRef {
@@ -72,6 +73,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   const [imageUrl, setImageUrl] = useState<string>("");
   const [beadSizeList, setBeadSizeList] = useState<number[]>([8, 10, 12, 13, 14, 15]);
   const [currentBeadSize, setCurrentBeadSize] = useState<number>(10);
+  const [detailBeadItem, setDetailBeadItem] = useState<Bead | null>(null);
 
   // 稳定化 beadPositionConfig，避免不必要的重新初始化
   const beadPositionConfig = useMemo<BeadPositionManagerConfig>(() => ({
@@ -83,8 +85,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     minWristSize: 8,
     enableHistory: true,
     maxHistoryLength: 10,
-    displayScale: 3.8
-  }), [canvasSize, spacing, renderRatio]);
+    displayScale: 3.4
+  };
 
   // 使用珠子位置管理器
   const positionManagerRef = useRef<BeadPositionManager | null>(null);
@@ -211,9 +213,12 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
 
   // 处理查看效果
   const handleViewEffect = useCallback(() => {
+    Taro.reportEvent('diy_event', {
+      view_diy_result: 1
+    })
     if (positionManagerState.predictedLength < 13) {
       Taro.showToast({
-        title: "哎呀，珠子有点少啦！一般手围建议不少于13cm噢。",
+        title: "哎呀，珠子有点少啦！一般手围建议至少不少于13cm噢。",
         icon: "none",
         duration: 2000,
       });
@@ -225,9 +230,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         diameter: dot.diameter,
         width: dot.width,
         image_aspect_ratio: dot.image_aspect_ratio,
-        pass_height_ratio: dot.pass_height_ratio,
-        pass_width_ratio: dot.pass_width_ratio,
-        isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && (!dot.width || (dot.pass_height_ratio && dot.pass_height_ratio !== 0.5)),
+        hole_postion: dot.hole_postion,
+        display_width: dot.display_width,
+        isFloatAccessory: dot.spu_type === SPU_TYPE.ACCESSORY && (!dot.width || (dot.hole_postion && dot.hole_postion !== 0.5)),
       }));
       generateCircleRing(dotImageData).then((imageUrl) => {
         console.log('generateCircleRing imageUrl: ', imageUrl)
@@ -277,7 +282,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
   }, action: "add" | "replace") => {
     if (!positionManagerRef.current) return;
     try {
-      console.log("bead", bead);
       // 转换为Bead类型
       const beadData: Bead = {
         ...bead,
@@ -493,7 +497,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     }
   }, [positionManagerState.selectedBeadIndex, processBeadClick, positionManagerState.beads, getBeadCluster]);
 
-  console.log(positionManagerState.beads, 'positionManagerState.beads')
+  const handleBeadImageClick = useCallback((bead: Bead) => {
+    setDetailBeadItem(bead);
+  }, []);
 
 
   return (
@@ -533,7 +539,15 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         onClick={handleBeadDeselect}
       >
         <View className="custom-design-ring-top-content">
-          <View onClick={showTutorial} className="custom-design-ring-tutorial-container">
+          <View 
+            onClick={() => {
+              Taro.reportEvent('diy_event', {
+                view_tutorial: 1
+              })
+              showTutorial?.()
+            }} 
+            className="custom-design-ring-tutorial-container"
+          >
             <Image src={tutorialIcon} className="custom-design-ring-tutorial-icon" style={{ width: "18px", height: "18px" }} />
             <View className="custom-design-ring-tutorial-text">
               教程
@@ -618,7 +632,16 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           onWuxingChange={handleWuxingChange}
           onAccessoryTypeChange={setCurrentAccessoryType}
           onBeadClick={handleBeadClick}
+          onBeadImageClick={handleBeadImageClick}
           currentSelectedBead={positionManagerState.beads?.[positionManagerState.selectedBeadIndex]}
+        />
+        {/* 图片预览弹窗 */}
+        <ImagePreviewModal
+          visible={!!detailBeadItem?.image_url}
+          imageUrl={detailBeadItem?.image_url || ''}
+          title={detailBeadItem?.name }
+          onClose={() => setDetailBeadItem(null)}
+          imageNeedRotate={detailBeadItem?.type === AccessoryType.GuaShi}
         />
       </View>
     </View>

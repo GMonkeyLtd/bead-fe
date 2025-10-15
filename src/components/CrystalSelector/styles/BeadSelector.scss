@@ -29,6 +29,7 @@
   align-items: center;
   gap: 12px;
   position: relative;
+  overflow-x: auto;
 
   /* 隐藏滚动条 */
   &::-webkit-scrollbar {
@@ -37,6 +38,13 @@
 
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+.wuxing-tabs-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .wuxing-tab {
@@ -54,6 +62,7 @@
   font-style: normal;
   font-weight: 500;
   line-height: 13px;
+  white-space: nowrap;
   /* 118.182% */
 
   &.active {

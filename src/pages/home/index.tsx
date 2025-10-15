@@ -150,6 +150,9 @@ const Home = () => {
                           color: "#fff",
                         }}
                         onClick={() => {
+                          Taro.reportEvent('homepage_event', {
+                            ai_design_click: 1
+                          })
                           if (!lastSessionId) {
                             startDesign();
                           } else {
@@ -179,6 +182,9 @@ const Home = () => {
                           color: "#fff",
                         }}
                         onClick={() => {
+                          Taro.reportEvent('homepage_event', {
+                            home_diy_click: 1
+                          })
                           Taro.redirectTo({
                             url: pageUrls.customDesign + '?from=home',
                           });
@@ -196,6 +202,9 @@ const Home = () => {
                   </View>
                 </View>
                 <View className="crystal-link-text" onClick={() => {
+                  Taro.reportEvent('homepage_event', {
+                    contact_merchants: 1
+                  })
                   setQrCodeVisible(true);
                 }}>
                   联系客服
