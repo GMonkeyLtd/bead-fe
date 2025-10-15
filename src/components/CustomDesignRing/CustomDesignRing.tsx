@@ -500,8 +500,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     setDetailBeadItem(bead);
   }, []);
 
-
-
   return (
     <View className="custom-design-ring-container">
       {/* 顶部内容区域 */}
