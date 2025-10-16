@@ -25,8 +25,8 @@ const ContactPreference = () => {
   const [wechatNumber, setWechatNumber] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
 
-  const { designId, tier, isCustom } = Taro.getCurrentInstance()?.router?.params || {};
-  console.log(designId, tier, isCustom, 'designId, tier, isCustom')
+  const { designId, tier, isCustom, from, workId } = Taro.getCurrentInstance()?.router?.params || {};
+  console.log(designId, tier, isCustom, from, 'designId, tier, isCustom, from')
 
   const getUserInfo = async () => {
     try {
@@ -95,6 +95,19 @@ const ContactPreference = () => {
         const { order_uuid } = res?.data || {};
         Taro.redirectTo({
           url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
+        });
+        return;
+      }
+      if (from === 'result') {
+        Taro.redirectTo({
+          url: `${pageUrls.result}?designBackendId=${designId}&showBudgetDialog=true`,
+        });
+        return;
+      }
+
+      if (from === 'inspiration-detail') {
+        Taro.redirectTo({
+          url: `${pageUrls.inspirationDetail}?designId=${designId}&workId=${workId}&showBudgetDialog=true`,
         });
         return;
       }

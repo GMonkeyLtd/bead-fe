@@ -494,5 +494,12 @@ export default {
       `/user/designs/${designId}`,
       { cancelToken: config?.cancelToken, ...config }
     );
+  },
+  getDiyInspiration: (config?: ApiConfig) => {
+    return http.post<any>(
+      `/user/diy/inspiration`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
+    );
   }
 };

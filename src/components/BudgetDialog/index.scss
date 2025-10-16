@@ -117,7 +117,7 @@
 .budget-dialog-main-title {
   font-family: "Source Han Serif CN", serif;
   font-weight: 400;
-  font-size: 18px;
+  font-size: 30px;
   letter-spacing: 2px;
   color: #1f1722;
   opacity: 0.9;
@@ -167,6 +167,7 @@
   padding: 0 24px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .budget-dialog-card {
@@ -312,10 +313,14 @@
 .budget-dialog-notice-text {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.35em;
   color: #1f1722;
   opacity: 0.8;
+}
+
+.budget-dialog-notice-text-bold {
+  font-weight: 600
 }
 
 .budget-dialog-button-wrapper {

@@ -119,10 +119,6 @@ const OrderListComp: React.FC<OrderListProps> = ({
 
   // 渲染价格或预算信息
   const renderPriceInfo = (order: OrderItem) => {
-    console.log(order, 'order')
-    if (order.tier == 0) {
-      return `价格：暂无`;
-    }
     return `价格：¥${order.budget?.toFixed(2) || 0}`;
   };
 

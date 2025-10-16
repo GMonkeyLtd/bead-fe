@@ -4,7 +4,7 @@ import Taro, { useRouter } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import LazyImage from "@/components/LazyImage";
-import api, { inspirationApi, InspirationWord, userHistoryApi } from "@/utils/api";
+import api, { inspirationApi, InspirationWord, userApi, userHistoryApi } from "@/utils/api";
 import CollectIcon from "@/assets/icons/collect.svg";
 import CollectedIcon from "@/assets/icons/collect-active.svg";
 import CrystalButton from "@/components/CrystalButton";
@@ -25,10 +25,10 @@ import AppHeader from "@/components/AppHeader";
 
 const InspirationDetailPage: React.FC = () => {
   const router = useRouter();
-  const { workId, designId } = router.params || {};
+  const { workId, designId, showBudgetDialog } = router.params || {};
   const [designData, setDesignData] = useState<any>(null);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] = useState(false);
-  const [budgetDialogShow, setBudgetDialogShow] = useState(false);
+  const [budgetDialogShow, setBudgetDialogShow] = useState(showBudgetDialog == 'true' || false);
   const [detail, setDetail] = useState<InspirationItem | null>(null);
   const [loading, setLoading] = useState(true);
   const { height: navBarHeight, top: navBarTop } = getNavBarHeightAndTop();
@@ -190,34 +190,6 @@ const InspirationDetailPage: React.FC = () => {
     );
   }
 
-  const handlePurchase = () => {
-    apiPay.buySameProduct({ word_id: detail.work_id }).then((res) => {
-      const { order_uuid } = res?.data || {};
-      Taro.getSetting({
-        success: (res) => {
-          console.log(res, 'res')
-        }
-      })
-      Taro.requestSubscribeMessage({
-        tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
-        entityIds: [order_uuid], // 添加必需的 entityIds 参数
-        complete: () => {
-          Taro.redirectTo({
-            url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-          })
-        },
-        success: () => {
-          Taro.redirectTo({
-            url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-          })
-        },
-        fail: () => Taro.redirectTo({
-          url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-        })
-      });
-    })
-  }
-
   const handleEditInspiration = () => {
     Taro.reportEvent('inspiration_event', {
       edit_inspiration_design: 1
@@ -227,6 +199,26 @@ const InspirationDetailPage: React.FC = () => {
     });
   }
 
+  const onClickBuySame = async () => {
+    Taro.reportEvent('inspiration_event', {
+      get_same_product: 1
+    });
+    const userData = await userApi.getUserInfo();
+    const { default_contact, phone, wechat_id } = userData?.data || {} as any;
+    if (default_contact === 0 && !phone) {
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?designId=${designData?.design_id}&workId=${detail.work_id}&from=inspiration-detail`,
+      });
+      return;
+    }
+    if (default_contact === 1 && !wechat_id) {
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?designId=${designData?.design_id}&workId=${detail.work_id}&from=inspiration-detail`,
+      });
+      return;
+    }
+    setBudgetDialogShow(true);
+  }
 
   return (
     <View
@@ -398,7 +390,7 @@ const InspirationDetailPage: React.FC = () => {
           <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
           <View className={styles.editorText}>编辑</View>
         </View>
-        {designData?.session_id && designData?.reference_price && (<CrystalButton
+        {detail?.final_price && (<CrystalButton
           onClick={() => {
             Taro.reportEvent('inspiration_event', {
               get_same_product: 1
@@ -427,9 +419,9 @@ const InspirationDetailPage: React.FC = () => {
           referencePrice={detail?.final_price}
           originalPrice={detail?.original_price}
           // onModifyDesign={handleModifyDesign}
+          workId={detail.work_id}
           isSameProduct={true}
           creatorName={detail.user.nick_name}
-          onConfirm={handlePurchase}
         />
       )}
       {braceletDetailDialogShow && designData?.info?.items?.length > 0 && (
