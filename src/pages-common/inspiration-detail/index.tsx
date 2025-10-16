@@ -398,7 +398,7 @@ const InspirationDetailPage: React.FC = () => {
           <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
           <View className={styles.editorText}>编辑</View>
         </View>
-        {designData?.session_id && designData?.reference_price && (<CrystalButton
+        {detail?.final_price && (<CrystalButton
           onClick={() => {
             Taro.reportEvent('inspiration_event', {
               get_same_product: 1

@@ -86,7 +86,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     enableHistory: true,
     maxHistoryLength: 10,
     displayScale: 3.4
-  };
+  }), [canvasSize, spacing, renderRatio]);
 
   // 使用珠子位置管理器
   const positionManagerRef = useRef<BeadPositionManager | null>(null);
@@ -501,6 +501,29 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     setDetailBeadItem(bead);
   }, []);
 
+  const handleDiyInspirationResponse = useCallback(async (diyInspiration: any) => {
+    if (diyInspiration.length > 0) {
+      if (!positionManagerRef.current) return;
+
+    try {
+      await positionManagerRef.current.setBeads(diyInspiration);
+      const state = positionManagerRef.current.getState();
+      setPositionManagerState(state);
+      Taro.showToast({
+        title: "已添加灵感",
+        icon: "none",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        Taro.showToast({
+          title: error.message,
+          icon: "none",
+        });
+      }
+    }
+    }
+  }, []);
+
 
   return (
     <View className="custom-design-ring-container">
@@ -603,6 +626,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             canRedo={positionManagerRef.current?.canRedo() || false}
             onHistoryBack={handleHistoryBack}
             onHistoryForward={handleHistoryForward}
+            onDiyInspirationResponse={handleDiyInspirationResponse}
           />
         </View>
       </View>
@@ -611,7 +635,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       <View className="custom-design-ring-bottom-container" style={{ height: `calc(100% - ${canvasSize}px - 60px)` }}>
         <View className="custom-design-bead-size-selector-container">
           <View className="custom-design-bead-size-selector-title">
-            尺寸(mm):
+            {/**展示当前选中珠子的名称 */}
+            {positionManagerState.beads?.[positionManagerState.selectedBeadIndex]?.name && `${positionManagerState.beads?.[positionManagerState.selectedBeadIndex]?.name}:`}
           </View>
           {positionManagerState.selectedBeadIndex === -1 ? (
             <View className="custom-design-bead-size-selector-tip">

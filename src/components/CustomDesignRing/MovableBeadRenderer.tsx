@@ -290,19 +290,28 @@ const MovableBeadRenderer: React.FC<MovableBeadRendererProps> = ({
 
   // 优化的珠子位置更新逻辑
   useEffect(() => {
-    if (!dragState.isDragging && beads.length > 0) {
-      // 使用更高效的比较方式
-      const needsUpdate = beads.length !== beadPositions.length ||
-        beads.some((bead, index) => {
-          const currentBead = beadPositions[index];
-          return !currentBead ||
-            bead.uniqueKey !== currentBead.uniqueKey ||
-            Math.abs(bead.x - currentBead.x) > 3 || // 增加容差
-            Math.abs(bead.y - currentBead.y) > 3;
-        });
+    if (!dragState.isDragging) {
+      // 处理 beads 为空的情况 - 当所有珠子被删除时
+      if (beads.length === 0 && beadPositions.length > 0) {
+        updateBeadPositionsDebounced([]);
+        return;
+      }
+      
+      // 处理 beads 有内容的情况
+      if (beads.length > 0) {
+        // 使用更高效的比较方式
+        const needsUpdate = beads.length !== beadPositions.length ||
+          beads.some((bead, index) => {
+            const currentBead = beadPositions[index];
+            return !currentBead ||
+              bead.uniqueKey !== currentBead.uniqueKey ||
+              Math.abs(bead.x - currentBead.x) > 3 || // 增加容差
+              Math.abs(bead.y - currentBead.y) > 3;
+          });
 
-      if (needsUpdate) {
-        updateBeadPositionsDebounced(beads);
+        if (needsUpdate) {
+          updateBeadPositionsDebounced(beads);
+        }
       }
     }
   }, [beads, dragState.isDragging, beadPositions, updateBeadPositionsDebounced]);
