@@ -390,8 +390,13 @@ const InspirationDetailPage: React.FC = () => {
           <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
           <View className={styles.editorText}>编辑</View>
         </View>
-        {designData?.session_id && designData?.reference_price && (<CrystalButton
-          onClick={onClickBuySame}
+        {detail?.final_price && (<CrystalButton
+          onClick={() => {
+            Taro.reportEvent('inspiration_event', {
+              get_same_product: 1
+            });
+            setBudgetDialogShow(true)
+          }}
           text={detail.final_price ? `¥${detail.final_price} 制作同款` : "制作同款"}
           icon={detail.final_price ? undefined : (
             <Image

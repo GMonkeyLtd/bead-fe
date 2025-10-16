@@ -80,7 +80,7 @@ export class BeadPositionManager {
       const predictedLength = this.calculator.calculatePredictedLength(processedBeads);
       // 计算位置，传递现有位置信息以保持uniqueKey连续性
       const beadsWithPosition = this.calculator.calculateBeadPositions(processedBeads);
-      
+
       this.setState({
         beads: beadsWithPosition,
         predictedLength,
