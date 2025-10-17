@@ -28,6 +28,9 @@ const HistoryOperations: React.FC<HistoryOperationsProps> = ({
 
   const getDiyInspiration = () => {
     if (inspirationLoading) return;
+    Taro.reportEvent("diy_event", {
+      click_inspirition: 1
+    })
     setInspirationLoading(true);
     apiSession.getDiyInspiration().then(res => {
       onDiyInspirationResponse(res?.data?.items);
