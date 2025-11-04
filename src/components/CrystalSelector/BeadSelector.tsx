@@ -19,6 +19,7 @@ export interface BeadType {
   image_url: string;
   beadList: BeadItemType[];
   beadSizeList: number[];
+  minimalPrice: number;
 }
 
 interface BeadSelectorProps {
@@ -101,6 +102,7 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
               onReplaceClick={() => handleBeadClick(typeBead, "replace")}
               showReplaceButton={currentSelectedBead && currentSelectedBead?.name !== typeBead.name}
               onBeadImageClick={() => onBeadImageClick(typeBead)}
+              minimalPrice={typeBead.minimalPrice}
             />
           </View>
         ))}
@@ -128,12 +130,15 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
             showReplaceButton={currentSelectedBead && currentSelectedBead?.name !== accessory.name}
             imageNeedRotate={accessory.type === AccessoryType.GuaShi}
             onBeadImageClick={() => onBeadImageClick(accessory)}
+            minimalPrice={accessory.minimalPrice}
           />
         </View>
         ))}
       </View>
     );
   };
+
+  console.log(beadTypeMap, accessoryTypeMap, "beadTypeMap, accessoryTypeMap");
 
   const renderCrystalTypes = () => {
     return (
@@ -170,7 +175,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   };
 
   const renderAccessoryTypes = () => {
-    console.log(AccessoryDisplayOrder, AccessoryFormatMap, "accessoryTypeMap");
     return (
       <View className="wuxing-tabs">
         <View className="wuxing-tabs-inner">

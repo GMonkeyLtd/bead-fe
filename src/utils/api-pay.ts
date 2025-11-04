@@ -2,32 +2,51 @@ import { AddressInfo } from "@/components/LogisticsCard";
 import { ApiConfig } from "./api";
 import http from "./request";
 
-
 export default {
-  addAddressToOrder: (params: { 
-    order_uuid: string,
-    detail_info: string,
-    province_name: string,
-    city_name: string,
-    county_name: string,
-    tel_number: string,
-    user_name: string,
-    national_code: string,
-    postal_code: string,
-  }, config?: ApiConfig) => {
+  addAddressToOrder: (
+    params: {
+      order_uuid: string;
+      detail_info: string;
+      province_name: string;
+      city_name: string;
+      county_name: string;
+      tel_number: string;
+      user_name: string;
+      national_code: string;
+      postal_code: string;
+    },
+    config?: ApiConfig
+  ) => {
     return http.post<any>(`/user/address`, params, config);
   },
-  getReferencePrice: (params: {
-    design_id: string;
-  }, config?: ApiConfig) => {
-    return http.get<any>(`/user/reference_price/${params.design_id}`, undefined, config);
+  getReferencePrice: (
+    params: {
+      design_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/reference_price/${params.design_id}`,
+      undefined,
+      config
+    );
   },
-  getWaybillToken: (params: {
-    order_id: string;
-  }, config?: ApiConfig) => {
-    return http.get<any>(`/user/orders/${params.order_id}/waybill_token`, undefined, config);
+  getWaybillToken: (
+    params: {
+      order_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/orders/${params.order_id}/waybill_token`,
+      undefined,
+      config
+    );
   },
-  applyRefund: (params: { orderId: string, reason: string }, config?: ApiConfig) =>
+  applyRefund: (
+    params: { orderId: string; reason: string },
+    config?: ApiConfig
+  ) =>
     http.post<{
       data: any;
     }>(
@@ -40,17 +59,21 @@ export default {
       }
     ),
   withdrawRefund: (params: { orderId: string }, config?: ApiConfig) =>
-    http.post<any>(`/user/cancel_refund`, { order_uuid: params.orderId }, config),
-  purchase: (params: { orderId: string, amount: number }, config?: ApiConfig) =>
+    http.post<any>(
+      `/user/cancel_refund`,
+      { order_uuid: params.orderId },
+      config
+    ),
+  purchase: (params: { orderId: string; amount: number }, config?: ApiConfig) =>
     http.post<{
       data: {
-        "trade_uuid": string,
-        "prepay_id": string,
-        "nonce_str": string,
-        "package": string,
-        "sign_type": "RSA",
-        "pay_sign": string,
-        "timestamp": string
+        trade_uuid: string;
+        prepay_id: string;
+        nonce_str: string;
+        package: string;
+        sign_type: "RSA";
+        pay_sign: string;
+        timestamp: string;
       };
     }>(
       `/user/submit_payment`,
@@ -65,21 +88,39 @@ export default {
     http.post<{
       data: any;
     }>(`/user/query_payment_status`, { order_uuid: params.orderId }, config),
-  confirmOrder: (params: {
-    order_id: string;
-  }, config?: ApiConfig) => {
-    return http.get<any>(`/user/orders/${params.order_id}/confirm_receipt`, undefined, config);
+  confirmOrder: (
+    params: {
+      order_id: string;
+    },
+    config?: ApiConfig
+  ) => {
+    return http.get<any>(
+      `/user/orders/${params.order_id}/confirm_receipt`,
+      undefined,
+      config
+    );
   },
   confirmOrderCallback: (params: { orderId: string }, config?: ApiConfig) =>
-    http.post<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, { success: true, }, config),
+    http.post<any>(
+      `/user/orders/${params.orderId}/confirm_receipt/callback`,
+      { success: true },
+      config
+    ),
   confirmReceiptCallback: (params: { orderId: string }, config?: ApiConfig) =>
-    http.get<any>(`/user/orders/${params.orderId}/confirm_receipt/callback`, undefined, config),
+    http.get<any>(
+      `/user/orders/${params.orderId}/confirm_receipt/callback`,
+      undefined,
+      config
+    ),
   buySameProduct: (params: { work_id: string }, config?: ApiConfig) =>
     http.post<any>(`/user/community/${params.work_id}/buy`, undefined, config),
-  buySameProductV2: (params: { work_id: string, address_info?: any }, config?: ApiConfig) =>
+  buySameProductV2: (
+    params: { work_id: string; address_info?: any },
+    config?: ApiConfig
+  ) =>
     http.post<any>(`/user/community/${params.work_id}/buy_v2`, params, config),
-  generateOrder: (
-    params: { design_id: number; address_info?: any; },
+  generateOrderV2: (
+    params: { design_id: number; address_info?: any },
     config?: ApiConfig
   ) =>
     http.post<{
@@ -87,6 +128,20 @@ export default {
         order_uuid: string;
       };
     }>(`/user/generateorder_v2`, params, {
+      showLoading: true,
+      loadingText: "订单生成中...",
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
+  generateOrder: (
+    params: { design_id: number; tier?: number; is_custom?: boolean },
+    config?: ApiConfig
+  ) =>
+    http.post<{
+      data: {
+        order_uuid: string;
+      };
+    }>(`/user/generateorder`, params, {
       showLoading: true,
       loadingText: "订单生成中...",
       cancelToken: config?.cancelToken,

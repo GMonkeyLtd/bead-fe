@@ -48,7 +48,6 @@ const CustomDesign = () => {
   });
   const { draftId, sessionId, designId, from, workId, showTutorial: showTutorialParam } = Taro.getCurrentInstance()?.router?.params || {};
 
-
   const oldBeadList = useMemo(() => {
     return design?.info?.items || (draft as any)?.items || [];
   }, [draft, design]);
@@ -166,6 +165,7 @@ const CustomDesign = () => {
         if (acc[key]) {
           acc[key].beadList.push(item);
           acc[key].beadSizeList.push(item.diameter);
+          acc[key].minimalPrice = Math.min(acc[key].minimalPrice, item.reference_price);
         } else {
           acc[key] = {
             image_url: item.image_url,
@@ -173,7 +173,8 @@ const CustomDesign = () => {
             name: item.name,
             wuxing: item.wuxing || [],
             beadList: [item],
-            beadSizeList: [item.diameter]
+            beadSizeList: [item.diameter],
+            minimalPrice: item.reference_price
           };
         }
         acc[key].beadSizeList = [...new Set(acc[key].beadSizeList)]?.sort((a: number, b: number) => a - b);
@@ -201,6 +202,7 @@ const CustomDesign = () => {
         if (acc[key]) {
           acc[key].beadList.push(item);
           acc[key].beadSizeList.push(item.diameter);
+          acc[key].minimalPrice = Math.min(acc[key].minimalPrice, item.reference_price);
         } else {
           acc[key] = {
             image_url: item.image_url,
@@ -208,7 +210,8 @@ const CustomDesign = () => {
             name: item.name,
             type: item.type,
             beadList: [item],
-            beadSizeList: [item.diameter]
+            beadSizeList: [item.diameter],
+            minimalPrice: item.reference_price
           };
         }
         acc[key].beadSizeList = [...new Set(acc[key].beadSizeList)]?.sort((a: number, b: number) => a - b);

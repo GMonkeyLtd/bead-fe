@@ -25,6 +25,8 @@ interface BeadItemProps {
   imageNeedRotate?: boolean;
   /** 图片点击事件 */
   onBeadImageClick?: () => void;
+  /** 最小价格 */
+  minimalPrice?: number;
 }
 
 const BeadItem: React.FC<BeadItemProps> = ({
@@ -38,7 +40,8 @@ const BeadItem: React.FC<BeadItemProps> = ({
   onItemClick,
   onBeadImageClick,
   className = '',
-  imageNeedRotate = false
+  imageNeedRotate = false,
+  minimalPrice = 0
 }) => {
   const [showImagePreview, setShowImagePreview] = useState(false);
 
@@ -82,7 +85,11 @@ const BeadItem: React.FC<BeadItemProps> = ({
             <Text className={styles.beadItemName}>{name}</Text>
           </View>
           <View className={styles.beadItemSpecs}>
-            <Text className={styles.specsLabel}>规格 :</Text>
+            <Text className={styles.specsLabel}>价格：</Text>
+            <Text className={styles.specsValue}>{`${(minimalPrice / 100).toFixed(1)}元起`}</Text>
+          </View>
+          <View className={styles.beadItemSpecs}>
+            <Text className={styles.specsLabel}>规格：</Text>
             <Text className={styles.specsValue}>{specifications}</Text>
           </View>
         </View>

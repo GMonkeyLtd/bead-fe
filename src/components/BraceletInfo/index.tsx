@@ -31,20 +31,19 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
   orderAction,
   showPrice = false,
   isSameBuy = false,
-  priceTier = 0
+  priceTier = 0,
 }) => {
-
   const handleCopyImageUrl = (orderNumber: string) => {
     Taro.setClipboardData({
       data: orderNumber,
       success: () => {
         Taro.showToast({
-          title: '复制成功',
-          icon: 'none',
-        })
-      }
-    })
-  }
+          title: "复制成功",
+          icon: "none",
+        });
+      },
+    });
+  };
   return (
     <View className={`bracelet-info ${className}`}>
       {/* 订单编号和复制 */}
@@ -93,14 +92,17 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
         </View>
 
         {/* 价格 */}
-        {showPrice &&
+        {showPrice && (
           <View className="price-section">
             <View className="price-label">
-              {!isSameBuy && (<View className="price-label-text">价格：</View>)}
+              {!isSameBuy && <View className="price-label-text">价格：</View>}
               {/* <Text className={`price ${priceTier == 0 ? 'price-tier-0' : ''}`}>{priceTier == 0 ? '暂无' : `¥${price.toFixed(2)}`}</Text> */}
-              <Text className={`price ${priceTier == 0 ? 'price-tier-0' : ''}`}>{`¥${price.toFixed(2)}`}</Text>
+              <Text
+                className={`price ${priceTier == 0 ? "price-tier-0" : ""}`}
+              >{`¥${price.toFixed(2)}`}</Text>
             </View>
-          </View>}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -115,15 +117,18 @@ interface BeadItem {
 interface BeadDetailListProps {
   beads: BeadItem[];
   className?: string;
+  showPrice?: boolean;
 }
 
 export const BeadDetailList: React.FC<BeadDetailListProps> = ({
   beads,
   className = "",
+  showPrice = false,
 }) => {
-
   const beadsData = (beads || [])?.reduce((acc: any[], item: any) => {
-    const existingBead = acc.find(bead => bead.name === item?.name && bead.size === item?.diameter);
+    const existingBead = acc.find(
+      (bead) => bead.name === item?.name && bead.size === item?.diameter
+    );
     if (existingBead) {
       existingBead.quantity += item?.quantity || 1;
     } else {
@@ -131,6 +136,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
         name: item?.name,
         size: item?.diameter,
         quantity: item?.quantity || 1,
+        reference_price: item?.reference_price,
       });
     }
     return acc;
@@ -143,6 +149,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
         <Text className="header-name">名称</Text>
         <Text className="header-size">尺寸/规格</Text>
         <Text className="header-quantity">数量</Text>
+        {showPrice && <Text className="header-price">单价</Text>}
       </View>
 
       {/* 珠子列表 */}
@@ -156,6 +163,11 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
             <Text className="cell-name">{bead.name}</Text>
             <Text className="cell-size">{`${bead.size}mm`}</Text>
             <Text className="cell-quantity">x{bead.quantity}</Text>
+            {showPrice && (
+              <Text className="cell-price">{`¥${
+                ((bead.reference_price / 100) || 0)?.toFixed(1) || 0
+              }`}</Text>
+            )}
           </View>
         ))}
       </View>
@@ -182,9 +194,8 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
   beads,
   orderAction,
   isSameBuy = false,
-  priceTier = 0
+  priceTier = 0,
 }) => {
-
   return (
     <View
       style={{

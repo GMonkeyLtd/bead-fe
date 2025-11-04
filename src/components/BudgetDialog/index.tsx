@@ -71,8 +71,8 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
         postal_code: address?.postalCode,
       }
   
-      const apiCall = isSameProduct ? apiPay.buySameProductV2 : apiPay.generateOrder;
-      const params = isSameProduct ? { work_id: workId, address_info: addressInfo } : { design_id: parseInt(designNumber), address_info: addressInfo };
+      const apiCall = isSameProduct ? apiPay.buySameProduct : apiPay.generateOrder;
+      const params = isSameProduct ? { work_id: workId  } : { design_id: parseInt(designNumber) };
       let _orderUuid;
       if (!orderUuid) {
         const res = await apiCall(params);
@@ -158,20 +158,20 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
 
 
   const handleConfirm = async () => {
-    if (!address) {
-      Taro.showToast({
-        title: "请先添加收货地址",
-        icon: "none",
-        duration: 1000,
-      });
-      Taro.chooseAddress({
-        success: (result) => {
-          setAddress(result);
-          doPurchase(result);
-        },
-      });
-      return;
-    }
+    // if (!address) {
+    //   Taro.showToast({
+    //     title: "请先添加收货地址",
+    //     icon: "none",
+    //     duration: 1000,
+    //   });
+    //   Taro.chooseAddress({
+    //     success: (result) => {
+    //       setAddress(result);
+    //       doPurchase(result);
+    //     },
+    //   });
+    //   return;
+    // }
     doPurchase(address);
   };
 

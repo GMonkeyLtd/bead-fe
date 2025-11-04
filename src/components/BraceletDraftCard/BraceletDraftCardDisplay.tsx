@@ -77,7 +77,7 @@ export const BraceletDraftCardDisplay = ({
             <CircleRingImage
               // imageUrl={isRegenerating ? "" :  draft.bracelet_image || ""}
               imageUrl={imageUrl}
-              size={140}
+              size={240}
               backendSize={160}
               backgroundImage={BRACELET_BG_IMAGE_URL}
               rotate={true}

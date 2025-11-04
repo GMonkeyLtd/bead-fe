@@ -501,5 +501,12 @@ export default {
       {},
       { cancelToken: config?.cancelToken, ...config }
     );
+  },
+  getFeatureFlag: (config?: ApiConfig) => {
+    return http.get<any>(
+      `/configs/features`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
+    );
   }
 };

@@ -632,7 +632,7 @@ const Result = () => {
         {referencePrice && (<CrystalButton
           onClick={doCreate}
           isPrimary
-          text="制作成品"
+          text={`¥${referencePrice} 制作成品`}
           style={{ flex: 1 }}
           prefixIcon={
             <Image
@@ -683,6 +683,7 @@ const Result = () => {
           title={braceletName}
           onClose={() => setBraceletDetailDialogShow(false)}
           wristSize={braceletSpec?.wrist_size}
+          showPrice={true}
         />
       )}
     </View>

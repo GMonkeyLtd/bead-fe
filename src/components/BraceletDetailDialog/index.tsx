@@ -13,6 +13,7 @@ interface BraceletDetailDialogProps {
   beads?: any[];
   onClose?: () => void;
   wristSize?: string;
+  showPrice?: boolean;
 }
 
 const BraceletDetailDialog: React.FC<BraceletDetailDialogProps> = ({
@@ -21,6 +22,7 @@ const BraceletDetailDialog: React.FC<BraceletDetailDialogProps> = ({
   beads,
   onClose,
   wristSize,
+  showPrice = false,
 }) => {
   const { keyboardHeight } = useKeyboardHeight();
 
@@ -46,7 +48,7 @@ const BraceletDetailDialog: React.FC<BraceletDetailDialogProps> = ({
 
         {/* 主要内容区域 */}
         <View className="bracelet-detail-dialog-content">
-          <BeadDetailList beads={beads} />
+          <BeadDetailList beads={beads} showPrice={showPrice} />
         </View>
 
         {/* 确认按钮 */}

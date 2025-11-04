@@ -172,11 +172,11 @@
   display: flex;
   border-radius: 2px 15px 15px 15px;
   align-items: center;
+  justify-content: space-between;
   height: 40px;
   gap: 4px;
   background: #FBF7F5;
   box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.04);
-  flex: 1;
 }
 
 
@@ -287,4 +287,18 @@
   line-height: normal;
   letter-spacing: 1px;
   white-space: nowrap;
+}
+
+.custom-design-bead-size-selector-title-container {
+  display: flex;
+  align-items: center;
+}
+
+.custom-design-bead-size-selector-price {
+  color: #000;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 1px;
 }

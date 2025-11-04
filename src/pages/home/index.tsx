@@ -20,28 +20,36 @@ const Home = () => {
   const instance = Taro.getCurrentInstance();
   const { newSession } = instance.router?.params || {};
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
+  const [showIntelligentDesign, setShowIntelligentDesign] = useState(false);
 
   useEffect(() => {
     AuthManager.clearAuth();
     AuthManager.login();
     Taro.showShareMenu({
       withShareTicket: true, // 支持获取群聊信息
-      showShareItems: ['shareAppMessage', 'shareTimeline'] // 同时开启好友和朋友圈分享
+      showShareItems: ["shareAppMessage", "shareTimeline"], // 同时开启好友和朋友圈分享
     });
   }, []);
 
   useDidShow(() => {
     setTimeout(() => {
-      apiSession.getLastSession().then((res) => {
-        if (res.data?.session_id) {
-          setLastSessionId(res.data.session_id);
-        }
-      }).catch((e) => {
-        setLastSessionId("");
-        console.error("getLastSession error: ", e);
-      })
+      apiSession
+        .getLastSession()
+        .then((res) => {
+          if (res.data?.session_id) {
+            setLastSessionId(res.data.session_id);
+          }
+        })
+        .catch((e) => {
+          setLastSessionId("");
+          console.error("getLastSession error: ", e);
+        });
     }, 200);
-  })
+    apiSession.getFeatureFlag({ showError: false }).then((res) => {
+      console.log("getFeatureFlag res: ", res);
+      setShowIntelligentDesign(res.data.chats);
+    });
+  });
 
   const startDesign = () => {
     // 打开日期时间选择抽屉
@@ -74,7 +82,9 @@ const Home = () => {
     isLunar: boolean;
   }) => {
     Taro.redirectTo({
-      url: pageUrls.chatDesign + '?year=' +
+      url:
+        pageUrls.chatDesign +
+        "?year=" +
         year +
         "&month=" +
         month +
@@ -136,57 +146,62 @@ const Home = () => {
                     </View>
                   </View>
                   <View className="crystal-action-section">
-                    <View className="crystal-action-section-items">
-                      <CrystalButton
-                        style={{
-                          borderRadius: '2px',
-                          border: "1.1px solid rgba(255, 255, 255, 0.20)",
-                          background: "rgba(0, 0, 0, 0)",
-                          backdropFilter: "blur(4px)",
-                          boxShadow: 'none',
-                          // width: "154px",
-                        }}
-                        textStyle={{
-                          color: "#fff",
-                        }}
-                        onClick={() => {
-                          Taro.reportEvent('homepage_event', {
-                            ai_design_click: 1
-                          })
-                          if (!lastSessionId) {
-                            startDesign();
-                          } else {
-                            Taro.navigateTo({
-                              url: pageUrls.chatDesign + '?session_id=' + lastSessionId,
+                    <View className="crystal-action-section-items" style={{ justifyContent: showIntelligentDesign ? "space-between" : "flex-end" }}>
+                      {showIntelligentDesign && (
+                        <CrystalButton
+                          style={{
+                            borderRadius: "2px",
+                            border: "1.1px solid rgba(255, 255, 255, 0.20)",
+                            background: "rgba(0, 0, 0, 0)",
+                            backdropFilter: "blur(4px)",
+                            boxShadow: "none",
+                            // width: "154px",
+                          }}
+                          textStyle={{
+                            color: "#fff",
+                          }}
+                          onClick={() => {
+                            Taro.reportEvent("homepage_event", {
+                              ai_design_click: 1,
                             });
-                          }
-                        }}
-                        text="智能定制"
-                      // icon={
-                      //   <Image
-                      //     src={RightArrowWhite}
-                      //     style={{ width: "16px", height: "10px" }}
-                      //   />
-                      // }
-                      />
+                            if (!lastSessionId) {
+                              startDesign();
+                            } else {
+                              Taro.navigateTo({
+                                url:
+                                  pageUrls.chatDesign +
+                                  "?session_id=" +
+                                  lastSessionId,
+                              });
+                            }
+                          }}
+                          text="智能定制"
+                          // icon={
+                          //   <Image
+                          //     src={RightArrowWhite}
+                          //     style={{ width: "16px", height: "10px" }}
+                          //   />
+                          // }
+                        />
+                      )}
                       <CrystalButton
                         style={{
-                          borderRadius: '2px',
+                          borderRadius: "2px",
                           border: "1.1px solid rgba(255, 255, 255, 0.20)",
                           background: "rgba(0, 0, 0,0)",
                           backdropFilter: "blur(4px)",
-                          boxShadow: 'none',
+                          boxShadow: "none",
                           // width: "154px",
                         }}
                         textStyle={{
                           color: "#fff",
                         }}
                         onClick={() => {
-                          Taro.reportEvent('homepage_event', {
-                            home_diy_click: 1
-                          })
+                          Taro.reportEvent("homepage_event", {
+                            home_diy_click: 1,
+                          });
                           Taro.redirectTo({
-                            url: pageUrls.customDesign + '?from=home',
+                            url: pageUrls.customDesign + "?from=home",
                           });
                         }}
                         text="DIY创作"
@@ -201,12 +216,15 @@ const Home = () => {
                     </View> */}
                   </View>
                 </View>
-                <View className="crystal-link-text" onClick={() => {
-                  Taro.reportEvent('homepage_event', {
-                    contact_merchants: 1
-                  })
-                  setQrCodeVisible(true);
-                }}>
+                <View
+                  className="crystal-link-text"
+                  onClick={() => {
+                    Taro.reportEvent("homepage_event", {
+                      contact_merchants: 1,
+                    });
+                    setQrCodeVisible(true);
+                  }}
+                >
                   联系客服
                 </View>
               </View>
@@ -222,12 +240,13 @@ const Home = () => {
       />
       <QrCodeDialog
         visible={qrCodeVisible}
-        qrCodeUrl={'https://zhuluoji.cn-sh2.ufileos.com/merchant-images/owned_store/OwnerStoreQR'}
+        qrCodeUrl={
+          "https://zhuluoji.cn-sh2.ufileos.com/merchant-images/owned_store/OwnerStoreQR"
+        }
         // merchantName={order?.merchant_info?.name || ""}
         qrType="客服微信"
         onClose={() => setQrCodeVisible(false)}
       />
-
     </View>
   );
 };

@@ -55,10 +55,8 @@
 .beadItemHeader {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-  align-self: stretch;
-  gap: 4px;
+  margin-bottom: 4px;
 }
 
 .beadItemName {
@@ -69,7 +67,6 @@
   letter-spacing: 9.09%;
   text-align: left;
   color: #000000;
-  flex: 1;
 }
 
 .beadItemSpecs {
@@ -82,7 +79,7 @@
 
   .specsLabel {
     font-family: "Noto Sans SC", sans-serif;
-    font-weight: 350;
+    font-weight: 300;
     font-size: 10px;
     line-height: 1.2em;
     text-align: left;
@@ -98,6 +95,7 @@
     text-align: left;
     color: rgba(0, 0, 0, 0.6);
     flex: 1;
+    letter-spacing: 1px;
   }
 }
 
@@ -199,4 +197,14 @@
     width: 0.88px;
     height: 5.83px;
   }
+}
+
+.beadItemPrice {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 10px;
+  line-height: 1.209em;
+  text-align: left;
+  color: rgba(0, 0, 0);
+  letter-spacing: 1px;
 }

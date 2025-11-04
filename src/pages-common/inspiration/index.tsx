@@ -37,6 +37,7 @@ export interface InspirationItem {
   original_price: number;
   reference_price: number;
   cost_price: number;
+  real_images: string[];
 }
 
 const INSPIRATION_TABS = [

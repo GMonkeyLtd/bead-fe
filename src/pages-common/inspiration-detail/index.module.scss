@@ -462,13 +462,39 @@
 
 .promoBannerContainer {
   width: 100%;
-  margin-top: -12px;
+  margin-top: -4px;
 }
 
 .sectionCard {
   padding: 16px;
   background: #fff;
   border-radius: 4px;
+}
+
+.imageSwiper {
+  width: 100%;
+}
+
+// 让Swiper能够自适应内容高度
+.imageSwiper :global(.taro-swiper) {
+  height: auto !important;
+}
+
+.imageSwiper :global(.taro-swiper-item) {
+  height: auto !important;
+  display: flex;
+  align-items: flex-start;
+}
+
+.imageItemWrapper {
+  width: 100%;
+  position: relative;
+  
+  .mainImage {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
 }
 
 // 响应式设计

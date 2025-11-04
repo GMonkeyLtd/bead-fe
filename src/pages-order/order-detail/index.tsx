@@ -515,7 +515,7 @@ const OrderDetail: React.FC = () => {
           <LogisticsCard
             address={address}
             onAddressChange={handleAddressChange}
-            enableChangeAddress={orderStatus === OrderStatusEnum.PendingPayment}
+            enableChangeAddress={orderStatus === OrderStatusEnum.PendingPayment || orderStatus === OrderStatusEnum.PendingShipment}
             logisticsStatus={
               orderStatus === OrderStatusEnum.Shipped
                 ? order?.waybill_status
@@ -683,7 +683,7 @@ const OrderStatus: React.FC<{
         }}
       >
         <Text className="order-status-title">
-          {isSame ? orderStatusDescription.replace('定制', '商品'): orderStatusDescription}
+          {isSame ? orderStatusDescription.replace('定制', '发货'): orderStatusDescription}
         </Text>
         <StatusBadge
           type={getStatusBadgeType(status)}
