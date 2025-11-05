@@ -43,16 +43,15 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   const [address, setAddress] = useState<AddressInfo | undefined>(undefined);
   const [orderUuid, setOrderUuid] = useState<string | undefined>(undefined);
 
-
   const doPurchase = async (address: AddressInfo | undefined) => {
     if (!isSameProduct) {
-      Taro.reportEvent('result_event', {
-        confirm_pay: 1
-      })
+      Taro.reportEvent("result_event", {
+        confirm_pay: 1,
+      });
     } else {
-      Taro.reportEvent('inspiration_event', {
-        same_product_pay: 1
-      })
+      Taro.reportEvent("inspiration_event", {
+        same_product_pay: 1,
+      });
     }
     if (onConfirm) {
       onConfirm(referencePrice || 0);
@@ -60,7 +59,6 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     }
 
     try {
-
       const addressInfo = {
         name: address?.userName,
         phone: address?.telNumber,
@@ -69,10 +67,14 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
         district: address?.countyName,
         detail: address?.detailInfo,
         postal_code: address?.postalCode,
-      }
-  
-      const apiCall = isSameProduct ? apiPay.buySameProduct : apiPay.generateOrder;
-      const params = isSameProduct ? { work_id: workId  } : { design_id: parseInt(designNumber) };
+      };
+
+      const apiCall = isSameProduct
+        ? apiPay.buySameProduct
+        : apiPay.generateOrder;
+      const params = isSameProduct
+        ? { work_id: workId }
+        : { design_id: parseInt(designNumber) };
       let _orderUuid;
       if (!orderUuid) {
         const res = await apiCall(params);
@@ -94,9 +96,9 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
             success: () => {
               Taro.getSetting({
                 success: (res) => {
-                  console.log(res, 'res')
-                }
-              })
+                  console.log(res, "res");
+                },
+              });
               Taro.requestSubscribeMessage({
                 tmplIds: ["KoXRoTjwgniOQfSF9WN7h-hT_mw-AYRDhwyG_9cMTgI"], // 最多3个
                 entityIds: [_orderUuid], // 添加必需的 entityIds 参数
@@ -104,16 +106,16 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                   Taro.reLaunch({
                     url: `${pageUrls.orderDetail}?orderId=${_orderUuid}`,
                   });
-
                 },
                 success: () => {
                   Taro.reLaunch({
                     url: `${pageUrls.orderDetail}?orderId=${_orderUuid}`,
-                  })
+                  });
                 },
-                fail: () => Taro.reLaunch({
-                  url: `${pageUrls.orderDetail}?orderId=${_orderUuid}`,
-                })
+                fail: () =>
+                  Taro.reLaunch({
+                    url: `${pageUrls.orderDetail}?orderId=${_orderUuid}`,
+                  }),
               });
             },
             fail: (err) => console.error("支付失败", err),
@@ -154,10 +156,23 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
     //       })
     //     });
     //   });
-  }
-
+  };
 
   const handleConfirm = async () => {
+    const userData = await userApi.getUserInfo();
+    const { default_contact, phone, wechat_id } = userData?.data || ({} as any);
+    if (default_contact === 0 && !phone) {
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?designId=${designNumber}&from=result`,
+      });
+      return;
+    }
+    if (default_contact === 1 && !wechat_id) {
+      Taro.redirectTo({
+        url: `${pageUrls.contactPreference}?designId=${designNumber}&from=result`,
+      });
+      return;
+    }
     // if (!address) {
     //   Taro.showToast({
     //     title: "请先添加收货地址",
@@ -185,22 +200,30 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
         {/* 同款制作提示条 */}
         {isSameProduct && (
           <View className="budget-dialog-promo-banner">
-            <Image src={sameProductIcon} style={{ width: "20px", height: "20px", marginRight: "4px" }} />
-            <Text className="budget-dialog-promo-text">同款制作前20名用户享</Text>
-            <View className="budget-dialog-promo-discount">
-              9折
-            </View>
+            <Image
+              src={sameProductIcon}
+              style={{ width: "20px", height: "20px", marginRight: "4px" }}
+            />
+            <Text className="budget-dialog-promo-text">
+              同款制作前20名用户享
+            </Text>
+            <View className="budget-dialog-promo-discount">9折</View>
           </View>
         )}
 
         {/* 标题区域 */}
-        <View className="budget-dialog-header" style={{ padding: '32px 32px 16px 32px' }}>
+        <View
+          className="budget-dialog-header"
+          style={{ padding: "32px 32px 16px 32px" }}
+        >
           <View className="budget-dialog-title-section">
             <View className="budget-dialog-title-group">
               <View className="budget-dialog-main-title">{title}</View>
-              {isSameProduct && (<View className="budget-dialog-limited-tag">
-                <Text className="budget-dialog-limited-text">限时上架</Text>
-              </View>)}
+              {isSameProduct && (
+                <View className="budget-dialog-limited-tag">
+                  <Text className="budget-dialog-limited-text">限时上架</Text>
+                </View>
+              )}
             </View>
             <View className="budget-dialog-subtitle">
               设计编号：{designNumber}
@@ -231,12 +254,16 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                       <View className="budget-dialog-budget-input-value">
                         {referencePrice}
                       </View>
-                      <View className="budget-dialog-budget-input-unit">RMB</View>
+                      <View className="budget-dialog-budget-input-unit">
+                        RMB
+                      </View>
                     </View>
                   </View>
-                  {isSameProduct && (<View className="budget-dialog-original-price-text">
-                    原价：{originalPrice}
-                  </View>)}
+                  {isSameProduct && (
+                    <View className="budget-dialog-original-price-text">
+                      原价：{originalPrice}
+                    </View>
+                  )}
                 </View>
 
                 {/* 商品图片 */}
@@ -254,17 +281,27 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               {/* 说明文字 */}
               <View className="budget-dialog-notice">
                 <View className="budget-dialog-divider" />
-                  {isSameProduct ?
-                    <Text className="budget-dialog-notice-text">'同款制作，品质如一，价格更低' </Text> :
-                    <View>
-                      <View className="budget-dialog-notice-text">· 下单后与客服确认实拍图，满意后送检发货；</View>
-                      <View className="budget-dialog-notice-text" style={{ marginTop: "4px" }}>
-                        <Text>· 实拍图不满意可</Text>
-                        <Text className="budget-dialog-notice-text-bold">全额退款</Text>
-                        <Text>。</Text>
-                      </View>
+                {isSameProduct ? (
+                  <Text className="budget-dialog-notice-text">
+                    '同款制作，品质如一，价格更低'{" "}
+                  </Text>
+                ) : (
+                  <View>
+                    <View className="budget-dialog-notice-text">
+                      · 下单后与客服确认实拍图，满意后送检发货；
                     </View>
-                  }
+                    <View
+                      className="budget-dialog-notice-text"
+                      style={{ marginTop: "4px" }}
+                    >
+                      <Text>· 实拍图不满意可</Text>
+                      <Text className="budget-dialog-notice-text-bold">
+                        全额退款
+                      </Text>
+                      <Text>。</Text>
+                    </View>
+                  </View>
+                )}
               </View>
             </View>
           </View>
@@ -301,12 +338,8 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
           )} */}
           {isSameProduct && (
             <View className="creator-info-container">
-              <View>
-                创作者
-              </View>
-              <View className="creator-nickname">
-                {`${creatorName}`}
-              </View>
+              <View>创作者</View>
+              <View className="creator-nickname">{`${creatorName}`}</View>
             </View>
           )}
         </View>
