@@ -1,6 +1,6 @@
 import { View, Text, Swiper, SwiperItem, Image } from "@tarojs/components";
 import { useEffect, useState } from "react";
-import Taro, { useDidShow } from "@tarojs/taro";
+import Taro, { useDidShow, useLoad, useShareAppMessage } from "@tarojs/taro";
 import "./index.scss";
 import { SWIPER_DATA } from "@/config/home-content";
 import RightArrowWhite from "@/assets/icons/right-arrow-white.svg";
@@ -13,6 +13,7 @@ import { pageUrls } from "@/config/page-urls";
 import TabBar, { TabBarTheme } from "@/components/TabBar";
 import apiSession from "@/utils/api-session";
 import QrCodeDialog from "@/components/QrCodeDialog";
+import { userApi } from "@/utils/api";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
@@ -21,6 +22,7 @@ const Home = () => {
   const { newSession } = instance.router?.params || {};
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [showIntelligentDesign, setShowIntelligentDesign] = useState(false);
+  const [shareCode, setShareCode] = useState<string>("");
 
   useEffect(() => {
     AuthManager.clearAuth();
@@ -29,7 +31,68 @@ const Home = () => {
       withShareTicket: true, // 支持获取群聊信息
       showShareItems: ["shareAppMessage", "shareTimeline"], // 同时开启好友和朋友圈分享
     });
+
+    // 获取用户信息并生成分享码
+    // 方式1: 使用用户ID作为分享码（如果有）
+    // 方式2: 调用后端API获取分享码
+    // 这里先用用户信息生成，实际应该调用后端API
+    userApi
+      .getUserInfo({ showLoading: false, showError: false })
+      .then((res) => {
+        // 根据API定义，getUserInfo返回 { data: { data: User } }
+        const user = (res.data as any)?.data;
+        if (user) {
+          // 使用用户微信ID或生成唯一码
+          // 实际应该调用后端API: /user/getsharecode
+          const userWechatId = user.wechat_id;
+          const code = userWechatId || `user_${Date.now()}`;
+          setShareCode(code);
+        } else {
+          // 如果获取失败，使用临时码
+          setShareCode(`temp_${Date.now()}`);
+        }
+      })
+      .catch(() => {
+        // 如果获取失败，使用临时码
+        setShareCode(`temp_${Date.now()}`);
+      });
   }, []);
+
+  // 使用 Taro 的 useShareAppMessage hook
+  useShareAppMessage(() => {
+    // 如果分享码还没获取到，使用临时码
+    const code = shareCode || `temp_${Date.now()}`;
+    
+    console.log("分享触发，分享码:", code);
+    
+    return {
+      title: "璞光集 - 定制专属水晶手串", // 分享标题
+      path: `/pages/home/index?code=${code}`, // 分享路径，携带分享码
+      imageUrl: "", // 可选：分享图片URL，留空使用小程序默认图
+    };
+  });
+
+  useLoad((options) => {
+    // 接收分享码参数
+    const code = options.code || options.shareCode;
+    if (code) {
+      console.log("通过分享进入，分享码:", code);
+      
+      // 可以在这里处理分享码逻辑，比如：
+      // 1. 上报分享来源
+      // 2. 记录分享关系
+      // 3. 显示欢迎提示等
+      
+      Taro.showToast({
+        title: `欢迎通过分享进入！`,
+        icon: "none",
+        duration: 2000,
+      });
+      
+      // 可以调用后端API记录分享关系
+      // userApi.recordShare({ share_code: code }).catch(console.error);
+    }
+  });
 
   useDidShow(() => {
     setTimeout(() => {
@@ -146,7 +209,14 @@ const Home = () => {
                     </View>
                   </View>
                   <View className="crystal-action-section">
-                    <View className="crystal-action-section-items" style={{ justifyContent: showIntelligentDesign ? "space-between" : "flex-end" }}>
+                    <View
+                      className="crystal-action-section-items"
+                      style={{
+                        justifyContent: showIntelligentDesign
+                          ? "space-between"
+                          : "flex-end",
+                      }}
+                    >
                       {showIntelligentDesign && (
                         <CrystalButton
                           style={{

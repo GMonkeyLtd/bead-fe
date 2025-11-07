@@ -33,11 +33,17 @@ import sharingIconSvg from "@/assets/icons/sharing-icon.svg";
 import deleteIconSvg from "@/assets/icons/delete.svg";
 import BudgetDialogGrading from "@/components/BudgetDialog/BudgetDialogGrading";
 import RefreshSvg from "@/assets/icons/refresh.svg";
+import PurchaseNotice from "@/components/PurchaseNotice";
 
 const Result = () => {
   const instance = Taro.getCurrentInstance();
   const params = instance.router?.params;
-  const { sessionId, from, originImageUrl: originImageUrlParam, showBudgetDialog } = params || {};
+  const {
+    sessionId,
+    from,
+    originImageUrl: originImageUrlParam,
+    showBudgetDialog,
+  } = params || {};
 
   const [imageUrl, setImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -50,7 +56,9 @@ const Result = () => {
   const [beadsInfo, setBeadsInfo] = useState<any[]>([]);
   const [rizhuInfo, setRizhuInfo] = useState<string>("");
   const [wuxingInfo, setWuxingInfo] = useState<any[]>([]);
-  const [budgetDialogShow, setBudgetDialogShow] = useState(showBudgetDialog == 'true' || false);
+  const [budgetDialogShow, setBudgetDialogShow] = useState(
+    showBudgetDialog == "true" || false
+  );
   const [orderList, setOrderList] = useState<any[]>([]);
   const [braceletDetailDialogShow, setBraceletDetailDialogShow] =
     useState(false);
@@ -63,16 +71,20 @@ const Result = () => {
     pollingInterval: 5000,
     checkStopPoll: (design) => {
       return design.progress == 100 && !!design?.info?.personal_report;
-    }
+    },
   });
   const [tierPriceConfig, setTierPriceConfig] = useState<any>(null);
 
-  const [originImageUrl, setOriginImageUrl] = useState<string>(originImageUrlParam ? decodeURIComponent(originImageUrlParam) : "");
+  const [originImageUrl, setOriginImageUrl] = useState<string>(
+    originImageUrlParam ? decodeURIComponent(originImageUrlParam) : ""
+  );
 
   const getOrderData = (orderUuid: string[]) => {
-    api.userHistory.getOrderById(orderUuid, { showLoading: false }).then((res) => {
-      res.data.orders?.length > 0 && setOrderList(res.data.orders);
-    });
+    api.userHistory
+      .getOrderById(orderUuid, { showLoading: false })
+      .then((res) => {
+        res.data.orders?.length > 0 && setOrderList(res.data.orders);
+      });
   };
 
   const canDiy = useMemo(() => {
@@ -80,20 +92,24 @@ const Result = () => {
   }, [beadsInfo]);
 
   const processDesignData = (designData) => {
-    const { design_id, image_url, draft_url, info, reference_price, session_id, draft_id, background_url } =
-      designData || {};
     const {
-      name,
-      description,
-      rizhu,
-      wuxing,
-      spec
-    } = info;
-    const deduplicatedBeads = getDeduplicateBeads(info.items, 'spu_id');
+      design_id,
+      image_url,
+      draft_url,
+      info,
+      reference_price,
+      session_id,
+      draft_id,
+      background_url,
+    } = designData || {};
+    const { name, description, rizhu, wuxing, spec } = info;
+    const deduplicatedBeads = getDeduplicateBeads(info.items, "spu_id");
     setBeadsInfo(info.items);
     image_url && setImageUrl(image_url);
     setBraceletName(name);
-    setBeadDescriptions(deduplicatedBeads.filter((item) => !!item.func_summary));
+    setBeadDescriptions(
+      deduplicatedBeads.filter((item) => !!item.func_summary)
+    );
     setDesignNo(design_id);
     setBraceletDescription(description);
     setRizhuInfo(rizhu || "");
@@ -104,7 +120,7 @@ const Result = () => {
     setBraceletSpec(spec);
     draft_url && setOriginImageUrl(draft_url);
     background_url && setBackgroundImageUrl(background_url);
-  }
+  };
 
   useEffect(() => {
     if (design?.order_uuids?.length) {
@@ -124,7 +140,7 @@ const Result = () => {
     if (designId) {
       getDesign({
         designId: designId,
-      })
+      });
     }
   };
 
@@ -140,9 +156,9 @@ const Result = () => {
 
   // 保存图片到相册
   const saveImage = async () => {
-    Taro.reportEvent('result_event', {
-      share_design: 1
-    })
+    Taro.reportEvent("result_event", {
+      share_design: 1,
+    });
     if (!imageUrl) {
       return;
     }
@@ -153,10 +169,10 @@ const Result = () => {
     });
     try {
       const res = await Taro.request({
-        url: 'https://api.gmonkey.top/api/generate-share-poster',
+        url: "https://api.gmonkey.top/api/generate-share-poster",
         method: "POST",
         header: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         data: {
           crystal_data: {
@@ -173,9 +189,9 @@ const Result = () => {
               function: item.func_summary,
               image_url: item.image_url,
             })),
-          }
-        }
-      })
+          },
+        },
+      });
       if (res.data.data) {
         // 检查相册权限
         const authSetting = await Taro.getSetting();
@@ -227,12 +243,14 @@ const Result = () => {
         // 将base64转换为临时文件
         const base64Data = res.data.data;
 
-        const tempFilePath = `${Taro.env.USER_DATA_PATH}/temp_poster_${Date.now()}.webp`;
+        const tempFilePath = `${
+          Taro.env.USER_DATA_PATH
+        }/temp_poster_${Date.now()}.webp`;
 
         await Taro.getFileSystemManager().writeFile({
           filePath: tempFilePath,
           data: base64Data,
-          encoding: 'base64',
+          encoding: "base64",
           success: () => {
             setShareImageUrl(tempFilePath);
             Taro.saveImageToPhotosAlbum({
@@ -249,12 +267,12 @@ const Result = () => {
                   icon: "error",
                 });
                 console.log(error, "保存失败");
-              }
+              },
             });
           },
           fail: (error) => {
             console.log("写入失败", error);
-          }
+          },
         });
       }
     } catch (error) {
@@ -272,18 +290,17 @@ const Result = () => {
           icon: "error",
         });
       }
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
 
   const doCreate = async () => {
-    Taro.reportEvent('result_event', {
-      get_product: 1
-    })
+    Taro.reportEvent("result_event", {
+      get_product: 1,
+    });
     const userData = await userApi.getUserInfo();
-    const { default_contact, phone, wechat_id } = userData?.data || {} as any;
+    const { default_contact, phone, wechat_id } = userData?.data || ({} as any);
     if (default_contact === 0 && !phone) {
       Taro.redirectTo({
         url: `${pageUrls.contactPreference}?designId=${designNo}&from=result`,
@@ -311,32 +328,39 @@ const Result = () => {
   };
 
   const handleModifyDesign = () => {
-    Taro.reportEvent('result_event', {
-      edit_design: 1
-    })
+    Taro.reportEvent("result_event", {
+      edit_design: 1,
+    });
     Taro.redirectTo({
       url: `${pageUrls.customDesign}?designId=${designNo}&sessionId=${designSessionId}&draftId=${designDraftId}&from=result`,
     });
   };
 
   const uploadProductImage = async (productImageUrl: string) => {
-    const productImageBase64 = await imageToBase64(productImageUrl, true, false, 'png')
-    apiSession.uploadProductImage({
-      design_id: designNo,
-      image_base64: productImageBase64,
-    }).then((res) => {
-      setImageUrl(res.image_url);
-    });
-  }
+    const productImageBase64 = await imageToBase64(
+      productImageUrl,
+      true,
+      false,
+      "png"
+    );
+    apiSession
+      .uploadProductImage({
+        design_id: designNo,
+        image_base64: productImageBase64,
+      })
+      .then((res) => {
+        setImageUrl(res.image_url);
+      });
+  };
 
   const posterData = useMemo(() => {
-    return { bgImage: backgroundImageUrl, braceletImage: originImageUrl }
-  }, [backgroundImageUrl, originImageUrl])
+    return { bgImage: backgroundImageUrl, braceletImage: originImageUrl };
+  }, [backgroundImageUrl, originImageUrl]);
 
   const handleDeleteDesign = () => {
-    Taro.reportEvent('result_event', {
-      delete_design: 1
-    })
+    Taro.reportEvent("result_event", {
+      delete_design: 1,
+    });
     if (orderList?.length > 0) {
       Taro.showToast({
         title: "该作品有相关订单，无法删除",
@@ -349,30 +373,33 @@ const Result = () => {
       content: "删除后将无法找回",
       success: (res) => {
         if (res.confirm) {
-          apiSession.deleteDesign(Number(designNo)).then((res) => {
-            Taro.showToast({
-              title: "删除成功",
-              icon: "success",
+          apiSession
+            .deleteDesign(Number(designNo))
+            .then((res) => {
+              Taro.showToast({
+                title: "删除成功",
+                icon: "success",
+              });
+              setTimeout(() => {
+                if (Taro.getCurrentPages().length > 1) {
+                  Taro.navigateBack();
+                } else {
+                  Taro.redirectTo({
+                    url: pageUrls.userCenter,
+                  });
+                }
+              }, 1000);
+            })
+            .catch((err) => {
+              Taro.showToast({
+                title: "删除失败",
+                icon: "error",
+              });
             });
-            setTimeout(() => {
-              if (Taro.getCurrentPages().length > 1) {
-                Taro.navigateBack();
-              } else {
-                Taro.redirectTo({
-                  url: pageUrls.userCenter,
-                });
-              }
-            }, 1000);
-          }).catch((err) => {
-            Taro.showToast({
-              title: "删除失败",
-              icon: "error",
-            });
-          });
         }
-      }
-    })
-  }
+      },
+    });
+  };
 
   return (
     <View
@@ -383,21 +410,24 @@ const Result = () => {
         // "--bg-image": `url(${imageUrl || DESIGN_PLACEHOLDER_IMAGE_URL})`,
       }}
     >
-      <AppHeader isWhite onBack={() => {
-        if (from === "chat") {
-          Taro.redirectTo({
-            url: pageUrls.chatDesign + "?session_id=" + sessionId,
-          });
-        } else {
-          if (Taro.getCurrentPages().length > 1) {
-            Taro.navigateBack();
-          } else {
+      <AppHeader
+        isWhite
+        onBack={() => {
+          if (from === "chat") {
             Taro.redirectTo({
-              url: pageUrls.userCenter,
+              url: pageUrls.chatDesign + "?session_id=" + sessionId,
             });
+          } else {
+            if (Taro.getCurrentPages().length > 1) {
+              Taro.navigateBack();
+            } else {
+              Taro.redirectTo({
+                url: pageUrls.userCenter,
+              });
+            }
           }
-        }
-      }} />
+        }}
+      />
       <View
         className={styles.resultContentContainer}
         style={{
@@ -420,17 +450,22 @@ const Result = () => {
           />
         </View>
         <View className={styles.resultContentCard}>
-          <View
-            className={styles.resultContentCardImage}
-            onClick={viewImage}
-          >
+          <View className={styles.resultContentCardImage} onClick={viewImage}>
             {!imageUrl && (
               <View className={styles.originImageContainer}>
-                <Image src={originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL} mode="heightFix" style={{ height: '100%' }} />
+                <Image
+                  src={originImageUrl || DESIGN_PLACEHOLDER_IMAGE_URL}
+                  mode="heightFix"
+                  style={{ height: "100%" }}
+                />
               </View>
             )}
             {imageUrl && (
-              <Image src={imageUrl} mode="aspectFill" style={{ width: '100%' }} />
+              <Image
+                src={imageUrl}
+                mode="aspectFill"
+                style={{ width: "100%" }}
+              />
             )}
             <View className={styles.logoImageContainer} onClick={viewImage}>
               <Image
@@ -442,19 +477,27 @@ const Result = () => {
             </View>
             {!imageUrl ? (
               <View className={styles.generatingGifContainer}>
-                <Image className={styles.generatingGif} src={GENERATING_GIF_URL} mode="widthFix" />
-                <View className={styles.generatingGifText}>
-                  场景设计...
-                </View>
+                <Image
+                  className={styles.generatingGif}
+                  src={GENERATING_GIF_URL}
+                  mode="widthFix"
+                />
+                <View className={styles.generatingGifText}>场景设计...</View>
               </View>
             ) : (
-              <Image className={styles.expendImage} src={expendImage} mode="widthFix" />
+              <Image
+                className={styles.expendImage}
+                src={expendImage}
+                mode="widthFix"
+              />
             )}
           </View>
           <View className={styles.resultContentCardTextContainer}>
             <View className={styles.resultContentCardText}>
               {designNo && (
-                <View className={styles.resultContentCardSubtitle}>{`设计编号：${designNo}`}</View>
+                <View
+                  className={styles.resultContentCardSubtitle}
+                >{`设计编号：${designNo}`}</View>
               )}
               <View className={styles.resultContentCardTextTitleContainer}>
                 <View className={styles.resultContentCardTextTitle}>
@@ -487,16 +530,22 @@ const Result = () => {
                 <View className={styles.resultContentCenterText}>
                   {rizhuInfo ? (
                     <View className={styles.resultContentWearTips}>
-                      <View className={styles.resultContentWearTipsTitleContainer}>
+                      <View
+                        className={styles.resultContentWearTipsTitleContainer}
+                      >
                         <Image
                           src={ReportSvg}
                           style={{ width: "16px", height: "16px" }}
                         />
                         <View className={styles.resultWuxingAnaylisisContainer}>
                           <View>你的日主为</View>
-                          <View className={styles.resultWuxingAnaylisisTag}>{rizhuInfo}</View>
+                          <View className={styles.resultWuxingAnaylisisTag}>
+                            {rizhuInfo}
+                          </View>
                           <View>，喜用</View>
-                          <View className={styles.resultWuxingAnaylisisTag}>{wuxingInfo?.join("、")}</View>
+                          <View className={styles.resultWuxingAnaylisisTag}>
+                            {wuxingInfo?.join("、")}
+                          </View>
                         </View>
                       </View>
                       <View className={styles.resultContentBraceletDescription}>
@@ -505,7 +554,9 @@ const Result = () => {
                     </View>
                   ) : (
                     <View className={styles.resultContentWearTips}>
-                      <View className={styles.resultContentWearTipsTitleContainer}>
+                      <View
+                        className={styles.resultContentWearTipsTitleContainer}
+                      >
                         <Image
                           src={ConceptSvg}
                           style={{ width: "16px", height: "16px" }}
@@ -534,13 +585,14 @@ const Result = () => {
                       天然水晶佩戴一段时间后建议定期净化噢~可以用清水冲洗或在月光下放置一晚，以保持水晶的能量纯净和光泽度。
                     </View>
                   </View> */}
-                  {(design?.progress != 100 || design?.info?.personal_report ) && (
+                  {(design?.progress != 100 ||
+                    design?.info?.personal_report) && (
                     <View className={styles.resultContentReportCardContainer}>
                       <ViewReportCard
                         onActionClick={() => {
-                          Taro.reportEvent('result_event', {
-                            view_crystal_analysis: 1
-                          })
+                          Taro.reportEvent("result_event", {
+                            view_crystal_analysis: 1,
+                          });
                           Taro.navigateTo({
                             url: `${pageUrls.designReport}?designId=${designNo}`,
                           });
@@ -560,7 +612,10 @@ const Result = () => {
                   />
                 </View> */}
               </View>
-              <View className={styles.resultContentWearTips} style={{ marginTop: "16px" }}>
+              <View
+                className={styles.resultContentWearTips}
+                style={{ marginTop: "16px" }}
+              >
                 <View className={styles.resultContentWearTipsTitleContainer}>
                   <Image
                     src={MaterialSvg}
@@ -577,7 +632,6 @@ const Result = () => {
               </View>
             </View>
           </View>
-
         </View>
         {orderList?.length > 0 && (
           <View className={styles.resultOrderListContainer}>
@@ -585,9 +639,14 @@ const Result = () => {
               <View className={styles.resultOrderListTitle}>
                 {`相关订单（${orderList.length}）`}
               </View>
-              <Image src={RefreshSvg} mode="widthFix" style={{ width: "11px", height: "11px" }} onClick={() => {
-                getOrderData(design.order_uuids);
-              }} />
+              <Image
+                src={RefreshSvg}
+                mode="widthFix"
+                style={{ width: "11px", height: "11px" }}
+                onClick={() => {
+                  getOrderData(design.order_uuids);
+                }}
+              />
             </View>
             <OrderListComp
               orders={orderList.map((item) => ({
@@ -611,37 +670,71 @@ const Result = () => {
           </View>
         )}
         {design?.order_uuids?.length > 0 && orderList.length === 0 && (
-          <View style={{ marginTop: "16px", fontSize: "12px", color: "gray", textAlign: "center" }}>
+          <View
+            style={{
+              marginTop: "16px",
+              fontSize: "12px",
+              color: "gray",
+              textAlign: "center",
+            }}
+          >
             {`订单信息加载中...`}
           </View>
         )}
+        <View style={{ marginTop: "16px" }}>
+          <PurchaseNotice />
+        </View>
       </View>
       <View className={styles.resultContentCardAction}>
-        <View className={`${styles.editorContainer} ${orderList?.length > 0 ? styles.disabled : ''}`} onClick={handleDeleteDesign}>
-          <Image src={deleteIconSvg} mode="widthFix" style={{ width: "22px", height: "22px" }} />
+        <View
+          className={`${styles.editorContainer} ${
+            orderList?.length > 0 ? styles.disabled : ""
+          }`}
+          onClick={handleDeleteDesign}
+        >
+          <Image
+            src={deleteIconSvg}
+            mode="widthFix"
+            style={{ width: "22px", height: "22px" }}
+          />
           <View className={styles.editorText}>删除</View>
         </View>
         <View className={styles.editorContainer} onClick={handleModifyDesign}>
-          <Image src={editInspirationSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
+          <Image
+            src={editInspirationSvg}
+            mode="widthFix"
+            style={{ width: "20px", height: "20px" }}
+          />
           <View className={styles.editorText}>编辑</View>
         </View>
-        <View className={`${styles.editorContainer} ${!imageUrl ? styles.editorContainerDisabled : ''}`} onClick={saveImage}>
-          <Image src={sharingIconSvg} mode="widthFix" style={{ width: "20px", height: "20px" }} />
+        <View
+          className={`${styles.editorContainer} ${
+            !imageUrl ? styles.editorContainerDisabled : ""
+          }`}
+          onClick={saveImage}
+        >
+          <Image
+            src={sharingIconSvg}
+            mode="widthFix"
+            style={{ width: "20px", height: "20px" }}
+          />
           <View className={styles.editorText}>分享</View>
         </View>
-        {referencePrice && (<CrystalButton
-          onClick={doCreate}
-          isPrimary
-          text={`¥${referencePrice} 制作成品`}
-          style={{ flex: 1 }}
-          prefixIcon={
-            <Image
-              src={createBeadImage}
-              mode="widthFix"
-              style={{ width: "24px", height: "24px" }}
-            />
-          }
-        />)}
+        {referencePrice && (
+          <CrystalButton
+            onClick={doCreate}
+            isPrimary
+            text={`¥${referencePrice} 制作成品`}
+            style={{ flex: 1 }}
+            prefixIcon={
+              <Image
+                src={createBeadImage}
+                mode="widthFix"
+                style={{ width: "24px", height: "24px" }}
+              />
+            }
+          />
+        )}
       </View>
       {/* {budgetDialogShow && design && tierPriceConfig && (
         <BudgetDialogGrading
@@ -663,19 +756,21 @@ const Result = () => {
           productImage={imageUrl}
           onClose={() => {
             initData();
-            setBudgetDialogShow(false)
+            setBudgetDialogShow(false);
           }}
           referencePrice={referencePrice}
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
       )}
-      {originImageUrl && backgroundImageUrl && !imageUrl && <ProductImageGenerator  // 生成海报   
-        data={posterData}
-        onGenerated={(url) => {
-          uploadProductImage(url);
-        }}
-        showProductImage={false}
-      />}
+      {originImageUrl && backgroundImageUrl && !imageUrl && (
+        <ProductImageGenerator // 生成海报
+          data={posterData}
+          onGenerated={(url) => {
+            uploadProductImage(url);
+          }}
+          showProductImage={false}
+        />
+      )}
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}

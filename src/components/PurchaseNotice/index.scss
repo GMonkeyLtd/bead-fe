@@ -1,0 +1,160 @@
+.purchase-notice-container {
+  width: 100%;
+  background: #ffffff;
+  border: 2px solid #eeeded;
+  border-radius: 10px;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.purchase-notice-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+}
+
+.purchase-notice-title Text {
+  font-family: 'Source Han Serif CN', serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.25em;
+  text-align: center;
+  color: #723900;
+}
+
+.purchase-notice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.purchase-notice-item {
+  width: 100%;
+  text-align: justify;
+  word-break: break-word;
+  line-height: 1.5em;
+}
+
+.purchase-notice-item-first {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 350;
+  font-size: 11px;
+  color: #1f1722;
+  min-height: 68px;
+}
+
+.purchase-notice-item-other {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  color: #723900;
+  min-height: 34px;
+}
+
+.purchase-notice-process {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.purchase-notice-process-bg {
+  width: 100%;
+  // max-width: 305px;
+  height: 84px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 19px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.purchase-notice-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 47px;
+}
+
+.purchase-notice-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5.42px;
+  flex-shrink: 0;
+  width: 28.92px;
+  height: 47px;
+}
+
+.purchase-notice-step-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.purchase-notice-step-icon Image {
+  width: 100%;
+  height: 100%;
+}
+
+.purchase-notice-step-label {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 350;
+  font-size: 11px;
+  line-height: 1.35em;
+  letter-spacing: 9.04%;
+  text-align: center;
+  color: #1f1722;
+  white-space: nowrap;
+}
+
+.purchase-notice-arrow {
+  width: 18.98px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0 2px;
+  padding-top: 17px;
+}
+
+.purchase-notice-arrow Image {
+  width: 100%;
+  height: 7.23px;
+}
+
+.purchase-notice-item-title {
+  display: inline;
+  color: #723900;
+  text-align: justify;
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  // line-height: 150%;
+  /* 16.5px */
+}
+
+.purchase-notice-item-content {
+  display: inline;
+  color: rgba(31, 23, 34, 0.60);
+  font-family: "Noto Sans SC";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 350;
+  // line-height: 150%;
+}

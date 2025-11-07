@@ -672,7 +672,7 @@ export default function OrderList({
           realImages={detailData.order_details?.actual_images || []}
           certificateImages={detailData.order_details?.certificate_images || []}
           budget={detailData.price.toString()}
-          productImage={detailData.design_info?.image_url || ""}
+          productImage={detailData.design_info?.image_url || detailData.design_info?.draft_url || ""}
           materials={(detailData.beadsData || []).map((item: any) => {
             return {
               name: item.name,
