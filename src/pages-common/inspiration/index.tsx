@@ -5,7 +5,14 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { View, Text, ScrollView, Image } from "@tarojs/components";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  Swiper,
+  SwiperItem,
+} from "@tarojs/components";
 import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
 import LazyImage from "@/components/LazyImage";
@@ -18,7 +25,11 @@ import RightArrowIcon from "@/assets/icons/right-arrow.svg";
 import CollectIcon from "@/assets/icons/collect.svg";
 import CollectedIcon from "@/assets/icons/collect-active.svg";
 import MyWorkIcon from "@/assets/icons/my-work.svg";
-import { FixedPriceTag, LimitedTimeTag, PromoText } from "@/components/InspirationTags";
+import {
+  FixedPriceTag,
+  LimitedTimeTag,
+  PromoText,
+} from "@/components/InspirationTags";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
 
 export interface InspirationItem {
@@ -53,6 +64,7 @@ const INSPIRATION_TABS = [
 
 const InspirationPage: React.FC = () => {
   const [curTab, setCurTab] = useState<"all" | "collect">("all");
+  const [bannerData, setBannerData] = useState<any[]>([]);
   const { height: navBarHeight } = getNavBarHeightAndTop();
   const {
     data: inspirationList,
@@ -117,9 +129,12 @@ const InspirationPage: React.FC = () => {
       };
     }, []),
     queryItem: useCallback(async (item: InspirationItem) => {
-      const res = await inspirationApi.getInspirationData({
-        work_id: item.work_id,
-      }, { showLoading: false });
+      const res = await inspirationApi.getInspirationData(
+        {
+          work_id: item.work_id,
+        },
+        { showLoading: false }
+      );
       return res.data.works?.[0] || null;
     }, []),
     selector: "#inspiration-more-tag", // 添加 selector 参数
@@ -127,11 +142,23 @@ const InspirationPage: React.FC = () => {
 
   const showData = useMemo(() => {
     if (curTab === "all") {
-      return inspirationList.map(item => ({ ...item, is_limited_time: true }));
+      return inspirationList.map((item) => ({
+        ...item,
+        is_limited_time: true,
+      }));
     } else {
       return collectInspirationList;
     }
   }, [curTab, collectInspirationList, inspirationList]);
+
+  const getInspirationBanner = async () => {
+    const res = await inspirationApi.getInspirationBanner({ showError: false });
+    setBannerData(res.data);
+  };
+
+  useEffect(() => {
+    getInspirationBanner();
+  }, []);
 
   // 页面显示时刷新数据
   usePullDownRefresh(() => {
@@ -183,7 +210,10 @@ const InspirationPage: React.FC = () => {
     // TODO: 实现收藏功能
     if (item.is_collect) {
       inspirationApi
-        .cancelCollectInspiration({ work_id: item.work_id }, { showLoading: false })
+        .cancelCollectInspiration(
+          { work_id: item.work_id },
+          { showLoading: false }
+        )
         .then(() => {
           // 同时更新两个列表中的数据
           updateItem(item);
@@ -209,7 +239,7 @@ const InspirationPage: React.FC = () => {
           // 先更新数据状态
           updateItem(item);
           collectUpdateItem(item);
-          
+
           // 延迟显示 toast 并使用最大可能的 duration
           safeSetTimeout(() => {
             Taro.showToast({
@@ -352,7 +382,7 @@ const InspirationPage: React.FC = () => {
         fallbackIntervalRef.current = null;
       }
       // 清理所有未完成的 timeout
-      timeoutRefs.current.forEach(timeoutId => {
+      timeoutRefs.current.forEach((timeoutId) => {
         clearTimeout(timeoutId);
       });
       timeoutRefs.current.clear();
@@ -362,12 +392,47 @@ const InspirationPage: React.FC = () => {
   return (
     <CrystalContainer showBack={false} showHome={false}>
       <View className={styles.inspirationContainer}>
+        {bannerData?.length > 0 && (
+          <Swiper
+            // className={styles.imageSwiper}
+            indicatorColor="rgba(255,255,255,0.6)"
+            indicatorActiveColor="#fff"
+            circular={true}
+            indicatorDots={bannerData?.length > 1 ? true : false}
+            autoplay={true}
+            interval={4000}
+            duration={500}
+            style={{ width: "100%", height: "36vw", marginTop: "12px" }}
+          >
+            {bannerData.map((item, index) => (
+              <SwiperItem key={`${item.work_id}-${index}`}>
+                <Image
+                  src={item.image_url}
+                  className={styles.mainImage}
+                  // mode="aspectFill"
+                  mode="widthFix"
+                  // mode="aspectFit"
+                  style={{ width: "100%" }}
+                  onClick={() => {
+                    Taro.reportEvent("inspiration_event", {
+                      click_inspiration_banner: 1,
+                    });
+                    Taro.navigateTo({
+                      url: `${pageUrls.inspirationDetail}?workId=${item.work_id}&designId=${item.design_id}`,
+                    });
+                  }}
+                />
+              </SwiperItem>
+            ))}
+          </Swiper>
+        )}
         <View className={styles.tabContainer}>
           {INSPIRATION_TABS.map((tab) => (
             <View
               key={tab.value}
-              className={`${styles.tabItem} ${curTab === tab.value ? styles.tabActive : ""
-                }`}
+              className={`${styles.tabItem} ${
+                curTab === tab.value ? styles.tabActive : ""
+              }`}
               onClick={() => setCurTab(tab.value as "all" | "collect")}
             >
               {curTab === tab.value && (
@@ -388,7 +453,7 @@ const InspirationPage: React.FC = () => {
         </View>
         <View
           style={{
-            height: `calc(100vh - ${navBarHeight + 120}px)`,
+            height: `calc(100vh - ${navBarHeight + 240}px)`,
             boxSizing: "border-box",
             paddingBottom: "140px",
             overflowY: "auto",
@@ -403,16 +468,16 @@ const InspirationPage: React.FC = () => {
               >
                 <View className={styles.imageContainer}>
                   <Image
-                    src={item.cover_url}
+                    src={item.real_images?.[0] || item.cover_url}
                     className={styles.inspirationImage}
                     mode="aspectFill"
                     lazyLoad
                   />
-                  {item?.is_limited_time && 
+                  {item?.is_limited_time && (
                     <View className={styles.limitedTimeTagContainer}>
                       <LimitedTimeTag text="限时" type="limited" />
                     </View>
-                  }
+                  )}
                 </View>
 
                 <View className={styles.itemInfo}>
@@ -425,21 +490,23 @@ const InspirationPage: React.FC = () => {
                           mode="aspectFill"
                           lazyLoad
                         />
-                        <Text className={styles.authorName}>{item.user.nick_name}</Text>
+                        <Text className={styles.authorName}>
+                          {item.user.nick_name}
+                        </Text>
                       </View>
                       {/* <View className={styles.separator}></View>
                       <Text className={styles.tagText}>水金火</Text> */}
                     </View>
                   </View>
                   {/* 促销标语 */}
-                  {item?.is_limited_time && (
-                    <PromoText 
-                      text="同款制作，每日前20名享" 
+                  {/* {item?.is_limited_time && (
+                    <PromoText
+                      text="同款制作，每日前20名享"
                       discountText="9折"
                       className={styles.promoTextContainer}
                     />
-                  )}
-                  
+                  )} */}
+
                   <View className={styles.titleSection}>
                     <Text className={styles.itemTitle}>{item.title}</Text>
                   </View>
@@ -447,15 +514,17 @@ const InspirationPage: React.FC = () => {
                   <View className={styles.priceSection}>
                     <View className={styles.priceContainer}>
                       <Text className={styles.pricePrefix}>¥</Text>
-                      <Text className={styles.currentPrice}>{item.final_price}</Text>
-                      <Text className={styles.originalPrice}>{item.original_price}</Text>
+                      <Text className={styles.currentPrice}>
+                        {item.final_price}
+                      </Text>
+                      <Text className={styles.originalPrice}>
+                        {item.original_price}
+                      </Text>
                     </View>
                   </View>
 
                   <View className={styles.userSection}>
-                    {item.is_limited_time && (
-                      <FixedPriceTag  />
-                    )}
+                    {item.is_limited_time && <FixedPriceTag text={`立减 ${item.original_price - item.final_price}元`} />}
                     <View
                       className={styles.collectSection}
                       onClick={(e) => handleCollectClick(item, e)}

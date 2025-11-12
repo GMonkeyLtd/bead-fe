@@ -100,31 +100,31 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       // const { path: sideImgPath, width: sideImgWidth, height: sideImgHeight } = await loadImage(data.bgImage);
       // const bgImageBase64 = await imageToBase64(data.bgImage, true, false);  
       // console.log('bgImageBase64', bgImageBase64);
-      const sideImage = processedPaths.get(data.bgImage);
-      if (!sideImage) {
-        return;
-      }
+      // const sideImage = processedPaths.get(data.bgImage);
+      // if (!sideImage) {
+      //   return;
+      // }
 
       // 裁剪逻辑：从原图中心位置裁剪出115px宽度的部分
-      const cropWidth = 342; // 固定裁剪宽度115px
-      const cropHeight = 1024; // 裁剪高度 = 原图高度
-      const cropX = Math.max(0, (746 - cropWidth) / 2); // 居中裁剪，确保不超出边界
-      const cropY = 0;
+      // const cropWidth = 342; // 固定裁剪宽度115px
+      // const cropHeight = 1024; // 裁剪高度 = 原图高度
+      // const cropX = Math.max(0, (746 - cropWidth) / 2); // 居中裁剪，确保不超出边界
+      // const cropY = 0;
 
       // 计算缩放比例：选择宽度和高度缩放比例中较小的那个，确保图片完全显示在Canvas内
-      const scaleRatioWidth = canvasWidth / cropWidth;
-      const scaleRatioHeight = canvasHeight / cropHeight;
-      const scaleRatio = Math.min(scaleRatioWidth, scaleRatioHeight);
+      // const scaleRatioWidth = canvasWidth / cropWidth;
+      // const scaleRatioHeight = canvasHeight / cropHeight;
+      // const scaleRatio = Math.min(scaleRatioWidth, scaleRatioHeight);
 
-      const targetWidth = cropWidth * scaleRatio;
-      const targetHeight = cropHeight * scaleRatio;
+      // const targetWidth = cropWidth * scaleRatio;
+      // const targetHeight = cropHeight * scaleRatio;
 
-      ctx.drawImage(
-        sideImage,
-        cropX, cropY, cropWidth, cropHeight, // 源图片裁剪区域
-        0, 0, targetWidth, targetHeight // 目标Canvas区域（居中）
-      );
-      ctx.restore();
+      // ctx.drawImage(
+      //   sideImage,
+      //   cropX, cropY, cropWidth, cropHeight, // 源图片裁剪区域
+      //   0, 0, targetWidth, targetHeight // 目标Canvas区域（居中）
+      // );
+      // ctx.restore();
 
       
       // 绘制手链图片
@@ -132,14 +132,15 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       if (!braceletImage) {
         return;
       }
-      const braceletImageSize = 280;
+      const braceletImageSize = 345;
       // const braceletImageSize = 160;
       // const imgBase64 = await imageToBase64(data.braceletImage, true, false);
       const heightCenter = (canvasHeight - braceletImageSize * dpr) / 2;
+      const widthCenter = (canvasWidth - braceletImageSize * dpr) / 2;
 
       ctx.drawImage(
         braceletImage,
-        targetWidth + (canvasWidth - targetWidth - braceletImageSize * dpr) / 2,
+        widthCenter, 
         heightCenter,
         braceletImageSize * dpr,
         braceletImageSize * dpr
@@ -152,7 +153,7 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       const logoWidth = 22;
       ctx.drawImage(
         logoImgPath,
-        targetWidth + (canvasWidth - targetWidth - logoWidth * dpr) / 2,
+        (canvasHeight - logoWidth * dpr) / 2,
         (canvasHeight - logoHeight * dpr) / 2,
         logoWidth * dpr,
         logoHeight * dpr
@@ -164,7 +165,7 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       const sloganWidth = 86;
       ctx.drawImage(
         sloganImgPath,
-        targetWidth + (canvasWidth - targetWidth - sloganWidth * dpr) / 2,
+        canvasWidth / 2,
         heightCenter + braceletImageSize * dpr + 56 * dpr,
         sloganWidth * dpr,
         sloganHeight * dpr
@@ -260,6 +261,8 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
       cleanup();
     };
   }, [cleanup]);
+
+  console.log('canvasImageUrl', canvasImageUrl, showProductImage);
 
   // 如果已完成且启用自动销毁，不渲染任何内容
   if (isCompleted && autoDestroy) {

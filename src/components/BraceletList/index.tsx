@@ -70,10 +70,10 @@ const BraceletItem: React.FC<{
       onClick={handleItemClick}
     >
       <View className="bracelet-image-container">
-        {item.image || imageUrl ? (
+        {item.image || imageUrl || item.draftUrl ? (
           <Image
             className="bracelet-image"
-            src={item.image || imageUrl}
+            src={item.image || imageUrl || item.draftUrl}
             mode="aspectFill"
             lazyLoad
             fadeIn={false}

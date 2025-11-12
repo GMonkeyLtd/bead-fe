@@ -414,7 +414,7 @@ export default function OrderList({
                 收货地址
               </View>
             )}
-            {[OrderStatus.PendingShipment].includes(order.order_status) && (
+            {/* {[OrderStatus.PendingShipment].includes(order.order_status) && ( */}
               <View
                 className={styles.completeBtn}
                 onClick={() => {
@@ -430,7 +430,7 @@ export default function OrderList({
               >
                 填写物流
               </View>
-            )}
+            {/* )} */}
           </View>
         </View>
       );

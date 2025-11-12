@@ -1,5 +1,5 @@
 .inspirationContainer {
-  padding: 0 16px;
+  padding: 0 8px;
   padding-bottom: 100px; // 为底部 TabBar 留出空间
   min-height: 100vh;
   overflow-y: hidden;
@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 0;
+  padding: 12px 0 16px;
   box-sizing: border-box;
 }
 
@@ -124,7 +124,7 @@
 }
 
 .itemTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #1f1722;
   opacity: 0.9;
@@ -159,7 +159,7 @@
 .currentPrice {
   font-family: "Helvetica Neue", sans-serif;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1em;
   color: #221d17;
 }

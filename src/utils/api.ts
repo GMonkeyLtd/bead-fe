@@ -408,6 +408,13 @@ export const inspirationApi = {
       ...config,
     });
   },
+  getInspirationBanner: (config?: ApiConfig) => {
+    return http.get<any>(
+      `/configs/banners`,
+      {},
+      { cancelToken: config?.cancelToken, ...config }
+    );
+  }
 };
 
 // 文件相关API

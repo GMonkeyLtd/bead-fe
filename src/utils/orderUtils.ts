@@ -125,7 +125,7 @@ export const getOrderStatusTip = (status: OrderStatus, afterSaleStatus: AfterSal
     case OrderStatus.PendingPayment:
       return "请及时付款";
     case OrderStatus.PendingShipment:
-      return "定制周期一般在7-10天";
+      return "定制周期一般在1-3天";
     case OrderStatus.Shipped:
       return "商家已发货，请耐心等待";
     case OrderStatus.AfterSale:

@@ -11,6 +11,7 @@ import {
   LOGO_IMAGE_URL,
   DESIGN_PLACEHOLDER_IMAGE_URL,
   GENERATING_GIF_URL,
+  RESULT_IMAGE_LOGO_IMAGE_URL,
 } from "@/config";
 import BudgetDialog from "@/components/BudgetDialog";
 import OrderListComp from "@/components/OrderListComp";
@@ -475,7 +476,7 @@ const Result = () => {
                 style={{ width: "48px", height: "23px" }}
               />
             </View>
-            {!imageUrl ? (
+            {/* {!imageUrl ? (
               <View className={styles.generatingGifContainer}>
                 <Image
                   className={styles.generatingGif}
@@ -484,13 +485,13 @@ const Result = () => {
                 />
                 <View className={styles.generatingGifText}>场景设计...</View>
               </View>
-            ) : (
+            ) : ( */}
               <Image
                 className={styles.expendImage}
                 src={expendImage}
                 mode="widthFix"
               />
-            )}
+            {/* )} */}
           </View>
           <View className={styles.resultContentCardTextContainer}>
             <View className={styles.resultContentCardText}>
@@ -748,6 +749,15 @@ const Result = () => {
           tierPriceConfig={tierPriceConfig}
         />
       )} */}
+      {originImageUrl && (
+          <ProductImageGenerator // 生成海报
+            data={posterData}
+            onGenerated={(url) => {
+              uploadProductImage(url);
+            }}
+            showProductImage={false}
+          />
+        )}
       {budgetDialogShow && (
         <BudgetDialog
           visible={budgetDialogShow}
@@ -760,15 +770,6 @@ const Result = () => {
           }}
           referencePrice={referencePrice}
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
-        />
-      )}
-      {originImageUrl && backgroundImageUrl && !imageUrl && (
-        <ProductImageGenerator // 生成海报
-          data={posterData}
-          onGenerated={(url) => {
-            uploadProductImage(url);
-          }}
-          showProductImage={false}
         />
       )}
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
