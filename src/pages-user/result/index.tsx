@@ -749,7 +749,7 @@ const Result = () => {
           tierPriceConfig={tierPriceConfig}
         />
       )} */}
-      {originImageUrl && (
+      {originImageUrl && !imageUrl && (
           <ProductImageGenerator // 生成海报
             data={posterData}
             onGenerated={(url) => {
