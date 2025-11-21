@@ -20,6 +20,7 @@ export default defineAppConfig({
       root: 'pages-user',
       pages: [
         'user-center/index',
+        'my-invites/index', // 新增页面
         'result/index',
         'contact-preference/index',
         'modify-user/index',

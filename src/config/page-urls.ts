@@ -15,6 +15,7 @@ export const pageUrls = {
   merchantOrderManagement: '/pages-merchant/order-management/index',
   merchantUserCenter: '/pages-merchant/user-center/index',
   modifyUser: '/pages-user/modify-user/index',
+  myInvites: '/pages-user/my-invites/index',
   webview: '/pages-common/webview/index',
   inspiration: '/pages-common/inspiration/index',
   inspirationDetail: '/pages-common/inspiration-detail/index',

@@ -249,7 +249,7 @@ const ProductImageGenerator: React.FC<ProductImageGeneratorProps> = ({
 
   // 当字体加载完成且数据可用时开始绘制
   useEffect(() => {
-    if (data?.bgImage && data?.braceletImage && !isUnmountedRef.current) {
+    if (data?.braceletImage && !isUnmountedRef.current) {
       debouncedDrawPoster();
     }
   }, [data?.bgImage, data?.braceletImage, debouncedDrawPoster]);

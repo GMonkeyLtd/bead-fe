@@ -286,12 +286,12 @@ export class BeadArrayCalculator {
     const currentLength = this.calculatePredictedLength(beads);
     const newLength = type === 'add' ? currentLength + newBeadDiameter * 0.1 : currentLength - newBeadDiameter * 0.1;
 
-    if (newLength > this.config.maxWristSize && type === 'add') {
-      return {
-        isValid: false,
-        message: "哎呀，珠子有点多啦！一般手围建议不超过23cm噢。"
-      };
-    }
+    // if (newLength > this.config.maxWristSize && type === 'add') {
+    //   return {
+    //     isValid: false,
+    //     message: "哎呀，珠子有点多啦！一般手围建议不超过23cm噢。"
+    //   };
+    // }
 
     // if (newLength < this.config.minWristSize && type === 'remove') {
     //   return {

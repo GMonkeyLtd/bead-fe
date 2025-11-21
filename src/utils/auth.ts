@@ -61,9 +61,9 @@ export const AuthManager = {
     },
 
     // 直接调用登录接口，避免循环依赖
-    async callLoginApi(code: string): Promise<{token: string, user?: any}> {
+    async callLoginApi(code: string, referralCode?: string): Promise<{token: string, user?: any}> {
       return new Promise((resolve, reject) => {
-        api.user.login({ code }).then((res) => {
+        api.user.login({ code, referral_code: referralCode }).then((res) => {
           resolve(res)
         }).catch((err) => {
           reject(err)
@@ -72,14 +72,14 @@ export const AuthManager = {
     },
 
     // 登录方法
-    async login(): Promise<string | null> {
+    async login(referralCode?: string): Promise<string | null> {
       // 防止并发登录
       if (isLoggingIn) {
         return loginPromise;
       }
 
       isLoggingIn = true;
-      loginPromise = this._performLogin();
+      loginPromise = this._performLogin(referralCode);
 
       try {
         const token = await loginPromise;
@@ -91,7 +91,7 @@ export const AuthManager = {
     },
 
     // 执行登录的内部方法
-    async _performLogin(): Promise<string | null> {
+    async _performLogin(referralCode?: string): Promise<string | null> {
       try {
         // 先检查是否已经登录
         if (AuthManager.isLoggedIn()) {
@@ -99,14 +99,14 @@ export const AuthManager = {
           return Taro.getStorageSync('token');
         }
   
-        console.log("开始登录流程...");
+        console.log("开始登录流程...", referralCode ? `邀请码: ${referralCode}` : '无邀请码');
         const loginRes = await Taro.login();
         
         if (!loginRes.code) {
           throw new Error('获取登录凭证失败');
         }
 
-        const res = await this.callLoginApi(loginRes.code);
+        const res = await this.callLoginApi(loginRes.code, referralCode);
         console.log("登录响应:", res);
   
         if (res.data.token) {

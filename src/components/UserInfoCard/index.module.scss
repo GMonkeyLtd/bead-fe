@@ -54,6 +54,18 @@
   margin: 0;
 }
 
+.sloganContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.copyIcon {
+  width: 12px;
+  height: 12px;
+  opacity: 0.6;
+}
+
 .actionSection {
   display: flex;
   flex-direction: row;

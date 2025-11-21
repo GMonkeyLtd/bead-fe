@@ -1,5 +1,5 @@
 import { AddressInfo } from "@/components/LogisticsCard";
-import { ApiConfig } from "./api";
+import { ApiConfig, ReferralStats, InviteeOrder } from "./api";
 import http from "./request";
 
 export default {
@@ -147,4 +147,15 @@ export default {
       cancelToken: config?.cancelToken,
       ...config,
     }),
+  getMyInvites: (config?: ApiConfig) =>
+    http.get<{
+      data: ReferralStats;
+    }>(`/user/promotion/invitees`, undefined, config),
+  getInviteeOrders: (inviteeUserId: string, config?: ApiConfig) =>
+    http.get<{
+      data: {
+        orders: InviteeOrder[];
+        total: number;
+      };
+    }>(`/user/promotion/invitees/${inviteeUserId}/orders`, undefined, config),
 };

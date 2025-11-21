@@ -18,8 +18,30 @@ export interface User {
   wechat_avatar_url?: number;
 }
 
+export interface ReferralUser {
+  user_id: string;
+  nick_name: string;
+  avatar_url: string;
+  order_count: number;
+  order_amount: number; // 单位：分
+}
+
+export interface ReferralStats {
+  total_invitees: number;
+  order_invitees: number;
+  invitees: ReferralUser[];
+}
+
+export interface InviteeOrder {
+  order_uuid: string;
+  order_status: number;
+  order_amount: number; // 分
+  created_at: string;
+}
+
 export interface LoginParams {
   code: string;
+  referral_code?: string;
 }
 
 export interface LoginResult {
@@ -113,6 +135,17 @@ export const userApi = {
   logout: (config?: ApiConfig) =>
     http.post(
       "/auth/logout",
+      {},
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    ),
+
+  // 获取邀请用户列表
+  getReferralUsers: (config?: ApiConfig) =>
+    http.get<{ data: ReferralStats }>(
+      "/user/referral/users",
       {},
       {
         cancelToken: config?.cancelToken,

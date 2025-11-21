@@ -407,3 +407,17 @@
   color: #ff4d4f;
   line-height: 1.4;
 }
+
+.myInvitesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.myInvitesTitle {
+  font-size: 12px;
+  color: #000;
+  text-decoration: underline;
+  opacity: 0.6;
+  text-align: center;
+}

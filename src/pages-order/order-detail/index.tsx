@@ -665,7 +665,7 @@ const OrderDetail: React.FC = () => {
 export default OrderDetail;
 
 // 订单状态组件
-const OrderStatus: React.FC<{
+export const OrderStatus: React.FC<{
   status: OrderStatusEnum;
   afterSaleStatus: AfterSaleStatus;
   isSame: boolean;

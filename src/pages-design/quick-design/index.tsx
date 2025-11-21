@@ -197,7 +197,7 @@ const QuickDesign = () => {
       const res = await sessionApi.saveDiyDesign({
         beadItems: beadItemsArray,
         image_base64: image_base64 as string,
-        wrist_size: parseInt(wristSize || '0'),
+        wrist_size: parseFloat(wristSize || '0'),
       });
       
       if (res.data?.design_id) {

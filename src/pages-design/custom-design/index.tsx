@@ -277,7 +277,7 @@ const CustomDesign = () => {
       const beadItems = editedBeads.map((item) => item.sku_id);
 
       Taro.redirectTo({
-        url: `${pageUrls.quickDesign}?beadItems=${JSON.stringify(beadItems)}&wristSize=${Math.floor(wristSize || 0).toString()}&imageUrl=${encodeURIComponent(imageUrl)}&from=${from}`,
+        url: `${pageUrls.quickDesign}?beadItems=${JSON.stringify(beadItems)}&wristSize=${Math.round(wristSize || 0).toString()}&imageUrl=${encodeURIComponent(imageUrl)}&from=${from}`,
       });
       return;
     }
