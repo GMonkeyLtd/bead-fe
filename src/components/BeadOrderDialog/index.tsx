@@ -44,7 +44,7 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
   onConfirm,
   wristSize,
 }) => {
-  const [showBeadPrice, setShowBeadPrice] = useState(true);
+  const [showBeadPrice, setShowBeadPrice] = useState(false);
   if (!visible) {
     return null;
   }
