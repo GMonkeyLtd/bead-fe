@@ -18,6 +18,9 @@ import userIcon from "@/assets/icons/user-center.svg";
 import userActiveIcon from "@/assets/icons/user-center-active.svg";
 import InspirationIcon from "@/assets/tabbar-icons/inspiration.svg";
 import InspirationActiveIcon from "@/assets/tabbar-icons/inspiration-active.svg";
+import ProductIcon from "@/assets/tabbar-icons/product_icon.svg";
+import ProductActiveIcon from "@/assets/tabbar-icons/product_active_icon.svg";
+import ProductIconDark from "@/assets/tabbar-icons/product_dark_icon.svg";
 
 interface TabBarItem {
   key: string;
@@ -55,6 +58,14 @@ const TAB_BAR_ITEMS = [
     iconDark: InspirationIconDark,
     text: "灵感",
     path: pageUrls.inspiration,
+  },
+  {
+    key: "product",
+    icon: ProductIcon,
+    iconActive: ProductActiveIcon,
+    iconDark: ProductIconDark,
+    text: "好物",
+    path: pageUrls.productList,
   },
   {
     key: "user",

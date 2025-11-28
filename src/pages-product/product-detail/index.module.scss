@@ -1,0 +1,215 @@
+.container {
+  padding: 0;
+  height: 100vh;
+  margin-top: 10px;
+}
+
+.resultContainer {
+  height: 100vh;
+  background: #F5F1EF;
+}
+
+// 图片区域样式
+.imageSection {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.mainImage {
+  width: 100%;
+}
+
+// 内容区域样式
+.contentSection {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 8px 24px 8px;
+}
+
+.sectionCardList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  padding: 16px 8px;
+}
+
+.sectionCard {
+  padding: 16px;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.titleSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  margin-top: 12px;
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.title {
+  font-family: "Source Han Serif CN", serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.437;
+  letter-spacing: 0.06em;
+  color: #000000;
+}
+
+.categoryText {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(31, 23, 34, 0.6);
+}
+
+.descriptionSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.description {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: justify;
+  color: #1f1722;
+}
+
+.priceSection {
+  display: flex;
+  justify-content: flex-start;
+  width: fit-content;
+  align-self: stretch;
+  gap: 2px;
+  padding: 0px 0px 4px;
+}
+
+.priceContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.pricePrefix {
+  color: #FF6D19;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.currentPrice {
+  color: #FF6D19;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.originalPrice {
+  color: rgba(31, 23, 34, 0.50);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 300;
+  text-decoration-line: line-through;
+}
+
+// 加载和错误状态样式
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 16px;
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #daa520;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 14px;
+  color: #666;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 16px;
+}
+
+.errorText {
+  font-size: 14px;
+  color: #999;
+  text-align: center;
+}
+
+.imageSwiper {
+  width: 100%;
+}
+
+// 底部按钮样式
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+  padding-bottom: calc(constant(safe-area-inset-bottom) + 24px);
+  border-top: 1px solid #e2dcd6;
+  gap: 20px;
+}
+
+// 响应式设计
+@media (max-width: 375px) {
+  .imageSection {
+    height: 375px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+}
+

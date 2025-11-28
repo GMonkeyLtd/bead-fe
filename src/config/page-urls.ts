@@ -21,4 +21,6 @@ export const pageUrls = {
   inspirationDetail: '/pages-common/inspiration-detail/index',
   chatDesign: '/pages-chat/chat-design/index',
   designReport: '/pages-common/design-report/index',
+  productList: '/pages-product/product-list/index',
+  productDetail: '/pages-product/product-detail/index',
 }

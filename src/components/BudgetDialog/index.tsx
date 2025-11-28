@@ -23,6 +23,9 @@ interface BudgetDialogProps {
   isSameProduct?: boolean;
   creatorName?: string;
   originalPrice?: number;
+  workId?: string;
+  productId?: string;
+  isProduct?: boolean;
 }
 
 const BudgetDialog: React.FC<BudgetDialogProps> = ({
@@ -30,6 +33,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   title = "夏日睡莲",
   designNumber = "0001",
   workId,
+  productId,
   productImage,
   onConfirm,
   onClose,
@@ -37,6 +41,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   originalPrice,
   onModifyDesign,
   isSameProduct = false,
+  isProduct = false,
   creatorName = "",
 }) => {
   const { keyboardHeight } = useKeyboardHeight();
@@ -69,12 +74,18 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
         postal_code: address?.postalCode,
       };
 
-      const apiCall = isSameProduct
-        ? apiPay.buySameProduct
-        : apiPay.generateOrder;
-      const params = isSameProduct
-        ? { work_id: workId }
-        : { design_id: parseInt(designNumber) };
+      let apiCall;
+      let params;
+      if (isProduct && productId) {
+        apiCall = apiPay.buyProduct;
+        params = { product_id: productId };
+      } else if (isSameProduct) {
+        apiCall = apiPay.buySameProduct;
+        params = { work_id: workId };
+      } else {
+        apiCall = apiPay.generateOrder;
+        params = { design_id: parseInt(designNumber) };
+      }
       let _orderUuid;
       if (!orderUuid) {
         const res = await apiCall(params);
@@ -225,9 +236,11 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                 </View>
               )}
             </View>
-            <View className="budget-dialog-subtitle">
-              设计编号：{designNumber}
-            </View>
+            {!isProduct && (
+              <View className="budget-dialog-subtitle">
+                设计编号：{designNumber}
+              </View>
+            )}
           </View>
         </View>
 
@@ -279,30 +292,32 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               </View>
 
               {/* 说明文字 */}
-              <View className="budget-dialog-notice">
-                <View className="budget-dialog-divider" />
-                {isSameProduct ? (
-                  <Text className="budget-dialog-notice-text">
-                    '同款制作，品质如一，价格更低'{" "}
-                  </Text>
-                ) : (
-                  <View>
-                    <View className="budget-dialog-notice-text">
-                      · 下单后与客服确认实拍图，满意后送检发货；
+              {!isProduct && (
+                <View className="budget-dialog-notice">
+                  <View className="budget-dialog-divider" />
+                  {isSameProduct ? (
+                    <Text className="budget-dialog-notice-text">
+                      '同款制作，品质如一，价格更低'{" "}
+                    </Text>
+                  ) : (
+                    <View>
+                      <View className="budget-dialog-notice-text">
+                        · 下单后与客服确认实拍图，满意后送检发货；
+                      </View>
+                      <View
+                        className="budget-dialog-notice-text"
+                        style={{ marginTop: "4px" }}
+                      >
+                        <Text>· 实拍图不满意可</Text>
+                        <Text className="budget-dialog-notice-text-bold">
+                          全额退款
+                        </Text>
+                        <Text>。</Text>
+                      </View>
                     </View>
-                    <View
-                      className="budget-dialog-notice-text"
-                      style={{ marginTop: "4px" }}
-                    >
-                      <Text>· 实拍图不满意可</Text>
-                      <Text className="budget-dialog-notice-text-bold">
-                        全额退款
-                      </Text>
-                      <Text>。</Text>
-                    </View>
-                  </View>
-                )}
-              </View>
+                  )}
+                </View>
+              )}
             </View>
           </View>
         </View>

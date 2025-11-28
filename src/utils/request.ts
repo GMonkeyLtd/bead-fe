@@ -5,7 +5,8 @@ import { pageUrls } from '@/config/page-urls'
 
 
  const domain = 'https://api.gmonkey.top' 
-const grayDomain = 'https://api-gray.gmonkey.top'
+// const grayDomain = 'https://api-gray.gmonkey.top'
+const grayDomain = 'http://localhost:8088'
 // const domain = 'https://test.qianjunye.com'
 
 // 根据环境构建API基础URL

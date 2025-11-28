@@ -74,18 +74,21 @@ export function usePageQuery<T = any>({
       setError(err instanceof Error ? err.message : '加载失败');
       setLoading(false);
       isLoadingRef.current = false;
+      // 发生错误时，停止继续加载更多，避免循环查询
+      setHasMore(false);
     } 
-  }, [fetchData, pageSize]); // 移除hasMore依赖，避免不必要的重新创建
+  }, [fetchData, pageSize, hasMore]); // 添加hasMore依赖
 
   // 加载更多
   const loadMore = useCallback(() => {
     console.log(isLoadingRef.current, 'isLoadingRef.current');
     console.log(hasMore, 'hasMore');
     console.log(enabled, 'enabled');
-    if (!isLoadingRef.current && hasMore && enabled) {
+    // 添加错误状态检查，避免在错误状态下继续加载
+    if (!isLoadingRef.current && hasMore && enabled && !error) {
       loadData(pageRef.current); // 使用pageRef.current确保使用最新页码
     }
-  }, [hasMore, enabled, loadData]);
+  }, [hasMore, enabled, loadData, error]);
 
   // 刷新数据
   const refresh = useCallback(() => {

@@ -52,6 +52,13 @@ export default defineAppConfig({
         'inspiration/index',
         'inspiration-detail/index',
       ]
+    },
+    {
+      root: 'pages-product',
+      pages: [
+        'product-list/index',
+        'product-detail/index',
+      ]
     }
   ],
   window: {

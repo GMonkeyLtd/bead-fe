@@ -473,6 +473,51 @@ export const configApi = {
   }
 }
 
+export interface Product {
+  product_id: string;
+  image_urls: string[];
+  name: string;
+  category: string;
+  description: string;
+  reference_price: number;
+  final_price: number;
+}
+
+export interface ProductListResponse extends BaseResponse {
+  data: {
+    page: number;
+    page_size: number;
+    total: number;
+    list: Product[];
+  };
+}
+
+export interface ProductDetailResponse extends BaseResponse {
+  data: Product;
+}
+
+export const productApi = {
+  getProductList: (
+    params: { page: number; page_size: number },
+    config?: ApiConfig
+  ) => {
+    return http.get<ProductListResponse>("/products", params, {
+      cancelToken: config?.cancelToken,
+      ...config,
+    });
+  },
+  getProductDetail: (productId: string, config?: ApiConfig) => {
+    return http.get<ProductDetailResponse>(
+      `/products/${productId}`,
+      {},
+      {
+        cancelToken: config?.cancelToken,
+        ...config,
+      }
+    );
+  },
+};
+
 // 导出所有API
 export default {
   user: userApi,
@@ -480,4 +525,5 @@ export default {
   bead: beadsApi,
   userHistory: userHistoryApi,
   inspiration: inspirationApi,
+  product: productApi,
 };

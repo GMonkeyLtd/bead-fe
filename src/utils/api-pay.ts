@@ -119,6 +119,17 @@ export default {
     config?: ApiConfig
   ) =>
     http.post<any>(`/user/community/${params.work_id}/buy_v2`, params, config),
+  buyProduct: (params: { product_id: string; address_info?: any }, config?: ApiConfig) =>
+    http.post<{
+      data: {
+        order_uuid: string;
+      };
+    }>(`/user/products/${params.product_id}/buy_v2`, params, {
+      showLoading: true,
+      loadingText: "订单生成中...",
+      cancelToken: config?.cancelToken,
+      ...config,
+    }),
   generateOrderV2: (
     params: { design_id: number; address_info?: any },
     config?: ApiConfig
