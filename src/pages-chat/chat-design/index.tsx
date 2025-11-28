@@ -42,9 +42,10 @@ const ChatDesign = () => {
   const hasShownInitMessagesRef = useRef(false);
 
   const spareHeight = useMemo(() => {
-    const inputHeight =
-      recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
-    return inputHeight + 20;
+    // const inputHeight =
+    //   recommendTags?.length > 0 ? INPUT_RECOMMEND_HEIGHT : INPUT_HEIGHT;
+    // return inputHeight + 20;
+    return 20;
   }, [recommendTags]);
 
   // 依次显示消息的函数
@@ -371,7 +372,7 @@ const ChatDesign = () => {
 
         {!byMerchant && (
           <View className={styles.inputContainer}>
-            {recommendTags?.length > 0 && (
+            {false && recommendTags?.length > 0 && (
               <TagList
                 tags={recommendTags?.map((item) => ({
                   id: item,
@@ -397,7 +398,7 @@ const ChatDesign = () => {
                 style={{ width: "27px", height: "27px" }}
               />
             </View> */}
-              <View className={styles.inputWrapper}>
+              {/* <View className={styles.inputWrapper}>
                 <Textarea
                   className={styles.messageInput}
                   value={inputValue}
@@ -426,7 +427,7 @@ const ChatDesign = () => {
                   style={{ width: "26px", height: "26px" }}
                   onClick={handleSend}
                 />
-              </View>
+              </View> */}
             </View>
             <Canvas 
               canvasId="page-chat-draft-canvas"

@@ -113,6 +113,7 @@ export const BraceletDraftCard = ({
     // 使用本地的generateCircleRing而不是传入的generateBraceletImage
     generateCircleRing(beadsForGeneration as DotImageData[])
       .then((braceletImage) => {
+        console.log('braceletImage:', braceletImage);
         if (braceletImage) {
           generatedBraceletImageRef.current = braceletImage;
           // 使用ref中的draft状态，避免依赖项变化
@@ -283,7 +284,7 @@ export const BraceletDraftCard = ({
                 <View className={styles.braceletBeadInfoContainer}>
                   <View className={styles.braceletBeadName}>{bead.name}</View>
                   <View className={styles.braceletBeadFunc}>
-                    {bead.func_summary}
+                    {bead.wuxing?.[0]}
                   </View>
                 </View>
               </View>

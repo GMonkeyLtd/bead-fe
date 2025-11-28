@@ -586,7 +586,7 @@ const Result = () => {
                       天然水晶佩戴一段时间后建议定期净化噢~可以用清水冲洗或在月光下放置一晚，以保持水晶的能量纯净和光泽度。
                     </View>
                   </View> */}
-                  {(design?.progress != 100 ||
+                  {/* {(design?.progress != 100 ||
                     design?.info?.personal_report) && (
                     <View className={styles.resultContentReportCardContainer}>
                       <ViewReportCard
@@ -602,7 +602,7 @@ const Result = () => {
                         showAction={!!design?.info?.personal_report}
                       />
                     </View>
-                  )}
+                  )} */}
                 </View>
                 {/* <View className={styles.resultContentWuxingDisplayContainer}>
                   <WuxingDisplay

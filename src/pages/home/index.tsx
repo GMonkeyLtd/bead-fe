@@ -1,5 +1,5 @@
 import { View, Text, Swiper, SwiperItem, Image } from "@tarojs/components";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Taro, { useDidShow, useLoad, useShareAppMessage } from "@tarojs/taro";
 import "./index.scss";
 import { SWIPER_DATA } from "@/config/home-content";
@@ -23,18 +23,25 @@ const Home = () => {
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [showIntelligentDesign, setShowIntelligentDesign] = useState(false);
   const [invitationCode, setInvitationCode] = useState<string>("");
+  const invitationCodeRef = useRef("");
+
+  // 确保 ref 始终是最新的
+  useEffect(() => {
+    invitationCodeRef.current = invitationCode;
+  }, [invitationCode]);
 
   // 使用 Taro 的 useShareAppMessage hook
-  // 注意：Taro 的 useShareAppMessage 会在每次渲染时重新注册，自动使用最新的 invitationCode
+  // 使用 ref 来避免闭包问题，确保获取到最新的 invitationCode
   useShareAppMessage(() => {
-    console.log("🔗 分享触发，当前分享码:", invitationCode);
-    const sharePath = invitationCode 
-      ? `/pages/home/index?code=${invitationCode}` 
+    const currentCode = invitationCodeRef.current;
+    console.log("🔗 分享触发，当前分享码:", currentCode);
+    const sharePath = currentCode 
+      ? `/pages/home/index?code=${currentCode}` 
       : `/pages/home/index`;
     console.log("🔗 分享路径:", sharePath);
     
     return {
-      title: "璞光集 - 定制专属水晶手串",
+      title: currentCode ? "璞光集 - 定制专属水晶手串" : "璞光集 - 好运气",
       path: sharePath,
       imageUrl: "",
     };

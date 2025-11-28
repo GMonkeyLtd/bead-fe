@@ -1,6 +1,6 @@
 import React from "react";
+import Taro from "@tarojs/taro";
 import { View, Text, Image } from "@tarojs/components";
-import "./index.scss";
 import orderIcon from "@/assets/icons/purchase-notice/order-icon.svg";
 import prepareIcon from "@/assets/icons/purchase-notice/prepare-icon.svg";
 import confirmIcon from "@/assets/icons/purchase-notice/confirm-icon.svg";
@@ -10,6 +10,8 @@ import arrow1 from "@/assets/icons/purchase-notice/arrow-1.svg";
 import arrow2 from "@/assets/icons/purchase-notice/arrow-2.svg";
 import arrow3 from "@/assets/icons/purchase-notice/arrow-3.svg";
 import arrow4 from "@/assets/icons/purchase-notice/arrow-4.svg";
+import { MAIN_ZE_IMAGE_URL, WRIST_SIZE_IMAGE_URL } from "@/config";
+import "./index.scss";
 
 interface PurchaseNoticeProps {
   title?: string;
@@ -69,6 +71,17 @@ const PurchaseNotice: React.FC<PurchaseNoticeProps> = ({
             </View>
           </View>
         ))}
+      </View>
+
+      <View className="purchase-notice-wrist-size">
+        <Image src={WRIST_SIZE_IMAGE_URL} mode="aspectFit" onClick={() => Taro.previewImage({
+          urls: [WRIST_SIZE_IMAGE_URL],
+        })} />
+      </View> 
+      <View className="purchase-notice-main-ze">
+        <Image src={MAIN_ZE_IMAGE_URL} mode="aspectFit" onClick={() => Taro.previewImage({
+          urls: [MAIN_ZE_IMAGE_URL],
+        })} />
       </View>
 
       {/* 流程步骤 */}

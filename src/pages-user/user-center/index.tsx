@@ -318,7 +318,7 @@ const UserCenterPage: React.FC = () => {
                   <Text className={styles.unitText}>元</Text>
                 </View>
               </View>
-              {totalInvites > 0 ? (
+              {totalInvites > 0 || userInfo?.is_promo_enable ? (
                 <View 
                   className={styles.myInvitesContainer}
                   onClick={() => {

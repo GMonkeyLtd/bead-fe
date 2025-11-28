@@ -16,6 +16,8 @@ export interface User {
   phone?: string;
   wechat_id?: string;
   wechat_avatar_url?: number;
+  is_promo_enable?: boolean;
+  promo_code?: string;
 }
 
 export interface ReferralUser {
