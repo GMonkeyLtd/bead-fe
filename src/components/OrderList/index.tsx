@@ -8,6 +8,7 @@ import {
   getStatusBadgeType,
   OrderStatus,
   AfterSaleStatus,
+  OrderTypeEnum,
 } from "@/utils/orderUtils";
 import BeadOrderDialog from "@/components/BeadOrderDialog";
 import ContactUserDialog from "@/components/ContactUserDialog";
@@ -24,6 +25,7 @@ import apiSession from "@/utils/api-session";
 import { ImageLoadQueue } from "@/utils/image-queue";
 
 export interface Order {
+  order_type: OrderTypeEnum;
   order_uuid: string;
   order_status: OrderStatus;
   price: number;
@@ -39,6 +41,15 @@ export interface Order {
     nick_name?: string;
     avatar_url?: string;
   };
+  product_info?: {
+    name: string;
+    image_urls: string[];
+    category: string;
+    final_price: number;
+    reference_price: number;
+    id: number;
+    description: string;
+  }
   after_sale_info?: {
     after_sale_status: string;
     after_sale_status_text: string;
@@ -171,25 +182,28 @@ export default function OrderList({
   };
 
   const handleOrderDetail = (order: Order) => {
-    const beadsData = order?.design_info?.items?.reduce(
-      (acc: any[], item: any) => {
-        const existingBead = acc.find((bead) => bead.sku_id === item?.sku_id);
-        if (existingBead) {
-          existingBead.quantity += item?.quantity || 1;
-        } else {
-          acc.push({
-            sku_id: item?.sku_id,
-            name: item?.name,
-            size: item?.diameter + "mm",
-            quantity: item?.quantity || 1,
-            costPrice: item?.cost_price / 100 || 0,
-            referencePrice: item?.reference_price / 100 || 0,
-          });
-        }
-        return acc;
-      },
-      []
-    );
+    let beadsData: any[] = [];
+    if (order.order_type === OrderTypeEnum.DesignAndCommunity) {
+      beadsData = order?.design_info?.items?.reduce(
+        (acc: any[], item: any) => {
+          const existingBead = acc.find((bead) => bead.sku_id === item?.sku_id);
+          if (existingBead) {
+            existingBead.quantity += item?.quantity || 1;
+          } else {
+            acc.push({
+              sku_id: item?.sku_id,
+              name: item?.name,
+              size: item?.diameter + "mm",
+              quantity: item?.quantity || 1,
+              costPrice: item?.cost_price / 100 || 0,
+              referencePrice: item?.reference_price / 100 || 0,
+            });
+          }
+          return acc;
+        },
+        []
+      );
+    }
     setDetailData({
       ...order,
       // @ts-ignore
@@ -575,7 +589,7 @@ export default function OrderList({
           <View className={styles.orderInfo}>
             <Image
               className={styles.orderImage}
-              src={order.design_info?.image_url || order.design_info?.draft_url}
+              src={order.design_info?.image_url || order.design_info?.draft_url || order.product_info?.image_urls[0]}
               mode="aspectFill"
               lazyLoad
               onClick={() => {
@@ -602,12 +616,12 @@ export default function OrderList({
             </Text>
           </View>
         </View>
-        {order.tier != -1 && <View className={styles.orderQualityContainer}>
+        {order.order_type !== undefined && <View className={styles.orderQualityContainer}>
           <View className={styles.orderQualityText}>
-            品质等级:
+            订单类型:
           </View>
           <View className={styles.quanlituTag}>
-            {formatLevel(order.tier)}
+            {order.order_type === OrderTypeEnum.DesignAndCommunity ? "设计定制" : "好物成品"}
           </View>
         </View>}
         {renderActionButtons(order)}
@@ -667,12 +681,13 @@ export default function OrderList({
         <BeadOrderDialog
           visible
           orderNumber={detailData.order_uuid}
-          productName={detailData.design_info?.name || ""}
-          productCode={detailData.design_info?.design_id || ""}
+          orderType={detailData.order_type}
+          productName={detailData.design_info?.name || detailData.product_info?.name || ""}
+          productCode={detailData.design_info?.design_id || detailData.product_info?.id || ""}
           realImages={detailData.order_details?.actual_images || []}
           certificateImages={detailData.order_details?.certificate_images || []}
           budget={detailData.price.toString()}
-          productImage={detailData.design_info?.image_url || detailData.design_info?.draft_url || ""}
+          productImage={detailData.design_info?.image_url || detailData.design_info?.draft_url || detailData.product_info?.image_urls[0] || ""}
           materials={(detailData.beadsData || []).map((item: any) => {
             return {
               name: item.name,

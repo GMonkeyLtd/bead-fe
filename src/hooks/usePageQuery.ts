@@ -45,9 +45,12 @@ export function usePageQuery<T = any>({
   const isLoadingRef = useRef(false);
   const pageRef = useRef(initialPage); // 添加pageRef来同步跟踪当前页码
 
+  // 使用 ref 来跟踪 hasMore，避免在 loadData 的依赖中包含 hasMore
+  const hasMoreRef = useRef(true);
+  
   // 加载数据
   const loadData = useCallback(async (pageNum: number, isRefresh = false) => {
-    if (isLoadingRef.current || (!hasMore && !isRefresh)) return;
+    if (isLoadingRef.current || (!hasMoreRef.current && !isRefresh)) return;
 
     isLoadingRef.current = true;
     setLoading(true);
@@ -63,6 +66,7 @@ export function usePageQuery<T = any>({
       } else {
         setData(prev => [...prev, ...result.data]);
       }
+      hasMoreRef.current = result.hasMore;
       setHasMore(result.hasMore);
       
       if (result.hasMore) {
@@ -75,9 +79,10 @@ export function usePageQuery<T = any>({
       setLoading(false);
       isLoadingRef.current = false;
       // 发生错误时，停止继续加载更多，避免循环查询
+      hasMoreRef.current = false;
       setHasMore(false);
     } 
-  }, [fetchData, pageSize, hasMore]); // 添加hasMore依赖
+  }, [fetchData, pageSize]); // 移除 hasMore 依赖，使用 ref 代替
 
   // 加载更多
   const loadMore = useCallback(() => {
@@ -94,6 +99,7 @@ export function usePageQuery<T = any>({
   const refresh = useCallback(() => {
     setPage(initialPage);
     pageRef.current = initialPage; // 同步重置pageRef
+    hasMoreRef.current = true; // 同时更新 ref
     setHasMore(true);
     loadData(initialPage, true);
   }, [initialPage, loadData]);
@@ -103,6 +109,7 @@ export function usePageQuery<T = any>({
     setData([]);
     setPage(initialPage);
     pageRef.current = initialPage; // 同步重置pageRef
+    hasMoreRef.current = true; // 同时更新 ref
     setHasMore(true);
     setError(null);
   }, [initialPage]);

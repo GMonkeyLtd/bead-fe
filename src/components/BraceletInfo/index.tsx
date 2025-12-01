@@ -3,8 +3,10 @@ import { View, Text, Image } from "@tarojs/components";
 import copyIcon from "@/assets/icons/copy.svg";
 import "./index.scss";
 import Taro from "@tarojs/taro";
+import { OrderTypeEnum } from "@/utils/orderUtils";
 
 interface BraceletCardProps {
+  orderType: OrderTypeEnum;
   orderNumber: string;
   productName: string;
   productNumber: string;
@@ -21,6 +23,7 @@ interface BraceletCardProps {
 }
 
 const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
+  orderType,
   orderNumber,
   productName,
   productNumber,
@@ -82,12 +85,14 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
           />
 
           {/* 商品详情 */}
-          <View className="product-details">
+          <View className="product-details" style={{ justifyContent: orderType === OrderTypeEnum.Product ? "center" : "space-between" }}>
             <View className="product-title-section">
               <Text className="product-name">{productName}</Text>
               <Text className="product-number">{productNumber}</Text>
             </View>
-            <Text className="product-quantity">数量：{quantity}颗</Text>
+            {orderType === OrderTypeEnum.DesignAndCommunity && (
+              <Text className="product-quantity">数量：{quantity}颗</Text>
+            )}
           </View>
         </View>
 
@@ -101,6 +106,11 @@ const BraceletOrderInfo: React.FC<BraceletCardProps> = ({
                 className={`price ${priceTier == 0 ? "price-tier-0" : ""}`}
               >{`¥${price.toFixed(2)}`}</Text>
             </View>
+          </View>
+        )}
+        {orderType === OrderTypeEnum.Product && (
+          <View className="product-tag-container">
+            <Text className="product-tag">好物商品</Text>
           </View>
         )}
       </View>
@@ -165,7 +175,7 @@ export const BeadDetailList: React.FC<BeadDetailListProps> = ({
             <Text className="cell-quantity">x{bead.quantity}</Text>
             {showPrice && (
               <Text className="cell-price">{`¥${
-                ((bead.reference_price / 100) || 0)?.toFixed(1) || 0
+                (bead.reference_price / 100 || 0)?.toFixed(1) || 0
               }`}</Text>
             )}
           </View>
@@ -183,6 +193,7 @@ export interface BraceletInfoProps extends BraceletCardProps {
   priceTier: number;
 }
 const BraceletInfo: React.FC<BraceletInfoProps> = ({
+  orderType,
   orderNumber,
   productName,
   productNumber,
@@ -206,6 +217,7 @@ const BraceletInfo: React.FC<BraceletInfoProps> = ({
       }}
     >
       <BraceletOrderInfo
+        orderType={orderType}
         orderNumber={orderNumber}
         productName={productName}
         productNumber={productNumber}

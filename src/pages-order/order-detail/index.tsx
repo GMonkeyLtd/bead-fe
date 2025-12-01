@@ -21,6 +21,7 @@ import {
   showReferencePrice,
   getStatusBadgeType,
   AfterSaleStatus,
+  OrderTypeEnum,
 } from "@/utils/orderUtils";
 import CrystalButton from "@/components/CrystalButton";
 import shareDesignImage from "@/assets/icons/share-design.svg";
@@ -500,6 +501,7 @@ const OrderDetail: React.FC = () => {
           status={orderStatus}
           afterSaleStatus={order?.after_sale_status}
           isSame={order?.community_info}
+          isProduct={order?.order_type === OrderTypeEnum.Product}
         />
       </View>
       <View
@@ -561,15 +563,16 @@ const OrderDetail: React.FC = () => {
           />
         )}
         {showJoinGroupChat && <JoinGroupChat />}
-        {order?.design_info && (
+        {(order?.design_info || order?.product_info) && (
           <BraceletInfo
+            orderType={order?.order_type}
             orderNumber={order?.order_uuid}
-            productName={order?.design_info?.name}
-            productNumber={order?.design_info?.design_id}
-            quantity={order?.design_info?.items?.length}
+            productName={order?.design_info?.name || order?.product_info?.name}
+            productNumber={order?.design_info?.design_id || order?.product_info?.id}
+            quantity={order?.design_info?.items?.length || order?.product_info?.quantity}
             price={order?.price || 0}
             showPrice={showReferencePrice(orderStatus) && order?.tier != 0}
-            productImage={order?.design_info?.image_url}
+            productImage={order?.design_info?.image_url || order?.product_info?.image_urls?.[0]}
             beads={order?.design_info?.items || []}
             isSameBuy={order?.community_info}
             priceTier={order?.tier}
@@ -669,9 +672,11 @@ export const OrderStatus: React.FC<{
   status: OrderStatusEnum;
   afterSaleStatus: AfterSaleStatus;
   isSame: boolean;
-}> = ({ status, afterSaleStatus, isSame }) => {
+  isProduct: boolean;
+}> = ({ status, afterSaleStatus, isSame, isProduct }) => {
   const orderStatusTip = getOrderStatusTip(status, afterSaleStatus);
   const orderStatusDescription = getOrderStatusDescription(status, afterSaleStatus);
+
   return (
     <View className="order-status">
       <View
@@ -683,7 +688,7 @@ export const OrderStatus: React.FC<{
         }}
       >
         <Text className="order-status-title">
-          {isSame ? orderStatusDescription.replace('定制', '发货'): orderStatusDescription}
+          {isSame || isProduct ? orderStatusDescription.replace('定制', '发货'): orderStatusDescription}
         </Text>
         <StatusBadge
           type={getStatusBadgeType(status)}

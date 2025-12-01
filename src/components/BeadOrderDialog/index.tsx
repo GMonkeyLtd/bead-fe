@@ -6,6 +6,7 @@ import copyIcon from '@/assets/icons/copy.svg';
 import closeIcon from '@/assets/icons/close.svg';
 import eyeCloseIcon from '@/assets/icons/eye-close.svg';
 import eyeOpenIcon from '@/assets/icons/eye-open.svg';
+import { OrderTypeEnum } from '@/utils/orderUtils';
 
 interface MaterialItem {
   name: string;
@@ -18,6 +19,7 @@ interface MaterialItem {
 interface BeadOrderDialogProps {
   visible: boolean;
   orderNumber: string;
+  orderType: OrderTypeEnum;
   productName: string;
   productCode: string;
   budget: string;
@@ -33,6 +35,7 @@ interface BeadOrderDialogProps {
 const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
   visible,
   orderNumber,
+  orderType,
   productName,
   productCode,
   realImages,
@@ -88,22 +91,22 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
             }} />
             <View className='product-details'>
               <Text className='product-name'>{productName}</Text>
-              <Text className='product-code'>{`设计编号：${productCode}`}</Text>
+              <Text className='product-code'>{`${orderType === OrderTypeEnum.DesignAndCommunity ? "设计编号" : "商品编号"}：${productCode}`}</Text>
             </View>
           </View>
           <View className='budget-info'>
             <View className='budget-info-content' onClick={() => setShowBeadPrice(!showBeadPrice)}>
               <Text className='budget-text'>价格：{budget}</Text>
-              <Image src={showBeadPrice ? eyeOpenIcon : eyeCloseIcon} mode='aspectFit' style={{ width: '16px', height: '16px' }} />
+              {orderType === OrderTypeEnum.DesignAndCommunity && <Image src={showBeadPrice ? eyeOpenIcon : eyeCloseIcon} mode='aspectFit' style={{ width: '16px', height: '16px' }} />}
             </View>
           </View>
         </View>
-        <View className='wrist-info'>
+        {orderType === OrderTypeEnum.DesignAndCommunity && <View className='wrist-info'>
           <Text className='wrist-text'>预估手围：{wristSize}cm</Text>
-        </View>
+        </View>}
 
         {/* 材料清单 */}
-        <View className='materials-section'>
+       {orderType === OrderTypeEnum.DesignAndCommunity && <View className='materials-section'>
           {/* 表头 */}
           <View className='materials-header'>
             <Text className='header-name'>名称</Text>
@@ -128,7 +131,7 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
               </View>
             ))}
           </View>
-        </View>
+        </View>}
 
         {/* 分割线 */}
         <View className='divider'></View>

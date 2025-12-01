@@ -9,6 +9,7 @@ import { getNavBarHeightAndTop } from "@/utils/style-tools";
 import CrystalButton from "@/components/CrystalButton";
 import BudgetDialog from "@/components/BudgetDialog";
 import { pageUrls } from "@/config/page-urls";
+import { formatProductCategory } from "@/utils/utils";
 
 const ProductDetailPage: React.FC = () => {
   const router = useRouter();
@@ -164,7 +165,9 @@ const ProductDetailPage: React.FC = () => {
                 <View className={styles.titleContainer}>
                   <Text className={styles.title}>{product.name}</Text>
                   {product.category && (
-                    <Text className={styles.categoryText}>{product.category}</Text>
+                    <View>
+                      <Text className={styles.categoryText}>{formatProductCategory(product.category)}</Text>
+                    </View>
                   )}
                 </View>
               </View>
@@ -198,12 +201,12 @@ const ProductDetailPage: React.FC = () => {
         <BudgetDialog
           visible={budgetDialogShow}
           title={product.name}
-          designNumber={product.product_id}
+          designNumber={product.id}
           productImage={product.image_urls?.[0]}
           onClose={() => setBudgetDialogShow(false)}
           referencePrice={product.final_price}
           originalPrice={product.reference_price}
-          productId={product.product_id}
+          productId={product.id}
           isProduct={true}
         />
       )}

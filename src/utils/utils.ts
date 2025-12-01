@@ -44,3 +44,14 @@ export const getDeduplicateBeads = (beads: BeadItem[], duplicateKey: string) => 
   });
   
 } 
+
+export const formatProductCategory = (category: string) => {
+  switch (category) {
+    case "bracelet":
+      return "手链";
+    case "necklace":
+      return "项链";
+    default:
+      return category;
+  }
+};

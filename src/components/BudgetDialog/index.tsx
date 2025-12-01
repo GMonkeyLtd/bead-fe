@@ -76,13 +76,16 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
 
       let apiCall;
       let params;
+      // 成品商品购买
       if (isProduct && productId) {
         apiCall = apiPay.buyProduct;
-        params = { product_id: productId };
+        params = { product_id: productId, address_info: addressInfo };
       } else if (isSameProduct) {
+        // 同款制作购买
         apiCall = apiPay.buySameProduct;
         params = { work_id: workId };
       } else {
+        // 设计购买
         apiCall = apiPay.generateOrder;
         params = { design_id: parseInt(designNumber) };
       }
@@ -184,20 +187,20 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
       });
       return;
     }
-    // if (!address) {
-    //   Taro.showToast({
-    //     title: "请先添加收货地址",
-    //     icon: "none",
-    //     duration: 1000,
-    //   });
-    //   Taro.chooseAddress({
-    //     success: (result) => {
-    //       setAddress(result);
-    //       doPurchase(result);
-    //     },
-    //   });
-    //   return;
-    // }
+    if (isProduct && !address) {
+      Taro.showToast({
+        title: "请先添加收货地址",
+        icon: "none",
+        duration: 1000,
+      });
+      Taro.chooseAddress({
+        success: (result) => {
+          setAddress(result);
+          doPurchase(result);
+        },
+      });
+      return;
+    }
     doPurchase(address);
   };
 
@@ -302,7 +305,9 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                   ) : (
                     <View>
                       <View className="budget-dialog-notice-text">
-                        · 下单后与客服确认实拍图，满意后送检发货；
+                        · <Text className="budget-dialog-notice-text-bold">
+                          付款后
+                        </Text>与客服确认实拍图，满意后送检发货；
                       </View>
                       <View
                         className="budget-dialog-notice-text"

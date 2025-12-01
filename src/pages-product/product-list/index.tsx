@@ -8,6 +8,7 @@ import { productApi, Product } from "@/utils/api";
 import { pageUrls } from "@/config/page-urls";
 import { usePageQuery } from "@/hooks/usePageQuery";
 import { getNavBarHeightAndTop } from "@/utils/style-tools";
+import { formatProductCategory } from "@/utils/utils";
 
 const ProductListPage: React.FC = () => {
   const { height: navBarHeight } = getNavBarHeightAndTop();
@@ -37,7 +38,7 @@ const ProductListPage: React.FC = () => {
       };
     }, []),
     queryItem: useCallback(async (item: Product) => {
-      const res = await productApi.getProductDetail(item.product_id);
+      const res = await productApi.getProductDetail(item.id);
       return res.data;
     }, []),
     selector: "#product-more-tag",
@@ -51,7 +52,7 @@ const ProductListPage: React.FC = () => {
   // 处理产品点击
   const handleItemClick = (item: Product) => {
     Taro.navigateTo({
-      url: `${pageUrls.productDetail}?productId=${item.product_id}`,
+      url: `${pageUrls.productDetail}?productId=${item.id}`,
     });
   };
 
@@ -200,7 +201,7 @@ const ProductListPage: React.FC = () => {
           <View className={styles.productList}>
             {productList.map((item) => (
               <View
-                key={`product_${item.product_id}`}
+                key={`product_${item.id}`}
                 className={styles.productItem}
                 onClick={() => handleItemClick(item)}
               >
@@ -221,7 +222,7 @@ const ProductListPage: React.FC = () => {
                   {item.category && (
                     <View className={styles.categorySection}>
                       <Text className={styles.categoryText}>
-                        {item.category}
+                        {formatProductCategory(item.category)}
                       </Text>
                     </View>
                   )}

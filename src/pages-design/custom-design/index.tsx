@@ -95,6 +95,7 @@ const CustomDesign = () => {
       const res = await beadsApi.getSkuList({ page, size: pageSize }, { showLoading: false });
       const resData = (res as any)?.data?.items || [];
       const totalCount = (res as any)?.data?.total || 0;
+      console.log(resData, "resData");
       return {
         data: resData,
         hasMore: resData.length + (page - 1) * pageSize < totalCount,
@@ -231,9 +232,11 @@ const CustomDesign = () => {
     }
   }, [skuHasMore, skuList]);
 
+  // 初始化时加载 SKU 列表，只执行一次
   useEffect(() => {
     refreshSkuList();
-  }, [refreshSkuList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 空依赖数组，只在组件挂载时执行一次
 
   const checkBeadsDataChanged = (_oldBeads: any[], _newBeads: any[]) => {
     if (!_oldBeads || !_newBeads || _oldBeads?.length !== _newBeads?.length) {

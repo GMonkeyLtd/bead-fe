@@ -163,3 +163,9 @@ export const getOrderStatusTip = (status: OrderStatus, afterSaleStatus: AfterSal
 export const showReferencePrice = (status: OrderStatus) => {
   return [OrderStatus.InProgress, OrderStatus.Negotiating, OrderStatus.Cancelled, OrderStatus.MerchantCancelled].includes(status);
 }
+
+
+export enum OrderTypeEnum {
+  DesignAndCommunity = 0,
+  Product = 1,
+}
