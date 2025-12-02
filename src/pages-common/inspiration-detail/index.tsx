@@ -327,8 +327,8 @@ const InspirationDetailPage: React.FC = () => {
               <PromoBanner
                 currentPrice={detail.final_price}
                 originalPrice={detail.original_price}
-                promoText="同款制作，每日前20名用户享"
-                discountText="9折"
+                promoText="同款制作，尽享折扣"
+                discountText=""
                 salesCount="120"
                 onClick={undefined}
               />

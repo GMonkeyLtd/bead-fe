@@ -517,14 +517,22 @@ const InspirationPage: React.FC = () => {
                       <Text className={styles.currentPrice}>
                         {item.final_price}
                       </Text>
-                      <Text className={styles.originalPrice}>
-                        {item.original_price}
-                      </Text>
+                      {item.original_price !== item.final_price && (
+                        <Text className={styles.originalPrice}>
+                          {item.original_price}
+                        </Text>
+                      )}
                     </View>
                   </View>
 
                   <View className={styles.userSection}>
-                    {item.is_limited_time && <FixedPriceTag text={`立减 ${item.original_price - item.final_price}元`} />}
+                    {item.is_limited_time && (
+                      <FixedPriceTag
+                        text={`立减 ${
+                          item.original_price - item.final_price
+                        }元`}
+                      />
+                    )}
                     <View
                       className={styles.collectSection}
                       onClick={(e) => handleCollectClick(item, e)}

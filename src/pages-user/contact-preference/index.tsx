@@ -25,7 +25,7 @@ const ContactPreference = () => {
   const [wechatNumber, setWechatNumber] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
 
-  const { designId, tier, isCustom, from, workId } = Taro.getCurrentInstance()?.router?.params || {};
+  const { designId, tier, isCustom, from, workId, productId } = Taro.getCurrentInstance()?.router?.params || {};
   console.log(designId, tier, isCustom, from, 'designId, tier, isCustom, from')
 
   const getUserInfo = async () => {
@@ -87,17 +87,7 @@ const ContactPreference = () => {
         title: "保存成功",
         icon: "success",
       });
-      if (designId && tier && isCustom) {
-        const res = await api.userHistory.createOrder({
-          design_id: parseInt(designId),
-          ...(isCustom == 'true' ? { is_custom: true } : { tier: parseInt(tier), is_custom: false }),
-        });
-        const { order_uuid } = res?.data || {};
-        Taro.redirectTo({
-          url: `${pageUrls.orderDetail}?orderId=${order_uuid}`,
-        });
-        return;
-      }
+      console.log(from, 'from')
       if (from === 'result') {
         Taro.redirectTo({
           url: `${pageUrls.result}?designBackendId=${designId}&showBudgetDialog=true`,
@@ -108,6 +98,13 @@ const ContactPreference = () => {
       if (from === 'inspiration-detail') {
         Taro.redirectTo({
           url: `${pageUrls.inspirationDetail}?designId=${designId}&workId=${workId}&showBudgetDialog=true`,
+        });
+        return;
+      }
+
+      if (from === 'product-detail') {
+        Taro.redirectTo({
+          url: `${pageUrls.productDetail}?productId=${productId}&showBudgetDialog=true`,
         });
         return;
       }

@@ -13,10 +13,10 @@ import { formatProductCategory } from "@/utils/utils";
 
 const ProductDetailPage: React.FC = () => {
   const router = useRouter();
-  const { productId } = router.params || {};
+  const { productId, showBudgetDialog } = router.params || {};
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [budgetDialogShow, setBudgetDialogShow] = useState(false);
+  const [budgetDialogShow, setBudgetDialogShow] = useState(showBudgetDialog == "true" || false);
   const { top: navBarTop } = getNavBarHeightAndTop();
 
   const getProductDetail = async (id: string) => {

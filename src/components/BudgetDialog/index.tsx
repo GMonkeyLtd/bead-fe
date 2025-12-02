@@ -175,18 +175,23 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
   const handleConfirm = async () => {
     const userData = await userApi.getUserInfo();
     const { default_contact, phone, wechat_id } = userData?.data || ({} as any);
-    if (default_contact === 0 && !phone) {
+    let payUrl = '';
+
+    if (isProduct) {
+      payUrl = `${pageUrls.contactPreference}?productId=${productId}&from=product-detail`;
+    } else if (isSameProduct) {
+      payUrl = `${pageUrls.contactPreference}?designId=${designNumber}&workId=${workId}&from=inspiration-detail`
+    } else {
+      payUrl = `${pageUrls.contactPreference}?designId=${designNumber}&from=result`
+    }
+    console.log(payUrl, 'payUrl')
+    if ((default_contact === 0 && !phone) || (default_contact === 1 && !wechat_id)) {
       Taro.redirectTo({
-        url: `${pageUrls.contactPreference}?designId=${designNumber}&from=result`,
+        url: payUrl,
       });
       return;
     }
-    if (default_contact === 1 && !wechat_id) {
-      Taro.redirectTo({
-        url: `${pageUrls.contactPreference}?designId=${designNumber}&from=result`,
-      });
-      return;
-    }
+    
     if (isProduct && !address) {
       Taro.showToast({
         title: "请先添加收货地址",
@@ -219,9 +224,9 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
               style={{ width: "20px", height: "20px", marginRight: "4px" }}
             />
             <Text className="budget-dialog-promo-text">
-              同款制作前20名用户享
+              同款制作尽享折扣
             </Text>
-            <View className="budget-dialog-promo-discount">9折</View>
+            {/* <View className="budget-dialog-promo-discount">9折</View> */}
           </View>
         )}
 
@@ -275,7 +280,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                       </View>
                     </View>
                   </View>
-                  {isSameProduct && (
+                  {isSameProduct && originalPrice !== referencePrice && (
                     <View className="budget-dialog-original-price-text">
                       原价：{originalPrice}
                     </View>
