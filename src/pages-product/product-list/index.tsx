@@ -219,14 +219,6 @@ const ProductListPage: React.FC = () => {
                     <Text className={styles.itemTitle}>{item.name}</Text>
                   </View>
 
-                  {item.category && (
-                    <View className={styles.categorySection}>
-                      <Text className={styles.categoryText}>
-                        {formatProductCategory(item.category)}
-                      </Text>
-                    </View>
-                  )}
-
                   <View className={styles.priceSection}>
                     <View className={styles.priceContainer}>
                       <Text className={styles.pricePrefix}>¥</Text>
@@ -241,6 +233,13 @@ const ProductListPage: React.FC = () => {
                         )}
                     </View>
                   </View>
+                  {item.category && (
+                    <View className={styles.categorySection}>
+                      <Text className={styles.categoryText}>
+                        {formatProductCategory(item.category)}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </View>
             ))}
@@ -252,7 +251,7 @@ const ProductListPage: React.FC = () => {
               <Text className={styles.noMoreText}>
                 {productList.length === 0
                   ? "暂无产品"
-                  : "暂时就这些啦～记得常来看看新内容哦"}
+                  : "暂时就这些啦～"}
               </Text>
             )}
           </View>

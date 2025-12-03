@@ -14,12 +14,17 @@ import { MAIN_ZE_IMAGE_URL, WRIST_SIZE_IMAGE_URL } from "@/config";
 import "./index.scss";
 
 interface PurchaseNoticeProps {
+  className?: string;
   title?: string;
-  notices?: string[];
+  notices?: { title: string; content: string }[];
   showProcess?: boolean;
+  showWristSizeTip?: boolean;
+  extraContent?: React.ReactNode;
 }
 
 const PurchaseNotice: React.FC<PurchaseNoticeProps> = ({
+  className = "",
+  showWristSizeTip = true,
   title = "购买须知",
   notices = [
     {
@@ -43,6 +48,7 @@ const PurchaseNotice: React.FC<PurchaseNoticeProps> = ({
     },
   ],
   showProcess = true,
+  extraContent = null,
 }) => {
   const processSteps = [
     { icon: orderIcon, label: "下单" },
@@ -55,7 +61,7 @@ const PurchaseNotice: React.FC<PurchaseNoticeProps> = ({
   const arrows = [arrow1, arrow2, arrow3, arrow4];
 
   return (
-    <View className="purchase-notice-container">
+    <View className={`purchase-notice-container ${className}`}>
       {/* 标题 */}
       <View className="purchase-notice-title">
         <Text>{title}</Text>
@@ -73,11 +79,13 @@ const PurchaseNotice: React.FC<PurchaseNoticeProps> = ({
         ))}
       </View>
 
-      <View className="purchase-notice-wrist-size">
+      {showWristSizeTip && (
+        <View className="purchase-notice-wrist-size">
         <Image src={WRIST_SIZE_IMAGE_URL} mode="aspectFit" onClick={() => Taro.previewImage({
           urls: [WRIST_SIZE_IMAGE_URL],
         })} />
-      </View> 
+        </View> 
+      )}
       <View className="purchase-notice-main-ze">
         <Image src={MAIN_ZE_IMAGE_URL} mode="aspectFit" onClick={() => Taro.previewImage({
           urls: [MAIN_ZE_IMAGE_URL],
@@ -110,6 +118,7 @@ const PurchaseNotice: React.FC<PurchaseNoticeProps> = ({
           </View>
         </View>
       )}
+      {extraContent}
     </View>
   );
 };

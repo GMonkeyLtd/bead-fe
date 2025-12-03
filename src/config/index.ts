@@ -41,6 +41,7 @@ export const TIER_PRICE_TAG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/ima
 export const PRICE_TIER_BG_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/price-tier-bg.png";
 export const WRIST_SIZE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wrist-size.jpg";
 export const MAIN_ZE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/%E5%85%8D%E8%B4%A3%E5%A3%B0%E6%98%8E.jpg";
+export const MERCHANT_QRCODE_IMAGE_URL = "https://zhuluoji.cn-sh2.ufileos.com/merchant-images/owned_store/OwnerStoreQR";
 
 export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 

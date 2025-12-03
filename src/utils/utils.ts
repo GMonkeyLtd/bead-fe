@@ -51,6 +51,8 @@ export const formatProductCategory = (category: string) => {
       return "手链";
     case "necklace":
       return "项链";
+    case "other":
+      return "其他";
     default:
       return category;
   }

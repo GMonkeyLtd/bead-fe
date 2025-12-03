@@ -361,3 +361,34 @@
   color: #5b4f40;
   opacity: 0.9;
 }
+
+.product-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px;
+}
+
+.product-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.product-detail-title {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  color: #1f1722;
+  opacity: 0.9;
+}
+
+.product-detail-value {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+  color: #1f1722;
+  opacity: 0.9;
+}

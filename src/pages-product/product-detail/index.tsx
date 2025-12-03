@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, Image, Swiper, SwiperItem } from "@tarojs/components";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  Swiper,
+  SwiperItem,
+} from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import CrystalContainer from "@/components/CrystalContainer";
@@ -10,13 +17,17 @@ import CrystalButton from "@/components/CrystalButton";
 import BudgetDialog from "@/components/BudgetDialog";
 import { pageUrls } from "@/config/page-urls";
 import { formatProductCategory } from "@/utils/utils";
+import PurchaseNotice from "@/components/PurchaseNotice";
+import { MERCHANT_QRCODE_IMAGE_URL } from "@/config";
 
 const ProductDetailPage: React.FC = () => {
   const router = useRouter();
   const { productId, showBudgetDialog } = router.params || {};
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [budgetDialogShow, setBudgetDialogShow] = useState(showBudgetDialog == "true" || false);
+  const [budgetDialogShow, setBudgetDialogShow] = useState(
+    showBudgetDialog == "true" || false
+  );
   const { top: navBarTop } = getNavBarHeightAndTop();
 
   const getProductDetail = async (id: string) => {
@@ -106,7 +117,8 @@ const ProductDetailPage: React.FC = () => {
         className={styles.container}
         scrollY
         style={{
-          height: `calc(100vh - ${72}px)`,
+          height: `calc(100vh - ${100}px)`,
+          marginBottom: "30px",
         }}
       >
         {/* 主图片区域 */}
@@ -158,30 +170,96 @@ const ProductDetailPage: React.FC = () => {
                       </Text>
                     )}
                 </View>
+                {product.category && (
+                    <View>
+                      <Text className={styles.categoryText}>
+                        {formatProductCategory(product.category)}
+                      </Text>
+                    </View>
+                  )}
               </View>
 
               {/* 标题区域 */}
               <View className={styles.titleSection}>
                 <View className={styles.titleContainer}>
                   <Text className={styles.title}>{product.name}</Text>
-                  {product.category && (
-                    <View>
-                      <Text className={styles.categoryText}>{formatProductCategory(product.category)}</Text>
-                    </View>
-                  )}
                 </View>
               </View>
 
               {/* 描述区域 */}
               {product.description && (
-                <View className={styles.descriptionSection}>
+                <View className={styles.descriptionSection} style={{ marginTop: 4 }}>
                   <Text className={styles.description}>
                     {product.description}
                   </Text>
                 </View>
               )}
+
+              <View className={styles.descriptionSectionDivider}></View>
+
+              {/* 材质 */}
+              {product.material && (
+                <View className={styles.descriptionSection}>
+                  <View className={styles.descriptionTitle}>
+                    <Text>材质：</Text>
+                  </View>
+                  <Text className={styles.description}>{product.material}</Text>
+                </View>
+              )}
+              {/* 尺寸 */}
+              {product.size && (
+                <View className={styles.descriptionSection} style={{ marginTop: 4 }}>
+                  <View className={styles.descriptionTitle}>
+                    <Text>尺寸：</Text>
+                  </View>
+                  <Text className={styles.description}>{product.size}</Text>
+                </View>
+              )}
             </View>
           </View>
+        </View>
+        <View className={styles.purchaseNoticeSection}> 
+          <PurchaseNotice
+            className={styles.purchaseNotice}
+            title="买家服务"
+            showProcess={false}
+            showWristSizeTip={false}
+            notices={[
+              {
+                title: "关于发货",
+                content:
+                  "我们会在发货前仔细检查每件饰品的品质。下单付款后保证48小时内发出。",
+              },
+              {
+                title: "关于快递",
+                content:
+                  "我们默认快递为中通快递。快递时效一般在2-4天，如您急需快速送达，请联系客服补邮费差价发顺丰空运。",
+              },
+              {
+                title: "关于证书",
+                content: "水晶类饰品包含水晶检验证书，支持复检。",
+              },
+              {
+                title: "关于售后",
+                content:
+                  "本品支持三天鉴赏期。非质量问题退货需承担邮费，退货请联系客服。",
+              },
+            ]}
+            extraContent={
+              <View className={styles.extraContent}>
+                <View className={styles.extraContentTitle}>
+                  <Text>私人定制服务</Text>
+                </View>
+                <View className={styles.extraContent}>
+                  支持 带图定制 / 长度定制 / 高品质款定制
+                </View>
+                <View className={styles.extraContent}>定制请联系客服</View>
+                <View className={styles.extraContentQrcode}>
+                  <Image src={MERCHANT_QRCODE_IMAGE_URL} mode="aspectFit" showMenuByLongpress={true} />
+                </View>
+              </View>
+            }
+          />
         </View>
       </ScrollView>
 
@@ -215,4 +293,3 @@ const ProductDetailPage: React.FC = () => {
 };
 
 export default ProductDetailPage;
-

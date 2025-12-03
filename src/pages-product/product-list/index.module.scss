@@ -10,6 +10,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   box-sizing: border-box;
+  width: 100%;
 }
 
 .productItem {
@@ -17,10 +18,14 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  min-width: 0; // 防止内容撑开
+  max-width: 100%; // 确保不超过容器
   cursor: pointer;
   transition: transform 0.2s ease;
   background: #ffffff;
   border-radius: 4px;
+  box-sizing: border-box;
+  overflow: hidden; // 防止内容溢出
 
   &:active {
     transform: scale(0.98);
@@ -51,12 +56,17 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0; // 防止内容撑开
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .titleSection {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0; // 防止内容撑开
+  width: 100%;
 }
 
 .itemTitle {
@@ -67,17 +77,19 @@
   font-family: "Source Han Serif CN", serif;
   letter-spacing: 0.071em;
   line-height: 1.437;
-  overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 0; // 防止内容撑开
+  flex: 1; // 占据可用空间
 }
 
 .categorySection {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0; // 防止内容撑开
+  width: 100%;
 }
 
 .categoryText {
@@ -89,15 +101,21 @@
   color: rgba(31, 23, 34, 0.6);
   font-family: "Noto Sans SC", sans-serif;
   line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%; // 确保不超过容器
+  flex-shrink: 1; // 允许收缩
 }
 
 .priceSection {
   display: flex;
   justify-content: flex-start;
-  width: fit-content;
-  align-self: stretch;
+  width: 100%;
+  min-width: 0; // 防止内容撑开
   gap: 2px;
   padding: 0px 0px 4px;
+  box-sizing: border-box;
 }
 
 .priceContainer {
@@ -105,6 +123,8 @@
   flex-direction: row;
   align-items: flex-end;
   gap: 3px;
+  min-width: 0; // 防止内容撑开
+  flex-shrink: 0; // 价格不收缩
 }
 
 .pricePrefix {

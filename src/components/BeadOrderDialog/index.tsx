@@ -30,6 +30,10 @@ interface BeadOrderDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   wristSize: string;
+  productDetail: {
+    material: string;
+    size: string;
+  } | null;
 }
 
 const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
@@ -46,6 +50,7 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
   onClose,
   onConfirm,
   wristSize,
+  productDetail,
 }) => {
   const [showBeadPrice, setShowBeadPrice] = useState(false);
   if (!visible) {
@@ -132,6 +137,17 @@ const BeadOrderDialog: React.FC<BeadOrderDialogProps> = ({
             ))}
           </View>
         </View>}
+
+        {orderType === OrderTypeEnum.Product && productDetail?.material && productDetail?.size && (
+          <View className='product-detail-section'>
+            <View className='product-detail-row'>
+              <View className='product-detail-title'>材质：</View><View className='product-detail-value'>{productDetail.material}</View>
+            </View>
+            <View className='product-detail-row'>
+              <View className='product-detail-title'>尺寸：</View><View className='product-detail-value'>{productDetail.size}</View>
+            </View>
+          </View>
+        )}
 
         {/* 分割线 */}
         <View className='divider'></View>

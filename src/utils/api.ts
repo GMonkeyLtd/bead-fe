@@ -483,6 +483,8 @@ export interface Product {
   description: string;
   reference_price: number;
   final_price: number;
+  material: string;
+  size: string;
 }
 
 export interface ProductListResponse extends BaseResponse {

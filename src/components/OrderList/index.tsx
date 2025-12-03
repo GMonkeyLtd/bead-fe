@@ -700,6 +700,10 @@ export default function OrderList({
           onClose={handleClose}
           onConfirm={console.log}
           wristSize={detailData.design_info?.spec?.wrist_size || ""}
+          productDetail={detailData.order_type === OrderTypeEnum.Product ? {
+            material: detailData.product_info?.material,
+            size: detailData.product_info?.size,
+          } : null}
         />
       )}
       {/* 联系用户弹窗 */}

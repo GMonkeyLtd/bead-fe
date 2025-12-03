@@ -141,7 +141,7 @@ const OrderDetail: React.FC = () => {
   }, [orderStatus]);
 
   const showBuyTip = useMemo(() => {
-    return [
+    return order?.order_type !== OrderTypeEnum.Product && [
       OrderStatusEnum.InProgress,
       OrderStatusEnum.Negotiating,
       OrderStatusEnum.PendingPayment,
@@ -695,7 +695,7 @@ export const OrderStatus: React.FC<{
           text={formatOrderStatus(status, afterSaleStatus)}
         />
       </View>
-      {orderStatusTip && (
+      {orderStatusTip && !isProduct && (
         <View className="order-status-content">
           <View className="chat-icon">
             <Image src={connectIcon} />

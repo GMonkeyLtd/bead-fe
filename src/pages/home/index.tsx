@@ -14,6 +14,7 @@ import TabBar, { TabBarTheme } from "@/components/TabBar";
 import apiSession from "@/utils/api-session";
 import QrCodeDialog from "@/components/QrCodeDialog";
 import { userApi } from "@/utils/api";
+import { MERCHANT_QRCODE_IMAGE_URL } from "@/config";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
@@ -319,7 +320,7 @@ const Home = () => {
       <QrCodeDialog
         visible={qrCodeVisible}
         qrCodeUrl={
-          "https://zhuluoji.cn-sh2.ufileos.com/merchant-images/owned_store/OwnerStoreQR"
+          MERCHANT_QRCODE_IMAGE_URL
         }
         // merchantName={order?.merchant_info?.name || ""}
         qrType="客服微信"

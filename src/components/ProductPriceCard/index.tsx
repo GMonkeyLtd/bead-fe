@@ -70,7 +70,7 @@ const ProductPriceCard: React.FC<ProductPriceCardProps> = ({
       {showImages && (<View className={styles.productImageSection}>
         <View className={styles.productImageTitleContainer}>
           <Text className={styles.productImageTitle}>商家实拍图</Text>
-          <Text className={styles.productImageUploadTime}>{`${imageUploadTime} 上传`}</Text>
+          {/* <Text className={styles.productImageUploadTime}>{`${imageUploadTime} 上传`}</Text> */}
         </View>
         <View className={styles.productImages}>
           <ImageSlider

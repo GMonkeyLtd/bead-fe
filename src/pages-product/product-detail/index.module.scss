@@ -27,7 +27,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 8px 24px 8px;
 }
 
 .sectionCardList {
@@ -35,13 +34,12 @@
   flex-direction: column;
   gap: 12px;
   position: relative;
-  padding: 16px 8px;
 }
 
 .sectionCard {
   padding: 16px;
   background: #fff;
-  border-radius: 4px;
+  // border-radius: 4px;
 }
 
 .titleSection {
@@ -49,8 +47,6 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  border-radius: 4px;
-  margin-top: 12px;
 }
 
 .titleContainer {
@@ -82,15 +78,22 @@
 
 .descriptionSection {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-top: 12px;
+  gap: 12px;
 }
+
+.descriptionTitle {
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: justify;
+  color: #1f1722;
+}
+
 
 .description {
   font-family: "Noto Sans SC", sans-serif;
   font-weight: 300;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   text-align: justify;
   color: #1f1722;
@@ -98,11 +101,12 @@
 
 .priceSection {
   display: flex;
-  justify-content: flex-start;
-  width: fit-content;
+  justify-content: space-between;
+  width: 100%;
   align-self: stretch;
   gap: 2px;
   padding: 0px 0px 4px;
+  margin-bottom: 8px;
 }
 
 .priceContainer {
@@ -205,6 +209,55 @@
   gap: 20px;
 }
 
+.extraContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.extraContentTitle {
+  font-family: 'Source Han Serif CN', serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.25em;
+  text-align: center;
+  color: #723900;
+  margin-top: 12px;
+}
+
+.extraContent {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 350;
+  font-size: 11px;
+  color: #1f1722;
+}
+
+.extraContentQrcode {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #e2dcd6;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.purchaseNotice {
+  margin-top: 16px;
+  // background-color: #fbf9f2;
+}
+
+.descriptionSectionDivider {
+  width: 100%;
+  height: 1px;
+  background-color: #e2dcd6;
+  margin: 16px 0;
+}
+
 // 响应式设计
 @media (max-width: 375px) {
   .imageSection {
@@ -214,5 +267,10 @@
   .title {
     font-size: 16px;
   }
+}
+
+.purchaseNoticeSection {
+  padding: 0 8px;
+  margin-bottom: 30px;
 }
 
