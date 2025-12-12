@@ -399,6 +399,15 @@ export default {
       }
     )
   },
+  getSimplifiedDesignList: (params: { offset: number; limit: number }, config?: ApiConfig) => {
+    return http.get<{
+      data: any;
+    }>(
+      `/user/designs/list`,
+      params,
+      { cancelToken: config?.cancelToken, ...config }
+    );
+  },
   getDesignItem: (designId: number, config?: ApiConfig) => {
     return http.get<{
       data: any;

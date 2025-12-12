@@ -40,6 +40,24 @@ const ChatDesign = () => {
   // 添加防重复执行的ref
   const hasInitializedRef = useRef(false);
   const hasShownInitMessagesRef = useRef(false);
+  
+  // Canvas池：只为最近的draft创建Canvas，避免无限增长
+  // 性能优化策略：
+  // 1. 限制最大Canvas数量为10个（避免内存和GPU资源占用过多）
+  // 2. 只保留最新的draft的Canvas（因为只有新消息才可能需要绘制）
+  // 3. 旧消息大概率已经有image_url（上传成功），不需要Canvas绘制
+  const MAX_CANVAS_COUNT = 10;
+  
+  const draftCanvasIds = useMemo(() => {
+    const draftsWithId = chatMessages
+      .filter(msg => msg.draft_id)
+      .map(msg => msg.draft_id);
+    
+    // 只取最后MAX_CANVAS_COUNT个draft（最新的消息）
+    const recentDrafts = draftsWithId.slice(-MAX_CANVAS_COUNT);
+    
+    return recentDrafts.map(draftId => `bracelet-draft-canvas-${draftId}`);
+  }, [chatMessages]);
 
   const spareHeight = useMemo(() => {
     // const inputHeight =
@@ -429,22 +447,47 @@ const ChatDesign = () => {
                 />
               </View> */}
             </View>
-            <Canvas 
-              canvasId="page-chat-draft-canvas"
-              id="page-chat-draft-canvas"
-              height={`${640 * dpr}px`}
-              width={`${640 * dpr}px`}
-              style={{
-                position: "absolute",
-                top: "-9999px",
-                left: "-9999px",
-                width: "640px",
-                height: "640px",
-                zIndex: -9999,
-              }}
-            />  
           </View>
         )}
+      </View>
+      
+      {/* 
+        Canvas池容器 - 性能优化关键点：
+        1. 放在PageContainer外层：避免被ChatMessages的transform样式影响（iOS兼容性）
+        2. Canvas数量限制：最多10个，防止内存溢出
+        3. 动态管理：只为最新的draft创建Canvas
+        4. 用途：当图片上传失败时，使用Canvas在客户端绘制手串图
+        
+        为什么需要这个设计？
+        - iOS Safari中，父元素有transform会创建新的层叠上下文
+        - 导致子元素的position:fixed失效，Canvas无法隐藏
+        - 所以需要将Canvas提升到最外层
+      */}
+      <View
+        style={{
+          position: "fixed",
+          top: "-10000px",
+          left: "-10000px",
+          width: "0px",
+          height: "0px",
+          overflow: "hidden",
+          opacity: 0,
+          zIndex: -99999,
+        }}
+      >
+        {draftCanvasIds.map((canvasId) => (
+          <Canvas
+            key={canvasId}
+            canvasId={canvasId}
+            id={canvasId}
+            height={`${640 * dpr}px`}
+            width={`${640 * dpr}px`}
+            style={{
+              width: "640px",
+              height: "640px",
+            }}
+          />
+        ))}
       </View>
     </PageContainer>
   );

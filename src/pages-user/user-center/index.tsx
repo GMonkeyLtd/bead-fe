@@ -47,7 +47,7 @@ const UserCenterPage: React.FC = () => {
     initialPage: 0,
     pageSize: 40,
     fetchData: useCallback(async (page: number, pageSize: number) => {
-      const res = await sessionApi.getDesignList(
+      const res = await sessionApi.getSimplifiedDesignList(
         { offset: page * pageSize, limit: pageSize },
         { showLoading: false }
       );
@@ -65,7 +65,7 @@ const UserCenterPage: React.FC = () => {
         return {
           id: item.design_id,
           progress: item.progress,
-          name: item.info.name,
+          name: item.name,
           image: item.image_url,
           draftUrl: item.draft_url,
           backgroundUrl: item.background_url,
@@ -117,7 +117,7 @@ const UserCenterPage: React.FC = () => {
   useEffect(() => {
     updateDesignInList(design);
     payApi
-      .getMyInvites({ showLoading: false })
+      .getMyInvites({ showLoading: false, showError: false })
       .then((res) => {
         setTotalInvites(res?.data?.total_invitees || 0);
       })

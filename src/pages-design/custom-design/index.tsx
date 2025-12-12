@@ -44,7 +44,10 @@ const CustomDesign = () => {
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const { draft, startPolling } = usePollDraft({ showLoading: true });
   const { design, getDesign } = usePollDesign({
-    pollingInterval: 5000
+    pollingInterval: 5000,
+    checkStopPoll: () => {
+      return true;
+    }
   });
   const { draftId, sessionId, designId, from, workId, showTutorial: showTutorialParam } = Taro.getCurrentInstance()?.router?.params || {};
 

@@ -1,4 +1,4 @@
-import { View, Image, Canvas } from "@tarojs/components";
+import { View, Image } from "@tarojs/components";
 import styles from "./index.module.scss";
 import Taro from "@tarojs/taro";
 import { BRACELET_BG_IMAGE_URL } from "@/config";
@@ -13,7 +13,7 @@ import CrystalButton from "../CrystalButton";
 import rightArrowGoldenIcon from "@/assets/icons/right-arrow-golden.svg";
 import { pageUrls } from "@/config/page-urls";
 import { usePollDraft, DraftData } from "@/hooks/usePollDraft";
-import { useCircleRingCanvas } from "@/hooks/useCircleRingCanvas";
+import { useCircleRingCanvas, DotImageData } from "@/hooks/useCircleRingCanvas";
 import refreshIcon from "@/assets/icons/refresh.svg";
 import { imageToBase64 } from "@/utils/imageUtils";
 import { SPU_TYPE } from "@/pages-design/custom-design";
@@ -46,12 +46,18 @@ export const BraceletDraftCard = ({
   const generatedBraceletImageRef = useRef<string | null>(null);
   const currentDraftRef = useRef<DraftData | null>(null);
 
+  // 为每个卡片生成唯一的canvasId，与页面中创建的Canvas保持一致
+  const uniqueCanvasId = useMemo(() => {
+    // 使用draft_id作为唯一标识，这样可以与页面中的Canvas对应
+    return `bracelet-draft-canvas-${draftId}`;
+  }, [draftId]);
+
   // 使用独立的CircleRing Canvas实例
-  const { generateCircleRing, canvasProps } =
+  const { generateCircleRing } =
     useCircleRingCanvas({
       targetSize: 640,
       fileType: "png",
-      canvasId: "page-chat-draft-canvas",
+      canvasId: uniqueCanvasId,
     });
 
   // 稳定化beads数组，避免不必要的重新渲染
@@ -347,7 +353,6 @@ export const BraceletDraftCard = ({
           )}
         </View>
       </View>
-      {/* Canvas已移到全局，这里不再需要 */}
     </View>
   );
 };

@@ -139,6 +139,7 @@ const Result = () => {
     const designId = params?.designBackendId || design?.design_id;
     // 获取传入的图片URL参数
     if (designId) {
+      setDesignNo(designId);
       getDesign({
         designId: designId,
       });

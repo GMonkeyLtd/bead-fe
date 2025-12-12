@@ -200,35 +200,26 @@ export const calculateBeadArrangementBySize = (
 
 export const computeBraceletLength = (beads: BeadItem[]) => {
   const beadsWidths = beads.map((dot) => dot.width);
-  console.log('beads, beads.length', beads, beads.length);
   // 所有珠子能围成的周长
   const allWidth = beadsWidths.reduce((sum, number) => sum + number, 0);
-  console.log('allWidth, beads.length', allWidth, beads.length);
   if (allWidth < 100) {
     return allWidth / 10;
   }
   // 所有珠子的直径总和(排除配饰，配饰太长影响计算)
   const beadsDiameters = beads.filter((dot) => dot.spu_type !== SPU_TYPE.ACCESSORY).map((dot) => dot.diameter);
   const allDiameter = beadsDiameters.reduce((sum, number) => sum + number, 0);
-  console.log('beadsDiameters.length, allDiameter', beadsDiameters.length, allDiameter);
   // 珠子的平均半径
   const averageRadius =  allDiameter / (2 * beadsDiameters.length);
-  console.log('averageRadius', averageRadius);
   // 围成圆的半径
   const ringRadius = allWidth / (2 * Math.PI);
-  console.log('ringRadius', ringRadius);
   // 手围 = （围成圆的半径 - 珠子的平均半径）* 2 * PI
   const predictLength = (ringRadius - averageRadius) * 2 * Math.PI;
-  console.log('predictLength', predictLength);
   const rest = (Math.round(predictLength) / 10) % 1;
-  console.log('rest', rest);
   if (rest < 0.5) {
     const result = Math.floor(predictLength / 10);
-    console.log('result', result);
     return result;
   } else {
     const result = Math.ceil(predictLength / 10);
-    console.log('result', result);
     return result;
   }
 };
