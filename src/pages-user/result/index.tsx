@@ -71,7 +71,7 @@ const Result = () => {
   const { design, getDesign } = usePollDesign({
     pollingInterval: 5000,
     checkStopPoll: (design) => {
-      return design.progress == 100 && !!design?.info?.personal_report;
+      return design.progress == 100;
     },
   });
   const [tierPriceConfig, setTierPriceConfig] = useState<any>(null);
