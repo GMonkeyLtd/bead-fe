@@ -530,7 +530,7 @@ const Result = () => {
               </View>
               <View className={styles.resultContentCenterContainer}>
                 <View className={styles.resultContentCenterText}>
-                  {rizhuInfo ? (
+                  {/* {rizhuInfo ? (
                     <View className={styles.resultContentWearTips}>
                       <View
                         className={styles.resultContentWearTipsTitleContainer}
@@ -554,7 +554,7 @@ const Result = () => {
                         {braceletDescription}
                       </View>
                     </View>
-                  ) : (
+                  ) : ( */}
                     <View className={styles.resultContentWearTips}>
                       <View
                         className={styles.resultContentWearTipsTitleContainer}
@@ -571,7 +571,7 @@ const Result = () => {
                         {braceletDescription}
                       </View>
                     </View>
-                  )}
+                  {/* )} */}
 
                   {/* <View className={styles.resultContentWearTips}>
                     <View className={styles.resultContentWearTipsTitleContainer}>

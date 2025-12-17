@@ -311,6 +311,7 @@ const OrderDetail: React.FC = () => {
               transaction_id,
             },
             success(res) {
+              console.log(res, "confirm order res");
               if (res.extraData.status === 'success') {
                 payApi
                   .confirmOrderCallback({ orderId: order?.order_uuid })
@@ -319,8 +320,8 @@ const OrderDetail: React.FC = () => {
                   });
               }
             },
-            fail() {
-              console.log("fail");
+            fail(res) {
+              console.log(res, "fail");
             },
             complete() {
               getOrderDetail();

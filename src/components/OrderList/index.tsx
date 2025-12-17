@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { View, Text, Button, Image, ScrollView } from "@tarojs/components";
-import Taro, { showToast, showModal, requirePlugin } from "@tarojs/taro";
+import { View, Text, Image } from "@tarojs/components";
+import Taro, { showToast, requirePlugin } from "@tarojs/taro";
 import styles from "./index.module.scss";
 import StatusBadge from "../StatusBadge";
 import {
@@ -498,9 +498,6 @@ export default function OrderList({
     });
   };
 
-  const onScrollToLower = () => {
-    console.log("onScrollToLower");
-  };
 
   const formatLevel = (level: number) => {
     switch (level) {
@@ -660,11 +657,13 @@ export default function OrderList({
 
   return (
     <View style={{ height: "100%" }}>
-      <ScrollView
+      <View
         className={`${styles.orderListContainer} ${className}`}
-        scrollY
-        onScrollToLower={onScrollToLower}
-        style={style}
+        style={{
+          ...style,
+          overflowY: "auto",
+          boxSizing: "border-box",
+        }}
       >
         {orders.length === 0 || loading ? (
           <View className={styles.emptyState}>
@@ -675,7 +674,7 @@ export default function OrderList({
         ) : (
           orders.map((order) => renderOrderItem(order))
         )}
-      </ScrollView>
+      </View>
       {/* 订单明细 */}
       {detailData && (
         <BeadOrderDialog
