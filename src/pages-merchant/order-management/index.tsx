@@ -12,6 +12,7 @@ export default function OrderManagement() {
   const [activeTab, setActiveTab] = useState<OrderStatus>(OrderStatus.Negotiating);
   const [orderStatusList, setOrderStatusList] = useState<any[]>([]);
   const activeStatusItemRef = useRef<any>(null);
+  const isFirstShowRef = useRef(true); // 标记是否是首次显示
 
   // 当前激活的状态配置
   const activeStatusItem = useMemo(() => {
@@ -122,7 +123,11 @@ export default function OrderManagement() {
   }, [activeStatusItem?.status, resetData, refresh]);
 
   useDidShow(() => {
-    loadOrderStatusList();
+    // 只在首次显示时加载数据，之后通过下拉刷新或其他方式更新
+    if (isFirstShowRef.current) {
+      isFirstShowRef.current = false;
+      loadOrderStatusList();
+    }
   });
 
   usePullDownRefresh(() => {
@@ -132,6 +137,15 @@ export default function OrderManagement() {
   // 滚动加载监听逻辑（完全参考 inspiration 页面的实现）
   const observerRef = useRef<IntersectionObserver | null>(null);
   const fallbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // 使用 ref 存储最新的状态，避免闭包问题
+  const hasMoreRef = useRef(hasMore);
+  const loadingRef = useRef(loading);
+
+  // 保持 ref 与状态同步
+  useEffect(() => {
+    hasMoreRef.current = hasMore;
+    loadingRef.current = loading;
+  }, [hasMore, loading]);
 
   const setupScrollListener = useCallback(() => {
     // 清理现有的观察器和定时器
@@ -144,6 +158,12 @@ export default function OrderManagement() {
       fallbackIntervalRef.current = null;
     }
 
+    // 如果没有更多数据，不需要设置监听器
+    if (!hasMore) {
+      console.log('没有更多数据，跳过设置滚动监听');
+      return;
+    }
+
     const targetId = "order-more-tag";
 
     // 优先使用 IntersectionObserver
@@ -151,8 +171,9 @@ export default function OrderManagement() {
       observerRef.current = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting && hasMore && !loading) {
-              console.log('触发加载更多，hasMore:', hasMore, 'loading:', loading);
+            // 使用 ref 获取最新的状态值，避免闭包陷阱
+            if (entry.isIntersecting && hasMoreRef.current && !loadingRef.current) {
+              console.log('触发加载更多，hasMore:', hasMoreRef.current, 'loading:', loadingRef.current);
               loadMore();
             }
           });
@@ -183,12 +204,21 @@ export default function OrderManagement() {
       console.warn("IntersectionObserver not supported, using fallback method");
       useFallbackMethod(targetId);
     }
-  }, [hasMore, loading, loadMore]);
+  }, [hasMore, loadMore]);
 
   // 降级方案：使用定时器轮询
   const useFallbackMethod = useCallback(
     (targetId: string) => {
       const checkElementStatus = () => {
+        // 使用 ref 获取最新的状态值
+        if (!hasMoreRef.current) {
+          if (fallbackIntervalRef.current) {
+            clearInterval(fallbackIntervalRef.current);
+            fallbackIntervalRef.current = null;
+          }
+          return;
+        }
+
         Taro.createSelectorQuery()
           .select(`#${targetId}`)
           .boundingClientRect()
@@ -197,13 +227,13 @@ export default function OrderManagement() {
               const rect = res[0];
               try {
                 const windowInfo = Taro.getWindowInfo();
-                if (rect.top < windowInfo.windowHeight && rect.bottom > 0 && hasMore && !loading) {
+                if (rect.top < windowInfo.windowHeight && rect.bottom > 0 && hasMoreRef.current && !loadingRef.current) {
                   loadMore();
                 }
               } catch (error) {
                 console.warn("Failed to get window info:", error);
                 const fallbackHeight = 667;
-                if (rect.top < fallbackHeight && rect.bottom > 0 && hasMore && !loading) {
+                if (rect.top < fallbackHeight && rect.bottom > 0 && hasMoreRef.current && !loadingRef.current) {
                   loadMore();
                 }
               }
@@ -213,7 +243,7 @@ export default function OrderManagement() {
 
       fallbackIntervalRef.current = setInterval(checkElementStatus, 500); // 降级方案使用较低频率
     },
-    [hasMore, loading, loadMore]
+    [loadMore]
   );
 
   // 设置滚动监听
