@@ -69,6 +69,7 @@ export interface OrderListProps {
   className?: string;
   style?: React.CSSProperties;
   isGrab?: boolean;
+  renderFooter?: () => React.ReactNode; // 底部渲染函数
 }
 
 // 图片生成队列管理器
@@ -123,6 +124,7 @@ export default function OrderList({
   className = "",
   isGrab = false,
   style,
+  renderFooter,
 }: OrderListProps) {
   // 创建图片生成管理器
   const imageGeneratorRef = useRef<OrderImageGenerator | null>(null);
@@ -665,14 +667,15 @@ export default function OrderList({
           boxSizing: "border-box",
         }}
       >
-        {orders.length === 0 || loading ? (
+        {orders.length === 0 && !loading ? (
           <View className={styles.emptyState}>
-            <Text className={styles.emptyText}>
-              {loading ? "加载中..." : emptyText}
-            </Text>
+            <Text className={styles.emptyText}>{emptyText}</Text>
           </View>
         ) : (
-          orders.map((order) => renderOrderItem(order))
+          <>
+            {orders.map((order) => renderOrderItem(order))}
+            {renderFooter?.()}
+          </>
         )}
       </View>
       {/* 订单明细 */}

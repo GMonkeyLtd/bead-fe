@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Image, Input } from "@tarojs/components";
 import { showToast } from "@tarojs/taro";
 import styles from "./index.module.scss";
@@ -19,7 +19,33 @@ const WayBillForm: React.FC<WayBillFormProps> = ({
   submitCallback,
 }) => {
   const [wayBillNumber, setWayBillNumber] = useState("");
-  const [senderPhone, setSenderPhone] = useState(""); 
+  const [senderPhone, setSenderPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // 当弹窗显示时，获取商家信息并填充发件人手机号
+  useEffect(() => {
+    if (visible) {
+      // 清空快递单号，但保留手机号（如果已有的话）
+      setWayBillNumber("");
+      loadMerchantPhone();
+    }
+  }, [visible]);
+
+  const loadMerchantPhone = async () => {
+    try {
+      setLoading(true);
+      const res = await merchantApi.user.getMerchantInfo();
+      if (res?.data?.phone) {
+        setSenderPhone(res.data.phone);
+      }
+    } catch (error) {
+      console.error("获取商家信息失败:", error);
+      // 静默失败，不影响用户操作
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!visible) {
     return null;
   }
