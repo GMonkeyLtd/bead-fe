@@ -15,7 +15,7 @@ export const SWIPER_DATA: SwiperItem[] = [
     //   title: "水晶手串新灵感",
     //   subtitle: "CRYSTAL",
     //   description: "探索未来，掌握命运",
-    //   backgroundImage: "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/home-page-bg.png",
+    //   backgroundImage: "https://zljcdn.gmonkey.top/images-frontend/home-page-bg.png",
     //   type: 'image'
     // },
     {
@@ -23,7 +23,7 @@ export const SWIPER_DATA: SwiperItem[] = [
       title: "水晶手串新灵感",
       subtitle: "CRYSTAL", 
       description: "定制属于你的光",
-      backgroundVideo: "https://zhuluoji.cn-sh2.ufileos.com/resources/home-video.mp4",
+      backgroundVideo: "https://zljcdn.gmonkey.top/resources/home-video.mp4",
       type: 'video',
       contentColor: '#fff'
     },

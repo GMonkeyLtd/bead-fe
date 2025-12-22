@@ -149,7 +149,7 @@ const OrderListComp: React.FC<OrderListProps> = ({
                     <Image
                       src={
                         order.orderImage ||
-                        "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/bead-ring.png"
+                        "https://zljcdn.gmonkey.top/images-frontend/bead-ring.png"
                       }
                       mode="aspectFill"
                       className={styles.merchantImg}
