@@ -75,7 +75,7 @@ const MyInvitesPage: React.FC = () => {
                   <Image
                     src={
                       user.avatar_url ||
-                      "https://zhuluoji.cn-sh2.ufileos.com/images-frontend/default-avatar.png"
+                      "https://zljcdn.gmonkey.top/images-frontend/default-avatar.png"
                     }
                     className={styles.avatar}
                     mode="aspectFill"

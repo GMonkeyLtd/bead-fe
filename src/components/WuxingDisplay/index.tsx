@@ -27,29 +27,29 @@ const WuxingDisplay: React.FC<WuxingDisplayProps> = ({
     const configs = {
       金: {
         textColor: "#662900",
-        iconUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/jin-icon.png',
-        bgUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/jin-bg.png'
+        iconUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/jin-icon.png',
+        bgUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/jin-bg.png'
         
       },
       火: {
         textColor: "#930002",
-        iconUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/huo-icon.png',
-        bgUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/huo-bg.png'
+        iconUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/huo-icon.png',
+        bgUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/huo-bg.png'
       },
       水: {
         textColor: "#007193",
-        iconUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/shui-icon.png',
-        bgUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/shui-bg.png'
+        iconUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/shui-icon.png',
+        bgUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/shui-bg.png'
       },
       土: {
         textColor: "#7F6340",
-        iconUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/tu-icon.png',
-        bgUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/tu-bg.png'
+        iconUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/tu-icon.png',
+        bgUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/tu-bg.png'
       },
       木: {
         textColor: "#609349",
-        iconUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/mu-icon.png',
-        bgUrl: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/wu-xing/mu-bg.png'
+        iconUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/mu-icon.png',
+        bgUrl: 'https://zljcdn.gmonkey.top/images-frontend/wu-xing/mu-bg.png'
       },
     };
     return configs[type as keyof typeof configs] || configs.金;

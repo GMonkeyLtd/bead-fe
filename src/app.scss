@@ -7,7 +7,7 @@
 
 @font-face {
   font-family: "GlobalFont"; // 自定义字体名称
-  src: url("https://zhuluoji.cn-sh2.ufileos.com/resources/%E8%83%A1%E6%99%93%E6%B3%A2%E6%B5%AA%E6%BC%AB%E5%AE%8B.ttf")
+  src: url("https://zljcdn.gmonkey.top/resources/%E8%83%A1%E6%99%93%E6%B3%A2%E6%B5%AA%E6%BC%AB%E5%AE%8B.ttf")
     format("truetype");
   font-weight: normal;
   font-style: normal;
@@ -15,7 +15,7 @@
 }
 @font-face {  
   font-family: "Source Han Serif CN";
-  src: url("https://zhuluoji.cn-sh2.ufileos.com/resources/resources_SourceHanSerifCN-Medium%20-zip.ttf")
+  src: url("https://zljcdn.gmonkey.top/resources/resources_SourceHanSerifCN-Medium%20-zip.ttf")
     format("truetype");
   font-weight: normal;
   font-style: normal;
@@ -56,7 +56,7 @@ body {
   display: flex;
   flex-direction: column;
   background: linear-gradient(180deg, rgba(213, 195, 157, 0.5) 0%, rgba(252, 245, 240, 0.8) 19.55%, #FFFCFA 100%),
-    url(https://zhuluoji.cn-sh2.ufileos.com/images-frontend/background-texture-opacity.png)
+    url(https://zljcdn.gmonkey.top/images-frontend/background-texture-opacity.png)
       repeat;
 
   // 确保容器不会溢出
