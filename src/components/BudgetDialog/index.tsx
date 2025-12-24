@@ -305,7 +305,7 @@ const BudgetDialog: React.FC<BudgetDialogProps> = ({
                   <View className="budget-dialog-divider" />
                   {isSameProduct ? (
                     <Text className="budget-dialog-notice-text">
-                      '同款制作，品质如一，价格更低'{" "}
+                      同款制作，品质如一，价格更低{" "}
                     </Text>
                   ) : (
                     <View>
