@@ -156,6 +156,36 @@ export const userApi = {
         ...apiConfig,
       }
     ),
+
+  // 查询用户订阅授权状态
+  getSubscriptionStatus: (data: {
+    templateIds: string[];
+    showLoading?: boolean;
+    showError?: boolean;
+  }) =>
+    http.get<{ data: Array<{ template_id: string; status: string; auth_type: string }> }>(
+      "/user/subscription/status",
+      { template_ids: data.templateIds.join(',') },
+      {
+        showLoading: data.showLoading,
+        showError: data.showError,
+      }
+    ),
+
+  // 上报用户订阅授权结果
+  reportSubscription: (data: {
+    subscriptions: Record<string, string>;
+    showLoading?: boolean;
+    showError?: boolean;
+  }) =>
+    http.post<any>(
+      "/user/subscription",
+      data.subscriptions,
+      {
+        showLoading: data.showLoading,
+        showError: data.showError,
+      }
+    ),
 };
 
 // 生成相关API
@@ -449,7 +479,7 @@ export const inspirationApi = {
     return http.get<any>(
       `/configs/banners`,
       {},
-      { cancelToken: apiConfig?.cancelToken, ...config }
+      { cancelToken: apiConfig?.cancelToken, ...apiConfig }
     );
   }
 };

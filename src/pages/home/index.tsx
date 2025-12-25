@@ -1,10 +1,12 @@
 import { View, Text, Swiper, SwiperItem, Image } from "@tarojs/components";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import Taro, { useDidShow, useLoad, useShareAppMessage } from "@tarojs/taro";
 import "./index.scss";
 import { SWIPER_DATA } from "@/config/home-content";
 import RightArrowWhite from "@/assets/icons/right-arrow-white.svg";
-import DateTimeDrawer from "@/components/DateTimeDrawer";
+// 🔥 优化：动态导入DateTimeDrawer组件，减少主包300-400KB
+// import DateTimeDrawer from "@/components/DateTimeDrawer";
+const DateTimeDrawer = lazy(() => import("@/components/DateTimeDrawer"));
 import CrystalButton from "@/components/CrystalButton";
 import AppHeader from "@/components/AppHeader";
 import BackgroundMedia from "@/components/BackgroundMedia";
@@ -14,7 +16,8 @@ import TabBar, { TabBarTheme } from "@/components/TabBar";
 import apiSession from "@/utils/api-session";
 import QrCodeDialog from "@/components/QrCodeDialog";
 import { userApi } from "@/utils/api";
-import { MERCHANT_QRCODE_IMAGE_URL } from "@/config";
+import { MERCHANT_QRCODE_IMAGE_URL, SUBSCRIPTION_NEW_PRODUCT_TEMPLATE_ID, SUBSCRIPTION_ACTIVITY_TEMPLATE_ID } from "@/config";
+import { ensureSubscribe } from "@/utils/messageUtils";
 
 const Home = () => {
   const [showDateTimeDrawer, setShowDateTimeDrawer] = useState(false);
@@ -25,6 +28,7 @@ const Home = () => {
   const [showIntelligentDesign, setShowIntelligentDesign] = useState(false);
   const [invitationCode, setInvitationCode] = useState<string>("");
   const invitationCodeRef = useRef("");
+  const [subscriptionStatus, setSubscriptionStatus] = useState<Record<string, string>>({});
 
   // 确保 ref 始终是最新的
   useEffect(() => {
@@ -84,7 +88,32 @@ const Home = () => {
           setInvitationCode("");
         }
 
-        // 3. 初始化完成后显示分享菜单（确保分享时已获取到邀请码）
+        // 3. ✨ 查询订阅授权状态
+        try {
+          const statusRes = await userApi.getSubscriptionStatus({
+            templateIds: [
+              SUBSCRIPTION_NEW_PRODUCT_TEMPLATE_ID,
+              SUBSCRIPTION_ACTIVITY_TEMPLATE_ID
+            ],
+            showLoading: false,
+            showError: false
+          });
+          
+          // 将状态转换为 Map 便于查询
+          const statusMap: Record<string, string> = {};
+          statusRes.data.forEach((item: any) => {
+            statusMap[item.template_id] = item.status;
+          });
+          
+          setSubscriptionStatus(statusMap);
+          console.log("✅ 订阅状态已加载:", statusMap);
+        } catch (error) {
+          console.error("❌ 查询订阅状态失败:", error);
+          // 查询失败保持空对象，后续不会请求授权（容错策略）
+          setSubscriptionStatus({});
+        }
+
+        // 4. 初始化完成后显示分享菜单（确保分享时已获取到邀请码）
         Taro.showShareMenu({
           withShareTicket: true,
           showShareItems: ["shareAppMessage", "shareTimeline"],
@@ -168,6 +197,75 @@ const Home = () => {
         gender +
         "&isLunar=" +
         isLunar,
+    });
+  };
+
+  // 判断是否需要请求订阅授权
+  const needSubscriptionAuthorization = () => {
+    // 如果状态为空对象，说明查询失败，默认不请求授权（容错）
+    if (Object.keys(subscriptionStatus).length === 0) {
+      return false;
+    }
+    
+    const checkStatus = (templateId: string) => {
+      const status = subscriptionStatus[templateId];
+      // 只有明确的需要重新授权状态才返回 true
+      return status === 'consumed' || 
+             status === 'expired' || 
+             status === 'rejected' ||
+             status === 'not_authorized';
+    };
+    
+    return checkStatus(SUBSCRIPTION_NEW_PRODUCT_TEMPLATE_ID) ||
+           checkStatus(SUBSCRIPTION_ACTIVITY_TEMPLATE_ID);
+  };
+
+  // 处理 DIY 创作按钮点击
+  const handleDIYClick = async () => {
+    Taro.reportEvent("homepage_event", {
+      home_diy_click: 1,
+    });
+    
+    // 根据缓存的授权状态判断是否需要请求授权
+    if (needSubscriptionAuthorization()) {
+      try {
+        // 1. 请求订阅授权
+        const result = await ensureSubscribe({
+          templateIds: [
+            SUBSCRIPTION_NEW_PRODUCT_TEMPLATE_ID,
+            SUBSCRIPTION_ACTIVITY_TEMPLATE_ID
+          ],
+          includeAlwaysAccept: true
+        });
+        
+        // 2. 上报授权结果到后端
+        if (result.requested && result.result) {
+          await userApi.reportSubscription({
+            subscriptions: result.result,
+            showLoading: false,
+            showError: false
+          });
+          
+          // 3. 更新本地缓存的状态
+          const newStatus = { ...subscriptionStatus };
+          Object.keys(result.result).forEach(templateId => {
+            if (result.result?.[templateId] === 'accept') {
+              newStatus[templateId] = 'authorized';
+            } else if (result.result?.[templateId] === 'reject') {
+              newStatus[templateId] = 'rejected';
+            }
+          });
+          setSubscriptionStatus(newStatus);
+          console.log("✅ 订阅状态已更新:", newStatus);
+        }
+      } catch (error) {
+        console.error('订阅流程失败:', error);
+      }
+    }
+    
+    // 跳转（无论授权结果）
+    Taro.redirectTo({
+      url: pageUrls.customDesign + "?from=home",
     });
   };
 
@@ -275,14 +373,7 @@ const Home = () => {
                         textStyle={{
                           color: "#fff",
                         }}
-                        onClick={() => {
-                          Taro.reportEvent("homepage_event", {
-                            home_diy_click: 1,
-                          });
-                          Taro.redirectTo({
-                            url: pageUrls.customDesign + "?from=home",
-                          });
-                        }}
+                        onClick={handleDIYClick}
                         text="DIY创作"
                       />
                     </View>
@@ -312,11 +403,15 @@ const Home = () => {
         ))}
       </Swiper>
       <TabBar theme={TabBarTheme.DARK} />
-      <DateTimeDrawer
-        onPersonalizeCustomize={handlePersonalizeCustomize}
-        visible={showDateTimeDrawer}
-        onClose={handleDrawerClose}
-      />
+      {showDateTimeDrawer && (
+        <Suspense fallback={<View />}>
+          <DateTimeDrawer
+            onPersonalizeCustomize={handlePersonalizeCustomize}
+            visible={showDateTimeDrawer}
+            onClose={handleDrawerClose}
+          />
+        </Suspense>
+      )}
       <QrCodeDialog
         visible={qrCodeVisible}
         qrCodeUrl={

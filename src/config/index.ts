@@ -47,3 +47,7 @@ export const DEFAULT_BACKGROUND_COLOR = "#F4F1EE";
 
 export const SERVICE_DOC_PDF_URL = "https://zljcdn.gmonkey.top/resources/%E7%92%9E%E5%85%89%E9%9B%86%E6%9C%8D%E5%8A%A1%E6%9D%A1%E6%AC%BE%20(1).pdf";
 export const PRIVACY_POLICY_PDF_URL = "/https://zljcdn.gmonkey.top/resources/%E7%92%9E%E5%85%89%E9%9B%86%E9%9A%90%E7%A7%81%E6%94%BF%E7%AD%96%20(1).pdf";
+
+// 订阅消息模板 ID
+export const SUBSCRIPTION_NEW_PRODUCT_TEMPLATE_ID = "MKT7vjzg2JVJ2qfuCxwd6n1vD432k9-ICyumG_R8LlU"; // 新品开售提醒
+export const SUBSCRIPTION_ACTIVITY_TEMPLATE_ID = "A3naddildeEgkTDh_T8nqD5etiklpcwHrTpCLBc6HDs"; // 活动开始提醒
