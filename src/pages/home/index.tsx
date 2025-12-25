@@ -1,12 +1,10 @@
-import { View, Text, Swiper, SwiperItem, Image } from "@tarojs/components";
-import { useEffect, useState, useRef, lazy, Suspense } from "react";
+import { View, Text, Swiper, SwiperItem } from "@tarojs/components";
+import { useEffect, useState, useRef } from "react";
 import Taro, { useDidShow, useLoad, useShareAppMessage } from "@tarojs/taro";
 import "./index.scss";
 import { SWIPER_DATA } from "@/config/home-content";
-import RightArrowWhite from "@/assets/icons/right-arrow-white.svg";
-// 🔥 优化：动态导入DateTimeDrawer组件，减少主包300-400KB
-// import DateTimeDrawer from "@/components/DateTimeDrawer";
-const DateTimeDrawer = lazy(() => import("@/components/DateTimeDrawer"));
+// 注意：Taro 小程序暂不支持 React.lazy 懒加载，改为直接导入
+import DateTimeDrawer from "@/components/DateTimeDrawer";
 import CrystalButton from "@/components/CrystalButton";
 import AppHeader from "@/components/AppHeader";
 import BackgroundMedia from "@/components/BackgroundMedia";
@@ -403,15 +401,11 @@ const Home = () => {
         ))}
       </Swiper>
       <TabBar theme={TabBarTheme.DARK} />
-      {showDateTimeDrawer && (
-        <Suspense fallback={<View />}>
-          <DateTimeDrawer
-            onPersonalizeCustomize={handlePersonalizeCustomize}
-            visible={showDateTimeDrawer}
-            onClose={handleDrawerClose}
-          />
-        </Suspense>
-      )}
+      <DateTimeDrawer
+        onPersonalizeCustomize={handlePersonalizeCustomize}
+        visible={showDateTimeDrawer}
+        onClose={handleDrawerClose}
+      />
       <QrCodeDialog
         visible={qrCodeVisible}
         qrCodeUrl={
