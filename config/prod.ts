@@ -4,6 +4,8 @@ export default {
   mini: {
     webpackChain(chain) {
       chain.optimization.minimize(true);
+      // 🔥 关键优化：禁用 source map，减少 3MB+ 体积
+      chain.devtool(false);
       chain.plugin('terser').use(require('terser-webpack-plugin'), [{
         terserOptions: {
           compress: {
@@ -15,10 +17,19 @@ export default {
       }]);
     },
     commonChunks: ['runtime', 'vendors', 'taro', 'common'],
-    // optimizeMainPackage: {
-    //   enable: true,
-    //   exclude: ['pages/result/index', 'pages/design/index']
-    // }
+    // 启用主包优化
+    optimizeMainPackage: {
+      enable: true,
+      exclude: []
+    },
+    // 禁用 source map
+    enableSourceMap: false,
+    sourceMapType: 'none',
+    // 图片压缩
+    imageUrlLoaderOption: {
+      limit: 4096,
+      quality: 85,
+    }
   },
   preloadRule: {
     "pages/home/index": {
