@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, Image } from "@tarojs/components";
-import Taro from "@tarojs/taro";
+// import Taro from "@tarojs/taro";
 import styles from "./index.module.scss";
-import qrcodeIcon from "@/assets/icons/qrcode.svg";
+// import qrcodeIcon from "@/assets/icons/qrcode.svg";
 import { APP_QRCODE_IMAGE_URL, JOIN_GROUP_AVATAR_IMAGE_URL, SERVICE_QRCODE_IMAGE_URL} from "@/config";
-import rightArrowIcon from "@/assets/icons/right-arrow.svg";
+// import rightArrowIcon from "@/assets/icons/right-arrow.svg";
 import CrystalButton from "../CrystalButton";
 import giftIcon from "@/assets/icons/gift.svg";
 import groupIcon from "@/assets/icons/group.svg";

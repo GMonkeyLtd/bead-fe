@@ -1,4 +1,6 @@
 export default defineAppConfig({
+  // 🔥 关键优化：启用按需注入，只加载必要的组件代码
+  lazyCodeLoading: "requiredComponents",
   pages: [
     'pages/home/index'
   ],

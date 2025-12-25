@@ -6,17 +6,56 @@ export default {
       chain.optimization.minimize(true);
       // 🔥 关键优化：禁用 source map，减少 3MB+ 体积
       chain.devtool(false);
+      
+      // 🔥 优化代码分割
+      chain.optimization.splitChunks({
+        chunks: 'all',
+        cacheGroups: {
+          common: {
+            name: 'common',
+            minChunks: 2,
+            priority: 1
+          },
+          vendors: {
+            name: 'vendors',
+            test: /[\\/]node_modules[\\/]/,
+            priority: 10
+          },
+          // 🔥 将 lunar-typescript 单独打包
+          lunar: {
+            name: 'lunar',
+            test: /[\\/]node_modules[\\/]lunar-typescript[\\/]/,
+            priority: 20
+          },
+          // 🔥 将 marked 单独打包
+          marked: {
+            name: 'marked',
+            test: /[\\/]node_modules[\\/]marked[\\/]/,
+            priority: 20
+          }
+        }
+      });
+      
       chain.plugin('terser').use(require('terser-webpack-plugin'), [{
         terserOptions: {
           compress: {
             drop_console: true,
             drop_debugger: true,
-            pure_funcs: ['console.log', 'console.debug']
+            pure_funcs: ['console.log', 'console.debug'],
+            // 🔥 额外的压缩选项
+            passes: 2,
+            unsafe: true,
+            unsafe_comps: true,
+            unsafe_math: true,
+            unsafe_proto: true
+          },
+          mangle: {
+            safari10: true
           }
         }
       }]);
     },
-    commonChunks: ['runtime', 'vendors', 'taro', 'common'],
+    commonChunks: ['runtime', 'vendors', 'taro', 'common', 'lunar', 'marked'],
     // 启用主包优化
     optimizeMainPackage: {
       enable: true,
@@ -27,8 +66,25 @@ export default {
     sourceMapType: 'none',
     // 图片压缩
     imageUrlLoaderOption: {
-      limit: 4096,
-      quality: 85,
+      limit: 2048, // 🔥 降低内联阈值，让更多图片外部加载
+      quality: 80, // 🔥 降低质量以减小体积
+    },
+    // 🔥 CSS 压缩优化
+    cssLoaderOption: {
+      localIdentName: '[hash:base64:5]'
+    },
+    // 🔥 启用 CSS Tree Shaking
+    postcss: {
+      pxtransform: {
+        enable: false
+      },
+      cssModules: {
+        enable: true,
+        config: {
+          namingPattern: 'module',
+          generateScopedName: '[hash:base64:5]'
+        }
+      }
     }
   },
   preloadRule: {

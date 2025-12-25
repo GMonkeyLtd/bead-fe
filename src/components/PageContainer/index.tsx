@@ -72,7 +72,7 @@ const PageContainer = ({
   const keyboardHeight = manualKeyboardHeight !== undefined ? manualKeyboardHeight : autoKeyboardHeight;
 
   // 使用 useMemo 缓存计算结果，避免每次渲染都重新计算
-  const { navBarTop, navBarHeight, bottomHeight, containerHeight, contentHeight, contentTop } = useMemo(() => {
+  const { bottomHeight, contentHeight, contentTop } = useMemo(() => {
     try {
       const { top: navBarTop, height: navBarHeight } = getNavBarHeightAndTop();
       const { bottomHeight } = getSafeAreaInfo();

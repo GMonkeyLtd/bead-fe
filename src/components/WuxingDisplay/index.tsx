@@ -1,10 +1,10 @@
 import React from "react";
 import "./index.scss";
-import jinSvg from "@/assets/xuxing-icons/jin.svg";
-import huoSvg from "@/assets/xuxing-icons/huo.svg";
-import shuiSvg from "@/assets/xuxing-icons/shui.svg";
-import tuSvg from "@/assets/xuxing-icons/tu.svg";
-import muSvg from "@/assets/xuxing-icons/mu.svg";
+// import jinSvg from "@/assets/xuxing-icons/jin.svg";
+// import huoSvg from "@/assets/xuxing-icons/huo.svg";
+// import shuiSvg from "@/assets/xuxing-icons/shui.svg";
+// import tuSvg from "@/assets/xuxing-icons/tu.svg";
+// import muSvg from "@/assets/xuxing-icons/mu.svg";
 import { Image } from "@tarojs/components";
 
 export interface WuxingElement {
