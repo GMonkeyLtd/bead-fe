@@ -6,7 +6,7 @@ export const DIY_TUTORIAL_STEPS: TutorialStep[] = [
     id: 1,
     title: '欢迎来到DIY设计台',
     description: '在这里，您可以自由设计属于自己的水晶手链。让我们一起开始这段创意之旅！',
-    image: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/tutorials/step1.png',
+    image: 'https://zljcdn.gmonkey.top/images-frontend/tutorials/step1.png',
     tips: [
       '您可以随时点击左上角返回按钮保存进度',
       '设计过程中可以随时预览效果'
@@ -16,7 +16,7 @@ export const DIY_TUTORIAL_STEPS: TutorialStep[] = [
     id: 2,
     title: '选择水晶珠子',
     description: '点击下方的水晶分类，选择您喜欢的珠子类型。每种珠子都有不同的寓意和能量。',
-    image: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/tutorials/step2.png',
+    image: 'https://zljcdn.gmonkey.top/images-frontend/tutorials/step2.png',
     highlights: ['bead-selector'],
     tips: [
       '可以根据五行属性选择适合的珠子',
@@ -28,7 +28,7 @@ export const DIY_TUTORIAL_STEPS: TutorialStep[] = [
     id: 3,
     title: '添加珠子到手链',
     description: '选中珠子后，点击手链上的任意位置即可添加。您也可以拖拽珠子来调整位置。',
-    image: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/tutorials/step3.png',
+    image: 'https://zljcdn.gmonkey.top/images-frontend/tutorials/step3.png',
     highlights: ['bracelet-ring'],
     tips: [
       '长按珠子可以删除',
@@ -40,7 +40,7 @@ export const DIY_TUTORIAL_STEPS: TutorialStep[] = [
     id: 4,
     title: '调整珠子位置',
     description: '通过拖拽可以调整珠子在手链上的位置，创造出您想要的排列效果。',
-    image: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/tutorials/step4.png',
+    image: 'https://zljcdn.gmonkey.top/images-frontend/tutorials/step4.png',
     highlights: ['bracelet-ring'],
     tips: [
       '相邻的珠子会自动对齐',
@@ -52,7 +52,7 @@ export const DIY_TUTORIAL_STEPS: TutorialStep[] = [
     id: 5,
     title: '添加配饰',
     description: '选择合适的配饰来装点您的手链，让设计更加精美独特。',
-    image: 'https://zhuluoji.cn-sh2.ufileos.com/images-frontend/tutorials/step5.png',
+    image: 'https://zljcdn.gmonkey.top/images-frontend/tutorials/step5.png',
     highlights: ['accessory-selector'],
     tips: [
       '配饰通常放在手链的中心位置',
