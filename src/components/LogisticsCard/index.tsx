@@ -3,7 +3,7 @@ import { Text, View, Image } from "@tarojs/components";
 import styles from "./index.module.scss";
 import rightArrowIcon from "@/assets/icons/right-arrow.svg";
 import Taro from "@tarojs/taro";
-import addressLine from "@/assets/icons/order-address-line.png";
+// import addressLine from "@/assets/icons/order-address-line.png";
 import logisticsIcon from "@/assets/icons/logistics.svg";
 
 export interface AddressInfo {

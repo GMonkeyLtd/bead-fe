@@ -90,7 +90,7 @@ const DateTimeDrawer = ({
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
     const currentDay = now.getDate();
-    const currentHour = now.getHours();
+    //const currentHour = now.getHours();
 
     // 初始化年份（当前年到过去100年）
     const yearList: number[] = [];

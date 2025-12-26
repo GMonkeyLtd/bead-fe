@@ -3,7 +3,7 @@ import { View, Text, Image } from "@tarojs/components";
 import StatusBadge, { StatusBadgeType } from "@/components/StatusBadge";
 import { AfterSaleStatus, formatOrderStatus, getStatusBadgeType, OrderStatus } from "@/utils/orderUtils";
 import phoneIcon from "@/assets/icons/phone.svg";
-import wechatIcon from "@/assets/icons/wechat.svg";
+// import wechatIcon from "@/assets/icons/wechat.svg";
 import remarkIcon from "@/assets/icons/remark.svg";
 import createBeadIcon from "@/assets/icons/create-bead.svg";
 import styles from "./index.module.scss";

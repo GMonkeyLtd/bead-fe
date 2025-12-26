@@ -10,7 +10,7 @@ import closeFillIcon from "@/assets/icons/close-fill.svg";
 import { PriceTier } from "../PriceTierSelector";
 import PriceTierSelector from "../PriceTierSelector";
 import qualityCompareIcon from "@/assets/icons/quality-compare-icon.svg";
-import QualityComparisonTable, { QualityFactor } from "../QualityComparisonTable";
+import QualityComparisonTable from "../QualityComparisonTable";
 
 interface BudgetDialogProps {
     visible: boolean;
