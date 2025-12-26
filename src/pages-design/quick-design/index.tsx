@@ -8,6 +8,7 @@ import { pageUrls } from "@/config/page-urls";
 import PageContainer from "@/components/PageContainer";
 import { CancelToken } from "@/utils/request";
 import sessionApi from "@/utils/api-session";
+import { userApi } from "@/utils/api";
 
 const predictedTimeText = (
   <View className="quick-design-loading-content">设计过程预计等待 5s</View>
@@ -214,7 +215,30 @@ const QuickDesign = () => {
       }
     } catch (error) {
       console.error('DIY设计保存失败:', error);
-      // 可以添加错误处理逻辑
+      
+      // 上报错误日志到后端
+      try {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        
+        await userApi.reportLog({
+          level: 'error',
+          message: 'DIY设计保存失败',
+          data: {
+            error: errorMessage,
+            stack: errorStack,
+            beadItems: beadItems,
+            wristSize: wristSize,
+            from: from,
+            imageUrl: imageUrl ? 'present' : 'missing', // 不直接上报完整URL，只标记是否存在
+          },
+          source: 'pages-design/quick-design',
+        });
+      } catch (reportError) {
+        // 日志上报失败不影响主流程，只记录到控制台
+        console.error('日志上报失败:', reportError);
+      }
+      
       Taro.showToast({
         title: '设计保存失败，请重试',
         icon: 'none',
