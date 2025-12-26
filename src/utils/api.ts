@@ -186,6 +186,29 @@ export const userApi = {
         showError: data.showError,
       }
     ),
+
+  // 上报日志
+  reportLog: (data: {
+    level: string;
+    message: string;
+    data?: Record<string, any>;
+    source?: string;
+  }, apiConfig?: RequestConfig) =>
+    http.post<any>(
+      "/user/report-log",
+      {
+        level: data.level,
+        message: data.message,
+        data: data.data,
+        source: data.source,
+      },
+      {
+        showLoading: false,
+        showError: false, // 日志上报失败不应该影响主流程
+        cancelToken: apiConfig?.cancelToken,
+        ...apiConfig,
+      }
+    ),
 };
 
 // 生成相关API
