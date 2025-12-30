@@ -72,11 +72,12 @@ const CustomDesign = () => {
     if (birthInfo) {
       // Show info and reset option
       const hourDisplay = (birthInfo.hour !== undefined && birthInfo.hour !== null && birthInfo.hour !== '') ? birthInfo.hour : '未知';
-      const dateStr = `${birthInfo.year}年${birthInfo.month}月${birthInfo.day}日 ${hourDisplay}时`;
+      const calendarType = birthInfo.isLunar ? '农历' : '公历'; // 添加公历/农历标识
+      const dateStr = `${calendarType} ${birthInfo.year}年${birthInfo.month}月${birthInfo.day}日 ${hourDisplay}时`;
       const wuxingStr = wuxingInfo?.xi_yong?.join('、') || '';
       Taro.showModal({
         title: '已选生辰',
-        content: `生辰：${dateStr}\n喜用：${wuxingStr}`,
+        content: `生辰：${dateStr}\n喜用：${wuxingStr}`, // \n 会自动分成两行
         confirmText: '重置',
         cancelText: '取消',
         success: (res) => {

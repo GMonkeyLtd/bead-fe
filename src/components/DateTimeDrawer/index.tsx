@@ -1,7 +1,7 @@
 import { View, Text, PickerView, PickerViewColumn } from "@tarojs/components";
 import { useState, useEffect } from "react";
 import { CommonEventFunction } from "@tarojs/components/types/common";
-import { Lunar, LunarMonth, Solar } from "lunar-typescript";
+import { LunarMonth } from "lunar-typescript";
 import "./index.scss";
 import CrystalButton from "../CrystalButton";
 import Taro from "@tarojs/taro";
@@ -132,14 +132,39 @@ const DateTimeDrawer = ({
     setSelectedIndexes([yearIndex, monthIndex, dayIndex, hourIndex]);
   }, []);
 
-  const updateDays = (year: number, month: number) => {
-    if (dateType === "公历") {
+  // 监听 dateType 变化，重新计算天数
+  useEffect(() => {
+    if (years.length > 0 && months.length > 0 && selectedIndexes.length > 0) {
+      const year = years[selectedIndexes[0]];
+      const month = months[selectedIndexes[1]];
+      if (year && month) {
+        const newDayList = updateDays(year, month);
+        
+        // 如果当前选中的日期超出了新日历类型的天数范围，调整到最后一天
+        if (selectedIndexes[2] >= newDayList.length) {
+          setSelectedIndexes([
+            selectedIndexes[0], 
+            selectedIndexes[1], 
+            newDayList.length - 1, 
+            selectedIndexes[3]
+          ]);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateType]);
+
+  const updateDays = (year: number, month: number, targetDateType?: string) => {
+    const currentDateType = targetDateType || dateType;
+    
+    if (currentDateType === "公历") {
       const daysInMonth = new Date(year, month, 0).getDate();
       const dayList: number[] = [];
       for (let i = 1; i <= daysInMonth; i++) {
         dayList.push(i);
       }
       setDays(dayList);
+      return dayList;
     } else {
       // 农历月份的天数
       const lunarMonth = LunarMonth.fromYm(year, month);
@@ -150,6 +175,7 @@ const DateTimeDrawer = ({
         dayList.push(i);
       }
       setDays(dayList);
+      return dayList;
     }
   };
 
@@ -180,35 +206,7 @@ const DateTimeDrawer = ({
     Taro.reportEvent('ai_design', {
       calendar_type: newDateType,
     })
-
-    // 在切换日期类型时转换日期
-    const year = years[selectedIndexes[0]];
-    const month = months[selectedIndexes[1]];
-    const day = days[selectedIndexes[2]];
-
-    if (newDateType === "农历") {
-      // 从公历转农历
-      const solar = Solar.fromYmd(year, month, day);
-      const lunar = solar.getLunar();
-
-      const yearIndex = years.findIndex((y) => y === lunar.getYear());
-      const monthIndex = lunar.getMonth();
-      const dayIndex = lunar.getDay();
-
-      setSelectedIndexes([yearIndex, monthIndex, dayIndex, selectedIndexes[3]]);
-      updateDays(lunar.getYear(), lunar.getMonth());
-    } else {
-      // 从农历转公历
-      const lunar = Lunar.fromYmd(year, month, day);
-      const solar = lunar.getSolar();
-
-      const yearIndex = years.findIndex((y) => y === solar.getYear());
-      const monthIndex = solar.getMonth() - 1;
-      const dayIndex = solar.getDay() - 1;
-
-      setSelectedIndexes([yearIndex, monthIndex, dayIndex, selectedIndexes[3]]);
-      updateDays(solar.getYear(), solar.getMonth());
-    }
+    // 天数更新和日期范围检查由 useEffect 处理
   };
 
   const handleGenderToggle = () => {

@@ -6,7 +6,7 @@ export default {
       chain.optimization.minimize(true);
       // 🔥 关键优化：禁用 source map，减少 3MB+ 体积
       chain.devtool(false);
-      
+
       // 🔥 优化代码分割
       chain.optimization.splitChunks({
         chunks: 'all',
@@ -35,7 +35,7 @@ export default {
           }
         }
       });
-      
+
       chain.plugin('terser').use(require('terser-webpack-plugin'), [{
         terserOptions: {
           compress: {
@@ -66,8 +66,8 @@ export default {
     sourceMapType: 'none',
     // 图片压缩
     imageUrlLoaderOption: {
-      limit: 2048, // 🔥 降低内联阈值，让更多图片外部加载
-      quality: 80, // 🔥 降低质量以减小体积
+      limit: 1024, // 🔥 进一步降低内联阈值，只内联非常小的图片
+      quality: 75, // 🔥 降低质量以减小体积
     },
     // 🔥 CSS 压缩优化
     cssLoaderOption: {
