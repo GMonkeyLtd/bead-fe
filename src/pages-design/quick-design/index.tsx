@@ -200,12 +200,12 @@ const QuickDesign = () => {
         image_base64: image_base64 as string,
         wrist_size: parseFloat(wristSize || '0'),
       });
-      
+
       if (res.data?.design_id) {
         setTimeout(() => {
           setProgressTip(progressTipText(res.data.design_id));
         }, 3000);
-        
+
         // 直接跳转到结果页面
         setTimeout(() => {
           Taro.redirectTo({
@@ -215,18 +215,48 @@ const QuickDesign = () => {
       }
     } catch (error) {
       console.error('DIY设计保存失败:', error);
-      
+
       // 上报错误日志到后端
       try {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const errorStack = error instanceof Error ? error.stack : undefined;
-        
+        // 展开 error 对象，获取更多信息
+        let errorDetails: any = {};
+
+        if (error instanceof Error) {
+          errorDetails.message = error.message;
+          errorDetails.stack = error.stack;
+          errorDetails.name = error.name;
+        }
+
+        // 如果是 axios 或其他 API 错误，可能包含 response
+        if (error && typeof error === 'object') {
+          const errorObj = error as any;
+
+          if (errorObj.response) {
+            errorDetails.response = {
+              status: errorObj.response.status,
+              statusText: errorObj.response.statusText,
+              data: errorObj.response.data,
+            };
+          }
+
+          if (errorObj.config) {
+            errorDetails.config = {
+              url: errorObj.config.url,
+              method: errorObj.config.method,
+            };
+          }
+
+          // 包含所有可枚举属性
+          errorDetails.rawError = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        } else {
+          errorDetails.rawError = String(error);
+        }
+
         await userApi.reportLog({
           level: 'error',
           message: 'DIY设计保存失败',
           data: {
-            error: errorMessage,
-            stack: errorStack,
+            errorDetails,
             beadItems: beadItems,
             wristSize: wristSize,
             from: from,
@@ -238,7 +268,7 @@ const QuickDesign = () => {
         // 日志上报失败不影响主流程，只记录到控制台
         console.error('日志上报失败:', reportError);
       }
-      
+
       Taro.showToast({
         title: '设计保存失败，请重试',
         icon: 'none',

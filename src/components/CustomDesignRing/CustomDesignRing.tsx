@@ -27,6 +27,8 @@ import HistoryOperations from "./HistoryOperations";
 import BeadSizeSelector from "../BeadSizeSelector";
 import tutorialIcon from "@/assets/icons/tutorial.svg";
 import questionIcon from "@/assets/icons/question.svg";
+import shengchenActiveIcon from "@/assets/icons/shengchen-active.svg";
+import shengchenInactiveIcon from "@/assets/icons/shengchen-inactive.svg";
 import ImagePreviewModal from "../ImagePreviewModal";
 import BraceletDetailDialog from "../BraceletDetailDialog";
 
@@ -55,6 +57,8 @@ interface CustomDesignRingProps {
   onOk?: (imageUrl: string, editedBeads: Bead[]) => void;
   onChange?: (imageUrl: string, editedBeads: Bead[]) => void;
   showTutorial?: () => void;
+  onBirthClick?: () => void;
+  isBirthSet?: boolean;
 }
 
 /**
@@ -73,6 +77,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
       renderRatio = 2,
       onOk,
       showTutorial,
+      onBirthClick,
+      isBirthSet = false,
     },
     ref
   ) => {
@@ -147,10 +153,14 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
     // 初始化五行类型
     useEffect(() => {
       const allWuxing = Object.keys(beadTypeMap);
-      if (allWuxing.length > 0) {
-        setCurrentWuxing("金"); // 默认选择"土"模式
+      if (allWuxing.length > 0 && !currentWuxing) {
+        if (beadTypeMap['推荐']) {
+          setCurrentWuxing("推荐");
+        } else {
+          setCurrentWuxing("金"); // 默认选择"金"模式
+        }
       }
-    }, [beadTypeMap]);
+    }, [beadTypeMap, currentWuxing]);
 
     const beadsTotalPrice = useMemo(() => {
       return positionManagerState.beads?.reduce((acc, bead) => {
@@ -369,8 +379,8 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         const newBeadSize = bead.beadSizeList.includes(currentBeadSize)
           ? currentBeadSize
           : bead.beadSizeList.includes(10)
-          ? 10
-          : bead.beadSizeList[0];
+            ? 10
+            : bead.beadSizeList[0];
         setCurrentBeadSize(newBeadSize);
         const newBead = bead.beadList.find(
           (item) => item.diameter === newBeadSize
@@ -614,50 +624,49 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
         <View
           className="custom-design-ring-tip-container"
           style={{
-            justifyContent: beadsTotalPrice > 0 ? "space-between" : "flex-end",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
           }}
         >
-          {beadsTotalPrice > 0 && (
-            <View className="custom-design-ring-tip-content-container">
-              <View className="custom-design-ring-tip-content-prefix">
-                <Image
-                  src={LILI_AVATAR_IMAGE_URL}
-                  className="custom-design-ring-lili-avatar"
-                />
-              </View>
-              <View
-                className="custom-design-ring-tip-content"
-                onClick={() => setShowBeadsDetailDialog(true)}
-              >
-                {/* <View>{`你的喜用神为`}</View>
-            <View className="custom-design-ring-tip-tag">
-              {wuxing?.join('')}
-            </View> */}
-                <View
-                  style={{ display: "flex", alignItems: "center", gap: "2px" }}
-                >
-                  <View>{`总价：`}</View>
-                  <View
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: "bold",
-                      color: "#9c560f",
-                    }}
-                  >{`${Math.floor(beadsTotalPrice / 100)}`}</View>
-                  <View>{`元`}</View>
+          <View className="custom-design-ring-tip-left" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {beadsTotalPrice > 0 && (
+              <View className="custom-design-ring-tip-content-container">
+                <View className="custom-design-ring-tip-content-prefix">
+                  <Image
+                    src={LILI_AVATAR_IMAGE_URL}
+                    className="custom-design-ring-lili-avatar"
+                  />
                 </View>
-                <Image
-                  src={questionIcon}
-                  className="custom-design-ring-question-icon"
-                  style={{ width: "14px", height: "14px" }}
-                />
+                <View
+                  className="custom-design-ring-tip-content"
+                  onClick={() => setShowBeadsDetailDialog(true)}
+                >
+                  <View
+                    style={{ display: "flex", alignItems: "center", gap: "2px" }}
+                  >
+                    <View>{`总价：`}</View>
+                    <View
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "bold",
+                        color: "#9c560f",
+                      }}
+                    >{`${Math.floor(beadsTotalPrice / 100)}`}</View>
+                    <View>{`元`}</View>
+                  </View>
+                  <Image
+                    src={questionIcon}
+                    className="custom-design-ring-question-icon"
+                    style={{ width: "14px", height: "14px" }}
+                  />
+                </View>
               </View>
-            </View>
-          )}
+            )}
+          </View>
+
           <View
-            className={`view-effect-button ${
-              positionManagerState.predictedLength < 13 ? "disabled" : ""
-            }`}
+            className={`view-effect-button ${positionManagerState.predictedLength < 13 ? "disabled" : ""
+              }`}
             onClick={handleViewEffect}
           >
             查看效果
@@ -675,6 +684,21 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
           onClick={handleBeadDeselect}
         >
           <View className="custom-design-ring-top-content">
+            <View
+              onClick={onBirthClick}
+              className="birth-button-container"
+            >
+              <View className="birth-icon-wrapper">
+                <Image
+                  src={isBirthSet ? shengchenActiveIcon : shengchenInactiveIcon}
+                  className="birth-icon"
+                />
+              </View>
+              <View className={`birth-button-text ${isBirthSet ? 'active' : 'inactive'}`}>
+                生辰
+              </View>
+            </View>
+
             <View
               onClick={() => {
                 Taro.reportEvent("diy_event", {
@@ -743,6 +767,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
               onHistoryBack={handleHistoryBack}
               onHistoryForward={handleHistoryForward}
               onDiyInspirationResponse={handleDiyInspirationResponse}
+              wuxing={wuxing}
             />
           </View>
         </View>
@@ -759,10 +784,9 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
                 {positionManagerState.beads?.[
                   positionManagerState.selectedBeadIndex
                 ]?.name &&
-                  `${
-                    positionManagerState.beads?.[
-                      positionManagerState.selectedBeadIndex
-                    ]?.name
+                  `${positionManagerState.beads?.[
+                    positionManagerState.selectedBeadIndex
+                  ]?.name
                   }`}
               </View>
               <View className="custom-design-bead-size-selector-price">
@@ -790,7 +814,6 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             )}
           </View>
           <BeadSelector
-            styleHeight={`calc(100% - 50px)`}
             accessoryTypeMap={
               accessoryTypeMap as Record<AccessoryType, AccessoryItem[]>
             }
@@ -798,6 +821,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             currentWuxing={currentWuxing}
             currentAccessoryType={currentAccessoryType}
             renderRatio={renderRatio}
+            recommendWuxing={wuxing}
             predictedLength={positionManagerState.predictedLength}
             onWuxingChange={handleWuxingChange}
             onAccessoryTypeChange={setCurrentAccessoryType}
@@ -805,7 +829,7 @@ const CustomDesignRing = forwardRef<CustomDesignRingRef, CustomDesignRingProps>(
             onBeadImageClick={handleBeadImageClick}
             currentSelectedBead={
               positionManagerState.beads?.[
-                positionManagerState.selectedBeadIndex
+              positionManagerState.selectedBeadIndex
               ]
             }
           />

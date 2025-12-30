@@ -22,6 +22,7 @@
   z-index: 10;
   padding: 8px;
 }
+
 .custom-design-ring-tutorial-text {
   color: rgba(87, 74, 58, 0.60);
   text-align: center;
@@ -301,4 +302,52 @@
   font-weight: 400;
   line-height: normal;
   letter-spacing: 1px;
+}
+
+.birth-button-container {
+  position: absolute;
+  right: 20px;
+  top: 70px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+}
+
+.birth-icon-wrapper {
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+
+  .birth-icon {
+    width: 20px;
+    height: 20px;
+
+    &.active {
+      transform: translateX(-20px);
+      filter: drop-shadow(20px 0 0 #FABC20);
+      opacity: 1;
+    }
+
+    &.inactive {
+      transform: none;
+      filter: none;
+      opacity: 0.3;
+    }
+  }
+}
+
+.birth-button-text {
+  font-size: 11px;
+  font-family: "Noto Sans SC";
+
+  &.active {
+    color: #574A3A;
+  }
+
+  &.inactive {
+    color: rgba(87, 74, 58, 0.60);
+  }
 }

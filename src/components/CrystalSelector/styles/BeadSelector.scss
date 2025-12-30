@@ -3,7 +3,7 @@
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
-  gap: 8px;
+  gap: 0px;
   flex-shrink: 0;
   border-radius: 10px;
   border: 1px solid #FFF;
@@ -12,9 +12,12 @@
 }
 
 .bead-selector-tabs-container {
-  padding: 16px 12px;
-  height: calc(100% - 52px);
+  padding: 16px 12px 0 12px;
+  flex: 1;
+  min-height: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .wuxing-tabs {
@@ -89,9 +92,9 @@
   width: 100%;
   gap: 12px;
   border-radius: 0;
-  height: calc(100% - 20px);
+  flex: 1;
+  min-height: 0;
   box-sizing: border-box;
-  padding-bottom: 12px;
 
   /* 隐藏滚动条 */
   &::-webkit-scrollbar {
@@ -111,7 +114,8 @@
   width: 100%;
   gap: 12px;
   border-radius: 0;
-  height: calc(100% - 20px);
+  flex: 1;
+  min-height: 0;
   box-sizing: border-box;
 
   /* 隐藏滚动条 */
@@ -197,4 +201,52 @@
 
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.bead-selector-container-flex {
+  flex: 1;
+  min-height: 0;
+}
+
+.bead-selector-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.wuxing-tabs-wrapper {
+  &.with-annotation {
+    .wuxing-tabs {
+      margin-bottom: 0px;
+    }
+  }
+
+  &.without-annotation {
+    .wuxing-tabs {
+      margin-bottom: 16px;
+    }
+  }
+}
+
+.wuxing-tab-recommended {
+  &:not(.active) {
+    background-color: #FAEAD3;
+  }
+}
+
+.xi-yong-annotation {
+  margin-left: 6px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+
+  .xi-yong-text {
+    font-size: 10px;
+    color: #A0836D;
+    line-height: 10px;
+  }
 }

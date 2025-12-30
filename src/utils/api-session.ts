@@ -504,10 +504,10 @@ export default {
       { cancelToken: config?.cancelToken, ...config }
     );
   },
-  getDiyInspiration: (config?: ApiConfig) => {
+  getDiyInspiration: (data?: { wuxing?: string[] }, config?: ApiConfig) => {
     return http.post<any>(
       `/user/diy/inspiration`,
-      {},
+      data || {},
       { cancelToken: config?.cancelToken, ...config }
     );
   },

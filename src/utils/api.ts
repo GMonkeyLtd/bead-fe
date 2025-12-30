@@ -212,11 +212,19 @@ export const userApi = {
 };
 
 // 生成相关API
+export interface WuXingInfo {
+  wuxing_count: Record<string, number>; // 五行统计（金、木、水、火、土各有多少）
+  missing: string[];      // 缺失的五行
+  rizhu: string;        // 日主天干
+  strong: string;       // 日主五行（日干对应的五行）
+  xi_yong: string[];      // 喜用神（推荐的五行）
+  ji_shen: string[];      // 忌神（避免的五行）
+}
+
 export const generateApi = {
-  // 八字查询
+  // 八字查询 - 获取五行信息
   bazi: (params: BaziParams, apiConfig?: RequestConfig) =>
-    http.post<BaziResult>("/user/querybazi", params, {
-      skipAuth: true,
+    http.post<{ data: WuXingInfo }>("/user/wuxing", { birth_info: params }, {
       cancelToken: apiConfig?.cancelToken,
       ...apiConfig,
     }),
