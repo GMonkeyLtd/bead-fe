@@ -34,7 +34,7 @@ const HistoryOperations: React.FC<HistoryOperationsProps> = ({
       click_inspirition: 1
     })
     setInspirationLoading(true);
-    apiSession.getDiyInspiration({ wuxing }).then(res => {
+    apiSession.getDiyInspiration({ xiyong: wuxing }).then(res => {
       onDiyInspirationResponse(res?.data?.items);
       setInspirationLoading(false);
     }).catch(err => {

@@ -64,7 +64,8 @@
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
-  line-height: 13px;
+  justify-content: center;
+  line-height: 16px;
   white-space: nowrap;
   /* 118.182% */
 
@@ -73,6 +74,20 @@
     background: #332E2A;
     color: #FFE9C3;
   }
+}
+
+.wuxing-icon {
+  width: 16px;
+  height: 16px;
+  // 未选中状态：黑色 #000000 60%
+  opacity: 0.6;
+  filter: brightness(0);
+}
+
+.wuxing-tab.active .wuxing-icon {
+  opacity: 1;
+  // 选中状态：金黄色 #FFE9C3
+  filter: brightness(0) saturate(100%) invert(93%) sepia(15%) saturate(628%) hue-rotate(327deg) brightness(103%) contrast(98%);
 }
 
 .bead-count {
@@ -230,11 +245,7 @@
   }
 }
 
-.wuxing-tab-recommended {
-  &:not(.active) {
-    background-color: #FAEAD3;
-  }
-}
+
 
 .xi-yong-annotation {
   margin-left: 6px;

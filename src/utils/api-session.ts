@@ -504,7 +504,7 @@ export default {
       { cancelToken: config?.cancelToken, ...config }
     );
   },
-  getDiyInspiration: (data?: { wuxing?: string[] }, config?: ApiConfig) => {
+  getDiyInspiration: (data?: { xiyong?: string[] }, config?: ApiConfig) => {
     return http.post<any>(
       `/user/diy/inspiration`,
       data || {},
