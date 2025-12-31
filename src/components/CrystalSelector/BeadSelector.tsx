@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useRef } from "react";
-import { View, Text, Image } from "@tarojs/components";
+import { View, Text } from "@tarojs/components";
 import "./styles/BeadSelector.scss";
 import CategorySelector from "./CategorySelector";
 import BeadItem from "./BeadItem";
@@ -10,12 +10,6 @@ import {
   BeadItem as BeadItemType,
 } from "@/utils/api-session";
 import LoadingIcon from "../LoadingIcon";
-import jinIcon from "@/assets/icons/jin.svg";
-import muIcon from "@/assets/icons/mu.svg";
-import shuiIcon from "@/assets/icons/shui.svg";
-import huoIcon from "@/assets/icons/huo.svg";
-import tuIcon from "@/assets/icons/tu.svg";
-import shengchenIcon from "@/assets/icons/shengchen.svg";
 
 
 
@@ -170,22 +164,6 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
   const renderCrystalTypes = () => {
     const showAnnotation = beadTypeMap['推荐'] && recommendWuxing?.length > 0 && currentWuxing === '推荐';
 
-    const wuxingIconMap: Record<string, string> = {
-      '金': jinIcon,
-      '木': muIcon,
-      '水': shuiIcon,
-      '火': huoIcon,
-      '土': tuIcon,
-    };
-
-    const wuxingTextMap: Record<string, string> = {
-      '金': '金',  // 金色
-      '木': '绿',  // 绿色
-      '水': '蓝',  // 蓝色
-      '火': '红',  // 红色
-      '土': '黄',  // 棕色
-    };
-
     return (
       <View className={`wuxing-tabs-wrapper ${showAnnotation ? 'with-annotation' : 'without-annotation'}`}>
         <View className="wuxing-tabs">
@@ -203,27 +181,13 @@ const BeadSelector: React.FC<BeadSelectorProps> = ({
                   ? beadTypeMap[wuxing].length
                   : 0;
 
-            // const isRecommended = recommendWuxing.includes(wuxing); // No longer needed for background
-
             return (
               <View
                 key={wuxing}
                 className={`wuxing-tab ${isActive ? "active" : ""} ${wuxing === '推荐' ? 'wuxing-tab-recommended' : ''}`}
                 onClick={() => handleWuxingChange(wuxing)}
               >
-                {wuxingIconMap[wuxing] ? (
-                  <>
-                    <Image src={wuxingIconMap[wuxing]} className="wuxing-icon" mode="aspectFit" />
-                    <Text>{wuxingTextMap[wuxing]}</Text>
-                  </>
-                ) : wuxing === '推荐' ? (
-                  <>
-                    <Image src={shengchenIcon} className="wuxing-icon" mode="aspectFit" />
-                    <Text>{wuxing}</Text>
-                  </>
-                ) : (
-                  wuxing
-                )}
+                <Text>{wuxing}</Text>
                 {beadCount > 0 && (
                   <Text className="bead-count">({beadCount})</Text>
                 )}

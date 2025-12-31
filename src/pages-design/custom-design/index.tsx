@@ -73,7 +73,7 @@ const CustomDesign = () => {
       // Show info and reset option
       const hourDisplay = (birthInfo.hour !== undefined && birthInfo.hour !== null && birthInfo.hour !== '') ? birthInfo.hour : '未知';
       const calendarType = birthInfo.isLunar ? '农历' : '公历'; // 添加公历/农历标识
-      const dateStr = `${calendarType} ${birthInfo.year}年${birthInfo.month}月${birthInfo.day}日 ${hourDisplay}时`;
+      const dateStr = `${calendarType} ${birthInfo.year}.${birthInfo.month}.${birthInfo.day} ${hourDisplay}时`;
       const wuxingStr = wuxingInfo?.xi_yong?.join('、') || '';
       Taro.showModal({
         title: '已选生辰',
