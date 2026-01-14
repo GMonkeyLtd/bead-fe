@@ -11,6 +11,7 @@ import { usePageQuery } from "@/hooks/usePageQuery";
 import { beadsApi } from "@/utils/api";
 import { SPU_TYPE } from "@/pages-design/custom-design";
 import CrystalBeadList, { CrystalBeadListItem } from "../CrystalBeadList";
+import { imageToBase64 } from "@/utils/imageUtils";
 
 
 interface ProductPriceFormProps {
@@ -23,6 +24,7 @@ interface ProductPriceFormProps {
   onConfirm?: () => void;
   beadsInfo?: BeadItem[];
   referencePrice?: number;
+  actualImages?: string[];
 }
 
 export interface BeadItemWithCount extends BeadItem {
@@ -37,12 +39,15 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
   beadsInfo,
   wristSize,
   referencePrice,
+  actualImages,
   onClose,
   onConfirm,
 }) => {
   const [price, setPrice] = useState<string>(referencePrice?.toString() || "");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [loadingOldImages, setLoadingOldImages] = useState(false);
   const [beadsData, setBeadsData] = useState<BeadItemWithCount[]>(() => {
     if (beadsInfo) {
       // 按sku_id进行聚合统计
@@ -64,6 +69,62 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
   });
   const [spuList, setSpuList] = useState<CrystalBeadListItem[]>([]);
   const [wristSizeValue, setWristSizeValue] = useState<string>(wristSize || "");
+  const [currentLoadedOrder, setCurrentLoadedOrder] = useState<string>("");
+  
+  // 当组件打开或订单信息变化时，重新加载图片和状态
+  useEffect(() => {
+    // 使用 actualImages 的 JSON 字符串作为唯一标识，确保图片变化时能够重新加载
+    const imagesKey = JSON.stringify(actualImages || []);
+    const orderKey = `${orderNumber}_${imagesKey}`;
+    
+    // 只有当订单标识发生变化时才重新加载
+    if (orderKey !== currentLoadedOrder) {
+      console.log('重新加载订单数据:', orderNumber);
+      setCurrentLoadedOrder(orderKey);
+      
+      // 重置状态
+      setPrice(referencePrice?.toString() || "");
+      setWristSizeValue(wristSize || "");
+      setSubmitLoading(false);
+      
+      // 加载图片
+      if (actualImages && actualImages.length > 0) {
+        setLoadingOldImages(true);
+        Promise.all(
+          actualImages.map(async (imageUrl) => {
+            try {
+              // 如果已经是base64格式，直接返回
+              if (imageUrl.startsWith('data:image')) {
+                return imageUrl;
+              }
+              // 否则转换为base64
+              const base64 = await imageToBase64(imageUrl, true, true, { quality: 70 });
+              return base64;
+            } catch (error) {
+              console.error("转换图片失败:", imageUrl, error);
+              Taro.showToast({
+                title: "部分图片加载失败",
+                icon: "none",
+              });
+              return null;
+            }
+          })
+        ).then((base64Images) => {
+          const validImages = base64Images.filter(img => img !== null) as string[];
+          setImages(validImages);
+          setLoadingOldImages(false);
+        }).catch((error) => {
+          console.error("转换图片失败:", error);
+          setLoadingOldImages(false);
+        });
+      } else {
+        // 如果没有旧图片，清空图片列表
+        setImages([]);
+        setLoadingOldImages(false);
+      }
+    }
+  }, [orderNumber, actualImages, referencePrice, wristSize, currentLoadedOrder]);
+  
   if (!visible) {
     return null;
   }
@@ -255,6 +316,10 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
   };
 
   const handleConfirm = () => {
+    if (submitLoading) {
+      return;
+    }
+
     if (!price || parseFloat(price) <= 0) {
       Taro.showToast({
         title: "请输入有效价格",
@@ -278,6 +343,7 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
       }
     })
 
+    setSubmitLoading(true);
     apiMerchant.user.submitPrice(orderNumber || "", parseFloat(price), images, skuIds, wristSizeValue).then((res: any) => {
       if (res.code === 200) {
         onClose?.();
@@ -292,6 +358,8 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
         title: "提交失败" + err.message,
         icon: "none",
       });
+    }).finally(() => {
+      setSubmitLoading(false);
     });
   };
 
@@ -413,47 +481,53 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
             </View>
             <Text className={styles["section-subtitle"]}>请上传商品实拍图，最多9张</Text>
 
-            <View className={styles["images-container"]}>
-              <View className={styles["images-grid"]}>
-                {images.length < 9 && (
-                  <View
-                    className={`${styles["add-image-btn"]} ${uploading ? styles["uploading"] : ''}`}
-                    onClick={handleChooseImage}
-                  >
-                    {uploading ? (
-                      <Text className={styles["uploading-text"]}>上传中...</Text>
-                    ) : (
-                      <>
-                        <Text className={styles["add-icon"]}>+</Text>
-                        <Text className={styles["add-text"]}>添加图片</Text>
-                      </>
-                    )}
-                  </View>
-                )}
-                {images.map((image, index) => (
-                  <View key={index} className={styles["image-item"]}>
-                    <Image
-                      src={image}
-                      className={styles["uploaded-image"]}
-                      mode="aspectFill"
-                      onClick={() => {
-                        Taro.previewImage({
-                          current: image,
-                          urls: [image],
-                        });
-                      }}
-                    />
-                    <View
-                      className={styles["remove-image-btn"]}
-                      onClick={() => handleRemoveImage(index)}
-                    >
-                      <Text className={styles["remove-icon"]}>×</Text>
-                    </View>
-                  </View>
-                ))}
-
+            {loadingOldImages ? (
+              <View style={{ padding: "20px", textAlign: "center" }}>
+                <Text style={{ color: "#999" }}>加载图片中...</Text>
               </View>
-            </View>
+            ) : (
+              <View className={styles["images-container"]}>
+                <View className={styles["images-grid"]}>
+                  {images.length < 9 && (
+                    <View
+                      className={`${styles["add-image-btn"]} ${uploading ? styles["uploading"] : ''}`}
+                      onClick={handleChooseImage}
+                    >
+                      {uploading ? (
+                        <Text className={styles["uploading-text"]}>上传中...</Text>
+                      ) : (
+                        <>
+                          <Text className={styles["add-icon"]}>+</Text>
+                          <Text className={styles["add-text"]}>添加图片</Text>
+                        </>
+                      )}
+                    </View>
+                  )}
+                  {images.map((image, index) => (
+                    <View key={index} className={styles["image-item"]}>
+                      <Image
+                        src={image}
+                        className={styles["uploaded-image"]}
+                        mode="aspectFill"
+                        onClick={() => {
+                          Taro.previewImage({
+                            current: image,
+                            urls: images,
+                          });
+                        }}
+                      />
+                      <View
+                        className={styles["remove-image-btn"]}
+                        onClick={() => handleRemoveImage(index)}
+                      >
+                        <Text className={styles["remove-icon"]}>×</Text>
+                      </View>
+                    </View>
+                  ))}
+
+                </View>
+              </View>
+            )}
           </View>
           <View className={styles["form-footer"]}>
           <CrystalButton
@@ -465,7 +539,9 @@ const ProductPriceForm: React.FC<ProductPriceFormProps> = ({
             text="确认提交"
             onClick={handleConfirm}
             isPrimary
-            icon={<Image src={rightArrowGolden} mode="aspectFit" style={{ width: "16px", height: "16px" }} />}
+            loading={submitLoading}
+            disabled={submitLoading}
+            icon={!submitLoading ? <Image src={rightArrowGolden} mode="aspectFit" style={{ width: "16px", height: "16px" }} /> : undefined}
             style={{ flex: 1 }}
           />
         </View>
