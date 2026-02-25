@@ -362,6 +362,7 @@ export default function OrderList({
                         onConfirm={submitPriceCb}
                         wristSize={order.design_info?.spec?.wrist_size || 15}
                         referencePrice={order.design_info?.reference_price / 100 || 0}
+                        actualImages={order.order_details?.actual_images || []}
                       />
                     );
                   }}
