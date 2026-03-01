@@ -437,7 +437,7 @@ const InspirationDetailPage: React.FC = () => {
           />
           <View className={styles.editorText}>编辑</View>
         </View>
-        {detail?.final_price && (
+        {/* {detail?.final_price && (
           <CrystalButton
             onClick={() => {
               Taro.reportEvent("inspiration_event", {
@@ -462,9 +462,9 @@ const InspirationDetailPage: React.FC = () => {
             style={{ flex: 1, margin: "24px 0 24px" }}
             isPrimary={true}
           />
-        )}
+        )} */}
       </View>
-      {budgetDialogShow && (
+      {/* {budgetDialogShow && (
         <BudgetDialog
           visible={budgetDialogShow}
           title={designData?.info?.name}
@@ -473,12 +473,11 @@ const InspirationDetailPage: React.FC = () => {
           onClose={() => setBudgetDialogShow(false)}
           referencePrice={detail?.final_price}
           originalPrice={detail?.original_price}
-          // onModifyDesign={handleModifyDesign}
           workId={detail.work_id}
           isSameProduct={true}
           creatorName={detail.user.nick_name}
         />
-      )}
+      )} */}
       {braceletDetailDialogShow && designData?.info?.items?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}

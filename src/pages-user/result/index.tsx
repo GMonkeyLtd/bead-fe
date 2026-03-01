@@ -245,9 +245,8 @@ const Result = () => {
         // 将base64转换为临时文件
         const base64Data = res.data.data;
 
-        const tempFilePath = `${
-          Taro.env.USER_DATA_PATH
-        }/temp_poster_${Date.now()}.webp`;
+        const tempFilePath = `${Taro.env.USER_DATA_PATH
+          }/temp_poster_${Date.now()}.webp`;
 
         await Taro.getFileSystemManager().writeFile({
           filePath: tempFilePath,
@@ -487,11 +486,11 @@ const Result = () => {
                 <View className={styles.generatingGifText}>场景设计...</View>
               </View>
             ) : ( */}
-              <Image
-                className={styles.expendImage}
-                src={expendImage}
-                mode="widthFix"
-              />
+            <Image
+              className={styles.expendImage}
+              src={expendImage}
+              mode="widthFix"
+            />
             {/* )} */}
           </View>
           <View className={styles.resultContentCardTextContainer}>
@@ -555,22 +554,22 @@ const Result = () => {
                       </View>
                     </View>
                   ) : ( */}
-                    <View className={styles.resultContentWearTips}>
-                      <View
-                        className={styles.resultContentWearTipsTitleContainer}
-                      >
-                        <Image
-                          src={ConceptSvg}
-                          style={{ width: "16px", height: "16px" }}
-                        />
-                        <Text className={styles.resultContentWearTipsTitle}>
-                          设计理念
-                        </Text>
-                      </View>
-                      <View className={styles.resultContentBraceletDescription}>
-                        {braceletDescription}
-                      </View>
+                  <View className={styles.resultContentWearTips}>
+                    <View
+                      className={styles.resultContentWearTipsTitleContainer}
+                    >
+                      <Image
+                        src={ConceptSvg}
+                        style={{ width: "16px", height: "16px" }}
+                      />
+                      <Text className={styles.resultContentWearTipsTitle}>
+                        设计理念
+                      </Text>
                     </View>
+                    <View className={styles.resultContentBraceletDescription}>
+                      {braceletDescription}
+                    </View>
+                  </View>
                   {/* )} */}
 
                   {/* <View className={styles.resultContentWearTips}>
@@ -689,9 +688,8 @@ const Result = () => {
       </View>
       <View className={styles.resultContentCardAction}>
         <View
-          className={`${styles.editorContainer} ${
-            orderList?.length > 0 ? styles.disabled : ""
-          }`}
+          className={`${styles.editorContainer} ${orderList?.length > 0 ? styles.disabled : ""
+            }`}
           onClick={handleDeleteDesign}
         >
           <Image
@@ -710,9 +708,8 @@ const Result = () => {
           <View className={styles.editorText}>编辑</View>
         </View>
         <View
-          className={`${styles.editorContainer} ${
-            !imageUrl ? styles.editorContainerDisabled : ""
-          }`}
+          className={`${styles.editorContainer} ${!imageUrl ? styles.editorContainerDisabled : ""
+            }`}
           onClick={saveImage}
         >
           <Image
@@ -722,7 +719,7 @@ const Result = () => {
           />
           <View className={styles.editorText}>分享</View>
         </View>
-        {referencePrice && (
+        {/* {referencePrice && (
           <CrystalButton
             onClick={doCreate}
             isPrimary
@@ -736,7 +733,7 @@ const Result = () => {
               />
             }
           />
-        )}
+        )} */}
       </View>
       {/* {budgetDialogShow && design && tierPriceConfig && (
         <BudgetDialogGrading
@@ -751,15 +748,15 @@ const Result = () => {
         />
       )} */}
       {originImageUrl && !imageUrl && (
-          <ProductImageGenerator // 生成海报
-            data={posterData}
-            onGenerated={(url) => {
-              uploadProductImage(url);
-            }}
-            showProductImage={false}
-          />
-        )}
-      {budgetDialogShow && (
+        <ProductImageGenerator // 生成海报
+          data={posterData}
+          onGenerated={(url) => {
+            uploadProductImage(url);
+          }}
+          showProductImage={false}
+        />
+      )}
+      {/* {budgetDialogShow && (
         <BudgetDialog
           visible={budgetDialogShow}
           title={braceletName}
@@ -772,7 +769,7 @@ const Result = () => {
           referencePrice={referencePrice}
           onModifyDesign={canDiy ? handleModifyDesign : undefined}
         />
-      )}
+      )} */}
       {braceletDetailDialogShow && beadsInfo?.length > 0 && (
         <BraceletDetailDialog
           visible={braceletDetailDialogShow}

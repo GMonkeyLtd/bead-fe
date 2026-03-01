@@ -171,12 +171,12 @@ const ProductDetailPage: React.FC = () => {
                     )}
                 </View>
                 {product.category && (
-                    <View>
-                      <Text className={styles.categoryText}>
-                        {formatProductCategory(product.category)}
-                      </Text>
-                    </View>
-                  )}
+                  <View>
+                    <Text className={styles.categoryText}>
+                      {formatProductCategory(product.category)}
+                    </Text>
+                  </View>
+                )}
               </View>
 
               {/* 标题区域 */}
@@ -218,7 +218,7 @@ const ProductDetailPage: React.FC = () => {
             </View>
           </View>
         </View>
-        <View className={styles.purchaseNoticeSection}> 
+        <View className={styles.purchaseNoticeSection}>
           <PurchaseNotice
             className={styles.purchaseNotice}
             title="买家服务"
@@ -264,7 +264,7 @@ const ProductDetailPage: React.FC = () => {
       </ScrollView>
 
       {/* 底部按钮 */}
-      <View className={styles.bottomBar}>
+      {/* <View className={styles.bottomBar}>
         {product?.final_price && (
           <CrystalButton
             onClick={onClickBuy}
@@ -273,9 +273,9 @@ const ProductDetailPage: React.FC = () => {
             isPrimary={true}
           />
         )}
-      </View>
+      </View> */}
 
-      {budgetDialogShow && product && (
+      {/* {budgetDialogShow && product && (
         <BudgetDialog
           visible={budgetDialogShow}
           title={product.name}
@@ -287,7 +287,7 @@ const ProductDetailPage: React.FC = () => {
           productId={product.id}
           isProduct={true}
         />
-      )}
+      )} */}
     </View>
   );
 };
